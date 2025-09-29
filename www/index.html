@@ -4,36 +4,56 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>WebRTC QR Code Signalisation</title>
-    <link rel="icon" type="image/x-icon" href="favicon.ico">
-    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/x-icon" href="favicon.ico" />
+    <link rel="stylesheet" href="style.css" />
   </head>
   <body>
     <h2>WebRTC P2P - Simplifié</h2>
     <button id="createOffer">Créer Offre (SDP)</button>
     <button id="scanBtn">Scanner QR code</button>
-    <br><br>
+    <br /><br />
     <div>
-      <b>QR code à partager :</b><br>
+      <b>QR code à partager :</b><br />
       <canvas id="qrCanvas"></canvas>
     </div>
     <div>
-      <b>Texte à copier/coller :</b><br>
-      <textarea id="textToShare" rows="6" cols="60" readonly title="Texte à partager" placeholder="SDP à partager"></textarea>
+      <b>Texte à copier/coller :</b><br />
+      <textarea
+        id="textToShare"
+        rows="6"
+        cols="60"
+        readonly
+        title="Texte à partager"
+        placeholder="SDP à partager"
+      ></textarea>
     </div>
     <div>
-      <b>Texte reçu (coller ici ou via scan) :</b><br>
-      <textarea id="textReceived" rows="6" cols="60" placeholder="Colle ici le SDP reçu"></textarea>
-      <br>
+      <b>Texte reçu (coller ici ou via scan) :</b><br />
+      <textarea
+        id="textReceived"
+        rows="6"
+        cols="60"
+        placeholder="Colle ici le SDP reçu"
+      ></textarea>
+      <br />
       <button id="setRemoteSDP">Définir SDP distant / Réponse</button>
     </div>
     <div>
       <h3>Chat WebRTC (test dataChannel)</h3>
-      <textarea id="chatLog" rows="6" cols="60" readonly placeholder="Messages reçus..."></textarea><br>
-      <input id="chatMsg" type="text" placeholder="Votre message">
+      <textarea
+        id="chatLog"
+        rows="6"
+        cols="60"
+        readonly
+        placeholder="Messages reçus..."
+      ></textarea
+      ><br />
+      <input id="chatMsg" type="text" placeholder="Votre message" />
       <button id="sendMsg">Envoyer</button>
     </div>
     <script src="qrcode.min.js"></script>
+    <script src="qr-gen.js"></script>
+    <script src="qr-scan.js"></script>
     <script src="webrtc-simple.js"></script>
-   
   </body>
 </html>
