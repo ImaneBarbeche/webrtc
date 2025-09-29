@@ -1,0 +1,10 @@
+{
+  "appId": "com.example.webrtc",
+  "appName": "webrtcsaviour",
+  "webDir": "www",
+  "plugins": {
+    "SplashScreen": {
+      "launchAutoHide": false
+    }
+  }
+}
