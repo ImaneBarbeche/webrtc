@@ -1,0 +1,25 @@
+.vis-item:not(.vis-dot){
+    height: 50Px !important;
+}
+
+/* Bloc incertain début, certain fin */
+/*.vis-item.vis-range:not(.details) {
+    border: 2px solid black !important;
+    background: linear-gradient(90deg, rgba(0,212,255,0) 0%, #d5ddf6 100%);
+    box-sizing: border-box;
+}*/
+
+/* Bloc incertain fin, certain début */
+/*.vis-item.vis-range:not(.details) {
+    border: 2px solid black !important;
+    background: linear-gradient(90deg,#d5ddf6 0%, rgba(0, 213, 255, 0) 100%);
+    box-sizing: border-box;
+}*/
+
+/* Bloc incertain début et fin, certain milieu */
+/*.vis-item.vis-range:not(.details) {
+    border: 2px solid black !important;
+    background: radial-gradient(circle,#d5ddf6 0%, rgba(0, 213, 255, 0) 100%);
+    box-sizing: border-box;
+}*/
+

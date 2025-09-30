@@ -1,31 +1,71 @@
-// ...existing code...
 async function startScanner() {
-    console.log('startScanner: démarrage');
+    console.log('QR Scanner: Starting...');
+    
     const overlay = document.createElement('div');
     overlay.id = 'qrOverlay';
     Object.assign(overlay.style, {
-        position: 'fixed', inset: '0', background: 'rgba(0,0,0,0.75)',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        zIndex: 10000, flexDirection: 'column', color: '#fff'
+        position: 'fixed', 
+        top: '0', 
+        left: '0', 
+        right: '0', 
+        bottom: '0',
+        background: 'rgba(0,0,0,0.85)',
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center',
+        zIndex: '10000', 
+        flexDirection: 'column', 
+        color: '#fff',
+        fontFamily: 'Arial, sans-serif'
     });
+    
     const video = document.createElement('video');
     video.setAttribute('playsinline', '');
-    video.style.maxWidth = '90%'; video.style.maxHeight = '70%';
+    Object.assign(video.style, {
+        maxWidth: '90%', 
+        maxHeight: '60%',
+        border: '3px solid #fff',
+        borderRadius: '15px'
+    });
     overlay.appendChild(video);
+    
     const info = document.createElement('div');
-    info.textContent = 'Aligner le QR code. Appuyer sur Annuler pour quitter.';
-    info.style.marginTop = '12px';
+    info.textContent = '📱 Alignez le QR code dans le cadre';
+    Object.assign(info.style, {
+        marginTop: '20px',
+        fontSize: '18px',
+        textAlign: 'center'
+    });
     overlay.appendChild(info);
+    
     const cancel = document.createElement('button');
-    cancel.textContent = 'Annuler'; cancel.style.marginTop = '8px';
+    cancel.textContent = '❌ Annuler';
+    Object.assign(cancel.style, {
+        marginTop: '20px',
+        padding: '12px 24px',
+        fontSize: '16px',
+        background: '#dc3545',
+        color: 'white',
+        border: 'none',
+        borderRadius: '8px',
+        cursor: 'pointer'
+    });
     overlay.appendChild(cancel);
+    
     document.body.appendChild(overlay);
 
     let stream = null, detector = null, rafId = null;
     cancel.addEventListener('click', stopScanner);
 
     try {
-        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false });
+        stream = await navigator.mediaDevices.getUserMedia({ 
+            video: { 
+                facingMode: 'environment',
+                width: { ideal: 1280 },
+                height: { ideal: 720 }
+            }, 
+            audio: false 
+        });
         video.srcObject = stream;
         await video.play();
     } catch (err) {
@@ -88,4 +128,3 @@ document.addEventListener('DOMContentLoaded', () => {
     const scanBtn = document.getElementById('scanBtn');
     if (scanBtn) scanBtn.addEventListener('click', startScanner);
 });
-// ...existing code...

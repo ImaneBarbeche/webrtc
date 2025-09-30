@@ -1,0 +1,367 @@
+/* LifeStories Onboarding Styles */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #333;
+}
+
+.onboarding-container {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    padding: 40px;
+    max-width: 800px;
+    width: 90%;
+    text-align: center;
+}
+
+.header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+    background: linear-gradient(45deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.header p {
+    color: #666;
+    font-size: 1.1rem;
+    margin-bottom: 30px;
+}
+
+.connection-status {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 20px 0;
+    padding: 15px;
+    border-radius: 10px;
+    background: #f8f9fa;
+}
+
+.status {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+.status.offline { background: #dc3545; }
+.status.connecting { background: #ffc107; animation: pulse 1s infinite; }
+.status.connected { background: #28a745; }
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+.connection-modes {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    margin: 30px 0;
+}
+
+.mode-card {
+    padding: 25px;
+    border: 2px solid #e9ecef;
+    border-radius: 15px;
+    transition: all 0.3s ease;
+}
+
+.mode-card:hover {
+    border-color: #667eea;
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(102, 126, 234, 0.1);
+}
+
+.mode-card h3 {
+    margin-bottom: 10px;
+    color: #495057;
+}
+
+.mode-card p {
+    color: #6c757d;
+    margin-bottom: 20px;
+    font-size: 0.9rem;
+}
+
+.primary-btn, .secondary-btn, .scan-btn, .copy-btn, .start-btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+}
+
+.primary-btn {
+    background: linear-gradient(45deg, #667eea, #764ba2);
+    color: white;
+}
+
+.primary-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
+}
+
+.scan-btn {
+    background: #28a745;
+    color: white;
+    margin-bottom: 15px;
+    width: 100%;
+}
+
+.scan-btn:hover {
+    background: #218838;
+}
+
+.secondary-btn {
+    background: #6c757d;
+    color: white;
+    width: 100%;
+}
+
+.secondary-btn:hover:not(:disabled) {
+    background: #5a6268;
+}
+
+.secondary-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.manual-input {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.manual-input textarea {
+    padding: 12px;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    resize: vertical;
+    min-height: 80px;
+    font-family: inherit;
+}
+
+.manual-input textarea:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+.connection-details {
+    margin: 30px 0;
+    padding: 25px;
+    background: #f8f9fa;
+    border-radius: 15px;
+    display: none;
+}
+
+.connection-details.show {
+    display: block;
+}
+
+.qr-section h3 {
+    margin-bottom: 20px;
+    color: #495057;
+}
+
+#qrCanvas {
+    margin: 20px auto;
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+    padding: 10px;
+    background: white;
+}
+
+#connectionCode {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    margin: 15px 0;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+    resize: none;
+    height: 100px;
+}
+
+.copy-btn {
+    background: #17a2b8;
+    color: white;
+}
+
+.copy-btn:hover {
+    background: #138496;
+}
+
+.status-message {
+    margin: 20px 0;
+    padding: 15px;
+    border-radius: 10px;
+    font-weight: 500;
+}
+
+.status-message.success {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.status-message.error {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.status-message.info {
+    background: #cce7ff;
+    color: #004085;
+    border: 1px solid #b3d7ff;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background: #e9ecef;
+    border-radius: 4px;
+    overflow: hidden;
+    margin: 15px 0;
+    display: none;
+}
+
+.progress-bar.show {
+    display: block;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(45deg, #667eea, #764ba2);
+    width: 0%;
+    transition: width 0.3s ease;
+    animation: progress-animation 2s ease-in-out infinite;
+}
+
+@keyframes progress-animation {
+    0% { width: 0%; }
+    50% { width: 70%; }
+    100% { width: 100%; }
+}
+
+.actions {
+    margin: 30px 0;
+    padding: 25px;
+    background: #d4edda;
+    border-radius: 15px;
+    border: 2px solid #28a745;
+    display: none;
+}
+
+.actions.show {
+    display: block;
+}
+
+.actions h3 {
+    color: #155724;
+    margin-bottom: 10px;
+}
+
+.actions p {
+    color: #155724;
+    margin-bottom: 20px;
+}
+
+.start-btn {
+    background: linear-gradient(45deg, #28a745, #20c997);
+    color: white;
+    font-size: 1.2rem;
+    padding: 15px 30px;
+}
+
+.start-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(40, 167, 69, 0.3);
+}
+
+.debug-panel {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    display: none;
+}
+
+.debug-panel.show {
+    display: block;
+}
+
+.debug-toggle {
+    background: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    cursor: pointer;
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+}
+
+.debug-log {
+    background: #343a40;
+    color: #f8f9fa;
+    padding: 15px;
+    border-radius: 10px;
+    max-width: 400px;
+    max-height: 300px;
+    overflow-y: auto;
+    font-family: 'Courier New', monospace;
+    font-size: 0.8rem;
+    line-height: 1.4;
+    display: none;
+}
+
+.debug-log.show {
+    display: block;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .connection-modes {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .onboarding-container {
+        padding: 20px;
+        margin: 20px;
+    }
+    
+    .header h1 {
+        font-size: 2rem;
+    }
+}
+
+/* Hidden elements */
+.hide {
+    display: none !important;
+}
+
+.show {
+    display: block !important;
+}
