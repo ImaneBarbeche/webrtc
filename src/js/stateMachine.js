@@ -519,7 +519,13 @@ export const surveyMachine = createMachine({
   guards: {
     // 🆕 Guard pour détecter si c'est l'année préloaded (2001)
     isPreloadedYear: ({context, event}) => {
-      return event.birthdate === '2001';
+      // Accept numeric or string year values (e.g. 2001, '2001', '2001-01-01')
+      if (!event || !event.birthdate) return false;
+      const raw = String(event.birthdate).trim();
+      // If user provided a full date like '2001-01-01', extract the year
+      const yearMatch = raw.match(/^(\d{4})/);
+      const year = yearMatch ? parseInt(yearMatch[1], 10) : parseInt(raw, 10);
+      return Number.isFinite(year) && year === 2001;
     },
 
     // 🆕 Guard pour vérifier si on est en mode live

@@ -210,6 +210,22 @@ const options = {
 const container = document.getElementById('timeline');
 const timeline = new vis.Timeline(container, items, groups, options);
 
+function getTimelineStartYear() {
+  try {
+    if (timeline && timeline.options && timeline.options.start) {
+      const s = timeline.options.start;
+      const date = (typeof s === 'string') ? new Date(s) : s;
+      if (date && !isNaN(date.getTime())) return date.getFullYear();
+    }
+    if (timeline && typeof timeline.getWindow === 'function') {
+      const w = timeline.getWindow();
+      if (w && w.start) return new Date(w.start).getFullYear();
+    }
+  } catch (e) {
+    console.warn('getTimelineStartYear fallback:', e);
+  }
+  return new Date().getFullYear();
+}
 function handleDragStart(event) {
   
   event.dataTransfer.effectAllowed = 'move';
@@ -334,7 +350,39 @@ document.getElementById('save').addEventListener('click',function (){
   });
 
 document.getElementById('load').addEventListener('click',function (){
-  test_items.forEach(i => items.add(i))
+  const existing = items.get();
+  const timelineStartYear = getTimelineStartYear();
+  if (timelineStartYear !== 2001) {
+    if (!confirm(`La timeline commence en ${timelineStartYear}. Charger les données 2001 peut donner un affichage inattendu. Continuer?`)) return;
+  }
+  test_items.forEach(i => {
+    try {
+      const item = Object.assign({}, i);
+      if (item.start && typeof item.start === 'string') item.start = new Date(item.start);
+      if (item.end && typeof item.end === 'string') item.end = new Date(item.end);
+      const duplicate = existing.find(e => (e.id === item.id) || (e.content === item.content && new Date(e.start).getTime() === new Date(item.start).getTime()));
+      if (!duplicate) items.add(item);
+    } catch (err) {
+      console.error('Error adding test item', i, err);
+    }
+  });
+  // Adjust timeline to dataset min year
+  try {
+    const years = test_items.map(i => {
+      const s = i.start;
+      if (!s) return Infinity;
+      const date = (typeof s === 'string') ? new Date(s) : s;
+      return date.getFullYear();
+    }).filter(y => Number.isFinite(y));
+    if (years.length) {
+      const minYear = Math.min(...years);
+      if (getTimelineStartYear() !== minYear) {
+          timeline.setOptions({ min: new Date(`${minYear}-01-01`), start: new Date(`${minYear}-01-01`) });
+        }
+    }
+  } catch (e) {
+    console.error('Error adjusting timeline start to dataset min year', e);
+  }
   console.log(items.get())
   });
 //wrapper
