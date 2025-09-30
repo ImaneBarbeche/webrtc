@@ -1,59 +1,57 @@
 <!DOCTYPE html>
-<html lang="fr">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>WebRTC QR Code Signalisation</title>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebRTC Tic-Tac-Toe avec QR Code</title>
     <link rel="icon" type="image/x-icon" href="favicon.ico" />
     <link rel="stylesheet" href="style.css" />
-  </head>
-  <body>
-    <h2>WebRTC P2P - Simplifié</h2>
-    <button id="createOffer">Créer Offre (SDP)</button>
-    <button id="scanBtn">Scanner QR code</button>
-    <br /><br />
+</head>
+<body>
+    <table id="board">
+        <tr><td></td><td></td><td></td></tr>
+        <tr><td></td><td></td><td></td></tr>
+        <tr><td></td><td></td><td></td></tr>
+    </table>
+    
     <div>
-      <b>QR code à partager :</b><br />
-      <canvas id="qrCanvas"></canvas>
+        <fieldset>
+            <input type="radio" name="shape" id="nought" value="nought" checked>
+            <label for="nought">nought</label>
+            <input type="radio" name="shape" id="cross" value="cross">
+            <label for="cross">cross</label>
+        </fieldset>
+        <fieldset>
+            <input type="radio" name="order" id="first" value="first" checked>
+            <label for="first">play first</label>
+            <input type="radio" name="order" id="next" value="next">
+            <label for="next">play next</label>
+        </fieldset>
     </div>
+    
     <div>
-      <b>Texte à copier/coller :</b><br />
-      <textarea
-        id="textToShare"
-        rows="6"
-        cols="60"
-        readonly
-        title="Texte à partager"
-        placeholder="SDP à partager"
-      ></textarea>
+        <textarea cols="30" rows="10" disabled placeholder="Offer will appear here" title="Offer textarea"></textarea>
+        <button id="btn0">ask</button>
+        <button id="scanBtn">Scanner QR Code</button>
     </div>
+    
     <div>
-      <b>Texte reçu (coller ici ou via scan) :</b><br />
-      <textarea
-        id="textReceived"
-        rows="6"
-        cols="60"
-        placeholder="Colle ici le SDP reçu"
-      ></textarea>
-      <br />
-      <button id="setRemoteSDP">Définir SDP distant / Réponse</button>
+        <textarea cols="30" rows="10" placeholder="Paste answer here" title="Answer textarea"></textarea>
+        <button id="btn1" disabled>answer</button>
     </div>
-    <div>
-      <h3>Chat WebRTC (test dataChannel)</h3>
-      <textarea
-        id="chatLog"
-        rows="6"
-        cols="60"
-        readonly
-        placeholder="Messages reçus..."
-      ></textarea
-      ><br />
-      <input id="chatMsg" type="text" placeholder="Votre message" />
-      <button id="sendMsg">Envoyer</button>
+    
+    <div id="status"></div>
+    
+    <div id="qr-section">
+        <h3>QR Code</h3>
+        <canvas id="qrCanvas"></canvas>
     </div>
+    
+    <div id="debug-log"></div>
+
     <script src="qrcode.min.js"></script>
     <script src="qr-gen.js"></script>
     <script src="qr-scan.js"></script>
     <script src="webrtc-simple.js"></script>
-  </body>
+</body>
 </html>

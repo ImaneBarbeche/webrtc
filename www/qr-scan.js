@@ -69,8 +69,19 @@ async function startScanner() {
 }
 function applyScannedValue(value) {
     console.log('QR scanné:', value);
-    const ta = document.getElementById('textReceived');
-    if (ta) { ta.value = value; ta.focus(); }
+    // Use the handleScannedData function from webrtc-simple.js if available
+    if (typeof window.handleScannedData === 'function') {
+        window.handleScannedData(value);
+    } else {
+        // Fallback to direct textarea assignment
+        const ta = document.querySelectorAll('textarea')[1]; // Second textarea
+        if (ta) { 
+            ta.value = value; 
+            ta.focus();
+            // Trigger input event to activate button
+            ta.dispatchEvent(new Event('input'));
+        }
+    }
 }
 // attache automatiquement le bouton au chargement (évite duplication dans webrtc-simple.js)
 document.addEventListener('DOMContentLoaded', () => {
