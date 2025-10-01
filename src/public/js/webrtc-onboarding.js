@@ -82,8 +82,8 @@ class WebRTCOnboarding {
         }
         this.dc = null;
         this.pc = new RTCPeerConnection({
-            iceServers: [
-                { urls: 'stun:stun.l.google.com:19302' }
+            iceServers: [ // helpers for NAT traversal, can be empty for local network
+                // { urls: 'stun:stun.l.google.com:19302' }
             ],
             iceTransportPolicy: 'all',
             iceCandidatePoolSize: 0

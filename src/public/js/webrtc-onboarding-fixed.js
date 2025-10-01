@@ -73,7 +73,7 @@ class WebRTCOnboarding {
         }
     }
 
-    // EXACT COPY of original initialize function
+    // initialize function
     initialize(statusText) {
         this.log("=== INITIALIZE ===");
         if (this.pc) {
@@ -83,13 +83,13 @@ class WebRTCOnboarding {
         this.dc = null;
         this.pc = new RTCPeerConnection({
             iceServers: [
-                { urls: 'stun:stun.l.google.com:19302' }
+                // { urls: 'stun:stun.l.google.com:19302' }
             ],
             iceTransportPolicy: 'all',
             iceCandidatePoolSize: 0
         });
         
-        // Debug event listeners - EXACT COPY
+        // Debug event listeners 
         this.pc.addEventListener("icecandidate", (e) => this.pcIceCandidate(e));
         this.pc.addEventListener("connectionstatechange", (e) => this.pcConnectionStateChange(e));
         this.pc.addEventListener("datachannel", (e) => this.pcDataChannel(e));
@@ -120,41 +120,53 @@ class WebRTCOnboarding {
         this.log(`State: ${newState}, Status: ${statusText}`);
     }
 
-    // EXACT COPY of btn0Click logic
+    // btn0Click logic = bouton creer une session
     async btn0Click() {
         this.log(`Button 0 clicked - state: ${this.state}`);
         switch (this.state) {
+            // you always start with the 'off' case. here it is before setting up a connection. 
             case "off":
+                // this part prevents the user from over clicking and messing up the state machine
                 this.elements.connectionCode.placeholder = "Une offre est en cours de création.";
                 this.elements.createBtn.disabled = true;
                 this.elements.connectionInput.disabled = true;
                 this.elements.connectBtn.disabled = true;
+
+                // create data channel and add listeners to follow the state of the connection
+
                 this.dc = this.pc.createDataChannel("lifestories");
                 this.dc.addEventListener("open", (e) => this.dcOpen(e));
                 this.dc.addEventListener("message", (e) => this.dcMessage(e));
                 this.log("Creating offer...");
                 this.log(`ICE Gathering State before offer: ${this.pc.iceGatheringState}`);
+
+                // async because it takes time to build and u don't want to break the app - creating the offer
                 const offer = await this.pc.createOffer();
                 this.log(`Offer created: ${JSON.stringify(offer).substring(0, 100)}`);
+
+                // you have the offer and then you set the localdescription with this offer
                 await this.pc.setLocalDescription(offer);
                 this.log(`Local description set. ICE Gathering State: ${this.pc.iceGatheringState}`);
                 this.log("Waiting for ICE candidates...");
                 this.state = "offerCreating";
                 break;
-            case "waitAnswer":
+                // waiting for answer from guest 
+            case "waitAnswer": 
             case "waitConnect":
+                // moment when user can copy the offer or answer
                 await this.copyToClipboard();
                 break;
         }
     }
 
-    // EXACT COPY of btn1Click logic
+    // quand l'enquêté (mode invité) scan le qr code (ou copie le texte), il appuie sur se connecter pour créer une réponse
     async btn1Click() {
         this.log(`Button 1 clicked - state: ${this.state}`);
         switch (this.state) {
             case "off":
                 try {
                     this.log("Parsing offer JSON...");
+                    // this is after scanning or pasting the offer in the textarea
                     let desc = JSON.parse(this.elements.connectionInput.value);
                     this.log(`Offer parsed: ${JSON.stringify(desc).substring(0, 100)}...`);
                     if (!("sessionId" in desc)) {
@@ -162,13 +174,15 @@ class WebRTCOnboarding {
                         this.log("ERROR: No sessionId in offer");
                         break;
                     }
-                    this.sessionId = desc.sessionId;
+                    this.sessionId = desc.sessionId; // sessionId is used to identify the session (not strictly necessary here or linked to the SDP)
                     this.log(`Session ID: ${this.sessionId}`);
-                    delete desc.sessionId;
+                    delete desc.sessionId; // remove sessionId from desc to avoid issues with setRemoteDescription (SDP)
                     this.log("Setting remote description (offer)...");
-                    await this.pc.setRemoteDescription(desc);
+                    await this.pc.setRemoteDescription(desc); // set the offer as remote description 
+
                     this.log("Remote description set, creating answer...");
-                    await this.pc.setLocalDescription(await this.pc.createAnswer());
+                    await this.pc.setLocalDescription(await this.pc.createAnswer()); // create and set the answer as local description
+
                     this.log("Answer created, waiting for ICE candidates...");
                     this.elements.connectionCode.placeholder = "Une réponse est en cours de création.";
                     this.elements.createBtn.disabled = true;
@@ -179,19 +193,21 @@ class WebRTCOnboarding {
                 } catch (err) {
                     this.log(`ERROR in btn1Click (off state): ${err.message}`);
                     this.log(`Stack: ${err.stack}`);
-                }
+                }   
                 break;
         }
     }
 
-    // New function for processing answer from guest
+    // processing the answer and setting it as remote description for the offerer
     async processAnswer() {
         try {
             this.log("Parsing answer JSON...");
             let answerDesc = JSON.parse(this.elements.responseInput.value);
             this.log(`Answer parsed: ${JSON.stringify(answerDesc).substring(0, 100)}...`);
             this.log("Setting remote description (answer)...");
-            await this.pc.setRemoteDescription(answerDesc);
+
+            await this.pc.setRemoteDescription(answerDesc); // set the answer as remote description for the offerer
+
             this.log("Remote description set - connection should establish");
             this.elements.processResponseBtn.disabled = true;
             this.setStateAndStatus("waitConnect", "Connecting...");
@@ -201,7 +217,7 @@ class WebRTCOnboarding {
         }
     }
 
-    // EXACT COPY of pcIceCandidate logic
+    // pcIceCandidate logic
     async pcIceCandidate(e) {
         if (e.candidate) {
             this.log(`ICE Candidate: ${e.candidate.candidate.substring(0, 50)}...`);
@@ -211,6 +227,7 @@ class WebRTCOnboarding {
         
         switch (this.state) {
             case "offerCreating":
+                // !e.candidate means the end of gathering
                 if (!e.candidate) {
                     this.sessionId = this.makeId();
                     const offerData = {
@@ -270,7 +287,7 @@ class WebRTCOnboarding {
         }
     }
 
-    // EXACT COPY of pcConnectionStateChange
+    // pcConnectionStateChange
     pcConnectionStateChange() {
         this.log(`Connection state: ${this.pc.connectionState}`);
         
@@ -299,7 +316,7 @@ class WebRTCOnboarding {
         }
     }
 
-    // EXACT COPY of pcDataChannel
+    // pcDataChannel
     pcDataChannel(e) {
         this.log("=== DATA CHANNEL RECEIVED ===");
         if (!this.dc) {

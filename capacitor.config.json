@@ -1,7 +1,7 @@
 {
   "appId": "com.example.webrtc",
   "appName": "webrtcsaviour",
-  "webDir": "www",
+  "webDir": "dist",
   "plugins": {
     "SplashScreen": {
       "launchShowDuration": 0,
