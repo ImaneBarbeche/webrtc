@@ -357,11 +357,41 @@ body {
     }
 }
 
-/* Hidden elements */
-.hide {
+/* ============================================
+   UTILITY CLASSES - Visibility Management
+   ============================================ */
+
+/* Hidden elements - initially invisible */
+.hidden {
     display: none !important;
 }
 
-.show {
+/* Show elements dynamically */
+.visible {
     display: block !important;
+}
+
+/* Specific onboarding sections visibility */
+#connectionDetails.hidden,
+#responseSection.hidden,
+#progressBar.hidden,
+#connectedActions.hidden,
+#debugPanel.hidden,
+#debugLog.hidden {
+    display: none;
+}
+
+#connectionDetails.visible,
+#connectedActions.visible {
+    display: block;
+}
+
+#responseSection.visible,
+#progressBar.visible,
+#debugPanel.visible {
+    display: flex;
+}
+
+#debugLog.visible {
+    display: block;
 }

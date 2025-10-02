@@ -2,36 +2,144 @@ import { createMachine, interpret, assign } from "../libs/xstate/xstate.js";
 import { ajouterEpisode, modifierEpisode } from "./episodes.js"
 import { timeline, groups, items } from "./timeline.js";
 
-// Nouvelle classe pour gérer les réponses live
+/**
+ * Gestionnaire des réponses en mode live
+ * Sauvegarde toutes les réponses du questionnaire dans localStorage
+ * et permet l'export complet incluant les épisodes de la timeline
+ * 
+ * @class LiveResponseManager
+ */
 class LiveResponseManager {
     constructor() {
         this.responses = this.loadResponses();
+        console.log('🎯 LiveResponseManager initialisé');
     }
 
+    /**
+     * Charge les réponses depuis localStorage
+     * @returns {Object} Objet contenant toutes les réponses sauvegardées
+     */
     loadResponses() {
         const saved = localStorage.getItem('survey-live-responses');
-        return saved ? JSON.parse(saved) : {};
+        const responses = saved ? JSON.parse(saved) : {};
+        console.log('📂 Réponses chargées:', Object.keys(responses).length, 'questions');
+        return responses;
     }
 
+    /**
+     * Sauvegarde une réponse dans localStorage
+     * @param {string} questionType - Type de question (ex: 'birth_year', 'birth_commune')
+     * @param {any} answer - Réponse à sauvegarder (peut être string, array, number)
+     */
     saveResponse(questionType, answer) {
         this.responses[questionType] = {
             answer: answer,
             timestamp: new Date().toISOString()
         };
         localStorage.setItem('survey-live-responses', JSON.stringify(this.responses));
-        console.log('💾 Réponse sauvegardée:', questionType, answer);
+        console.log('💾 Réponse sauvegardée:', questionType, '→', answer);
     }
 
+    /**
+     * Récupère toutes les réponses
+     * @returns {Object} Toutes les réponses sauvegardées
+     */
     getAllResponses() {
         return this.responses;
     }
 
-    exportToJSON() {
+    /**
+     * Récupère les épisodes depuis la timeline
+     * @returns {Array} Tableau d'épisodes avec leurs propriétés
+     */
+    getTimelineEpisodes() {
+        const allItems = items.get();
+        console.log('📅 Récupération épisodes timeline:', allItems.length, 'épisodes');
+        
+        return allItems.map(item => ({
+            id: item.id,
+            content: item.content,
+            start: item.start,
+            end: item.end,
+            group: item.group,
+            type: item.type,
+            className: item.className
+        }));
+    }
+
+    /**
+     * Récupère les groupes depuis la timeline
+     * @returns {Array} Tableau des groupes avec leurs propriétés
+     */
+    getTimelineGroups() {
+        const allGroups = groups.get();
+        console.log('🏘️ Récupération groupes timeline:', allGroups.length, 'groupes');
+        
+        return allGroups.map(group => ({
+            id: group.id,
+            content: group.content,
+            order: group.order,
+            dependsOn: group.dependsOn
+        }));
+    }
+
+    /**
+     * Prépare les données complètes pour l'export
+     * Inclut réponses, épisodes, groupes et métadonnées
+     * @returns {Object} Données structurées prêtes pour l'export
+     */
+    getExportData() {
         const data = {
+            // Métadonnées
+            metadata: {
+                exportDate: new Date().toISOString(),
+                type: 'live-survey',
+                version: '1.0',
+                source: 'LifeStories-Live'
+            },
+            
+            // Réponses du questionnaire
             responses: this.responses,
-            exportDate: new Date().toISOString(),
-            type: 'live-survey'
+            
+            // Épisodes de la timeline
+            episodes: this.getTimelineEpisodes(),
+            
+            // Groupes de la timeline
+            groups: this.getTimelineGroups(),
+            
+            // Configuration de la timeline
+            timelineConfig: {
+                start: timeline.options?.start,
+                end: timeline.options?.end,
+                min: timeline.options?.min,
+                max: timeline.options?.max
+            },
+            
+            // Statistiques
+            statistics: {
+                totalResponses: Object.keys(this.responses).length,
+                totalEpisodes: items.get().length,
+                totalGroups: groups.get().length
+            }
         };
+        
+        console.log('📊 Données export préparées:', {
+            responses: data.statistics.totalResponses,
+            episodes: data.statistics.totalEpisodes,
+            groups: data.statistics.totalGroups
+        });
+        
+        return data;
+    }
+
+    /**
+     * Exporte toutes les données (réponses + timeline) en JSON
+     * Télécharge automatiquement le fichier
+     */
+    exportToJSON() {
+        console.log('📁 Démarrage export JSON complet...');
+        
+        const data = this.getExportData();
         
         const blob = new Blob([JSON.stringify(data, null, 2)], { 
             type: 'application/json' 
@@ -40,20 +148,133 @@ class LiveResponseManager {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `survey-live-${Date.now()}.json`;
-        a.click();
         
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+        a.download = `lifestories-live-${timestamp}.json`;
+        
+        a.click();
         URL.revokeObjectURL(url);
+        
+        console.log('✅ Export terminé:', a.download);
+        console.log('📦 Contenu exporté:', {
+            réponses: data.statistics.totalResponses,
+            épisodes: data.statistics.totalEpisodes,
+            groupes: data.statistics.totalGroups
+        });
     }
 
+    /**
+     * Réinitialise toutes les données
+     * Supprime les réponses de localStorage
+     */
     reset() {
         this.responses = {};
         localStorage.removeItem('survey-live-responses');
+        console.log('🗑️ LiveResponseManager réinitialisé');
     }
 }
 
 // Instance globale du gestionnaire de réponses live
 export const liveResponseManager = new LiveResponseManager();
+
+/**
+ * HELPER: Calcule les dates par défaut pour un groupe donné
+ * Essaie d'abord de trouver dans items existants (mode dataset)
+ * Sinon fallback sur timeline.options.start ou context.lastEpisode
+ * 
+ * @param {Object} context - Contexte de la state machine
+ * @param {number} group - Numéro du groupe
+ * @returns {Object} { start: Date|null, end: Date|null }
+ */
+function getDefaultDatesForGroup(context, group) {
+    // 1️⃣ Essayer de trouver dans items existants (mode dataset)
+    const groupConfig = groups.get(group);
+    
+    if (groupConfig?.dependsOn) {
+        const dependsOnGroup = groupConfig.dependsOn;
+        const filteritems = items.get().filter(i => i.group === dependsOnGroup);
+        
+        console.log(`🔍 Recherche dates pour groupe ${group} (dépend de ${dependsOnGroup})`);
+        console.log(`   Items trouvés:`, filteritems.length);
+        
+        // Vérifier si on a un item à l'index voulu
+        if (filteritems.length > 0 && filteritems[context.currentCommuneIndex]) {
+            const foundItem = filteritems[context.currentCommuneIndex];
+            console.log(`✅ Dates trouvées dans items existants:`, {
+                start: foundItem.start,
+                end: foundItem.end,
+                source: 'dataset'
+            });
+            return {
+                start: foundItem.start,
+                end: foundItem.end
+            };
+        } else {
+            console.log(`⚠️ Aucun item trouvé à l'index ${context.currentCommuneIndex}, fallback...`);
+        }
+    }
+    
+    // 2️⃣ Fallback : utiliser lastEpisode.end comme start
+    if (context.lastEpisode?.end) {
+        console.log(`📍 Fallback sur lastEpisode.end:`, context.lastEpisode.end);
+        return {
+            start: context.lastEpisode.end,
+            end: null  // Sera calculé automatiquement par ajouterEpisode (+1an)
+        };
+    }
+    
+    // 3️⃣ Fallback : utiliser timeline.options.start (année de naissance)
+    if (timeline.options?.start) {
+        console.log(`📅 Fallback sur timeline.options.start:`, timeline.options.start);
+        return {
+            start: timeline.options.start,
+            end: null
+        };
+    }
+    
+    // 4️⃣ Dernier recours : date actuelle
+    console.warn(`⚠️ Aucune date par défaut trouvée, utilisation de la date actuelle`);
+    return {
+        start: new Date(),
+        end: null
+    };
+}
+
+/**
+ * HELPER: Synchronise l'ordre des communes avec l'ordre chronologique de la timeline
+ * Parcourt les items de la timeline, trouve ceux qui correspondent au groupe actuel,
+ * et retourne leurs noms dans l'ordre chronologique (tri par date start)
+ * 
+ * @param {Array<string>} inputCommunes - Liste des communes saisies (peut être dans le désordre)
+ * @param {number} group - Numéro du groupe à filtrer
+ * @returns {Array<string>} Communes triées par ordre chronologique
+ */
+function synchronizeCommunesWithTimeline(inputCommunes, group) {
+    console.log('🔄 Synchronisation ordre communes avec timeline...');
+    console.log('   Input:', inputCommunes, 'Groupe:', group);
+    
+    // Récupérer tous les items du groupe
+    const groupItems = items.get().filter(i => i.group === group);
+    
+    if (groupItems.length === 0) {
+        console.log('   ⚠️ Aucun item trouvé, on garde l\'ordre de saisie');
+        return inputCommunes;
+    }
+    
+    // Filtrer seulement les items qui correspondent aux communes saisies
+    const relevantItems = groupItems.filter(item => 
+        inputCommunes.includes(item.content)
+    );
+    
+    // Trier par date de début (ordre chronologique)
+    relevantItems.sort((a, b) => new Date(a.start) - new Date(b.start));
+    
+    // Extraire les noms des communes dans le bon ordre
+    const sortedCommunes = relevantItems.map(item => item.content);
+    
+    console.log('   ✅ Ordre synchronisé:', sortedCommunes);
+    return sortedCommunes;
+}
 
 /*
 ********************************************************************************
@@ -360,9 +581,17 @@ export const surveyMachine = createMachine({
 
     addCommune: assign({
       communes: ({context, event}) => {
-        console.log(event);  // Vérifier ce qui est ajouté
-        //ajouterEpisode(context.event.value,context.context.episodeStartDate,0,)
-        return [...context.communes, ...event.commune];
+        console.log('📍 Ajout communes:', event);
+        
+        // Fusionner les nouvelles communes avec les existantes
+        const mergedCommunes = [...context.communes, ...event.commune];
+        
+        // 🔄 Synchroniser immédiatement avec l'ordre de la timeline
+        // Note: À ce stade, les items ne sont pas encore créés, donc on garde l'ordre de saisie
+        // La synchronisation réelle se fera après addCalendarEpisode
+        console.log('📝 Communes ajoutées (ordre de saisie):', mergedCommunes);
+        
+        return mergedCommunes;
       }
     }),
 
@@ -372,36 +601,72 @@ export const surveyMachine = createMachine({
       }
     }),
 
-    // Ajoute l'épisode au calendrier et change le contexte lastEpisode, si un parametre start est spécifié alors le privilégier, sinon utiliser context.lastEpisode.end
+    // Ajoute l'épisode au calendrier et change le contexte lastEpisode
+    // ✅ Synchronise automatiquement l'ordre des communes avec la timeline
     addCalendarEpisode: assign ({
       lastEpisode: ({context, event}, params) => {
         let defaultStart = context.lastEpisode?.end;
-        let defaultEnd = 0;
-        let endDate = 0;
-        let startDate = 0;
+        let defaultEnd = null;  // ✅ Remplacé 0 par null
+        let endDate = null;     // ✅ Remplacé 0 par null
+        let startDate = null;   // ✅ Remplacé 0 par null
         
-        if(params?.start == "timeline_init"){
-          startDate = timeline.options.start
+        // Si param spécial "timeline_init", utiliser le début de la timeline
+        if(params?.start === "timeline_init"){
+          startDate = timeline.options.start;
+          console.log('🎬 Initialisation timeline, start:', startDate);
         }
         
-        if(groups.get(context.group).dependsOn){
-          console.log(context.group)
-          console.log(context.currentCommuneIndex)
-          let filteritems = (items.get()).filter(i => i.group == groups.get(context.group).dependsOn)
-          console.log(filteritems)
-          defaultStart = filteritems[context.currentCommuneIndex].start
-          defaultEnd = filteritems[context.currentCommuneIndex].end
+        // ✅ NOUVELLE LOGIQUE: Utiliser le helper pour obtenir dates par défaut
+        const defaultDates = getDefaultDatesForGroup(context, context.group);
+        if (defaultDates) {
+          defaultStart = defaultDates.start;
+          defaultEnd = defaultDates.end;
         }
-        console.log(timeline.options.start)
-        let trick = event.type == "ANSWER_BIRTH_COMMUNE" ? event.commune[0] : event.commune//trick addfirstquestion
-        let truc = ajouterEpisode(trick||event.statut_res, startDate || defaultStart, endDate || defaultEnd,context.group);
-        console.log(items.get())
-        return truc
+        
+        console.log('📊 Dates calculées:', {
+          startDate,
+          defaultStart,
+          endDate,
+          defaultEnd,
+          group: context.group
+        });
+        
+        // Gérer le trick pour la première question (commune de naissance)
+        let trick = event.type === "ANSWER_BIRTH_COMMUNE" ? event.commune[0] : event.commune;
+        
+        // Ajouter l'épisode avec priorité: startDate || defaultStart
+        let truc = ajouterEpisode(
+          trick || event.statut_res, 
+          startDate || defaultStart, 
+          endDate || defaultEnd,
+          context.group
+        );
+        
+        console.log('✅ Episode ajouté, items actuels:', items.get().length);
+        return truc;
+      },
+      
+      // 🔄 NOUVELLE PROPRIÉTÉ: Synchroniser communes après chaque ajout
+      communes: ({context, event}) => {
+        // Si on n'a pas de communes dans le context, rien à synchroniser
+        if (!context.communes || context.communes.length === 0) {
+          return context.communes;
+        }
+        
+        // Synchroniser l'ordre avec la timeline réelle
+        const synchronized = synchronizeCommunesWithTimeline(context.communes, context.group);
+        
+        console.log('🔄 Synchronisation post-ajout:');
+        console.log('   Avant:', context.communes);
+        console.log('   Après:', synchronized);
+        
+        return synchronized;
       }
     }),
 
-    // TODO : PB ordre si j'entre pau puis grenoble dans l'input et que je place en premier grenoble puis que je place pau, dans ma statemachine j'aurais ['Pau','Grenoble'] mais l'ordre correspond pas, les questions liés sont inversés : "locataire dans pau -> va tag grenoble"
-    // Modifie l'épisode du calendrier et change le contexte lastEpisode TODO POUR CA IL FAUT MODIFIER QUESTIONNAIREJS POUR CHANGER LE SEND COMMUNE
+    // ✅ RÉSOLU: L'ordre est maintenant synchronisé automatiquement avec la timeline
+    // après chaque ajout d'épisode via synchronizeCommunesWithTimeline()
+    // Modifie l'épisode du calendrier et change le contexte lastEpisode
     modifyCalendarEpisode: assign ({
       lastEpisode: ({context, event}, params) => {
         if(params){
@@ -517,7 +782,23 @@ export const surveyMachine = createMachine({
     })
   },
   guards: {
-    // 🆕 Guard pour détecter si c'est l'année préloaded (2001)
+    /**
+     * Guard pour détecter si c'est l'année préloaded (2001)
+     * Cette année spéciale indique qu'on veut charger le dataset de démonstration
+     * 
+     * @param {Object} event - Événement contenant event.birthdate
+     * @returns {boolean} true si l'année est exactement 2001
+     * 
+     * @example
+     * birthdate = "2001" → true (mode dataset)
+     * birthdate = "2001-01-01" → true (extrait l'année)
+     * birthdate = "1990" → false (mode live)
+     * 
+     * Formats acceptés:
+     * - Nombre: 2001
+     * - String: "2001"
+     * - Date ISO: "2001-01-01"
+     */
     isPreloadedYear: ({context, event}) => {
       // Accept numeric or string year values (e.g. 2001, '2001', '2001-01-01')
       if (!event || !event.birthdate) return false;
@@ -525,21 +806,71 @@ export const surveyMachine = createMachine({
       // If user provided a full date like '2001-01-01', extract the year
       const yearMatch = raw.match(/^(\d{4})/);
       const year = yearMatch ? parseInt(yearMatch[1], 10) : parseInt(raw, 10);
-      return Number.isFinite(year) && year === 2001;
+      const isPreloaded = Number.isFinite(year) && year === 2001;
+      
+      console.log('🔍 Vérification année préloaded:', {
+        input: event.birthdate,
+        parsedYear: year,
+        isPreloaded
+      });
+      
+      return isPreloaded;
     },
 
-    // 🆕 Guard pour vérifier si on est en mode live
+    /**
+     * Guard pour vérifier si on est en MODE LIVE
+     * Le mode live est activé quand l'année de naissance n'est PAS 2001
+     * Dans ce mode, les réponses sont sauvegardées dans localStorage
+     * 
+     * @param {Object} context - Contexte de la state machine
+     * @returns {boolean} true si context.isLiveMode === true
+     * 
+     * Utilisé pour:
+     * - Déclencher l'export automatique à la fin du questionnaire
+     * - Activer la sauvegarde des réponses
+     */
     isLiveMode: ({context}) => {
       return context.isLiveMode;
     },
 
-    // 🆕 Guard pour vérifier si on n'est PAS en mode live
+    /**
+     * Guard pour vérifier si on N'est PAS en mode live (mode dataset)
+     * Le mode dataset est activé avec l'année 2001
+     * Dans ce mode, on utilise les données préchargées de enquete.json
+     * 
+     * @param {Object} context - Contexte de la state machine
+     * @returns {boolean} true si context.isLiveMode === false
+     * 
+     * Utilisé pour:
+     * - Sauter la sauvegarde des réponses (déjà dans le dataset)
+     * - Utiliser les données préexistantes de la timeline
+     */
     isNotLiveMode: ({context}) => {
       return !context.isLiveMode;
     },
 
-    moreCommunesToProcess: (context) => {
-      return context.context.currentCommuneIndex < context.context.communes.length - 1
+    /**
+     * Guard pour vérifier s'il reste des communes à traiter
+     * Utilisé dans la boucle de questions sur les communes
+     * 
+     * @param {Object} context - Contexte de la state machine
+     * @returns {boolean} true si currentCommuneIndex < communes.length - 1
+     * 
+     * @example
+     * communes = ["Pau", "Grenoble", "Lyon"]
+     * currentCommuneIndex = 0 → true (il reste Grenoble et Lyon)
+     * currentCommuneIndex = 1 → true (il reste Lyon)
+     * currentCommuneIndex = 2 → false (dernière commune)
+     */
+    moreCommunesToProcess: ({context}) => {
+      const hasMore = context.currentCommuneIndex < context.communes.length - 1;
+      console.log('🔄 Plus de communes à traiter?', {
+        currentIndex: context.currentCommuneIndex,
+        totalCommunes: context.communes.length,
+        communes: context.communes,
+        hasMore
+      });
+      return hasMore;
     }
   }
 });

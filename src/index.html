@@ -38,7 +38,7 @@
         </div>
         </div>
 
-        <div class="connection-details" id="connectionDetails" style="display: none;">
+        <div class="connection-details hidden" id="connectionDetails">
             <div class="qr-section">
                 <h3>Code de connexion</h3>
                 <canvas id="qrCanvas"></canvas>
@@ -46,7 +46,7 @@
                 <button id="copyBtn" class="copy-btn">📋 Copier</button>
             </div>
             
-            <div class="response-section" id="responseSection" style="display: none;">
+            <div class="response-section hidden" id="responseSection">
                 <h3>En attente de la réponse de l'invité...</h3>
                 <p>Une fois que l'invité a scanné votre code, scannez sa réponse :</p>
                 <button id="scanResponseBtn" class="scan-btn">📷 Scanner la réponse</button>
@@ -59,12 +59,12 @@
 
         <div class="status-section">
             <div id="statusMessage" class="status-message"></div>
-            <div class="progress-bar" id="progressBar" style="display: none;">
+            <div class="progress-bar hidden" id="progressBar">
                 <div class="progress-fill"></div>
             </div>
         </div>
 
-        <div class="actions" id="connectedActions" style="display: none;">
+        <div class="actions hidden" id="connectedActions">
             <h3>✅ Connexion établie !</h3>
             <p>Vous pouvez maintenant commencer votre session collaborative</p>
             <button id="startApp" class="start-btn">🚀 Commencer LifeStories</button>
@@ -72,9 +72,9 @@
     </div>
 
     <!-- Debug panel (hidden by default) -->
-    <div class="debug-panel" id="debugPanel" style="display: none;">
-        <button class="debug-toggle" onclick="document.getElementById('debugLog').style.display = document.getElementById('debugLog').style.display === 'none' ? 'block' : 'none'">🐛</button>
-        <div id="debugLog" class="debug-log" style="display: none;"></div>
+    <div class="debug-panel hidden" id="debugPanel">
+        <button class="debug-toggle" onclick="document.getElementById('debugLog').classList.toggle('visible')">🐛</button>
+        <div id="debugLog" class="debug-log hidden"></div>
     </div>
 
     <script src="js/qrcode.min.js"></script>

@@ -115,8 +115,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         renderQuestion(state); // Mise à jour à chaque transition
     });
     
-    // Le subscribe() appelle déjà renderQuestion() avec l'état initial
-    // renderQuestion(surveyService.getSnapshot()); // Supprimé pour éviter le doublon
 
     
     
@@ -295,25 +293,12 @@ document.addEventListener("DOMContentLoaded", async () => {
           nextQBtn.innerHTML = "Suivant";
           
           nextQBtn.addEventListener("click", () => {
-            // Récupération des communes saisies
-            let list_communes_not_sorted = [];
-            responseList.querySelectorAll('li').forEach(e => list_communes_not_sorted.push(e.innerHTML));
+            // Récupération des communes dans l'ordre de saisie
+            let list_communes = [];
+            responseList.querySelectorAll('li').forEach(e => list_communes.push(e.innerHTML));
             
-            // FIXME: Cette logique dépend des items existants - à améliorer pour mode live
-            // Pour l'instant, si items vides, garder l'ordre de saisie
-            let list_communes;
-            const existingItems = items.get().filter(i => list_communes_not_sorted.includes(i.content));
-            
-            if (existingItems.length > 0) {
-              // Tri par date de début si items trouvés
-              existingItems.sort((a, b) => (new Date(a.start)) - (new Date(b.start)));
-              list_communes = existingItems.map(i => i.content);
-              console.log('🗂️ Communes triées par dates existantes:', list_communes);
-            } else {
-              // Garder l'ordre de saisie si pas d'items existants (mode live)
-              list_communes = list_communes_not_sorted;
-              console.log('📝 Communes dans l\'ordre de saisie:', list_communes);
-            }
+            console.log('📝 Communes envoyées dans l\'ordre de saisie:', list_communes);
+            console.log('⚙️ L\'ordre sera synchronisé avec la timeline par la state machine');
             
             // Normalisation et envoi
             const normalizedEvent = createNormalizedEvent(eventType, { commune: list_communes });

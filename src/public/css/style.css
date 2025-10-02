@@ -121,8 +121,6 @@ body {
 
         .vis-item.green {
             border: 2px solid rgba(150, 235, 150, 0.7) !important;
-            /*background-image: linear-gradient(45deg, rgba(255, 255, 255, 0.5) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.5) 50%, rgba(255, 255, 255, 0.5) 75%, transparent 75%, transparent);
-            background-size: 20px 20px;*/
         }
 
         
@@ -188,17 +186,6 @@ body {
             box-shadow: rgba(185, 181, 181, 0.45) 0px 25px 20px -20px;
         }
 
-        .vis-label{
-            /*border: none !important;*/
-        }
-        .vis-line, .vis-grid {
-            /*display: none; */
-        }
-
-        .vis-dot{
-            /*display: none !important*/
-        }
-
         .vis-point{
             margin: 0 !important;
             padding: 0 !important;
@@ -247,5 +234,4 @@ body {
 
         .vis-group:has(.details){
             background-color: #f4f4f4 !important;
-           /* border: 1px solid #4d4d4d !important;*/
         }

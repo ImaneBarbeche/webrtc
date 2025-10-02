@@ -236,8 +236,8 @@ class WebRTCOnboarding {
                     this.elements.connectionInput.disabled = false;
                     this.elements.processResponseBtn.innerText = "Traiter la réponse";
                     this.elements.processResponseBtn.disabled = true;
-                    this.elements.responseSection.style.display = 'block';
-                    this.elements.connectionDetails.style.display = 'block';
+                    this.elements.responseSection.classList.remove('hidden');
+                    this.elements.connectionDetails.classList.remove('hidden');
                     this.isOfferor = true;
                     this.state = "waitAnswer";
                 }
@@ -263,7 +263,7 @@ class WebRTCOnboarding {
                     this.elements.connectionInput.disabled = true;
                     this.elements.connectBtn.innerText = "Abandonner";
                     this.elements.connectBtn.disabled = false;
-                    this.elements.connectionDetails.style.display = 'block';
+                    this.elements.connectionDetails.classList.remove('hidden');
                     this.state = "waitConnect";
                 }
                 break;
@@ -279,7 +279,7 @@ class WebRTCOnboarding {
                 this.log('=== CONNECTION ESTABLISHED ===');
                 this.connectionEstablished = true;
                 this.setStateAndStatus("connected", "Connexion établie !");
-                this.elements.connectedActions.style.display = 'block';
+                this.elements.connectedActions.classList.remove('hidden');
                 break;
                 
             case 'disconnected':
@@ -313,7 +313,7 @@ class WebRTCOnboarding {
         this.log("Data channel opened");
         this.connectionEstablished = true;
         this.setStateAndStatus("connected", "Connexion établie - Canal de données ouvert !");
-        this.elements.connectedActions.style.display = 'block';
+        this.elements.connectedActions.classList.remove('hidden');
     }
 
     dcMessage(e) {
