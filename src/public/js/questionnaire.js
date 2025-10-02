@@ -11,6 +11,97 @@ import { surveyMachine, surveyService } from "./stateMachine.js";
  ************************************************************************************************************
  */
 
+/**
+ * EVENT NORMALIZATION HELPER
+ * Crée un événement standardisé pour la state machine
+ * 
+ * @param {string} type - Type de l'événement (ex: "ANSWER_BIRTH_YEAR", "YES", "NO")
+ * @param {Object} data - Données de l'événement
+ * @returns {Object} Événement normalisé et validé
+ */
+function createNormalizedEvent(type, data = {}) {
+    // Validation du type
+    if (!type || typeof type !== 'string') {
+        console.error('❌ Event type invalide:', type);
+        return null;
+    }
+
+    // Normalisation des données selon le type d'événement
+    const event = { type: type.toUpperCase() };
+
+    // Normalisation spécifique par type d'événement
+    switch (type.toUpperCase()) {
+        case 'ANSWER_BIRTH_YEAR':
+            // Toujours stocker l'année comme string YYYY
+            if (data.birthdate) {
+                const yearMatch = String(data.birthdate).trim().match(/^(\d{4})/);
+                event.birthdate = yearMatch ? yearMatch[1] : String(data.birthdate).trim();
+                console.log('📅 Année de naissance normalisée:', event.birthdate);
+            }
+            break;
+
+        case 'ANSWER_BIRTH_COMMUNE':
+        case 'ANSWER_NEW_COMMUNE':
+            // Toujours stocker les communes comme array
+            if (data.commune) {
+                event.commune = Array.isArray(data.commune) ? data.commune : [data.commune];
+                console.log('🏘️ Commune(s) normalisée(s):', event.commune);
+            }
+            break;
+
+        case 'ANSWER_ARRIVAL_YEAR':
+        case 'ANSWER_HOUSING_ARRIVAL_YEAR':
+            // Année d'arrivée comme string YYYY
+            if (data.start) {
+                const yearMatch = String(data.start).trim().match(/^(\d{4})/);
+                event.start = yearMatch ? yearMatch[1] : String(data.start).trim();
+                console.log('📍 Année d\'arrivée normalisée:', event.start);
+            }
+            break;
+
+        case 'ANSWER_HOUSING_DEPARTURE_YEAR':
+            // Année de départ comme string YYYY
+            if (data.end) {
+                const yearMatch = String(data.end).trim().match(/^(\d{4})/);
+                event.end = yearMatch ? yearMatch[1] : String(data.end).trim();
+                console.log('🚪 Année de départ normalisée:', event.end);
+            }
+            break;
+
+        case 'ANSWER_HOUSING_SPLIT_YEAR':
+            // Année de split comme string YYYY
+            if (data.split) {
+                const yearMatch = String(data.split).trim().match(/^(\d{4})/);
+                event.split = yearMatch ? yearMatch[1] : String(data.split).trim();
+                console.log('✂️ Année de déménagement normalisée:', event.split);
+            }
+            break;
+
+        case 'LOCATAIRE':
+        case 'PROPRIETAIRE':
+            // Statut résidentiel
+            event.statut_res = type;
+            console.log('🏠 Statut résidentiel:', event.statut_res);
+            break;
+
+        case 'YES':
+        case 'NO':
+            // Pas de données supplémentaires pour YES/NO
+            console.log('✅/❌ Réponse binaire:', type);
+            break;
+
+        default:
+            // Pour tout autre type, copier les données telles quelles
+            Object.assign(event, data);
+            console.log('📦 Événement générique:', type, data);
+    }
+
+    // Log de l'événement final pour debug
+    console.log('🚀 Événement normalisé envoyé:', event);
+    
+    return event;
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
     const container = document.getElementById("questions");
     // Initialisation de la machine à états
@@ -130,13 +221,18 @@ document.addEventListener("DOMContentLoaded", async () => {
             input.placeholder = "Votre réponse";
             input.addEventListener("keypress", (event) => {
               if (event.key === "Enter" && input.value.trim() !== "" && eventType) {
-                let eventData = { type: eventType };
-                eventData[eventKey] = eventKey == "commune" ?  [input.value] : input.value//cas special pour commune 
-                console.log(eventData)
-                surveyService.send(eventData); // On envoie l'événement correct
-                event.target.closest('.question').querySelectorAll('input').forEach(input => {
-                  input.disabled = true; 
-                });
+                // Préparation des données brutes
+                const rawData = {};
+                rawData[eventKey] = eventKey === "commune" ? [input.value] : input.value;
+                
+                // Normalisation et envoi
+                const normalizedEvent = createNormalizedEvent(eventType, rawData);
+                if (normalizedEvent) {
+                  surveyService.send(normalizedEvent);
+                  event.target.closest('.question').querySelectorAll('input').forEach(input => {
+                    input.disabled = true; 
+                  });
+                }
               }
             });
             questionDiv.appendChild(input);
@@ -148,13 +244,20 @@ document.addEventListener("DOMContentLoaded", async () => {
             const button = document.createElement("button");
             button.innerText = choice;
             button.addEventListener("click", (event) => {
-              let eventData = { type: choice.toUpperCase() };
-              eventData[eventKey] = choice;  
-              surveyService.send(eventData); // "YES" ou "NO"
+              // Préparation des données selon le choix
+              const rawData = {};
+              if (eventKey && eventKey !== "commune") {
+                rawData[eventKey] = choice;
+              }
+              
+              // Normalisation et envoi
+              const normalizedEvent = createNormalizedEvent(choice.toUpperCase(), rawData);
+              if (normalizedEvent) {
+                surveyService.send(normalizedEvent);
                 event.target.closest('.question').querySelectorAll('button').forEach(btn => {
                   btn.disabled = true; 
                 });
-
+              }
             });
             questionDiv.appendChild(button);
             });
@@ -192,15 +295,31 @@ document.addEventListener("DOMContentLoaded", async () => {
           nextQBtn.innerHTML = "Suivant";
           
           nextQBtn.addEventListener("click", () => {
+            // Récupération des communes saisies
             let list_communes_not_sorted = [];
-            responseList.querySelectorAll('li').forEach(e=> list_communes_not_sorted.push(e.innerHTML))
-            let list_communes = items.get().filter(i => list_communes_not_sorted.includes(i.content))
-              list_communes.sort((a, b) => (new Date(a.start)) - (new Date(b.start)) )
-              list_communes = list_communes.map(i => i.content)
-              console.log(list_communes)
-            let eventData = { type: "ANSWER_NEW_COMMUNE" };
-              eventData[eventKey] = list_communes;
-            surveyService.send(eventData);
+            responseList.querySelectorAll('li').forEach(e => list_communes_not_sorted.push(e.innerHTML));
+            
+            // FIXME: Cette logique dépend des items existants - à améliorer pour mode live
+            // Pour l'instant, si items vides, garder l'ordre de saisie
+            let list_communes;
+            const existingItems = items.get().filter(i => list_communes_not_sorted.includes(i.content));
+            
+            if (existingItems.length > 0) {
+              // Tri par date de début si items trouvés
+              existingItems.sort((a, b) => (new Date(a.start)) - (new Date(b.start)));
+              list_communes = existingItems.map(i => i.content);
+              console.log('🗂️ Communes triées par dates existantes:', list_communes);
+            } else {
+              // Garder l'ordre de saisie si pas d'items existants (mode live)
+              list_communes = list_communes_not_sorted;
+              console.log('📝 Communes dans l\'ordre de saisie:', list_communes);
+            }
+            
+            // Normalisation et envoi
+            const normalizedEvent = createNormalizedEvent(eventType, { commune: list_communes });
+            if (normalizedEvent) {
+              surveyService.send(normalizedEvent);
+            }
           });
       
           questionDiv.appendChild(nextQBtn);
