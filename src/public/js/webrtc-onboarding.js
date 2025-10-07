@@ -264,15 +264,24 @@ class WebRTCOnboarding {
           this.log(
             `Offer length: ${this.elements.connectionCode.value.length} chars`
           );
-          this.elements.createBtn.innerText = "Copier l'offre";
-          this.elements.createBtn.disabled = false;
-          this.elements.connectionInput.placeholder =
-            'Collez la réponse reçue ici, puis cliquez sur "Traiter la réponse" pour établir la connexion.';
-          this.elements.connectionInput.disabled = false;
-          this.elements.processResponseBtn.innerText = "Traiter la réponse";
-          this.elements.processResponseBtn.disabled = true;
-          this.elements.responseSection.classList.remove("hidden");
-          this.elements.connectionDetails.classList.remove("hidden");
+          
+          // Stocker les références pour le setTimeout
+          const elements = this.elements;
+          
+          // Utiliser setTimeout pour éviter les violations de performance dans le handler ICE
+          setTimeout(() => {
+            elements.createBtn.innerText = "Copier l'offre";
+            elements.createBtn.disabled = false;
+            elements.connectionInput.placeholder =
+              'Collez la réponse reçue ici, puis cliquez sur "Traiter la réponse" pour établir la connexion.';
+            elements.connectionInput.disabled = false;
+            elements.processResponseBtn.innerText = "Traiter la réponse";
+            elements.processResponseBtn.disabled = true;
+            elements.responseSection.classList.remove("hidden");
+            elements.connectionDetails.classList.remove("hidden");
+            elements.connectionDetails.classList.add('show'); // Ajouter la classe .show pour afficher
+          }, 0);
+          
           this.isOfferor = true;
           this.state = "waitAnswer";
         }
@@ -306,14 +315,23 @@ class WebRTCOnboarding {
           this.log(
             `Answer length: ${this.elements.connectionCode.value.length} chars`
           );
-          this.elements.createBtn.innerText = "Copier la réponse";
-          this.elements.createBtn.disabled = false;
-          this.elements.connectionInput.placeholder =
-            'Cliquez sur "Copier la réponse", puis donnez la réponse à l\'hôte.';
-          this.elements.connectionInput.disabled = true;
-          this.elements.connectBtn.innerText = "Abandonner";
-          this.elements.connectBtn.disabled = false;
-          this.elements.connectionDetails.classList.remove("hidden");
+          
+          // Stocker les références pour le setTimeout
+          const elements = this.elements;
+          
+          // Utiliser setTimeout pour éviter les violations de performance dans le handler ICE
+          setTimeout(() => {
+            elements.createBtn.innerText = "Copier la réponse";
+            elements.createBtn.disabled = false;
+            elements.connectionInput.placeholder =
+              'Cliquez sur "Copier la réponse", puis donnez la réponse à l\'hôte.';
+            elements.connectionInput.disabled = true;
+            elements.connectBtn.innerText = "Abandonner";
+            elements.connectBtn.disabled = false;
+            elements.connectionDetails.classList.remove("hidden");
+            elements.connectionDetails.classList.add('show'); // Ajouter la classe .show pour afficher
+          }, 0);
+          
           this.state = "waitConnect";
         }
         break;
@@ -366,13 +384,19 @@ class WebRTCOnboarding {
       "connected",
       "Connexion établie - Canal de données ouvert !"
     );
-    this.elements.connectedActions.classList.remove("hidden");
 
     // Enregistrer le data channel globalement pour webrtc-sync.js
     if (typeof window !== "undefined") {
       window.webrtcDataChannel = this.dc;
       this.log("Data channel exporté globalement (window.webrtcDataChannel)");
     }
+    
+    // Utiliser setTimeout + ajouter la classe .show
+    const elements = this.elements;
+    setTimeout(() => {
+      elements.connectedActions.classList.remove("hidden");
+      elements.connectedActions.classList.add('show');
+    }, 0);
   }
 
   dcMessage(e) {
@@ -456,7 +480,7 @@ class WebRTCOnboarding {
     );
     sessionStorage.setItem("webrtc_sessionId", this.sessionId || "");
 
-    window.location.href = "LifeStories.html";
+    window.location.href = "public/LifeStories.html";
   }
 
   // Méthode pour obtenir l'instance active
