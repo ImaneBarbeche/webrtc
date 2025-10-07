@@ -20,6 +20,8 @@ import { surveyMachine, surveyService } from "./stateMachine.js";
  * @returns {Object} Événement normalisé et validé
  */
 function createNormalizedEvent(type, data = {}) {
+    console.log('🔄 createNormalizedEvent appelé:', { type, data });
+    
     // Validation du type
     if (!type || typeof type !== 'string') {
         console.error('❌ Event type invalide:', type);
@@ -104,8 +106,14 @@ function createNormalizedEvent(type, data = {}) {
 
 document.addEventListener("DOMContentLoaded", async () => {
     const container = document.getElementById("questions");
+    
+    console.log('🚀 Initialisation du questionnaire...');
+    console.log('📦 Container trouvé:', container);
+    
     // Initialisation de la machine à états
     surveyService.start();
+    console.log('✅ surveyService démarré');
+    
     surveyService.subscribe((state) => {
         console.log("=====================================")
         console.log('État actuel:', state.value);
@@ -242,6 +250,8 @@ document.addEventListener("DOMContentLoaded", async () => {
             const button = document.createElement("button");
             button.innerText = choice;
             button.addEventListener("click", (event) => {
+              console.log('🔘 Clic sur bouton:', choice);
+              
               // Préparation des données selon le choix
               const rawData = {};
               if (eventKey && eventKey !== "commune") {
@@ -250,11 +260,16 @@ document.addEventListener("DOMContentLoaded", async () => {
               
               // Normalisation et envoi
               const normalizedEvent = createNormalizedEvent(choice.toUpperCase(), rawData);
+              console.log('📤 Envoi événement:', normalizedEvent);
+              
               if (normalizedEvent) {
                 surveyService.send(normalizedEvent);
+                console.log('✅ Événement envoyé à surveyService');
                 event.target.closest('.question').querySelectorAll('button').forEach(btn => {
                   btn.disabled = true; 
                 });
+              } else {
+                console.error('❌ Événement normalisé est null !');
               }
             });
             questionDiv.appendChild(button);

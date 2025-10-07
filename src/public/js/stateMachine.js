@@ -631,12 +631,31 @@ export const surveyMachine = createMachine({
           group: context.group
         });
         
-        // Gérer le trick pour la première question (commune de naissance)
-        let trick = event.type === "ANSWER_BIRTH_COMMUNE" ? event.commune[0] : event.commune;
+        // Déterminer le contenu de l'épisode selon le type d'événement
+        let episodeContent;
+        
+        if (event.type === "ANSWER_BIRTH_COMMUNE") {
+          // Commune de naissance : prendre la première commune du array
+          episodeContent = event.commune[0];
+        } else if (event.commune) {
+          // Nouvelle commune : peut être string ou array
+          episodeContent = Array.isArray(event.commune) ? event.commune[0] : event.commune;
+        } else if (event.statut_res) {
+          // Statut résidentiel (LOCATAIRE/PROPRIETAIRE)
+          episodeContent = event.statut_res;
+        } else if (context.group === 12) {
+          // Groupe Logement : utiliser la commune actuelle
+          episodeContent = context.communes[context.currentCommuneIndex] || "Logement";
+        } else {
+          // Fallback
+          episodeContent = "Episode";
+        }
+        
+        console.log('📝 Contenu épisode déterminé:', episodeContent, 'pour event:', event.type);
         
         // Ajouter l'épisode avec priorité: startDate || defaultStart
         let truc = ajouterEpisode(
-          trick || event.statut_res, 
+          episodeContent, 
           startDate || defaultStart, 
           endDate || defaultEnd,
           context.group

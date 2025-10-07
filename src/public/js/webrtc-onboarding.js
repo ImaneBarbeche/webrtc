@@ -1,5 +1,4 @@
-// WebRTC Onboarding - Exact copy of working Tic-Tac-Toe logic
-
+// WebRTC Onboarding
 class WebRTCOnboarding {
     constructor() {
         this.pc = null;
