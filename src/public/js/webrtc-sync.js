@@ -16,12 +16,14 @@ class WebRTCSync {
     }
     
     checkOnboardingConnection() {
+            // Vérifie si on vient d'un onboarding WebRTC
         const wasConnected = sessionStorage.getItem('webrtc_connected');
         
         if (wasConnected === 'true') {
-            this.isOfferor = sessionStorage.getItem('webrtc_isOfferor') === 'true';
+            // Récupère les infos
+            this.isOfferor = sessionStorage.getItem('webrtc_isOfferor') === 'true'; // Suis-je l'hôte ou l'invité ?
             this.sessionId = sessionStorage.getItem('webrtc_sessionId') || null;
-            this.connected = true;
+            this.connected = true; // ID de session
             
             console.log('✅ WebRTC connexion restaurée:', {
                 isOfferor: this.isOfferor,

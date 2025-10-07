@@ -80,6 +80,16 @@
             0%, 100% { opacity: 1; }
             50% { opacity: 0.3; }
         }
+        
+        /* Mode viewer : masquer le questionnaire */
+        #questionnaire.viewer-mode {
+            display: none;
+        }
+        
+        /* Ajuster la mise en page en mode viewer */
+        .split.viewer-mode #trajectories {
+            width: 100% !important;
+        }
     </style>
     
 </head>
@@ -136,7 +146,13 @@
                 const role = window.webrtcSync.getRole();
                 statusEl.classList.remove('standalone');
                 statusEl.classList.add('connected');
-                statusText.textContent = `Synchronisé (${role === 'host' ? 'Hôte' : 'Invité'})`;
+                
+                // Texte plus explicite selon le rôle
+                if (role === 'host') {
+                    statusText.textContent = '🎤 Enquêteur (Hôte)';
+                } else {
+                    statusText.textContent = '👁️ Observateur (Viewer)';
+                }
             }
         });
     </script>

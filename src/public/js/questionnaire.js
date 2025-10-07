@@ -11,8 +11,9 @@ import { surveyMachine, surveyService } from "./stateMachine.js";
  ************************************************************************************************************
  */
 
-// Variable pour stocker si on doit synchroniser
+// Variables pour la synchronisation WebRTC
 let syncEnabled = false;
+let isHost = true; // Par défaut, mode standalone = hôte
 
 document.addEventListener("DOMContentLoaded", async () => {
     const container = document.getElementById("questions");
@@ -20,7 +21,16 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Vérifier si WebRTC est disponible
     if (window.webrtcSync && window.webrtcSync.isActive()) {
         syncEnabled = true;
-        console.log('✅ Mode synchronisation WebRTC activé - Rôle:', window.webrtcSync.getRole());
+        isHost = window.webrtcSync.getRole() === 'host';
+        
+        console.log(`✅ Mode synchronisation WebRTC activé - Rôle: ${isHost ? 'HÔTE' : 'VIEWER'}`);
+        
+        // Si viewer, masquer le questionnaire
+        if (!isHost) {
+            document.getElementById('questionnaire').classList.add('viewer-mode');
+            document.querySelector('.split').classList.add('viewer-mode');
+            console.log('👁️ Mode VIEWER : questionnaire masqué, calendrier en lecture seule');
+        }
         
         // Écouter les événements reçus de l'autre tablette
         window.webrtcSync.onMessage((message) => {
@@ -65,7 +75,13 @@ document.addEventListener("DOMContentLoaded", async () => {
      * Envoyer un événement (local + remote si WebRTC activé)
      */
     function sendEvent(eventData) {
-        console.log('📤 Envoi événement:', eventData);
+        // Vérifier si on est hôte
+        if (!isHost) {
+            console.warn('⛔ VIEWER ne peut pas envoyer d\'événements');
+            return; // Bloquer l'envoi
+        }
+        
+        console.log('📤 HÔTE envoie événement:', eventData);
         
         // Envoyer localement
         surveyService.send(eventData);
