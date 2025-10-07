@@ -1,7 +1,0 @@
-/* SweetAlert2 Fallback */
-.swal2-popup { 
-    background: white; 
-    border-radius: 8px; 
-    padding: 20px; 
-    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-}

@@ -1,0 +1,178 @@
+[
+  {
+    "id": 44,
+    "start": "1926-01-01",
+    "end": "1929-01-01",
+    "content": "Treuzy-Levelay",
+    "group":14,
+    "className":"green"
+  },
+  {
+    "id": 45,
+    "start": "1930-01-01",
+    "end": "1937-01-01",
+    "content": "Cerneux",
+    "group":14,
+    "className":"green"
+  },
+  {
+    "id": 46,
+    "start": "1938-01-01",
+    "end": "1939-01-01",
+    "content": "Saint-Mars-Vieux-Maisons",
+    "group":14,
+    "className":"green"
+  },
+  {
+    "id": 47,
+    "start": "1940-01-01",
+    "end": "1941-01-01",
+    "content": "Sancy-lès-Provins",
+    "group":14,
+    "className":"green"
+  },
+  {
+    "id": 48,
+    "start": "1942-01-01",
+    "end": "1945-01-01",
+    "content": "Cerneux",
+    "group":14,
+    "className":"green"
+  },
+  {
+    "id": 49,
+    "start": "1946-01-01",
+    "end": "1947-01-01",
+    "content": "Cerneux",
+    "group":14,
+    "className":"green"
+  },
+  {
+    "id": 50,
+    "start": "1948-01-01",
+    "end": "1949-01-01",
+    "content": "Villiers-Saint-Georges",
+    "group":14,
+    "className":"green"
+  },
+  {
+    "id": 51,
+    "start": "1950-01-01",
+    "end": "1951-01-01",
+    "content": "Cerneux",
+    "group":14,
+    "className":"green"
+  },
+  {
+    "id": 52,
+    "start": "1952-01-01",
+    "end": "1953-01-01",
+    "content": "Cerneux",
+    "group":14,
+    "className":"green"
+  },
+  {
+    "id": 53,
+    "start": "1954-01-01",
+    "end": "1980-01-01",
+    "content": "Cerneux",
+    "group":14,
+    "className":"green"
+  },
+  {
+      "id": 22,
+      "start": "1938-01-01",
+      "end": "1939-01-01",
+      "content": "Saint-Mars-Vieux-Maisons",
+      "group":21,
+      "className": "blue"
+  },
+  {
+      "id": 23,
+      "start": "1940-01-01",
+      "end": "1941-01-01",
+      "content": "Sancy-lès-Provins",
+      "group":21,
+      "className": "blue"
+  },
+  {
+      "id": 24,
+      "start": "1942-01-01",
+      "end": "1945-01-01",
+      "content": "Cerneux",
+      "group":21,
+      "className": "blue"
+  },
+  {
+      "id": 25,
+      "start": "1946-01-01",
+      "end": "1947-01-01",
+      "content": "Cerneux",
+      "group":21,
+      "className": "blue"
+  },
+  {
+      "id": 26,
+      "start": "1948-01-01",
+      "end": "1949-01-01",
+      "content": "Villiers-Saint-Georges",
+      "group":21,
+      "className": "blue"
+  },
+  {
+      "id": 27,
+      "start": "1950-01-01",
+      "end": "1951-01-01",
+      "content": "Cerneux",
+      "group":21,
+      "className": "blue"
+  },
+  {
+      "id": 28,
+      "start": "1952-01-01",
+      "end": "1952-01-01",
+      "content": "Cerneux",
+      "group":21,
+      "className": "blue"
+  },
+  {
+      "id": 29,
+      "start": "1954-01-01",
+      "end": "1980-01-01",
+      "content": "Cerneux",
+      "group":21,
+      "className": "blue"
+  },
+  {
+      "id": 30,
+      "start": "1926-01-01",
+      "end": "1949-01-01",
+      "content": "Celibataire - 0 enfant(s)",
+      "group": 3,
+      "className": "red"
+  },
+  {
+      "id": 31,
+      "start": "1949-01-01",
+      "end": "1961-01-01",
+      "content": "Marié - 1 enfant(s)",
+      "group": 3,
+      "className": "red"
+  },
+  {
+      "id": 32,
+      "start": "1961-01-01",
+      "end": "1963-01-01",
+      "content": "Marié - 2 enfant(s)",
+      "group": 3,
+      "className": "red"
+  },
+  {
+      "id": 33,
+      "start": "1963-01-01",
+      "end": "1981-01-01",
+      "content": "Marié - 3 enfant(s)",
+      "group": 3,
+      "className": "red"
+  }
+]

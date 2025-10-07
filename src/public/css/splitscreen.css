@@ -36,7 +36,7 @@
 }
 
 .custom-bar{
-    background-color: #100f0f !important;
+    background-color: rgb(231, 104, 104) !important;
     width: 4px !important;
     cursor: col-resize !important;
 }

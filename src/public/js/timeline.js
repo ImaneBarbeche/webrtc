@@ -210,25 +210,6 @@ const options = {
 const container = document.getElementById('timeline');
 const timeline = new vis.Timeline(container, items, groups, options);
 
-// Helper: safe retrieval of timeline start year
-function getTimelineStartYear() {
-  try {
-    if (timeline && timeline.options && timeline.options.start) {
-      const s = timeline.options.start;
-      const date = (typeof s === 'string') ? new Date(s) : s;
-      if (date && !isNaN(date.getTime())) return date.getFullYear();
-    }
-    // fallback: compute from visible window
-    if (timeline && typeof timeline.getWindow === 'function') {
-      const w = timeline.getWindow();
-      if (w && w.start) return new Date(w.start).getFullYear();
-    }
-  } catch (e) {
-    console.warn('getTimelineStartYear fallback:', e);
-  }
-  return new Date().getFullYear();
-}
-
 function handleDragStart(event) {
   
   event.dataTransfer.effectAllowed = 'move';
@@ -353,50 +334,7 @@ document.getElementById('save').addEventListener('click',function (){
   });
 
 document.getElementById('load').addEventListener('click',function (){
-  // Avoid loading duplicates: check if items dataset already contains test ids or contents
-  const existing = items.get();
-
-  // If timeline start isn't set to 2001, warn the user before loading preloaded dataset
-  const timelineStartYear = getTimelineStartYear();
-  if (timelineStartYear !== 2001) {
-    if (!confirm(`La timeline commence en ${timelineStartYear}. Charger les données 2001 peut donner un affichage inattendu. Continuer?`)) return;
-  }
-
-  // Add each test item only if there isn't already an item with same id or exact content+start
-  test_items.forEach(i => {
-    try {
-      // Normalize dates: convert ISO strings to Date objects if needed
-      const item = Object.assign({}, i);
-      if (item.start && typeof item.start === 'string') item.start = new Date(item.start);
-      if (item.end && typeof item.end === 'string') item.end = new Date(item.end);
-
-      const duplicate = existing.find(e => (e.id === item.id) || (e.content === item.content && new Date(e.start).getTime() === new Date(item.start).getTime()));
-      if (!duplicate) {
-        items.add(item);
-      } else {
-        console.log('Skipped duplicate test item:', item.content);
-      }
-    } catch (err) {
-      console.error('Error adding test item', i, err);
-    }
-  });
-  // If dataset has an earlier start year than timeline, snap timeline to dataset min year for correct display
-  try {
-    const years = test_items.map(i => {
-      const s = i.start;
-      if (!s) return Infinity;
-      const date = (typeof s === 'string') ? new Date(s) : s;
-      return date.getFullYear();
-    }).filter(y => Number.isFinite(y));
-    if (years.length) {
-      const minYear = Math.min(...years);
-      if (getTimelineStartYear() !== minYear) {
-          timeline.setOptions({ min: new Date(`${minYear}-01-01`), start: new Date(`${minYear}-01-01`) });
-        }
-    }
-  } catch (e) {
-    console.error('Error adjusting timeline start to dataset min year', e);
-  }
+  test_items.forEach(i => items.add(i))
   console.log(items.get())
   });
 //wrapper

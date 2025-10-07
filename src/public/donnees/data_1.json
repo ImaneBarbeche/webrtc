@@ -1,0 +1,295 @@
+{
+  "items": [
+      {
+        "id": "2024-11-12T15:45:09.283Z",
+        "type": "range",
+        "content": "Bordeaux",
+        "start": "1959-12-30T23:00:00.000Z",
+        "end": "1999-12-31T23:00:00.000Z",
+        "group": 14,
+        "className": "green"
+      },
+      {
+        "id": "2024-11-12T15:45:30.467Z",
+        "type": "range",
+        "content": "Paris",
+        "start": "1999-12-31T23:00:00.000Z",
+        "end": "2019-12-30T23:00:00.000Z",
+        "group": 14,
+        "className": "green"
+      },
+      {
+        "id": "2024-11-12T15:46:13.037Z",
+        "type": "range",
+        "content": "Logement 1",
+        "start": "1959-12-30T23:00:00.000Z",
+        "end": "1969-12-31T23:00:00.000Z",
+        "group": 13,
+        "className": "green"
+      },
+      {
+        "id": "2024-11-12T15:46:31.004Z",
+        "type": "range",
+        "content": "Logement 2",
+        "start": "1969-12-31T23:00:00.000Z",
+        "end": "1979-12-31T23:00:00.000Z",
+        "group": 13,
+        "className": "green"
+      },
+      {
+        "id": "2024-11-12T15:47:21.575Z",
+        "type": "range",
+        "content": "Logement 3",
+        "start": "1979-12-31T23:00:00.000Z",
+        "end": "1999-12-31T23:00:00.000Z",
+        "group": 13,
+        "className": "green",
+        
+      },
+      {
+        "id": "2024-11-12T15:48:01.529Z",
+        "type": "range",
+        "content": "Maison",
+        "start": "1959-12-30T23:00:00.000Z",
+        "end": "1979-12-31T23:00:00.000Z",
+        "group": 12,
+        "className": "green"
+      },
+      {
+        "id": "2024-11-12T15:48:20.011Z",
+        "type": "range",
+        "content": "Appartement",
+        "start": "1979-12-31T23:00:00.000Z",
+        "end": "1999-12-31T23:00:00.000Z",
+        "group": 12,
+        "className": "green"
+      },
+      {
+        "id": "2024-11-12T15:49:27.709Z",
+        "type": "range",
+        "content": "Locataire",
+        "start": "1959-12-30T23:00:00.000Z",
+        "end": "1990-12-31T23:00:00.000Z",
+        "group": 11,
+        "className": "green"
+      },
+      {
+        "id": "2024-11-12T15:49:58.961Z",
+        "type": "range",
+        "content": "Propriétaire",
+        "start": "1990-12-31T23:00:00.000Z",
+        "end": "1999-12-30T23:00:00.000Z",
+        "group": 11,
+        "className": "green"
+      },
+      {
+        "id": "2024-11-13T14:50:52.160Z",
+        "type": "range",
+        "content": "Etudes",
+        "start": "1959-12-30T23:00:00.000Z",
+        "end": "1979-12-30T23:00:00.000Z",
+        "group": 24,
+        "className": "blue"
+      },
+      {
+        "id": "2024-11-13T14:52:10.361Z",
+        "type": "range",
+        "content": "Bordeaux",
+        "start": "1959-12-30T23:00:00.000Z",
+        "end": "1969-12-30T23:00:00.000Z",
+        "group": 23,
+        "className": "blue"
+      },
+      {
+        "id": "2024-11-13T14:53:11.907Z",
+        "type": "range",
+        "content": "Pessac",
+        "start": "1969-12-30T23:00:00.000Z",
+        "end": "1979-12-30T23:00:00.000Z",
+        "group": 23,
+        "className": "blue"
+      },
+      {
+        "id": "2024-11-13T14:53:40.690Z",
+        "type": "range",
+        "content": "Inactivité",
+        "start": "1979-12-30T23:00:00.000Z",
+        "end": "1982-12-30T23:00:00.000Z",
+        "group": 24,
+        "className": "blue"
+      },
+      {
+        "id": "2024-11-13T14:54:02.315Z",
+        "type": "range",
+        "content": "Emploi",
+        "start": "1982-12-30T23:00:00.000Z",
+        "end": "2019-12-30T23:00:00.000Z",
+        "group": 24,
+        "className": "blue"
+      },
+      {
+        "id": "2024-11-13T14:55:03.017Z",
+        "type": "range",
+        "content": "Montpellier",
+        "start": "2004-12-30T23:00:00.000Z",
+        "end": "2019-12-30T23:00:00.000Z",
+        "group": 23,
+        "className": "blue"
+      },
+      {
+        "id": "2024-11-13T14:55:19.476Z",
+        "type": "range",
+        "content": "Paris",
+        "start": "1997-12-30T23:00:00.000Z",
+        "end": "2004-12-30T23:00:00.000Z",
+        "group": 23,
+        "className": "blue"
+      },
+      {
+        "id": "2024-11-13T14:56:24.380Z",
+        "type": "range",
+        "content": "Bordeaux",
+        "start": "1982-12-31T23:00:00.000Z",
+        "end": "1997-12-30T23:00:00.000Z",
+        "group": 23,
+        "className": "blue"
+      },
+      {
+        "id": "2024-11-13T14:57:07.488Z",
+        "type": "range",
+        "content": "Entreprise 2",
+        "start": "1997-12-30T23:00:00.000Z",
+        "end": "2019-12-30T23:00:00.000Z",
+        "group": 22,
+        "className": "blue"
+      },
+      {
+        "id": "2024-11-13T14:57:45.282Z",
+        "type": "range",
+        "content": "Entreprise 1",
+        "start": "1982-12-30T23:00:00.000Z",
+        "end": "1997-12-30T23:00:00.000Z",
+        "group": 22,
+        "className": "blue"
+      },
+      {
+        "id": "2024-11-13T14:58:31.619Z",
+        "type": "range",
+        "content": "Graphiste",
+        "start": "1982-12-30T23:00:00.000Z",
+        "end": "1990-12-30T23:00:00.000Z",
+        "group": 21,
+        "className": "blue"
+      },
+      {
+        "id": "2024-11-13T14:58:50.307Z",
+        "type": "range",
+        "content": "Modélisateur 3D",
+        "start": "1990-12-30T23:00:00.000Z",
+        "end": "1999-12-30T23:00:00.000Z",
+        "group": 21,
+        "className": "blue"
+      },
+      {
+        "id": "2024-11-13T14:59:29.538Z",
+        "type": "range",
+        "content": "Directeur artistique",
+        "start": "1999-12-30T23:00:00.000Z",
+        "end": "2019-12-30T23:00:00.000Z",
+        "group": 21,
+        "className": "blue"
+      },
+      {
+        "id": "2024-11-13T14:59:49.999Z",
+        "type": "range",
+        "content": "Université Bordeaux",
+        "start": "1959-12-30T23:00:00.000Z",
+        "end": "1969-12-30T23:00:00.000Z",
+        "group": 22,
+        "className": "blue"
+      },
+      {
+        "id": "2024-11-13T15:00:45.286Z",
+        "type": "range",
+        "content": "IUT Pessac",
+        "start": "1969-12-30T23:00:00.000Z",
+        "end": "1979-12-30T23:00:00.000Z",
+        "group": 22,
+        "className": "blue"
+      }
+    ],
+  "groups": [
+    {
+      "id": 1,
+      "content": "Migratoire",
+      "nestedGroups":[11,12,13,14],
+    },
+    {
+      "id": 2,
+      "content": "Professionnel",
+      "nestedGroups":[21,22,23,24],
+    },
+    {
+      "id": 3,
+      "content": "Familial",
+      "nestedGroups":[31,32,33,34]
+    },
+
+    {
+      "id": 11,
+      "content": "Statut résidentiel"
+    },
+    {
+      "id": 12,
+      "content": "Type"
+    },
+    {
+      "id": 13,
+      "content": "Logement",
+      "type":"primary"
+    },
+    {
+      "id": 14,
+      "content": "Ville",
+      "type":"primary"
+    },
+
+    {
+      "id": 21,
+      "content": "Poste"
+    },
+    {
+      "id": 22,
+      "content": "Etablissement/Entreprise"
+    },
+    {
+      "id": 23,
+      "content": "Lieu",
+      "type":"primary"
+    },
+    {
+      "id": 24,
+      "content": "Activité professionnelle",
+      "type":"primary"
+    },
+
+    {
+      "id": 31,
+      "content": "Nb Enfants du foyer"
+    },
+    {
+      "id": 32,
+      "content": "Statut marital"
+    },
+    {
+      "id": 33,
+      "content": "Entreprise",
+      "type":"primary"
+    },
+    {
+      "id": 34,
+      "content": "Lieu de travail",
+      "type":"primary"
+    }
+  ]
+}
