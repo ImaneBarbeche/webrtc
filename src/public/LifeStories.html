@@ -46,10 +46,50 @@
             background-color: #e9ecef;
             cursor: not-allowed;
         }
+        
+        /* Indicateur de synchronisation WebRTC */
+        #webrtc-status {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        #webrtc-status.connected {
+            background-color: #28a745;
+            color: white;
+        }
+        #webrtc-status.standalone {
+            background-color: #6c757d;
+            color: white;
+        }
+        #webrtc-status .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: white;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
     </style>
     
 </head>
 <body>
+    <!-- Indicateur de statut WebRTC -->
+    <div id="webrtc-status" class="standalone">
+        <span class="dot"></span>
+        <span id="webrtc-status-text">Mode standalone</span>
+    </div>
+    
     <!--<div id="mask">-->
     <div class="split">
         <!-- Left side-->
@@ -82,6 +122,25 @@
     
     <script src="libs/vis-timeline/vis-timeline-graph2d.min.js"></script> 
     <!--Documentation de vis timeline: https://visjs.github.io/vis-timeline/ -->
+    
+    <!-- WebRTC Synchronization -->
+    <script src="js/webrtc-sync.js"></script>
+    
+    <!-- Mise à jour de l'indicateur de statut -->
+    <script>
+        window.addEventListener('load', () => {
+            const statusEl = document.getElementById('webrtc-status');
+            const statusText = document.getElementById('webrtc-status-text');
+            
+            if (window.webrtcSync && window.webrtcSync.isActive()) {
+                const role = window.webrtcSync.getRole();
+                statusEl.classList.remove('standalone');
+                statusEl.classList.add('connected');
+                statusText.textContent = `Synchronisé (${role === 'host' ? 'Hôte' : 'Invité'})`;
+            }
+        });
+    </script>
+    
     <script type="module" src="js/timeline.js"></script>
     <script type="module" src="js/questionnaire.js"></script>
     <script type="module" src="js/utils.js"></script>

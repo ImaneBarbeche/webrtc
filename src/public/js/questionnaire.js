@@ -11,8 +11,25 @@ import { surveyMachine, surveyService } from "./stateMachine.js";
  ************************************************************************************************************
  */
 
+// Variable pour stocker si on doit synchroniser
+let syncEnabled = false;
+
 document.addEventListener("DOMContentLoaded", async () => {
     const container = document.getElementById("questions");
+    
+    // Vérifier si WebRTC est disponible
+    if (window.webrtcSync && window.webrtcSync.isActive()) {
+        syncEnabled = true;
+        console.log('✅ Mode synchronisation WebRTC activé - Rôle:', window.webrtcSync.getRole());
+        
+        // Écouter les événements reçus de l'autre tablette
+        window.webrtcSync.onMessage((message) => {
+            handleRemoteMessage(message);
+        });
+    } else {
+        console.log('ℹ️ Mode standalone (pas de synchronisation WebRTC)');
+    }
+    
     // Initialisation de la machine à états
     surveyService.start();
     surveyService.subscribe((state) => {
@@ -25,6 +42,40 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
     
     renderQuestion(surveyService.getSnapshot()); // Utilisation de .getSnapshot()
+
+    /**
+     * Gérer les messages reçus de l'autre tablette
+     */
+    function handleRemoteMessage(message) {
+        console.log('📥 Message WebRTC reçu:', message);
+        
+        if (message.type === 'SURVEY_EVENT') {
+            // Appliquer l'événement reçu à notre machine à états
+            console.log('📥 Application événement distant:', message.event);
+            surveyService.send(message.event);
+        } else if (message.type === 'SURVEY_STATE') {
+            // Synchroniser l'état complet (utile pour rattrapage)
+            console.log('📥 Synchronisation état complet:', message.state);
+            // Note: XState v5 n'a pas de méthode simple pour forcer un état
+            // On pourrait recréer le service ou envoyer des événements pour arriver au bon état
+        }
+    }
+    
+    /**
+     * Envoyer un événement (local + remote si WebRTC activé)
+     */
+    function sendEvent(eventData) {
+        console.log('📤 Envoi événement:', eventData);
+        
+        // Envoyer localement
+        surveyService.send(eventData);
+        
+        // Envoyer via WebRTC si disponible
+        if (syncEnabled && window.webrtcSync) {
+            window.webrtcSync.sendEvent(eventData);
+        }
+    }
+    
 
     
     
@@ -122,7 +173,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 let eventData = { type: eventType };
                 eventData[eventKey] = eventKey == "commune" ?  [input.value] : input.value//cas special pour commune en cas d'ajout multiples de commun. la valeur des communes sera toujours dans un tableau
                 console.log(eventData)
-                surveyService.send(eventData); // On envoie l'événement correct
+                sendEvent(eventData); // Utiliser sendEvent au lieu de surveyService.send
                 event.target.closest('.question').querySelectorAll('input').forEach(input => {
                   input.disabled = true; 
                 });
@@ -139,7 +190,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             button.addEventListener("click", (event) => {
               let eventData = { type: choice.toUpperCase() };
               eventData[eventKey] = choice;  
-              surveyService.send(eventData); // "YES" ou "NO"
+              sendEvent(eventData); // Utiliser sendEvent au lieu de surveyService.send
                 event.target.closest('.question').querySelectorAll('button').forEach(btn => {
                   btn.disabled = true; 
                 });
@@ -189,7 +240,7 @@ document.addEventListener("DOMContentLoaded", async () => {
               console.log(list_communes)
             let eventData = { type: "ANSWER_NEW_COMMUNE" };
               eventData[eventKey] = list_communes;
-            surveyService.send(eventData);
+            sendEvent(eventData); // Utiliser sendEvent au lieu de surveyService.send
           });
       
           questionDiv.appendChild(nextQBtn);

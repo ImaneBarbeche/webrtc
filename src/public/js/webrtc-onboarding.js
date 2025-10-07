@@ -313,6 +313,12 @@ class WebRTCOnboarding {
         this.connectionEstablished = true;
         this.setStateAndStatus("connected", "Connexion établie - Canal de données ouvert !");
         this.elements.connectedActions.classList.remove('hidden');
+        
+        // Enregistrer le data channel globalement pour webrtc-sync.js
+        if (typeof window !== 'undefined') {
+            window.webrtcDataChannel = this.dc;
+            this.log("Data channel exporté globalement (window.webrtcDataChannel)");
+        }
     }
 
     dcMessage(e) {
@@ -377,7 +383,23 @@ class WebRTCOnboarding {
         }
 
         this.log('Starting LifeStories application...');
+        
+        // Sauvegarder la connexion WebRTC pour l'application
+        sessionStorage.setItem('webrtc_connected', 'true');
+        sessionStorage.setItem('webrtc_isOfferor', this.isOfferor ? 'true' : 'false');
+        sessionStorage.setItem('webrtc_sessionId', this.sessionId || '');
+        
         window.location.href = 'LifeStories.html';
+    }
+    
+    // Méthode pour obtenir l'instance active
+    getDataChannel() {
+        return this.dc;
+    }
+    
+    // Méthode pour vérifier si la connexion est établie
+    isConnected() {
+        return this.connectionEstablished;
     }
 
     showMessage(message, type = 'info') {
