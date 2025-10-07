@@ -388,10 +388,10 @@ export const surveyMachine = createMachine({
             guard: 'isNotLiveMode',
             actions: [
               'addCommune',
-              'resetCommune',
-              'nextGroup',
+              'resetCommune', // reset index pour commencer la boucle
+              
             ],
-            target: 'askSameHousing'
+            target: 'askCommuneArrivalAge'
           },
           {
             // Mode live
@@ -399,13 +399,48 @@ export const surveyMachine = createMachine({
               'saveLiveResponse',
               'addCommune',
               'resetCommune',
-              'nextGroup',
+              
             ],
-            target: 'askSameHousing'
+            target: 'askCommuneArrivalAge'
           }
         ]
       }
     },
+    askCommuneArrivalAge: {
+  on: {
+    ANSWER_COMMUNE_ARRIVAL_AGE: {
+      actions: ['saveLiveResponse'],
+      target: 'askCommuneArrivalYear'
+    }
+  }
+},
+
+askCommuneArrivalYear: {
+  on: {
+    ANSWER_COMMUNE_ARRIVAL_YEAR: {
+      actions: [
+        'saveLiveResponse',
+        'extendPreviousCalendarEpisode',  // ferme l'épisode précédent
+        'addCalendarEpisode',  // Ajouter l'épisode avec la date
+      ],
+      target: 'checkMoreCommunes'  // Vérifier s'il reste des communes
+    }
+  }
+},
+
+checkMoreCommunes: {
+  always: [
+    {
+      guard: 'moreCommunesToProcess',
+      actions: ['nextCommune'],
+      target: 'askCommuneArrivalAge'  // Reboucler
+    },
+    {
+      actions: ['resetCommune', 'nextGroup'],
+      target: 'askSameHousing'  // Fini avec les communes
+    }
+  ]
+},
     askArrivalYear: {
       on: {
         ANSWER_ARRIVAL_YEAR: {
@@ -610,13 +645,24 @@ export const surveyMachine = createMachine({
         let endDate = null;     // ✅ Remplacé 0 par null
         let startDate = null;   // ✅ Remplacé 0 par null
         
-        // Si param spécial "timeline_init", utiliser le début de la timeline
+        // 🆕 PRIORITÉ 1: Si l'événement contient des dates explicites, les utiliser
+        if (event.start) {
+          startDate = event.start;
+          console.log('📅 Date start depuis event:', startDate);
+        }
+        
+        if (event.end) {
+          endDate = event.end;
+          console.log('📅 Date end depuis event:', endDate);
+        }
+        
+        // PRIORITÉ 2: Si param spécial "timeline_init", utiliser le début de la timeline
         if(params?.start === "timeline_init"){
           startDate = timeline.options.start;
           console.log('🎬 Initialisation timeline, start:', startDate);
         }
         
-        // ✅ NOUVELLE LOGIQUE: Utiliser le helper pour obtenir dates par défaut
+        // PRIORITÉ 3: Utiliser le helper pour obtenir dates par défaut
         const defaultDates = getDefaultDatesForGroup(context, context.group);
         if (defaultDates) {
           defaultStart = defaultDates.start;
@@ -628,7 +674,9 @@ export const surveyMachine = createMachine({
           defaultStart,
           endDate,
           defaultEnd,
-          group: context.group
+          group: context.group,
+          eventStart: event.start,
+          eventEnd: event.end
         });
         
         // Déterminer le contenu de l'épisode selon le type d'événement
@@ -663,24 +711,10 @@ export const surveyMachine = createMachine({
         
         console.log('✅ Episode ajouté, items actuels:', items.get().length);
         return truc;
-      },
-      
-      // 🔄 NOUVELLE PROPRIÉTÉ: Synchroniser communes après chaque ajout
-      communes: ({context, event}) => {
-        // Si on n'a pas de communes dans le context, rien à synchroniser
-        if (!context.communes || context.communes.length === 0) {
-          return context.communes;
-        }
-        
-        // Synchroniser l'ordre avec la timeline réelle
-        const synchronized = synchronizeCommunesWithTimeline(context.communes, context.group);
-        
-        console.log('🔄 Synchronisation post-ajout:');
-        console.log('   Avant:', context.communes);
-        console.log('   Après:', synchronized);
-        
-        return synchronized;
       }
+      
+      // 🔄 Note: La synchronisation des communes se fera plus tard si nécessaire
+      // On ne synchronise PAS ici car les items ne sont pas encore tous créés
     }),
 
     // ✅ RÉSOLU: L'ordre est maintenant synchronisé automatiquement avec la timeline
@@ -699,16 +733,29 @@ export const surveyMachine = createMachine({
     }),
 
     extendPreviousCalendarEpisode:({context, event}) => {
+      console.log('🔧 extendPreviousCalendarEpisode appelé');
+      console.log('   Context:', context);
+      console.log('   Event:', event);
+      console.log('   lastEpisode:', context.lastEpisode);
       
       const { type, ...modifs } = event;
+      
+      // Si l'événement contient 'start', c'est la date de fin du précédent épisode
       if (modifs.hasOwnProperty('start')) {
         modifs.end = modifs.start;
         delete modifs.start;
       }
-      let previousEp =(items.get())[context.currentCommuneIndex-1]
-      let truc = modifierEpisode(previousEp.id,modifs)
-      console.log(truc)
-      return truc
+      
+      // Utiliser context.lastEpisode au lieu de chercher par index
+      if (!context.lastEpisode) {
+        console.warn('⚠️ Pas de lastEpisode à étendre');
+        return;
+      }
+      
+      console.log('   Modification épisode précédent:', context.lastEpisode.id, 'avec:', modifs);
+      let truc = modifierEpisode(context.lastEpisode.id, modifs);
+      console.log('   Résultat:', truc);
+      return truc;
     },
 
     setupCalendar: ({context, event}) => {

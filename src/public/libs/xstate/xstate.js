@@ -174,6 +174,9 @@ export function interpret(machine) {
         if (transition.target) {
           currentState = transition.target;
           console.log("XState fallback: Transitioned to:", currentState);
+          
+          // 🆕 Après transition, vérifier les transitions automatiques (always)
+          this.checkAlwaysTransitions();
         }
 
         // Update context with event data
@@ -186,6 +189,88 @@ export function interpret(machine) {
       const snapshot = this.getSnapshot();
       subscribers.forEach((callback) => callback(snapshot));
       return this;
+    },
+
+    checkAlwaysTransitions: function () {
+      const currentStateConfig = machine.states[currentState];
+      
+      // Vérifier si l'état actuel a des transitions "always"
+      if (!currentStateConfig || !currentStateConfig.always) {
+        return;
+      }
+
+      console.log("XState fallback: Checking always transitions for state:", currentState);
+
+      const alwaysTransitions = Array.isArray(currentStateConfig.always)
+        ? currentStateConfig.always
+        : [currentStateConfig.always];
+
+      // Trouver la première transition always dont le guard passe
+      for (let i = 0; i < alwaysTransitions.length; i++) {
+        const transition = alwaysTransitions[i];
+
+        // Vérifier le guard si présent
+        let shouldTransition = true;
+        if (transition.guard) {
+          const guardFn = machine.config.guards && machine.config.guards[transition.guard];
+          if (guardFn) {
+            shouldTransition = guardFn({ context: currentContext, event: {} });
+            console.log(`XState fallback: Always guard "${transition.guard}" = ${shouldTransition}`);
+          } else {
+            console.warn(`XState fallback: Guard "${transition.guard}" not found`);
+            shouldTransition = false;
+          }
+        }
+
+        if (shouldTransition) {
+          console.log("XState fallback: Executing always transition:", transition);
+
+          // Exécuter les actions
+          if (transition.actions && machine.config.actions) {
+            const actionsList = Array.isArray(transition.actions)
+              ? transition.actions
+              : [transition.actions];
+
+            actionsList.forEach((actionName) => {
+              const actionFn = machine.config.actions[actionName];
+              if (actionFn) {
+                console.log("XState fallback: Executing always action:", actionName);
+                try {
+                  const result = actionFn({ context: currentContext, event: {} });
+                  if (result && typeof result === 'object') {
+                    const updatedContext = {};
+                    for (const key in result) {
+                      if (typeof result[key] === 'function') {
+                        updatedContext[key] = result[key]({ context: currentContext, event: {} });
+                      } else {
+                        updatedContext[key] = result[key];
+                      }
+                    }
+                    currentContext = { ...currentContext, ...updatedContext };
+                  }
+                } catch (error) {
+                  console.error("XState fallback: Always action error:", error);
+                }
+              }
+            });
+          }
+
+          // Transition vers le target
+          if (transition.target) {
+            currentState = transition.target;
+            console.log("XState fallback: Always transitioned to:", currentState);
+
+            // Notifier les subscribers
+            const snapshot = this.getSnapshot();
+            subscribers.forEach((callback) => callback(snapshot));
+
+            // Vérifier récursivement si le nouvel état a aussi des always
+            this.checkAlwaysTransitions();
+          }
+
+          break; // On prend seulement la première transition qui passe
+        }
+      }
     },
 
     getSnapshot: function () {
