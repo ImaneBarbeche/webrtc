@@ -480,7 +480,7 @@ class WebRTCOnboarding {
     );
     sessionStorage.setItem("webrtc_sessionId", this.sessionId || "");
 
-    window.location.href = "public/LifeStories.html";
+    window.location.href = "LifeStories.html";
   }
 
   // Méthode pour obtenir l'instance active

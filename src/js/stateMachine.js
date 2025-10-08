@@ -1,4 +1,4 @@
-import { createMachine, interpret, assign } from "https://cdn.skypack.dev/xstate@5";
+import { createMachine, interpret, assign } from "../libs/xstate/xstate.js";
 import { ajouterEpisode, modifierEpisode } from "./episodes.js"
 import { timeline, groups, items } from "./timeline.js";
 /*

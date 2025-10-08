@@ -17,7 +17,9 @@
     "@capacitor/barcode-scanner": "^2.1.0",
     "@capacitor/camera": "latest",
     "@capacitor/core": "latest",
-    "@capacitor/splash-screen": "latest"
+    "@capacitor/splash-screen": "latest",
+    "sweetalert2": "^11.24.1",
+    "xstate": "^5.22.1"
   },
   "devDependencies": {
     "@capacitor/cli": "latest",
