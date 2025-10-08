@@ -1,4 +1,6 @@
-import { createMachine, interpret, assign } from "../libs/xstate/xstate.js";
+// XState est chargé via UMD en tant que variable globale window.XState
+const { createMachine, interpret, assign } = window.XState;
+
 import { ajouterEpisode, modifierEpisode } from "./episodes.js"
 import { timeline, groups, items } from "./timeline.js";
 /*

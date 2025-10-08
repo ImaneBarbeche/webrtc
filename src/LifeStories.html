@@ -157,10 +157,12 @@
         });
     </script>
     
+    <!-- XState UMD - doit être chargé avant les modules -->
+    <script src="libs/xstate/xstate.js"></script>
+    
     <script type="module" src="js/timeline.js"></script>
     <script type="module" src="js/questionnaire.js"></script>
     <script type="module" src="js/utils.js"></script>
-    <script type="module" src="libs/xstate/xstate.js"></script>
     <script type="module" src="js/stateMachine.js"></script>
     <script>
         Split(['#questionnaire', '#trajectories'], {
