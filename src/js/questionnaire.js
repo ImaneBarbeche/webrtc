@@ -25,13 +25,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         
         console.log(`✅ Mode synchronisation WebRTC activé - Rôle: ${isHost ? 'HÔTE' : 'VIEWER'}`);
         
-        // Si viewer, masquer le questionnaire
-        if (!isHost) {
-            document.getElementById('questionnaire').classList.add('viewer-mode');
-            document.querySelector('.split').classList.add('viewer-mode');
-            console.log('👁️ Mode VIEWER : questionnaire masqué, calendrier en lecture seule');
-        }
-        
         // Écouter les événements reçus de l'autre tablette
         window.webrtcSync.onMessage((message) => {
             handleRemoteMessage(message);

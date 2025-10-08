@@ -210,6 +210,9 @@ const options = {
 const container = document.getElementById('timeline');
 const timeline = new vis.Timeline(container, items, groups, options);
 
+// Exporter la timeline globalement
+window.timeline = timeline;
+
 function handleDragStart(event) {
   
   event.dataTransfer.effectAllowed = 'move';

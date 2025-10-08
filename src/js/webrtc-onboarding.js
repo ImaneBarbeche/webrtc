@@ -487,7 +487,17 @@ class WebRTCOnboarding {
     
     if (onboarding) onboarding.classList.add('hidden');
     if (debugPanel) debugPanel.style.display = 'none';
-    if (lifestories) lifestories.classList.add('active');
+    if (lifestories) {
+      lifestories.classList.add('active');
+      
+      // Si c'est le viewer (pas l'offeror), activer le mode viewer
+      if (!this.isOfferor) {
+        lifestories.classList.add('viewer-mode');
+        this.log("Mode VIEWER activé - questionnaire masqué");
+      } else {
+        this.log("Mode HÔTE activé - questionnaire visible");
+      }
+    }
     
     // Dispatcher un événement pour initialiser Split.js
     document.dispatchEvent(new Event('lifestoriesShown'));

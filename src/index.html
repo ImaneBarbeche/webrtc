@@ -105,13 +105,18 @@
         }
         
         /* Mode viewer : masquer le questionnaire */
-        #questionnaire.viewer-mode {
-            display: none;
+        .viewer-mode #questionnaire {
+            display: none !important;
         }
         
         /* Ajuster la mise en page en mode viewer */
-        .split.viewer-mode #trajectories {
+        .viewer-mode #trajectories {
             width: 100% !important;
+        }
+        
+        /* Masquer le séparateur Split.js en mode viewer */
+        .viewer-mode .gutter {
+            display: none !important;
         }
     </style>
 </head>
@@ -247,15 +252,21 @@
         document.addEventListener('lifestoriesShown', () => {
             // Petit délai pour que le DOM soit complètement rendu
             setTimeout(() => {
-                Split(['#questionnaire', '#trajectories'], {
-                    sizes: [20, 80],
-                    minSize: 100,
-                    gutterSize: 8,
-                    cursor: 'col-resize',
-                });
+                // Vérifier si on est en mode viewer
+                const isViewer = sessionStorage.getItem('webrtc_isOfferor') === 'false';
                 
-                // Forcer un redraw de la timeline après l'affichage
-                if (window.timeline) {
+                // Initialiser Split.js seulement en mode hôte
+                if (!isViewer) {
+                    Split(['#questionnaire', '#trajectories'], {
+                        sizes: [20, 80],
+                        minSize: 100,
+                        gutterSize: 8,
+                        cursor: 'col-resize',
+                    });
+                }
+                
+                // Forcer un redraw de la timeline après l'affichage (si elle existe)
+                if (window.timeline && typeof window.timeline.redraw === 'function') {
                     window.timeline.redraw();
                 }
             }, 100);
