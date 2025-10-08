@@ -385,15 +385,26 @@ class WebRTCOnboarding {
       "Connexion établie - Canal de données ouvert !"
     );
 
+    // IMPORTANT: Sauvegarder le rôle AVANT de configurer webrtcSync
+    sessionStorage.setItem("webrtc_connected", "true");
+    sessionStorage.setItem("webrtc_isOfferor", this.isOfferor ? "true" : "false");
+    sessionStorage.setItem("webrtc_sessionId", this.sessionId || "");
+    this.log(`📝 SessionStorage sauvegardé: isOfferor=${this.isOfferor}, sessionId=${this.sessionId}`);
+
     // Enregistrer le data channel globalement pour webrtc-sync.js
     if (typeof window !== "undefined") {
       window.webrtcDataChannel = this.dc;
       this.log("Data channel exporté globalement (window.webrtcDataChannel)");
       
       // Notifier webrtc-sync que le data channel est prêt
+      this.log(`DEBUG: window.webrtcSync existe? ${!!window.webrtcSync}`);
+      this.log(`DEBUG: window.webrtcSync.setDataChannel existe? ${!!(window.webrtcSync && typeof window.webrtcSync.setDataChannel === 'function')}`);
+      
       if (window.webrtcSync && typeof window.webrtcSync.setDataChannel === 'function') {
         window.webrtcSync.setDataChannel(this.dc);
         this.log("Data channel transmis à webrtcSync");
+      } else {
+        this.log("ERREUR: webrtcSync non disponible ou setDataChannel manquant!");
       }
     }
     
@@ -478,19 +489,11 @@ class WebRTCOnboarding {
 
     this.log("Starting LifeStories application...");
 
-    // Sauvegarder la connexion WebRTC pour l'application
-    sessionStorage.setItem("webrtc_connected", "true");
-    sessionStorage.setItem(
-      "webrtc_isOfferor",
-      this.isOfferor ? "true" : "false"
-    );
-    sessionStorage.setItem("webrtc_sessionId", this.sessionId || "");
-
-    // S'assurer que webrtc-sync a bien le data channel
-    if (window.webrtcSync && typeof window.webrtcSync.setDataChannel === 'function') {
-      window.webrtcSync.setDataChannel(this.dc);
-      this.log("Data channel re-transmis à webrtcSync lors du démarrage de LifeStories");
-    }
+    // SessionStorage déjà sauvegardé dans dcOpen(), juste vérifier
+    this.log(`DEBUG startApp: window.webrtcSync existe? ${!!window.webrtcSync}`);
+    this.log(`DEBUG startApp: window.webrtcDataChannel existe? ${!!window.webrtcDataChannel}`);
+    
+    // Pas besoin de re-transmettre le data channel, déjà fait dans dcOpen()
 
     // Cacher l'onboarding et afficher LifeStories
     const onboarding = document.querySelector('.onboarding-container');

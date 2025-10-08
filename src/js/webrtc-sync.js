@@ -85,9 +85,16 @@ class WebRTCSync {
         
         // Récupérer les infos de session si pas encore fait
         if (this.isOfferor === null) {
-            this.isOfferor = sessionStorage.getItem('webrtc_isOfferor') === 'true';
+            const storedIsOfferor = sessionStorage.getItem('webrtc_isOfferor');
+            this.isOfferor = storedIsOfferor === 'true';
             this.sessionId = sessionStorage.getItem('webrtc_sessionId') || null;
             console.log('📡 Rôle récupéré depuis sessionStorage:', {
+                storedIsOfferor: storedIsOfferor,
+                isOfferor: this.isOfferor,
+                sessionId: this.sessionId
+            });
+        } else {
+            console.log('📡 Rôle déjà défini:', {
                 isOfferor: this.isOfferor,
                 sessionId: this.sessionId
             });
@@ -218,7 +225,9 @@ class WebRTCSync {
      * Obtenir le rôle (host/guest)
      */
     getRole() {
-        return this.isOfferor ? 'host' : 'guest';
+        const role = this.isOfferor ? 'host' : 'guest';
+        console.log(`🎭 getRole() appelé: isOfferor=${this.isOfferor}, retourne="${role}"`);
+        return role;
     }
 }
 

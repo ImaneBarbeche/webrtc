@@ -36,10 +36,17 @@ function handleRemoteMessage(message) {
 // Fonction pour activer la synchronisation WebRTC
 function enableWebRTCSync() {
     if (window.webrtcSync && window.webrtcSync.isActive()) {
+        // N'activer qu'une seule fois
+        if (syncEnabled) {
+            console.log('ℹ️ WebRTC déjà activé, pas de re-configuration');
+            return true;
+        }
+        
         syncEnabled = true;
         isHost = window.webrtcSync.getRole() === 'host';
         
         console.log(`✅ Mode synchronisation WebRTC activé - Rôle: ${isHost ? 'HÔTE' : 'VIEWER'}`);
+        console.log(`   🔒 Rôle verrouillé, ne changera plus`);
         
         // Écouter les événements reçus de l'autre tablette (une seule fois)
         if (!window.webrtcSyncListenerAdded) {
