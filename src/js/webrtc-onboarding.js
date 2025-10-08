@@ -389,6 +389,12 @@ class WebRTCOnboarding {
     if (typeof window !== "undefined") {
       window.webrtcDataChannel = this.dc;
       this.log("Data channel exporté globalement (window.webrtcDataChannel)");
+      
+      // Notifier webrtc-sync que le data channel est prêt
+      if (window.webrtcSync && typeof window.webrtcSync.setDataChannel === 'function') {
+        window.webrtcSync.setDataChannel(this.dc);
+        this.log("Data channel transmis à webrtcSync");
+      }
     }
     
     // Utiliser setTimeout + ajouter la classe .show
@@ -479,6 +485,12 @@ class WebRTCOnboarding {
       this.isOfferor ? "true" : "false"
     );
     sessionStorage.setItem("webrtc_sessionId", this.sessionId || "");
+
+    // S'assurer que webrtc-sync a bien le data channel
+    if (window.webrtcSync && typeof window.webrtcSync.setDataChannel === 'function') {
+      window.webrtcSync.setDataChannel(this.dc);
+      this.log("Data channel re-transmis à webrtcSync lors du démarrage de LifeStories");
+    }
 
     // Cacher l'onboarding et afficher LifeStories
     const onboarding = document.querySelector('.onboarding-container');

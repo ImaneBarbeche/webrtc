@@ -15,23 +15,58 @@ import { surveyMachine, surveyService } from "./stateMachine.js";
 let syncEnabled = false;
 let isHost = true; // Par défaut, mode standalone = hôte
 
-document.addEventListener("DOMContentLoaded", async () => {
-    const container = document.getElementById("questions");
+/**
+ * Gérer les messages reçus de l'autre tablette
+ */
+function handleRemoteMessage(message) {
+    console.log('📥 QUESTIONNAIRE - Message WebRTC reçu:', message);
     
-    // Vérifier si WebRTC est disponible
+    if (message.type === 'SURVEY_EVENT') {
+        // Appliquer l'événement reçu à notre machine à états
+        console.log('📥 QUESTIONNAIRE - Application événement distant:', message.event);
+        surveyService.send(message.event);
+    } else if (message.type === 'SURVEY_STATE') {
+        // Synchroniser l'état complet (utile pour rattrapage)
+        console.log('📥 QUESTIONNAIRE - Synchronisation état complet:', message.state);
+        // Note: XState v5 n'a pas de méthode simple pour forcer un état
+        // On pourrait recréer le service ou envoyer des événements pour arriver au bon état
+    }
+}
+
+// Fonction pour activer la synchronisation WebRTC
+function enableWebRTCSync() {
     if (window.webrtcSync && window.webrtcSync.isActive()) {
         syncEnabled = true;
         isHost = window.webrtcSync.getRole() === 'host';
         
         console.log(`✅ Mode synchronisation WebRTC activé - Rôle: ${isHost ? 'HÔTE' : 'VIEWER'}`);
         
-        // Écouter les événements reçus de l'autre tablette
-        window.webrtcSync.onMessage((message) => {
-            handleRemoteMessage(message);
-        });
+        // Écouter les événements reçus de l'autre tablette (une seule fois)
+        if (!window.webrtcSyncListenerAdded) {
+            window.webrtcSync.onMessage((message) => {
+                handleRemoteMessage(message);
+            });
+            window.webrtcSyncListenerAdded = true;
+        }
+        
+        return true;
     } else {
         console.log('ℹ️ Mode standalone (pas de synchronisation WebRTC)');
+        return false;
     }
+}
+
+document.addEventListener("DOMContentLoaded", async () => {
+    const container = document.getElementById("questions");
+    
+    // Essayer d'activer WebRTC au chargement
+    enableWebRTCSync();
+    
+    // Ré-essayer lors de l'affichage de LifeStories
+    document.addEventListener('lifestoriesShown', () => {
+        console.log('🔄 LifeStories affiché, ré-vérification WebRTC...');
+        enableWebRTCSync();
+    });
     
     // Initialisation de la machine à états
     surveyService.start();
@@ -46,24 +81,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     
     renderQuestion(surveyService.getSnapshot()); // Utilisation de .getSnapshot()
 
-    /**
-     * Gérer les messages reçus de l'autre tablette
-     */
-    function handleRemoteMessage(message) {
-        console.log('📥 Message WebRTC reçu:', message);
-        
-        if (message.type === 'SURVEY_EVENT') {
-            // Appliquer l'événement reçu à notre machine à états
-            console.log('📥 Application événement distant:', message.event);
-            surveyService.send(message.event);
-        } else if (message.type === 'SURVEY_STATE') {
-            // Synchroniser l'état complet (utile pour rattrapage)
-            console.log('📥 Synchronisation état complet:', message.state);
-            // Note: XState v5 n'a pas de méthode simple pour forcer un état
-            // On pourrait recréer le service ou envoyer des événements pour arriver au bon état
-        }
-    }
-    
     /**
      * Envoyer un événement (local + remote si WebRTC activé)
      */
@@ -80,8 +97,18 @@ document.addEventListener("DOMContentLoaded", async () => {
         surveyService.send(eventData);
         
         // Envoyer via WebRTC si disponible
+        console.log('🔍 État WebRTC:', { 
+            syncEnabled, 
+            webrtcSyncExists: !!window.webrtcSync,
+            webrtcSyncActive: window.webrtcSync?.isActive(),
+            dataChannelExists: !!window.webrtcDataChannel
+        });
+        
         if (syncEnabled && window.webrtcSync) {
-            window.webrtcSync.sendEvent(eventData);
+            const sent = window.webrtcSync.sendEvent(eventData);
+            console.log(`📡 Résultat envoi WebRTC: ${sent ? 'SUCCESS' : 'FAILED'}`);
+        } else {
+            console.warn('⚠️ WebRTC non disponible pour envoi');
         }
     }
     

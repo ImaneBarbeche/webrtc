@@ -74,8 +74,24 @@ class WebRTCSync {
             return;
         }
         
+        // Si on a déjà un data channel, ne pas le réinitialiser
+        if (this.dc && this.dc.readyState === 'open') {
+            console.log('ℹ️ Data channel déjà configuré et ouvert');
+            return;
+        }
+        
         this.dc = dataChannel;
         this.connected = dataChannel.readyState === 'open';
+        
+        // Récupérer les infos de session si pas encore fait
+        if (this.isOfferor === null) {
+            this.isOfferor = sessionStorage.getItem('webrtc_isOfferor') === 'true';
+            this.sessionId = sessionStorage.getItem('webrtc_sessionId') || null;
+            console.log('📡 Rôle récupéré depuis sessionStorage:', {
+                isOfferor: this.isOfferor,
+                sessionId: this.sessionId
+            });
+        }
         
         // Écouter les messages entrants
         this.dc.addEventListener('message', (e) => this.handleMessage(e));
@@ -116,7 +132,8 @@ class WebRTCSync {
         try {
             const data = JSON.parse(event.data);
             
-            console.log('📥 Message reçu:', data);
+            console.log('📥 Message WebRTC reçu:', data);
+            console.log(`   Type: ${data.type}, Sender: ${data.sender}, Rôle local: ${this.getRole()}`);
             
             // Appeler tous les gestionnaires enregistrés
             this.messageHandlers.forEach(handler => {
@@ -127,7 +144,7 @@ class WebRTCSync {
                 }
             });
         } catch (err) {
-            console.error('❌ Erreur parsing message:', err);
+            console.error('❌ Erreur parsing message WebRTC:', err, 'Data brute:', event.data);
         }
     }
     
@@ -138,6 +155,7 @@ class WebRTCSync {
     sendEvent(event) {
         if (!this.connected || !this.dc) {
             console.warn('⚠️ Impossible d\'envoyer l\'événement: data channel non connecté');
+            console.warn('   État:', { connected: this.connected, dc: !!this.dc, readyState: this.dc?.readyState });
             return false;
         }
         
@@ -150,10 +168,11 @@ class WebRTCSync {
             };
             
             this.dc.send(JSON.stringify(message));
-            console.log('📤 Événement envoyé:', event);
+            console.log('📤 Événement WebRTC envoyé:', event);
+            console.log(`   Sender: ${message.sender}, Data channel ready: ${this.dc.readyState}`);
             return true;
         } catch (err) {
-            console.error('❌ Erreur envoi événement:', err);
+            console.error('❌ Erreur envoi événement WebRTC:', err);
             return false;
         }
     }
