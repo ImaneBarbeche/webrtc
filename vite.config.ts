@@ -1,10 +1,9 @@
 import { defineConfig } from 'vite';
-import { copyFileSync, mkdirSync, cpSync } from 'fs';
-import { resolve } from 'path';
+import { viteStaticCopy } from 'vite-plugin-static-copy';
 
 export default defineConfig({
   root: './src',
-  publicDir: './public',
+  publicDir: false, // Désactivé car on utilise le plugin pour copier
   build: {
     outDir: '../dist',
     minify: false,
@@ -15,4 +14,18 @@ export default defineConfig({
       }
     }
   },
+  plugins: [
+    viteStaticCopy({
+      targets: [
+        { src: 'css', dest: '.' },
+        { src: 'js', dest: '.' },
+        { src: 'libs', dest: '.' },
+        { src: 'donnees', dest: '.' },
+        { src: 'assets', dest: '.' },
+        { src: 'LifeStories.html', dest: '.' },
+        { src: 'enquete.json', dest: '.' },
+        { src: 'manifest.json', dest: '.' }
+      ]
+    })
+  ]
 });

@@ -5,7 +5,115 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LifeStories - Connexion Collaborative</title>
     <link rel="icon" type="image/x-icon" href="favicon.ico" />
+    <!-- CSS pour onboarding -->
     <link rel="stylesheet" href="css/onboarding.css" />
+    <!-- CSS pour LifeStories (caché au démarrage) -->
+    <link href="libs/vis-timeline/vis-timeline-graph2d.min.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="libs/leaflet/leaflet.css"/>
+    <link href="libs/sweetalert2/sweetalert2.min.css" rel="stylesheet" type="text/css"/>
+    <link href="css/bloc_border.css" rel="stylesheet" type="text/css"/>
+    <link href="css/splitscreen.css" rel="stylesheet" type="text/css"/>
+    <style>
+        /* Cacher/Afficher les sections */
+        .onboarding-container {
+            position: relative;
+            z-index: 1000;
+        }
+        
+        .onboarding-container.hidden {
+            display: none !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
+        }
+        
+        .lifestories-container {
+            display: none; /* Caché au démarrage */
+            position: relative;
+            width: 100%;
+            height: 100vh;
+        }
+        
+        .lifestories-container.active {
+            display: block;
+        }
+        
+        /* Styles pour les questions empilées */
+        .question {
+            margin-bottom: 15px;
+            padding: 10px;
+            border-left: 3px solid #007bff;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+        }
+        .question input {
+            margin: 8px 0;
+            padding: 6px 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 200px;
+        }
+        .question button {
+            margin: 5px;
+            padding: 6px 12px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .question button:hover {
+            background-color: #0056b3;
+        }
+        .question input:disabled {
+            background-color: #e9ecef;
+            cursor: not-allowed;
+        }
+        
+        /* Indicateur de synchronisation WebRTC */
+        #webrtc-status {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        #webrtc-status.connected {
+            background-color: #28a745;
+            color: white;
+        }
+        #webrtc-status.standalone {
+            background-color: #6c757d;
+            color: white;
+        }
+        #webrtc-status .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: white;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+        
+        /* Mode viewer : masquer le questionnaire */
+        #questionnaire.viewer-mode {
+            display: none;
+        }
+        
+        /* Ajuster la mise en page en mode viewer */
+        .split.viewer-mode #trajectories {
+            width: 100% !important;
+        }
+    </style>
 </head>
 <body>
     <div class="onboarding-container">
@@ -36,8 +144,7 @@
                 </div>
             </div>
         </div>
-        </div>
-
+        
         <div class="connection-details hidden" id="connectionDetails">
             <div class="qr-section">
                 <h3>Code de connexion</h3>
@@ -69,7 +176,7 @@
             <p>Vous pouvez maintenant commencer votre session collaborative</p>
             <button id="startApp" class="start-btn">🚀 Commencer LifeStories</button>
         </div>
-    </div>
+    </div> <!-- Fin de .onboarding-container -->
 
     <!-- Debug panel (hidden by default) -->
     <div class="debug-panel hidden" id="debugPanel">
@@ -77,9 +184,82 @@
         <div id="debugLog" class="debug-log hidden"></div>
     </div>
 
+    <!-- Section LifeStories (cachée au démarrage) -->
+    <div class="lifestories-container" id="lifestoriesContainer">
+        <!-- Indicateur de statut WebRTC -->
+        <div id="webrtc-status" class="standalone">
+            <span class="dot"></span>
+            <span id="webrtc-status-text">Mode standalone</span>
+        </div>
+        
+        <div class="split">
+            <!-- Left side-->
+            <div id="questionnaire">
+                <h2>Questionnaire</h2>
+                <div id="questions"></div>
+            </div>
+
+            <!-- Right side-->
+            <div id="trajectories" class="split vertical">
+                
+                <div id="canvas">
+                    <h2>Calendrier de vie</h2>
+                    <div id="timeline"></div>  
+                    <button id="save">Save</button>
+                    <button id="load">Load</button>
+                    
+                </div>
+                
+                <div id="bricks">
+                    <h2>Synthèse</h2>
+                    <div id="moreInfos"></div>
+                </div>  
+                <div id="map"></div>
+            
+                
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts Onboarding -->
     <script src="js/qrcode.min.js"></script>
     <script src="js/qr-gen.js"></script>
     <script src="js/qr-scan.js"></script>
     <script src="js/webrtc-onboarding.js"></script>
+    
+    <!-- Scripts LifeStories (libs externes) -->
+    <script src="libs/sweetalert2/sweetalert2.min.js"></script>
+    <script src="libs/leaflet/leaflet.js"></script>
+    <script src="libs/split.js/split.min.js"></script>
+    <script src="libs/vis-timeline/vis-timeline-graph2d.min.js"></script>
+    
+    <!-- XState UMD - doit être chargé avant les modules -->
+    <script src="libs/xstate/xstate.js"></script>
+    <!-- Scripts LifeStories (modules) -->
+    <script type="module" src="js/timeline.js"></script>
+    <script type="module" src="js/questionnaire.js"></script>
+    <script type="module" src="js/utils.js"></script>
+    <script type="module" src="js/stateMachine.js"></script>
+    <script type="module" src="js/webrtc-sync.js"></script>
+    
+    <script>
+        // Initialiser Split.js quand LifeStories est affiché
+        document.addEventListener('lifestoriesShown', () => {
+            // Petit délai pour que le DOM soit complètement rendu
+            setTimeout(() => {
+                Split(['#questionnaire', '#trajectories'], {
+                    sizes: [20, 80],
+                    minSize: 100,
+                    gutterSize: 8,
+                    cursor: 'col-resize',
+                });
+                
+                // Forcer un redraw de la timeline après l'affichage
+                if (window.timeline) {
+                    window.timeline.redraw();
+                }
+            }, 100);
+        });
+    </script>
 </body>
 </html>

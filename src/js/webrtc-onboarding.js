@@ -480,7 +480,19 @@ class WebRTCOnboarding {
     );
     sessionStorage.setItem("webrtc_sessionId", this.sessionId || "");
 
-    window.location.href = "LifeStories.html";
+    // Cacher l'onboarding et afficher LifeStories
+    const onboarding = document.querySelector('.onboarding-container');
+    const debugPanel = document.getElementById('debugPanel');
+    const lifestories = document.getElementById('lifestoriesContainer');
+    
+    if (onboarding) onboarding.classList.add('hidden');
+    if (debugPanel) debugPanel.style.display = 'none';
+    if (lifestories) lifestories.classList.add('active');
+    
+    // Dispatcher un événement pour initialiser Split.js
+    document.dispatchEvent(new Event('lifestoriesShown'));
+    
+    this.log("LifeStories UI activated, onboarding hidden");
   }
 
   // Méthode pour obtenir l'instance active
