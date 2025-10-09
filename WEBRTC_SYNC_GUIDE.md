@@ -213,7 +213,6 @@ Si tu veux que seul l'hôte puisse répondre :
 function sendEvent(eventData) {
     // Bloquer si on est invité
     if (window.webrtcSync && window.webrtcSync.getRole() === 'guest') {
-        console.log('⛔ Invité ne peut pas répondre');
         return;
     }
     

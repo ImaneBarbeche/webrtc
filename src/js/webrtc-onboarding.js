@@ -3,10 +3,10 @@ class WebRTCOnboarding {
   constructor() {
     this.pc = null;
     this.dc = null;
-    this.isOfferor = null;
-    this.sessionId = null;
-    this.state = "off";
-    this.connectionEstablished = false;
+    this.isOfferor = null; // true for host, false for guest
+    this.sessionId = null; // Unique session ID for the connection
+    this.state = "off"; // off, offerCreating, waitAnswer, answerCreating, waitConnect, connected, disconnected, failed, closed
+    this.connectionEstablished = false; // True when data channel is open
 
     this.initializeElements();
     this.setupEventListeners();
@@ -72,15 +72,13 @@ class WebRTCOnboarding {
   log(message) {
     const timestamp = new Date().toLocaleTimeString();
     const logMessage = `[${timestamp}] ${message}`;
-    console.log(logMessage);
-
     if (this.elements.debugLog) {
       this.elements.debugLog.innerHTML += logMessage + "<br>";
       this.elements.debugLog.scrollTop = this.elements.debugLog.scrollHeight;
     }
   }
 
-  // EXACT COPY of original initialize function
+  // initialize function
   initialize(statusText) {
     this.log("=== INITIALIZE ===");
     if (this.pc) {
@@ -282,7 +280,7 @@ class WebRTCOnboarding {
             elements.connectionDetails.classList.add('show'); // Ajouter la classe .show pour afficher
           }, 0);
           
-          this.isOfferor = true;
+          this.isOfferor = true; 
           this.state = "waitAnswer";
         }
         break;
@@ -376,10 +374,10 @@ class WebRTCOnboarding {
       this.dc.addEventListener("message", (e) => this.dcMessage(e));
     }
   }
-// New modification!! On exporte le data channel pour le récupérer ailleurs pour éviter de réecrire la connexion webrtc
+  // On exporte le data channel pour le récupérer ailleurs pour éviter de réecrire la connexion webrtc
   dcOpen() {
     this.log("Data channel opened");
-    this.connectionEstablished = true;
+    this.connectionEstablished = true; // Marquer la connexion comme établie
     this.setStateAndStatus(
       "connected",
       "Connexion établie - Canal de données ouvert !"

@@ -23,17 +23,11 @@ class WebRTCSync {
             // Récupère les infos
             this.isOfferor = sessionStorage.getItem('webrtc_isOfferor') === 'true'; // Suis-je l'hôte ou l'invité ?
             this.sessionId = sessionStorage.getItem('webrtc_sessionId') || null;
-            this.connected = true; // ID de session
-            
-            console.log('✅ WebRTC connexion restaurée:', {
-                isOfferor: this.isOfferor,
-                sessionId: this.sessionId
-            });
-            
+            this.connected = true; // ID de session    
             // Essayer de récupérer le data channel depuis window
             this.tryConnectDataChannel();
         } else {
-            console.log('⚠️ Pas de connexion WebRTC détectée');
+            console.log('Pas de connexion WebRTC détectée');
         }
     }
     
@@ -54,7 +48,6 @@ class WebRTCSync {
             attempts++;
             
             if (window.webrtcDataChannel) {
-                console.log('✅ Data channel récupéré après', attempts * 100, 'ms');
                 this.setDataChannel(window.webrtcDataChannel);
                 clearInterval(interval);
             } else if (attempts >= maxAttempts) {
@@ -76,7 +69,6 @@ class WebRTCSync {
         
         // Si on a déjà un data channel, ne pas le réinitialiser
         if (this.dc && this.dc.readyState === 'open') {
-            console.log('ℹ️ Data channel déjà configuré et ouvert');
             return;
         }
         
@@ -88,13 +80,8 @@ class WebRTCSync {
             const storedIsOfferor = sessionStorage.getItem('webrtc_isOfferor');
             this.isOfferor = storedIsOfferor === 'true';
             this.sessionId = sessionStorage.getItem('webrtc_sessionId') || null;
-            console.log('📡 Rôle récupéré depuis sessionStorage:', {
-                storedIsOfferor: storedIsOfferor,
-                isOfferor: this.isOfferor,
-                sessionId: this.sessionId
-            });
         } else {
-            console.log('📡 Rôle déjà défini:', {
+            console.log('Rôle déjà défini:', {
                 isOfferor: this.isOfferor,
                 sessionId: this.sessionId
             });
@@ -106,19 +93,15 @@ class WebRTCSync {
         // Surveiller l'état du canal
         this.dc.addEventListener('open', () => {
             this.connected = true;
-            console.log('✅ Data channel prêt pour la synchronisation');
         });
         
         this.dc.addEventListener('close', () => {
             this.connected = false;
-            console.log('❌ Data channel fermé');
         });
         
         this.dc.addEventListener('error', (e) => {
             console.error('❌ Erreur data channel:', e);
         });
-        
-        console.log('📡 WebRTCSync initialisé avec data channel');
     }
     
     /**
@@ -137,11 +120,7 @@ class WebRTCSync {
      */
     handleMessage(event) {
         try {
-            const data = JSON.parse(event.data);
-            
-            console.log('📥 Message WebRTC reçu:', data);
-            console.log(`   Type: ${data.type}, Sender: ${data.sender}, Rôle local: ${this.getRole()}`);
-            
+            const data = JSON.parse(event.data);            
             // Appeler tous les gestionnaires enregistrés
             this.messageHandlers.forEach(handler => {
                 try {
@@ -175,8 +154,6 @@ class WebRTCSync {
             };
             
             this.dc.send(JSON.stringify(message));
-            console.log('📤 Événement WebRTC envoyé:', event);
-            console.log(`   Sender: ${message.sender}, Data channel ready: ${this.dc.readyState}`);
             return true;
         } catch (err) {
             console.error('❌ Erreur envoi événement WebRTC:', err);
@@ -206,7 +183,6 @@ class WebRTCSync {
             };
             
             this.dc.send(JSON.stringify(message));
-            console.log('📤 État complet envoyé:', state.value);
             return true;
         } catch (err) {
             console.error('❌ Erreur envoi état:', err);
@@ -226,7 +202,6 @@ class WebRTCSync {
      */
     getRole() {
         const role = this.isOfferor ? 'host' : 'guest';
-        console.log(`🎭 getRole() appelé: isOfferor=${this.isOfferor}, retourne="${role}"`);
         return role;
     }
 }

@@ -1,6 +1,4 @@
-function generateQRCode(text, canvasId = 'qrCanvas') {
-    console.log('Génération QR Code pour:', text.substring(0, 50) + '...');
-    
+function generateQRCode(text, canvasId = 'qrCanvas') {    
     const canvas = document.getElementById(canvasId);
     if (!canvas) {
         console.error('Canvas non trouvé:', canvasId);
@@ -24,7 +22,6 @@ function generateQRCode(text, canvasId = 'qrCanvas') {
                 ctx.fillRect(col * cellSize, row * cellSize, cellSize, cellSize);
             }
         }
-        console.log('QR Code généré avec succès');
     } catch (error) {
         console.error('Erreur génération QR Code:', error);
     }

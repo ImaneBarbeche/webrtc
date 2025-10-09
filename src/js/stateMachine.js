@@ -175,7 +175,6 @@ export const surveyMachine = createMachine({
   actions: {
     addCommune: assign({
       communes: ({context, event}) => {
-        console.log(event);  // Vérifier ce qui est ajouté
         //ajouterEpisode(context.event.value,context.context.episodeStartDate,0,)
         return [...context.communes, ...event.commune];
       }
@@ -200,17 +199,12 @@ export const surveyMachine = createMachine({
         }
         
         if(groups.get(context.group).dependsOn){
-          console.log(context.group)
-          console.log(context.currentCommuneIndex)
           let filteritems = (items.get()).filter(i => i.group == groups.get(context.group).dependsOn)
-          console.log(filteritems)
           defaultStart = filteritems[context.currentCommuneIndex].start
           defaultEnd = filteritems[context.currentCommuneIndex].end
         }
-        console.log(timeline.options.start)
         let trick = event.type == "ANSWER_BIRTH_COMMUNE" ? event.commune[0] : event.commune//trick addfirstquestion
         let truc = ajouterEpisode(trick||event.statut_res, startDate || defaultStart, endDate || defaultEnd,context.group);
-        console.log(items.get())
         return truc
       }
     }),
@@ -223,7 +217,6 @@ export const surveyMachine = createMachine({
           return modifierEpisode(context.lastEpisode.id, params);
         }
         const { type, ...modifs } = event;
-        console.log(modifs)
         return modifierEpisode(context.lastEpisode.id,modifs);
         
       }
@@ -238,7 +231,6 @@ export const surveyMachine = createMachine({
       }
       let previousEp =(items.get())[context.currentCommuneIndex-1]
       let truc = modifierEpisode(previousEp.id,modifs)
-      console.log(truc)
       return truc
     },
 
@@ -308,7 +300,6 @@ export const surveyMachine = createMachine({
 
     nextCommune: assign({
       currentCommuneIndex: ({context, event}) => {
-        console.log("before:",context.currentCommuneIndex)
         return context.currentCommuneIndex + 1
       }
     }),

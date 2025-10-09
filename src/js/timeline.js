@@ -97,7 +97,6 @@ const options = {
     // TODO: tooltip
     onAdd: function (item, callback) {
           // Appel à prettyEpisode pour les éléments de type "range"
-          console.log(item)
           utils.prettyEpisode(item.content, function(value) {
               if (value) {
                   item.content = value;
@@ -163,7 +162,6 @@ const options = {
             if (formData) {
               // Ajouter les valeurs des inputs comme attributs à l'item
               item.attributes = formData;
-              console.log(item);
               callback(item); // Retourner l'item modifié
           } else {
               callback(null); // Annuler l'update'
@@ -174,7 +172,6 @@ const options = {
           utils.prettyEpisode(item.content, function(value) {
               if (value) {
                   item.content = value;
-                  console.log("Range ajouté : ", item);
                   callback(item); // Retourner l'item modifié
               } else {
                   callback(null); // Annuler si l'utilisateur n'a pas confirmé
@@ -237,11 +234,9 @@ function handleDragStart(event) {
   //changer le css pour hint
   //retrouver la classe de la ligne à faire briller
   let line = `line_${event.target.closest("ul").id.split('_')[1]}`
-  console.log(line)
   event.target.style.opacity = "0.2";
 
   
-  console.log(item)
   // set event.target ID with item ID
   //event.target.id = new Date(item.id).toISOString();
   event.dataTransfer.setData("text", JSON.stringify(item));

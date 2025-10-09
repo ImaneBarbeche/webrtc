@@ -21,7 +21,6 @@ export function ajouterEpisode(text, start, end, group){
     if(end == 0){
         end = new Date(start);
         end.setFullYear(end.getFullYear() + 1);
-        console.log(end)
     }
     let classColor = group.toString().startsWith('1') ? 'green' : (group.toString().startsWith('2') ? 'blue' : 'red')
     let item = {
@@ -37,7 +36,6 @@ export function ajouterEpisode(text, start, end, group){
     if(state.lastEpisode?.end == item.start){
         state.previousEpisode = state.lastEpisode
     }
-    console.log(item)
     items.add(item)
     state.lastEpisode = item;
     return item

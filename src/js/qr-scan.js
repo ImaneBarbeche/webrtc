@@ -1,6 +1,4 @@
-async function startScanner() {
-    console.log('QR Scanner: Starting...');
-    
+async function startScanner() {    
     const overlay = document.createElement('div');
     overlay.id = 'qrOverlay';
     Object.assign(overlay.style, {
@@ -104,11 +102,9 @@ async function startScanner() {
         if (rafId) cancelAnimationFrame(rafId);
         if (stream) stream.getTracks().forEach(t => t.stop());
         const el = document.getElementById('qrOverlay'); if (el) el.remove();
-        console.log('startScanner: arrêté');
     }
 }
 function applyScannedValue(value) {
-    console.log('QR scanné:', value);
     // Use the handleScannedData function from webrtc-simple.js if available
     if (typeof window.handleScannedData === 'function') {
         window.handleScannedData(value);

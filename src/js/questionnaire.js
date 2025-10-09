@@ -18,16 +18,12 @@ let isHost = true; // Par défaut, mode standalone = hôte
 /**
  * Gérer les messages reçus de l'autre tablette
  */
-function handleRemoteMessage(message) {
-    console.log('📥 QUESTIONNAIRE - Message WebRTC reçu:', message);
-    
+function handleRemoteMessage(message) {    
     if (message.type === 'SURVEY_EVENT') {
         // Appliquer l'événement reçu à notre machine à états
-        console.log('📥 QUESTIONNAIRE - Application événement distant:', message.event);
         surveyService.send(message.event);
     } else if (message.type === 'SURVEY_STATE') {
         // Synchroniser l'état complet (utile pour rattrapage)
-        console.log('📥 QUESTIONNAIRE - Synchronisation état complet:', message.state);
         // Note: XState v5 n'a pas de méthode simple pour forcer un état
         // On pourrait recréer le service ou envoyer des événements pour arriver au bon état
     }
@@ -38,16 +34,11 @@ function enableWebRTCSync() {
     if (window.webrtcSync && window.webrtcSync.isActive()) {
         // N'activer qu'une seule fois
         if (syncEnabled) {
-            console.log('ℹ️ WebRTC déjà activé, pas de re-configuration');
             return true;
         }
         
         syncEnabled = true;
-        isHost = window.webrtcSync.getRole() === 'host';
-        
-        console.log(`✅ Mode synchronisation WebRTC activé - Rôle: ${isHost ? 'HÔTE' : 'VIEWER'}`);
-        console.log(`   🔒 Rôle verrouillé, ne changera plus`);
-        
+        isHost = window.webrtcSync.getRole() === 'host';        
         // Écouter les événements reçus de l'autre tablette (une seule fois)
         if (!window.webrtcSyncListenerAdded) {
             window.webrtcSync.onMessage((message) => {
@@ -58,7 +49,6 @@ function enableWebRTCSync() {
         
         return true;
     } else {
-        console.log('ℹ️ Mode standalone (pas de synchronisation WebRTC)');
         return false;
     }
 }
@@ -71,18 +61,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     
     // Ré-essayer lors de l'affichage de LifeStories
     document.addEventListener('lifestoriesShown', () => {
-        console.log('🔄 LifeStories affiché, ré-vérification WebRTC...');
         enableWebRTCSync();
     });
     
     // Initialisation de la machine à états
     surveyService.start();
     surveyService.subscribe((state) => {
-        console.log("=====================================")
-        console.log('État actuel:', state.value);
-        console.log('Context actuel:', state.context);
-        console.log("=====================================")
-
         renderQuestion(state); // Mise à jour à chaque transition
     });
     
@@ -96,24 +80,13 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (!isHost) {
             console.warn('⛔ VIEWER ne peut pas envoyer d\'événements');
             return; // Bloquer l'envoi
-        }
-        
-        console.log('📤 HÔTE envoie événement:', eventData);
-        
+        }        
         // Envoyer localement
         surveyService.send(eventData);
-        
-        // Envoyer via WebRTC si disponible
-        console.log('🔍 État WebRTC:', { 
-            syncEnabled, 
-            webrtcSyncExists: !!window.webrtcSync,
-            webrtcSyncActive: window.webrtcSync?.isActive(),
-            dataChannelExists: !!window.webrtcDataChannel
-        });
+    
         
         if (syncEnabled && window.webrtcSync) {
             const sent = window.webrtcSync.sendEvent(eventData);
-            console.log(`📡 Résultat envoi WebRTC: ${sent ? 'SUCCESS' : 'FAILED'}`);
         } else {
             console.warn('⚠️ WebRTC non disponible pour envoi');
         }
@@ -215,7 +188,6 @@ document.addEventListener("DOMContentLoaded", async () => {
               if (event.key === "Enter" && input.value.trim() !== "" && eventType) {
                 let eventData = { type: eventType };
                 eventData[eventKey] = eventKey == "commune" ?  [input.value] : input.value//cas special pour commune en cas d'ajout multiples de commun. la valeur des communes sera toujours dans un tableau
-                console.log(eventData)
                 sendEvent(eventData); // Utiliser sendEvent au lieu de surveyService.send
                 event.target.closest('.question').querySelectorAll('input').forEach(input => {
                   input.disabled = true; 
@@ -280,7 +252,6 @@ document.addEventListener("DOMContentLoaded", async () => {
             let list_communes = items.get().filter(i => list_communes_not_sorted.includes(i.content))
               list_communes.sort((a, b) => (new Date(a.start)) - (new Date(b.start)) )
               list_communes = list_communes.map(i => i.content)
-              console.log(list_communes)
             let eventData = { type: "ANSWER_NEW_COMMUNE" };
               eventData[eventKey] = list_communes;
             sendEvent(eventData); // Utiliser sendEvent au lieu de surveyService.send
