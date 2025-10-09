@@ -105,3 +105,48 @@
 #mask{
     
 }
+
+.vis-group {
+    /* background-color: red; */
+    border: none !important;
+}
+
+.vis-panel.vis-center {
+    border: none;
+}
+
+.vis-panel.vis-left {
+    border: none;
+}
+
+.vis-panel.vis-top, .vis-panel.vis-bottom {
+    border: none;
+}
+
+.vis-label {
+    background-color: var(--primary-grey);
+    border: none !important;
+    border-radius: 2rem;
+    padding: 0;
+    /* padding: 1rem; */
+
+    .vis-inner {
+        /* padding: 1rem !important; */
+    }
+}
+
+.vis-labelset .vis-label .vis-inner {
+    padding: 1rem;
+}
+/* 
+.vis-label.vis-nested-groupvis-label.vis-group-level-unknown-but-gte1 {
+    background-color: red !important;
+} */
+
+
+.vis-item.vis-range.green {
+    background-color: #EABCA5;
+    border: none;
+    /* margin-inline: 1rem; */
+    /* padding-block: 1rem; */
+}
