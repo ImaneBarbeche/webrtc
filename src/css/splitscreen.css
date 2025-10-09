@@ -40,6 +40,24 @@
     width: 0.15rem !important;
     border-radius: 2rem;
     cursor: col-resize !important;
+    position: relative;
+
+    /* bullet */
+    &::after {
+        content: "";
+        width: 1rem;
+        aspect-ratio: 1 / 1;
+        display: block;
+        position: absolute;
+        border-radius: 10rem;
+        top: 0;
+        right: 50%;
+        transform: translateX(50%);
+        background-color: inherit;
+        pointer-events: none;
+        box-shadow: 0rem 0.08rem var(--primary-beige);
+
+    }
 }
 
 .card{
