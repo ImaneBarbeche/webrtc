@@ -28,6 +28,7 @@ class WebRTCSync {
             this.tryConnectDataChannel();
         } else {
             console.log('Pas de connexion WebRTC détectée');
+            this.updateStatusIndicator(); // Afficher "Mode standalone"
         }
     }
     
@@ -87,16 +88,20 @@ class WebRTCSync {
             });
         }
         
+        this.updateStatusIndicator(); // Mettre à jour l'indicateur APRÈS avoir lu le rôle
+        
         // Écouter les messages entrants
         this.dc.addEventListener('message', (e) => this.handleMessage(e));
         
         // Surveiller l'état du canal
         this.dc.addEventListener('open', () => {
             this.connected = true;
+            this.updateStatusIndicator();
         });
         
         this.dc.addEventListener('close', () => {
             this.connected = false;
+            this.updateStatusIndicator();
         });
         
         this.dc.addEventListener('error', (e) => {
@@ -195,6 +200,27 @@ class WebRTCSync {
      */
     isActive() {
         return this.connected && this.dc !== null;
+    }
+    
+    /**
+     * Mettre à jour l'indicateur visuel de statut WebRTC
+     */
+    updateStatusIndicator() {
+        const statusElement = document.getElementById('webrtc-status');
+        const statusText = document.getElementById('webrtc-status-text');
+        
+        if (!statusElement || !statusText) {
+            return; // L'indicateur n'existe pas sur cette page
+        }
+        
+        if (this.connected) {
+            statusElement.className = 'connected';
+            const role = this.isOfferor ? 'HÔTE' : 'VIEWER';
+            statusText.textContent = `Connecté (${role})`;
+        } else {
+            statusElement.className = 'standalone';
+            statusText.textContent = 'Mode standalone';
+        }
     }
     
     /**
