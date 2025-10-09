@@ -36,8 +36,9 @@
 }
 
 .custom-bar{
-    background-color: rgb(231, 104, 104) !important;
-    width: 4px !important;
+    background-color: var(--primary-dark);
+    width: 0.15rem !important;
+    border-radius: 2rem;
     cursor: col-resize !important;
 }
 

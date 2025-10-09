@@ -16,6 +16,13 @@
     /* Note: La plupart des styles viennent de vis-timeline-graph2d.min.css */
 }
 
+.vis-timeline {
+    /* background-color: var(--primary-beige); */
+    border: none;
+    border-radius: 2rem;
+    
+}
+
 /* ========================================
    BOUTONS SAVE/LOAD
    ======================================== */
