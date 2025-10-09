@@ -5,120 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LifeStories - Connexion Collaborative</title>
     <link rel="icon" type="image/x-icon" href="favicon.ico" />
-    <!-- CSS pour onboarding -->
-    <link rel="stylesheet" href="css/onboarding.css" />
-    <!-- CSS pour LifeStories (caché au démarrage) -->
+    
+    <!-- CSS Bibliothèques externes -->
     <link href="libs/vis-timeline/vis-timeline-graph2d.min.css" rel="stylesheet" type="text/css">
     <link rel="stylesheet" href="libs/leaflet/leaflet.css"/>
     <link href="libs/sweetalert2/sweetalert2.min.css" rel="stylesheet" type="text/css"/>
+    
+    <!-- CSS Application LifeStories -->
+    <link rel="stylesheet" href="css/app.css" />
+    <link rel="stylesheet" href="css/onboarding.css" />
+    <link rel="stylesheet" href="css/questionnaire.css" />
+    <link rel="stylesheet" href="css/calendar.css" />
     <link href="css/bloc_border.css" rel="stylesheet" type="text/css"/>
     <link href="css/splitscreen.css" rel="stylesheet" type="text/css"/>
-    <style>
-        /* Cacher/Afficher les sections */
-        .onboarding-container {
-            position: relative;
-            z-index: 1000;
-        }
-        
-        .onboarding-container.hidden {
-            display: none !important;
-            visibility: hidden !important;
-            opacity: 0 !important;
-            pointer-events: none !important;
-        }
-        
-        .lifestories-container {
-            display: none; /* Caché au démarrage */
-            position: relative;
-            width: 100%;
-            height: 100vh;
-        }
-        
-        .lifestories-container.active {
-            display: block;
-        }
-        
-        /* Styles pour les questions empilées */
-        .question {
-            margin-bottom: 15px;
-            padding: 10px;
-            border-left: 3px solid #007bff;
-            background-color: #f8f9fa;
-            border-radius: 4px;
-        }
-        .question input {
-            margin: 8px 0;
-            padding: 6px 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            width: 200px;
-        }
-        .question button {
-            margin: 5px;
-            padding: 6px 12px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        .question button:hover {
-            background-color: #0056b3;
-        }
-        .question input:disabled {
-            background-color: #e9ecef;
-            cursor: not-allowed;
-        }
-        
-        /* Indicateur de synchronisation WebRTC */
-        #webrtc-status {
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            padding: 8px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: bold;
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        #webrtc-status.connected {
-            background-color: #28a745;
-            color: white;
-        }
-        #webrtc-status.standalone {
-            background-color: #6c757d;
-            color: white;
-        }
-        #webrtc-status .dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background-color: white;
-            animation: pulse 2s ease-in-out infinite;
-        }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
-        }
-        
-        /* Mode viewer : masquer le questionnaire */
-        .viewer-mode #questionnaire {
-            display: none !important;
-        }
-        
-        /* Ajuster la mise en page en mode viewer */
-        .viewer-mode #trajectories {
-            width: 100% !important;
-        }
-        
-        /* Masquer le séparateur Split.js en mode viewer */
-        .viewer-mode .gutter {
-            display: none !important;
-        }
-    </style>
 </head>
 <body>
     <div class="onboarding-container">

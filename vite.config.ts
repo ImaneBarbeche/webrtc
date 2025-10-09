@@ -22,7 +22,6 @@ export default defineConfig({
         { src: 'libs', dest: '.' },
         { src: 'donnees', dest: '.' },
         { src: 'assets', dest: '.' },
-        { src: 'LifeStories.html', dest: '.' },
         { src: 'enquete.json', dest: '.' },
         { src: 'manifest.json', dest: '.' }
       ]

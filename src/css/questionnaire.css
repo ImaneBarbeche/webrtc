@@ -1,0 +1,51 @@
+/**
+ * questionnaire.css - Styles pour le questionnaire LifeStories
+ * Gère l'affichage des questions, inputs et boutons
+ */
+
+/* ========================================
+   QUESTIONS
+   ======================================== */
+
+.question {
+    margin-bottom: 15px;
+    padding: 10px;
+    border-left: 3px solid #007bff;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+}
+
+/* ========================================
+   INPUTS
+   ======================================== */
+
+.question input {
+    margin: 8px 0;
+    padding: 6px 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    width: 200px;
+}
+
+.question input:disabled {
+    background-color: #e9ecef;
+    cursor: not-allowed;
+}
+
+/* ========================================
+   BOUTONS
+   ======================================== */
+
+.question button {
+    margin: 5px;
+    padding: 6px 12px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.question button:hover {
+    background-color: #0056b3;
+}

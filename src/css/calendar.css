@@ -1,0 +1,57 @@
+/**
+ * calendar.css - Styles pour le calendrier/timeline LifeStories
+ * Gère l'affichage de la timeline, canvas, synthèse et carte
+ */
+
+/* ========================================
+   TIMELINE / CANVAS
+   ======================================== */
+
+#canvas {
+    /* Styles spécifiques au canvas de la timeline */
+}
+
+#timeline {
+    /* Styles spécifiques à la timeline vis.js */
+    /* Note: La plupart des styles viennent de vis-timeline-graph2d.min.css */
+}
+
+/* ========================================
+   BOUTONS SAVE/LOAD
+   ======================================== */
+
+#save, #load {
+    margin: 5px;
+    padding: 8px 16px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+#save:hover, #load:hover {
+    background-color: #0056b3;
+}
+
+/* ========================================
+   SYNTHÈSE (BRICKS)
+   ======================================== */
+
+#bricks {
+    padding: 10px;
+}
+
+#moreInfos {
+    /* Styles pour les informations supplémentaires */
+}
+
+/* ========================================
+   CARTE
+   ======================================== */
+
+#map {
+    /* Styles pour la carte Leaflet */
+    /* Note: La plupart des styles viennent de leaflet.css */
+}
