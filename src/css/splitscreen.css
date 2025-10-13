@@ -123,30 +123,85 @@
     border: none;
 }
 
-.vis-label {
+.vis-label.vis-group-level-0 {
     background-color: var(--primary-grey);
     border: none !important;
     border-radius: 2rem;
     padding: 0;
+    border-block: 0.2rem solid transparent !important;
+    border-radius: 2rem !important;
+    background-clip: padding-box;
     /* padding: 1rem; */
 
     .vis-inner {
+        border: none !important;
+        border-radius: 0rem !important;
+        /* background-color: red !important; */
         /* padding: 1rem !important; */
     }
+
+    &.expanded {
+        border-bottom: none !important;
+        border-bottom-left-radius: 0 !important;
+        border-bottom-right-radius: 0 !important;
+    } 
 }
 
 .vis-labelset .vis-label .vis-inner {
     padding: 1rem;
+    /* border-radius: 0rem !important; */
+}
+
+.vis-ltr .vis-label:not(.vis-nesting-group):not(.vis-group-level-0) {
+    background-color: var(--primary-grey);
+
+    &:last-of-type {
+        background-color: red !important;
+        border: 2px solid red;
+        border-radius: 2rem !important;
+    }
+}
+
+.vis-ltr .vis-label:not(.vis-nesting-group):not(.vis-group-level-0):last-child {
+    background-color: red !important;
+}
+
+.vis-group-level-unknown-but-gte1 {
+    border: none;
+    border-bottom: none !important;
+}
+
+.vis-ltr .vis-label.vis-nested-group .vis-inner {
+    padding-left: 0rem;
+    list-style-type: disc;
+    display: list-item;
+    list-style-position: inside;
+
+    &::marker {
+        color: color-mix(in srgb, var(--primary-grey), black 20%);
+    }
 }
 /* 
 .vis-label.vis-nested-groupvis-label.vis-group-level-unknown-but-gte1 {
     background-color: red !important;
 } */
 
+.vis-item.vis-range {
+    margin-inline: 1rem;
+    padding-block: .3rem;
+    /* position: relative; */
+
+}
 
 .vis-item.vis-range.green {
     background-color: #EABCA5;
     border: none;
+    border-inline: 0.2rem solid transparent;
+    /* border-style: outset; */
+    border-radius: 2rem !important;
+    background-clip: padding-box;
+    /* border-radius: 2rem; */
+
     /* margin-inline: 1rem; */
     /* padding-block: 1rem; */
 }

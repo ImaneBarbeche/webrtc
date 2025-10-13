@@ -15,13 +15,13 @@ import { test_items } from "./dataset.js";
 // Données des groupes
 
 const groupsData = [
-    { id: 1, content: "Migratoire", nestedGroups: [11,12,13],showNested: true, className: "vert"},
+    { id: 1, content: "Migratoire", nestedGroups: [11,12],showNested: true, className: "vert"},
     { id: 2, content: "Scolaire", showNested: false, className: "bleu" },
     { id: 3, content: "Professionnelle", showNested: false, className: "rouge"},
     { id: 11, content: "Statut résidentiel",dependsOn: 12,className: "line_11"},
     /*{ id: 12, content: "Type",dependsOn: 13},*/
     { id: 12, content: "Logement",dependsOn: 13,className: "line_12"},
-    { id: 13, content: "Commune",keyof: 1,className: "line_13"} // ou pays si étranger
+    { id: 13, content: "Commune",className: "line_13"} // ou pays si étranger
 ];
 
 // Ajout d'icônes sur certains groupes (exemple)

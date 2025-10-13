@@ -5,7 +5,8 @@
 
 
 :root {
-    --primary-beige: #F6F1E8;
+    /* --primary-beige: #F6F1E8; */
+    --primary-beige: white;
     --primary-dark: #2E2E2E;
     --primary-grey: #FAFAFA;
 }
