@@ -15,13 +15,22 @@ import { test_items } from "./dataset.js";
 // Données des groupes
 
 const groupsData = [
-    { id: 1, content: "Migratoire", nestedGroups: [11,12,13], showNested: true, className: "vert", landmarkChildren: [13]}, // landmarkChildren = sous-groupes à afficher quand fermé
-    { id: 2, content: "Scolaire", showNested: false, className: "bleu" },
-    { id: 3, content: "Professionnelle", showNested: false, className: "rouge"},
+    // MIGRATOIRE
+    { id: 1, content: "Migratoire", nestedGroups: [11,12,13], showNested: true, className: "vert", landmarkChildren: [13]},
     { id: 11, content: "Statut résidentiel", dependsOn: 12, className: "line_11"},
-    /*{ id: 12, content: "Type",dependsOn: 13},*/
     { id: 12, content: "Logement", dependsOn: 13, className: "line_12"},
-    { id: 13, content: "📍 Commune", keyof: 1, className: "line_13", isLandmark: true} // Repère temporel
+    { id: 13, content: "📍 Commune", keyof: 1, className: "line_13", isLandmark: true},
+    
+    // SCOLAIRE
+    { id: 2, content: "Scolaire", nestedGroups: [21,22,23], showNested: false, className: "bleu", landmarkChildren: [23]},
+    { id: 21, content: "Établissements", dependsOn: 23, className: "line_21"},
+    { id: 22, content: "Formations", dependsOn: 23, className: "line_22"},
+    { id: 23, content: "📍 Diplômes", keyof: 2, className: "line_23", isLandmark: true},
+    
+    // PROFESSIONNELLE
+    { id: 3, content: "Professionnelle", nestedGroups: [31,32], showNested: false, className: "rouge", landmarkChildren: [31]},
+    { id: 31, content: "📍 Postes", keyof: 3, className: "line_31", isLandmark: true},
+    { id: 32, content: "Contrats", dependsOn: 31, className: "line_32"}
 ];
 
 // Ajout d'icônes sur certains groupes (exemple)
@@ -45,15 +54,16 @@ const options = {
         remove: true,      // Permet de supprimer un item
         overrideItems: false  // Autoriser ces options à remplacer les paramètres "editable" de l'élément
     },
-    zoomMin:365 * 24 * 60 * 60 * 1000 * 12, //zoom min à l'année et max 5 années
+    // Calcul dynamique : année naissance (2001) → année actuelle + 5 ans
+    zoomMin: 365 * 24 * 60 * 60 * 1000 * (new Date().getFullYear() - 2001 + 10), // Durée totale + 10 ans de marge
     min: new Date(),
-    max: new Date(),
+    max: new Date(`${new Date().getFullYear()}-12-31`),
     showCurrentTime: false, // Ne pas afficher la ligne de temps actuelle
     orientation: 'both', // Option pour définir l'orientation (top/bottom)
     margin: {item:{vertical: 30, horizontal: 0}},
     align: "center",
     stack: true,
-    end: new Date(`${new Date().getFullYear()}-12-31`)/*new Date(2040, 11, 31)*/,
+    end: new Date(`${new Date().getFullYear()}-12-31`), 
     xss:{
         filterOptions:{
             allowList: {
