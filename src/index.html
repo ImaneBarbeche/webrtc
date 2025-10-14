@@ -31,39 +31,66 @@
             <span id="status-text">Hors ligne</span>
         </div>
 
-        <div class="connection-modes">
-            <div class="mode-card">
-                <h3>👤 Mode Hôte</h3>
-                <p>Créez une session et partagez le code de connexion</p>
-                <button id="btn0" class="primary-btn">Créer une session</button>
-            </div>
-            
-            <div class="mode-card">
-                <h3>🤝 Mode Invité</h3>
-                <p>Rejoignez une session existante</p>
-                <button id="scanBtn" class="scan-btn">📷 Scanner QR Code</button>
-                <div class="manual-input">
-                    <textarea id="connectionInput" placeholder="Ou collez le code de connexion ici..."></textarea>
-                    <button id="btn1" class="secondary-btn" disabled>Se connecter</button>
+        <!-- Step 1: Role Selection -->
+        <div class="role-selection" id="roleSelection">
+            <h2>Choisissez votre rôle</h2>
+            <div class="role-cards">
+                <div class="role-card">
+                    <button id="selectInterviewer" class="primary-btn">Enquêteur</button>
+                </div>
+                
+                <div class="role-card">
+                    <button id="selectInterviewee" class="primary-btn">Enquêté</button>
                 </div>
             </div>
         </div>
-        
-        <div class="connection-details hidden" id="connectionDetails">
-            <div class="qr-section">
-                <h3>Code de connexion</h3>
-                <canvas id="qrCanvas"></canvas>
-                <textarea id="connectionCode" readonly placeholder="Le code de connexion apparaîtra ici..."></textarea>
-                <button id="copyBtn" class="copy-btn">📋 Copier</button>
+
+        <!-- Step 2A: Interviewer Flow (Host) -->
+        <div class="interviewer-flow hidden" id="interviewerFlow">
+            <!-- Offer display -->
+            <div class="offer-display" id="offerDisplay">
+                <h3>📤 Votre code de connexion <span class="code-badge hidden" id="codeBadge">✓ Code disponible</span></h3>
+                <p>Partagez ce code avec l'enquêté</p>
+                <div class="qr-section">
+                    <canvas id="qrCanvas"></canvas>
+                    <textarea id="connectionCode" readonly placeholder="Génération du code..."></textarea>
+                    <button id="copyBtn" class="copy-btn">📋 Copier le code</button>
+                </div>
             </div>
             
-            <div class="response-section hidden" id="responseSection">
-                <h3>En attente de la réponse de l'invité...</h3>
-                <p>Une fois que l'invité a scanné votre code, scannez sa réponse :</p>
+            <!-- Waiting for response -->
+            <div class="wait-response hidden" id="waitResponse">
+                <h3>⏳ En attente de la réponse</h3>
+                <p>L'enquêté doit scanner votre code et vous fournir sa réponse</p>
                 <button id="scanResponseBtn" class="scan-btn">📷 Scanner la réponse</button>
                 <div class="manual-input">
                     <textarea id="responseInput" placeholder="Ou collez la réponse ici..."></textarea>
                     <button id="processResponseBtn" class="secondary-btn" disabled>Traiter la réponse</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 2B: Interviewee Flow (Guest) -->
+        <div class="interviewee-flow hidden" id="intervieweeFlow">
+            <!-- Scan/paste offer -->
+            <div class="scan-offer" id="scanOffer">
+                <h3>📥 Recevoir le code de l'enquêteur</h3>
+                <p>Scannez le QR code ou collez le code fourni par l'enquêteur</p>
+                <button id="scanBtn" class="scan-btn">📷 Scanner le QR Code</button>
+                <div class="manual-input">
+                    <textarea id="connectionInput" placeholder="Ou collez le code de connexion ici..."></textarea>
+                    <button id="btn1" class="secondary-btn" disabled>Recevoir le code</button>
+                </div>
+            </div>
+            
+            <!-- Answer display -->
+            <div class="answer-display hidden" id="answerDisplay">
+                <h3>📤 Votre réponse</h3>
+                <p>Partagez ce code avec l'enquêteur</p>
+                <div class="qr-section">
+                    <canvas id="qrCanvasAnswer"></canvas>
+                    <textarea id="answerCode" readonly placeholder="Génération de la réponse..."></textarea>
+                    <button id="copyAnswerBtn" class="copy-btn">📋 Copier la réponse</button>
                 </div>
             </div>
         </div>
@@ -77,8 +104,10 @@
 
         <div class="actions hidden" id="connectedActions">
             <h3>✅ Connexion établie !</h3>
-            <p>Vous pouvez maintenant commencer votre session collaborative</p>
-            <button id="startApp" class="start-btn">🚀 Commencer LifeStories</button>
+            <p>Lancement de LifeStories...</p>
+            <div class="auto-start-indicator">
+                <div class="spinner"></div>
+            </div>
         </div>
     </div> <!-- Fin de .onboarding-container -->
 
