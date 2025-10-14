@@ -201,11 +201,8 @@ class WebRTCOnboarding {
       this.log(`Signaling State: ${this.pc.signalingState}`);
     });
 
-    this.elements.createBtn.innerText = "Créer une session";
-    this.elements.createBtn.disabled = false;
-    this.elements.connectBtn.innerText = "Se connecter";
-    this.elements.connectBtn.disabled = true;
-    this.elements.processResponseBtn.disabled = true;
+    // Note: Old createBtn and connectBtn removed in new UI
+    // Buttons are now role-specific (selectInterviewer, selectInterviewee, etc.)
     this.setStateAndStatus("off", statusText);
   }
 
@@ -263,8 +260,11 @@ class WebRTCOnboarding {
           this.log(`Offer complete with sessionId: ${this.sessionId}`);
           this.log(`Offer length: ${this.elements.connectionCode.value.length} chars`);
           
-          // Don't show wait response yet - wait for user to copy/scan first
-          // The minimizeOfferAndShowWaitResponse() will be called on copy action
+          // Auto-show wait response section after QR code is displayed
+          // This happens automatically so it works on tablets (scan only, no copy)
+          setTimeout(() => {
+            this.minimizeOfferAndShowWaitResponse();
+          }, 800); // Small delay to let QR code render
           
           this.isOfferor = true;
           this.state = "waitAnswer";
@@ -482,25 +482,37 @@ class WebRTCOnboarding {
   }
 
   scanQRCode() {
+    this.log(`scanQRCode called, startScanner type: ${typeof startScanner}`);
     if (typeof startScanner === "function") {
       this.scanningResponse = false;
+      this.log("Starting QR scanner for offer");
       startScanner();
     } else {
+      this.log(`ERROR: startScanner is ${typeof startScanner}`);
       this.showMessage("Scanner QR non disponible", "error");
     }
   }
 
   scanResponse() {
+    this.log(`scanResponse called, startScanner type: ${typeof startScanner}`);
     if (typeof startScanner === "function") {
       this.scanningResponse = true;
+      this.log("Starting QR scanner for response");
       startScanner();
     } else {
+      this.log(`ERROR: startScanner is ${typeof startScanner}`);
       this.showMessage("Scanner QR non disponible", "error");
     }
   }
 
   // Minimize offer display and show wait response section (interviewer)
   minimizeOfferAndShowWaitResponse() {
+    // Avoid double minimization - check if already minimized
+    if (this.elements.offerDisplay.classList.contains("minimized")) {
+      this.log("Offer already minimized, skipping");
+      return;
+    }
+    
     this.log("Minimizing offer and showing wait response");
     this.elements.offerDisplay.classList.add("minimized");
     this.elements.waitResponse.classList.remove("hidden");
@@ -576,16 +588,26 @@ class WebRTCOnboarding {
     this.log(`QR Code scanned: ${data.substring(0, 50)}...`);
 
     if (this.scanningResponse) {
-      // This is a response scan for the host
+      // This is a response scan for the host (interviewer)
       this.elements.responseInput.value = data;
       this.elements.processResponseBtn.disabled = false;
-      this.showMessage("Réponse scannée !", "success");
+      this.showMessage("Réponse scannée ! Traitement en cours...", "success");
       this.scanningResponse = false;
+      
+      // Auto-process the answer after scan
+      setTimeout(() => {
+        this.processAnswer();
+      }, 500); // Small delay to show success message
     } else {
-      // This is a regular connection scan for guest
+      // This is a regular connection scan for guest (interviewee)
       this.elements.connectionInput.value = data;
       this.elements.connectBtn.disabled = false;
-      this.showMessage("QR Code scanné !", "success");
+      this.showMessage("QR Code scanné ! Connexion en cours...", "success");
+      
+      // Auto-receive the offer after scan
+      setTimeout(() => {
+        this.receiveOffer();
+      }, 500); // Small delay to show success message
     }
   }
 }

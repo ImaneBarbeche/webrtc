@@ -105,7 +105,7 @@ async function startScanner() {
     }
 }
 function applyScannedValue(value) {
-    // Use the handleScannedData function from webrtc-simple.js if available
+    // Use the handleScannedData function from webrtc-onboarding.js if available
     if (typeof window.handleScannedData === 'function') {
         window.handleScannedData(value);
     } else {
@@ -119,8 +119,6 @@ function applyScannedValue(value) {
         }
     }
 }
-// attache automatiquement le bouton au chargement (évite duplication dans webrtc-simple.js)
-document.addEventListener('DOMContentLoaded', () => {
-    const scanBtn = document.getElementById('scanBtn');
-    if (scanBtn) scanBtn.addEventListener('click', startScanner);
-});
+
+// Note: Event listeners are now attached in webrtc-onboarding.js
+// No need to attach here to avoid conflicts
