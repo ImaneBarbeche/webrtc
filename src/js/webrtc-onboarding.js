@@ -20,23 +20,35 @@ class WebRTCOnboarding {
       statusMessage: document.getElementById("statusMessage"),
       progressBar: document.getElementById("progressBar"),
 
-      createBtn: document.getElementById("btn0"),
-      scanBtn: document.getElementById("scanBtn"),
-      connectBtn: document.getElementById("btn1"),
-      copyBtn: document.getElementById("copyBtn"),
-      startBtn: document.getElementById("startApp"),
+      // Role selection
+      roleSelection: document.getElementById("roleSelection"),
+      selectInterviewer: document.getElementById("selectInterviewer"),
+      selectInterviewee: document.getElementById("selectInterviewee"),
 
-      connectionInput: document.getElementById("connectionInput"),
-      connectionCode: document.getElementById("connectionCode"),
+      // Interviewer flow (Host)
+      interviewerFlow: document.getElementById("interviewerFlow"),
+      offerDisplay: document.getElementById("offerDisplay"),
+      waitResponse: document.getElementById("waitResponse"),
+      codeBadge: document.getElementById("codeBadge"),
       qrCanvas: document.getElementById("qrCanvas"),
-
-      // Response handling for host
-      responseSection: document.getElementById("responseSection"),
+      connectionCode: document.getElementById("connectionCode"),
+      copyBtn: document.getElementById("copyBtn"),
       scanResponseBtn: document.getElementById("scanResponseBtn"),
       responseInput: document.getElementById("responseInput"),
       processResponseBtn: document.getElementById("processResponseBtn"),
 
-      connectionDetails: document.getElementById("connectionDetails"),
+      // Interviewee flow (Guest)
+      intervieweeFlow: document.getElementById("intervieweeFlow"),
+      scanOffer: document.getElementById("scanOffer"),
+      answerDisplay: document.getElementById("answerDisplay"),
+      scanBtn: document.getElementById("scanBtn"),
+      connectionInput: document.getElementById("connectionInput"),
+      connectBtn: document.getElementById("btn1"),
+      qrCanvasAnswer: document.getElementById("qrCanvasAnswer"),
+      answerCode: document.getElementById("answerCode"),
+      copyAnswerBtn: document.getElementById("copyAnswerBtn"),
+
+      // Common
       connectedActions: document.getElementById("connectedActions"),
       debugLog: document.getElementById("debugLog"),
       debugPanel: document.getElementById("debugPanel"),
@@ -44,22 +56,21 @@ class WebRTCOnboarding {
   }
 
   setupEventListeners() {
-    this.elements.createBtn.addEventListener("click", () => this.btn0Click());
-    this.elements.connectBtn.addEventListener("click", () => this.btn1Click());
-    this.elements.processResponseBtn.addEventListener("click", () =>
-      this.processAnswer()
-    );
-    this.elements.scanBtn.addEventListener("click", () => this.scanQRCode());
-    this.elements.scanResponseBtn.addEventListener("click", () =>
-      this.scanResponse()
-    );
-    this.elements.copyBtn.addEventListener("click", () =>
-      this.copyToClipboard()
-    );
-    this.elements.startBtn.addEventListener("click", () =>
-      this.startApplication()
-    );
+    // Role selection
+    this.elements.selectInterviewer.addEventListener("click", () => this.selectInterviewerRole());
+    this.elements.selectInterviewee.addEventListener("click", () => this.selectIntervieweeRole());
 
+    // Interviewer (Host) actions
+    this.elements.scanResponseBtn.addEventListener("click", () => this.scanResponse());
+    this.elements.processResponseBtn.addEventListener("click", () => this.processAnswer());
+    this.elements.copyBtn.addEventListener("click", () => this.copyToClipboard());
+
+    // Interviewee (Guest) actions
+    this.elements.scanBtn.addEventListener("click", () => this.scanQRCode());
+    this.elements.connectBtn.addEventListener("click", () => this.receiveOffer());
+    this.elements.copyAnswerBtn.addEventListener("click", () => this.copyAnswerToClipboard());
+
+    // Input validation
     this.elements.connectionInput.addEventListener("input", (e) => {
       this.elements.connectBtn.disabled = !e.target.value.trim();
     });
@@ -75,6 +86,80 @@ class WebRTCOnboarding {
     if (this.elements.debugLog) {
       this.elements.debugLog.innerHTML += logMessage + "<br>";
       this.elements.debugLog.scrollTop = this.elements.debugLog.scrollHeight;
+    }
+  }
+
+  // Role selection methods
+  selectInterviewerRole() {
+    this.log("=== INTERVIEWER ROLE SELECTED ===");
+    this.isOfferor = true;
+    this.elements.roleSelection.classList.add("hidden");
+    this.elements.interviewerFlow.classList.remove("hidden");
+    this.setStateAndStatus("offerCreating", "Création de la session...");
+    this.createOffer();
+  }
+
+  selectIntervieweeRole() {
+    this.log("=== INTERVIEWEE ROLE SELECTED ===");
+    this.isOfferor = false;
+    this.elements.roleSelection.classList.add("hidden");
+    this.elements.intervieweeFlow.classList.remove("hidden");
+    this.setStateAndStatus("off", "En attente du code de l'enquêteur");
+  }
+
+  // Interviewer: Create offer automatically
+  async createOffer() {
+    try {
+      this.dc = this.pc.createDataChannel("lifestories");
+      this.dc.addEventListener("open", (e) => this.dcOpen(e));
+      this.dc.addEventListener("message", (e) => this.dcMessage(e));
+      this.log("Creating offer...");
+      this.log(`ICE Gathering State before offer: ${this.pc.iceGatheringState}`);
+      
+      const offer = await this.pc.createOffer();
+      this.log(`Offer created: ${JSON.stringify(offer).substring(0, 100)}`);
+      await this.pc.setLocalDescription(offer);
+      this.log(`Local description set. ICE Gathering State: ${this.pc.iceGatheringState}`);
+      this.log("Waiting for ICE candidates...");
+      this.state = "offerCreating";
+    } catch (err) {
+      this.log(`ERROR creating offer: ${err.message}`);
+      this.showMessage("Erreur lors de la création de l'offre", "error");
+    }
+  }
+
+  // Interviewee: Receive and process offer
+  async receiveOffer() {
+    try {
+      this.log("Parsing offer JSON...");
+      let desc = JSON.parse(this.elements.connectionInput.value);
+      this.log(`Offer parsed: ${JSON.stringify(desc).substring(0, 100)}...`);
+      
+      if (!("sessionId" in desc)) {
+        this.setStateAndStatus("error", "Erreur: l'offre n'a pas de sessionId.");
+        this.log("ERROR: No sessionId in offer");
+        return;
+      }
+      
+      this.sessionId = desc.sessionId;
+      this.log(`Session ID: ${this.sessionId}`);
+      delete desc.sessionId;
+      
+      this.log("Setting remote description (offer)...");
+      await this.pc.setRemoteDescription(desc);
+      this.log("Remote description set, creating answer...");
+      await this.pc.setLocalDescription(await this.pc.createAnswer());
+      this.log("Answer created, waiting for ICE candidates...");
+      
+      this.elements.connectBtn.disabled = true;
+      this.elements.scanBtn.disabled = true;
+      this.elements.connectionInput.disabled = true;
+      this.state = "answerCreating";
+      this.setStateAndStatus("answerCreating", "Création de votre réponse...");
+    } catch (err) {
+      this.log(`ERROR receiving offer: ${err.message}`);
+      this.log(`Stack: ${err.stack}`);
+      this.showMessage("Erreur lors du traitement de l'offre", "error");
     }
   }
 
@@ -130,81 +215,6 @@ class WebRTCOnboarding {
     this.log(`State: ${newState}, Status: ${statusText}`);
   }
 
-  // btn0Click logic
-  async btn0Click() {
-    this.log(`Button 0 clicked - state: ${this.state}`);
-    switch (this.state) {
-      case "off":
-        this.elements.connectionCode.placeholder =
-          "Une offre est en cours de création.";
-        this.elements.createBtn.disabled = true;
-        this.elements.connectionInput.disabled = true;
-        this.elements.connectBtn.disabled = true;
-        this.dc = this.pc.createDataChannel("lifestories");
-        this.dc.addEventListener("open", (e) => this.dcOpen(e));
-        this.dc.addEventListener("message", (e) => this.dcMessage(e));
-        this.log("Creating offer...");
-        this.log(
-          `ICE Gathering State before offer: ${this.pc.iceGatheringState}`
-        );
-        const offer = await this.pc.createOffer();
-        this.log(`Offer created: ${JSON.stringify(offer).substring(0, 100)}`);
-        await this.pc.setLocalDescription(offer);
-        this.log(
-          `Local description set. ICE Gathering State: ${this.pc.iceGatheringState}`
-        );
-        this.log("Waiting for ICE candidates...");
-        this.state = "offerCreating";
-        break;
-      case "waitAnswer":
-      case "waitConnect":
-        await this.copyToClipboard();
-        break;
-    }
-  }
-
-  // btn1Click logic
-  async btn1Click() {
-    this.log(`Button 1 clicked - state: ${this.state}`);
-    switch (this.state) {
-      case "off":
-        try {
-          this.log("Parsing offer JSON...");
-          let desc = JSON.parse(this.elements.connectionInput.value);
-          this.log(
-            `Offer parsed: ${JSON.stringify(desc).substring(0, 100)}...`
-          );
-          if (!("sessionId" in desc)) {
-            this.setStateAndStatus(
-              "error",
-              "Error: The offer has no sessionId."
-            );
-            this.log("ERROR: No sessionId in offer");
-            break;
-          }
-          this.sessionId = desc.sessionId;
-          this.log(`Session ID: ${this.sessionId}`);
-          delete desc.sessionId;
-          this.log("Setting remote description (offer)...");
-          await this.pc.setRemoteDescription(desc);
-          this.log("Remote description set, creating answer...");
-          await this.pc.setLocalDescription(await this.pc.createAnswer());
-          this.log("Answer created, waiting for ICE candidates...");
-          this.elements.connectionCode.placeholder =
-            "Une réponse est en cours de création.";
-          this.elements.createBtn.disabled = true;
-          this.elements.connectionInput.disabled = true;
-          this.elements.connectBtn.disabled = true;
-          this.isOfferor = false;
-          this.state = "answerCreating";
-        } catch (err) {
-          this.log(`ERROR in btn1Click (off state): ${err.message}`);
-          this.log(`Stack: ${err.stack}`);
-        }
-        break;
-    }
-  }
-
   // New function for processing answer from guest
   async processAnswer() {
     try {
@@ -243,94 +253,48 @@ class WebRTCOnboarding {
           this.elements.connectionCode.value = JSON.stringify(offerData);
 
           // Generate QR Code for the offer
-          this.log(`Tentative génération QR code...`);
-          if (
-            typeof generateQRCode === "function" &&
-            document.getElementById("qrCanvas")
-          ) {
-            this.log(`Génération QR code pour l'offre`);
+          this.log(`Génération QR code pour l'offre`);
+          if (typeof generateQRCode === "function" && this.elements.qrCanvas) {
             generateQRCode(JSON.stringify(offerData), "qrCanvas");
           } else {
-            this.log(
-              `Erreur: generateQRCode=${typeof generateQRCode}, canvas=${!!document.getElementById(
-                "qrCanvas"
-              )}`
-            );
+            this.log(`Erreur: generateQRCode non disponible`);
           }
 
           this.log(`Offer complete with sessionId: ${this.sessionId}`);
-          this.log(
-            `Offer length: ${this.elements.connectionCode.value.length} chars`
-          );
+          this.log(`Offer length: ${this.elements.connectionCode.value.length} chars`);
           
-          // Stocker les références pour le setTimeout
-          const elements = this.elements;
+          // Don't show wait response yet - wait for user to copy/scan first
+          // The minimizeOfferAndShowWaitResponse() will be called on copy action
           
-          // Utiliser setTimeout pour éviter les violations de performance dans le handler ICE
-          setTimeout(() => {
-            elements.createBtn.innerText = "Copier l'offre";
-            elements.createBtn.disabled = false;
-            elements.connectionInput.placeholder =
-              'Collez la réponse reçue ici, puis cliquez sur "Traiter la réponse" pour établir la connexion.';
-            elements.connectionInput.disabled = false;
-            elements.processResponseBtn.innerText = "Traiter la réponse";
-            elements.processResponseBtn.disabled = true;
-            elements.responseSection.classList.remove("hidden");
-            elements.connectionDetails.classList.remove("hidden");
-            elements.connectionDetails.classList.add('show'); // Ajouter la classe .show pour afficher
-          }, 0);
-          
-          this.isOfferor = true; 
+          this.isOfferor = true;
           this.state = "waitAnswer";
+          this.setStateAndStatus("waitAnswer", "Partagez le code avec l'enquêté");
         }
         break;
+
       case "answerCreating":
         if (!e.candidate) {
-          this.elements.connectionCode.value = JSON.stringify(
-            this.pc.localDescription
-          );
+          const answerData = this.pc.localDescription.toJSON();
+          this.elements.answerCode.value = JSON.stringify(answerData);
 
           // Generate QR Code for the answer
-          this.log(`Tentative génération QR code pour réponse...`);
-          if (
-            typeof generateQRCode === "function" &&
-            document.getElementById("qrCanvas")
-          ) {
-            this.log(`Génération QR code pour la réponse`);
-            generateQRCode(
-              JSON.stringify(this.pc.localDescription),
-              "qrCanvas"
-            );
+          this.log(`Génération QR code pour la réponse`);
+          if (typeof generateQRCode === "function" && this.elements.qrCanvasAnswer) {
+            generateQRCode(JSON.stringify(answerData), "qrCanvasAnswer");
           } else {
-            this.log(
-              `Erreur: generateQRCode=${typeof generateQRCode}, canvas=${!!document.getElementById(
-                "qrCanvas"
-              )}`
-            );
+            this.log(`Erreur: generateQRCode non disponible`);
           }
 
           this.log(`Answer complete`);
-          this.log(
-            `Answer length: ${this.elements.connectionCode.value.length} chars`
-          );
+          this.log(`Answer length: ${this.elements.answerCode.value.length} chars`);
           
-          // Stocker les références pour le setTimeout
-          const elements = this.elements;
-          
-          // Utiliser setTimeout pour éviter les violations de performance dans le handler ICE
+          // Hide scan offer section and show answer display
           setTimeout(() => {
-            elements.createBtn.innerText = "Copier la réponse";
-            elements.createBtn.disabled = false;
-            elements.connectionInput.placeholder =
-              'Cliquez sur "Copier la réponse", puis donnez la réponse à l\'hôte.';
-            elements.connectionInput.disabled = true;
-            elements.connectBtn.innerText = "Abandonner";
-            elements.connectBtn.disabled = false;
-            elements.connectionDetails.classList.remove("hidden");
-            elements.connectionDetails.classList.add('show'); // Ajouter la classe .show pour afficher
+            this.hideScanOfferAndShowAnswer();
           }, 0);
           
           this.state = "waitConnect";
+          this.setStateAndStatus("waitConnect", "Partagez votre réponse avec l'enquêteur");
         }
         break;
     }
@@ -346,6 +310,20 @@ class WebRTCOnboarding {
         this.connectionEstablished = true;
         this.setStateAndStatus("connected", "Connexion établie !");
         this.elements.connectedActions.classList.remove("hidden");
+        
+        // Auto-start for interviewee (guest), they don't need to click
+        if (!this.isOfferor) {
+          this.log("Auto-starting application for interviewee");
+          setTimeout(() => {
+            this.startApplication();
+          }, 1000); // Small delay to show success message
+        } else {
+          // For interviewer, auto-start after short delay
+          this.log("Auto-starting application for interviewer");
+          setTimeout(() => {
+            this.startApplication();
+          }, 1500); // Slightly longer delay for interviewer to see status
+        }
         break;
 
       case "disconnected":
@@ -440,6 +418,11 @@ class WebRTCOnboarding {
           );
           this.log("Copied to clipboard");
           this.showMessage("Copié dans le presse-papiers", "success");
+          
+          // Minimize offer and show wait response after copy (interviewer only)
+          if (this.isOfferor && this.state === "waitAnswer") {
+            this.minimizeOfferAndShowWaitResponse();
+          }
           break;
       }
     } catch (err) {
@@ -457,6 +440,44 @@ class WebRTCOnboarding {
       document.execCommand("copy");
       this.elements.connectionCode.disabled = disabled;
       this.showMessage("Code sélectionné (Ctrl+C pour copier)", "info");
+      
+      // Minimize offer and show wait response after copy (interviewer only)
+      if (this.isOfferor && this.state === "waitAnswer") {
+        this.minimizeOfferAndShowWaitResponse();
+      }
+    }
+  }
+
+  async copyAnswerToClipboard() {
+    try {
+      let result = await navigator.permissions.query({
+        name: "clipboard-write",
+      });
+      switch (result.state) {
+        case "granted":
+        case "prompt":
+          await navigator.clipboard.writeText(
+            this.elements.answerCode.value
+          );
+          this.log("Answer copied to clipboard");
+          this.showMessage("Réponse copiée dans le presse-papiers", "success");
+          break;
+      }
+    } catch (err) {
+      this.log(`Clipboard error: ${err.message}`);
+      let disabled = this.elements.answerCode.disabled;
+      this.elements.answerCode.disabled = false;
+      try {
+        this.elements.answerCode.select();
+      } catch (err2) {
+        this.elements.answerCode.setSelectionRange(
+          0,
+          this.elements.answerCode.value.length
+        );
+      }
+      document.execCommand("copy");
+      this.elements.answerCode.disabled = disabled;
+      this.showMessage("Réponse sélectionnée (Ctrl+C pour copier)", "info");
     }
   }
 
@@ -476,6 +497,23 @@ class WebRTCOnboarding {
     } else {
       this.showMessage("Scanner QR non disponible", "error");
     }
+  }
+
+  // Minimize offer display and show wait response section (interviewer)
+  minimizeOfferAndShowWaitResponse() {
+    this.log("Minimizing offer and showing wait response");
+    this.elements.offerDisplay.classList.add("minimized");
+    this.elements.waitResponse.classList.remove("hidden");
+    if (this.elements.codeBadge) {
+      this.elements.codeBadge.classList.remove("hidden");
+    }
+  }
+
+  // Hide scan offer and show answer display (interviewee)
+  hideScanOfferAndShowAnswer() {
+    this.log("Hiding scan offer and showing answer");
+    this.elements.scanOffer.classList.add("hidden");
+    this.elements.answerDisplay.classList.remove("hidden");
   }
 
   // quand on passe de la page onboarding à la page lifestories, permet de garder une mémoire temporaire de la connexion afin de vérifier qu'on vient bien du process onboarding
