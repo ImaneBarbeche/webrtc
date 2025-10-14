@@ -15,7 +15,7 @@ import { test_items } from "./dataset.js";
 // Données des groupes
 
 const groupsData = [
-    { id: 1, content: "Migratoire", nestedGroups: [11,12],showNested: true, className: "vert"},
+    { id: 1, content: "Migratoire", nestedGroups: [11,12,13],showNested: true, className: "vert"},
     { id: 2, content: "Scolaire", showNested: false, className: "bleu" },
     { id: 3, content: "Professionnelle", showNested: false, className: "rouge"},
     { id: 11, content: "Statut résidentiel",dependsOn: 12,className: "line_11"},

@@ -152,7 +152,18 @@
     /* border-radius: 0rem !important; */
 }
 
-.vis-ltr .vis-label:not(.vis-nesting-group):not(.vis-group-level-0) {
+
+/* .vis-labelset .vis-label:last-child:not(.vis-group-level-0) {
+    background-color: red;
+}
+
+.vis-label.vis-group-level-unknown-but-gte1:last-child {
+    background-color: red !important;
+    border-bottom-left-radius: 2rem;
+    border-bottom-right-radius: 2rem;
+} */
+
+/* .vis-ltr .vis-label:not(.vis-nesting-group):not(.vis-group-level-0) {
     background-color: var(--primary-grey);
 
     &:last-of-type {
@@ -164,11 +175,18 @@
 
 .vis-ltr .vis-label:not(.vis-nesting-group):not(.vis-group-level-0):last-child {
     background-color: red !important;
+    outline: dashed red !important;
 }
 
-.vis-group-level-unknown-but-gte1 {
+.vis-ltr .vis-label:not(.vis-nesting-group):not(.vis-group-level-0):last-of-type {
+    background-color: blue !important;
+    outline: dashed blue !important;
+} */
+
+.vis-label.vis-nested-group.vis-group-level-unknown-but-gte1 {
     border: none;
     border-bottom: none !important;
+    background-color: var(--primary-grey);
 }
 
 .vis-ltr .vis-label.vis-nested-group .vis-inner {
@@ -181,6 +199,42 @@
         color: color-mix(in srgb, var(--primary-grey), black 20%);
     }
 }
+
+/* .vis-ltr .vis-label.vis-nested-group:last-of-type {
+    background-color: red !important;
+} */
+
+/* .vis-label.vis-nested-group:last-of-type, */
+/* .vis-label.vis-group-level-unknown-but-gte1:nth-of-type(4) {
+    background-color: blue !important;
+    border: 2px solid black;
+} */
+
+/* .vis-label.vis-nesting-group.expanded.vis-group-level-0 ~ .vis-label.vis-group-level-unknown-but-gte1 {
+    background-color: blue;
+} */
+
+/* .vis-label.vis-nesting-group.expanded.vis-group-level-0 ~ .vis-label.vis-group-level-unknown-but-gte1:nth-of-type(4) { */
+    /* background-color: red !important; */
+    /* border: 2px solid black;
+} */
+
+/* .vis-label.vis-nesting-group.expanded.vis-group-level-0 ~ .vis-label.vis-nested-group.vis-group-level-unknown-but-gte1:last-of-type {
+    background-color: green !important;
+    border: 2px solid black;
+} */
+
+.vis-panel.vis-left .vis-content .vis-labelset .vis-label.vis-nesting-group.expanded.vis-group-level-0 ~ .vis-label.vis-nested-group:not(:has(~ .vis-label.vis-nested-group)) {
+    border-bottom-right-radius: 2rem;
+    border-bottom-left-radius: 2rem;
+    /* background-color: green !important;
+    border: 2px solid black; */
+}
+
+/* .vis-label.vis-nesting-group.expanded.vis-group-level-0 ~ .vis-label.vis-group-level-unknown-but-gte1:last-of-type { 
+    background-color: red !important;
+} */
+
 /* 
 .vis-label.vis-nested-groupvis-label.vis-group-level-unknown-but-gte1 {
     background-color: red !important;
