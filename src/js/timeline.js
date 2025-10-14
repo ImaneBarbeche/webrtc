@@ -15,13 +15,13 @@ import { test_items } from "./dataset.js";
 // Données des groupes
 
 const groupsData = [
-    { id: 1, content: "Migratoire", nestedGroups: [11,12,13],showNested: true, className: "vert"},
+    { id: 1, content: "Migratoire", nestedGroups: [11,12,13], showNested: true, className: "vert", landmarkChildren: [13]}, // landmarkChildren = sous-groupes à afficher quand fermé
     { id: 2, content: "Scolaire", showNested: false, className: "bleu" },
     { id: 3, content: "Professionnelle", showNested: false, className: "rouge"},
-    { id: 11, content: "Statut résidentiel",dependsOn: 12,className: "line_11"},
+    { id: 11, content: "Statut résidentiel", dependsOn: 12, className: "line_11"},
     /*{ id: 12, content: "Type",dependsOn: 13},*/
-    { id: 12, content: "Logement",dependsOn: 13,className: "line_12"},
-    { id: 13, content: "Commune",keyof: 1,className: "line_13"} // ou pays si étranger
+    { id: 12, content: "Logement", dependsOn: 13, className: "line_12"},
+    { id: 13, content: "📍 Commune", keyof: 1, className: "line_13", isLandmark: true} // Repère temporel
 ];
 
 // Ajout d'icônes sur certains groupes (exemple)
@@ -209,6 +209,62 @@ const timeline = new vis.Timeline(container, items, groups, options);
 
 // Exporter la timeline globalement
 window.timeline = timeline;
+
+/**
+ * GESTION DES LANDMARKS (REPÈRES TEMPORELS)
+ * Permet d'afficher certains sous-groupes sur la ligne parent quand celui-ci est fermé
+ */
+timeline.on('click', function(properties) {
+    // Vérifier si c'est un clic sur un label de groupe parent (qui a des nestedGroups)
+    if (properties.what === 'group-label' && properties.group) {
+        const clickedGroup = groups.get(properties.group);
+        
+        // Vérifier si ce groupe a des landmarks définis
+        if (clickedGroup && clickedGroup.landmarkChildren && clickedGroup.landmarkChildren.length > 0) {
+            
+            // Petit délai pour que vis.js finisse de toggle le groupe
+            setTimeout(() => {
+                const updatedGroup = groups.get(properties.group);
+                const isClosed = !updatedGroup.showNested;
+                
+                console.log(`Groupe ${updatedGroup.content} ${isClosed ? 'fermé' : 'ouvert'}`);
+                
+                // Pour chaque landmark défini
+                updatedGroup.landmarkChildren.forEach(landmarkId => {
+                    let landmarkItems;
+                    
+                    if (isClosed) {
+                        // Fermeture : chercher les items qui sont actuellement dans le landmark
+                        landmarkItems = items.get({ filter: item => item.group === landmarkId });
+                    } else {
+                        // Ouverture : chercher les items qui ÉTAIENT dans le landmark (actuellement sur le parent)
+                        landmarkItems = items.get({ 
+                            filter: item => item.group === properties.group && item._originalGroup === landmarkId 
+                        });
+                    }
+                    
+                    console.log(`Traitement de ${landmarkItems.length} items du landmark ${landmarkId}`);
+                    
+                    landmarkItems.forEach(item => {
+                        if (isClosed) {
+                            // Groupe fermé : afficher les items sur le parent
+                            item._originalGroup = item.group; // Sauvegarder le groupe d'origine
+                            item.group = properties.group; // Déplacer vers le parent
+                        } else {
+                            // Groupe ouvert : remettre les items dans leur groupe d'origine
+                            if (item._originalGroup) {
+                                item.group = item._originalGroup;
+                                delete item._originalGroup; // Nettoyer la propriété temporaire
+                            }
+                        }
+                        items.update(item);
+                    });
+                });
+                
+            }, 50); // Délai court pour laisser vis.js finir son rendu
+        }
+    }
+});
 
 function handleDragStart(event) {
   
