@@ -3,6 +3,18 @@
  * Gère le layout principal, les transitions et le mode viewer
  */
 
+
+:root {
+    /* --primary-beige: #F6F1E8; */
+    --primary-beige: white;
+    --primary-dark: #2E2E2E;
+    --primary-grey: #FAFAFA;
+}
+
+body {
+    background-color: var(--primary-beige);
+}
+
 /* ========================================
    LAYOUT PRINCIPAL - SECTIONS
    ======================================== */
