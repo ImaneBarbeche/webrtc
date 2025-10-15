@@ -57,18 +57,32 @@ class WebRTCOnboarding {
 
   setupEventListeners() {
     // Role selection
-    this.elements.selectInterviewer.addEventListener("click", () => this.selectInterviewerRole());
-    this.elements.selectInterviewee.addEventListener("click", () => this.selectIntervieweeRole());
+    this.elements.selectInterviewer.addEventListener("click", () =>
+      this.selectInterviewerRole()
+    );
+    this.elements.selectInterviewee.addEventListener("click", () =>
+      this.selectIntervieweeRole()
+    );
 
     // Interviewer (Host) actions
-    this.elements.scanResponseBtn.addEventListener("click", () => this.scanResponse());
-    this.elements.processResponseBtn.addEventListener("click", () => this.processAnswer());
-    this.elements.copyBtn.addEventListener("click", () => this.copyToClipboard());
+    this.elements.scanResponseBtn.addEventListener("click", () =>
+      this.scanResponse()
+    );
+    this.elements.processResponseBtn.addEventListener("click", () =>
+      this.processAnswer()
+    );
+    this.elements.copyBtn.addEventListener("click", () =>
+      this.copyToClipboard()
+    );
 
     // Interviewee (Guest) actions
     this.elements.scanBtn.addEventListener("click", () => this.scanQRCode());
-    this.elements.connectBtn.addEventListener("click", () => this.receiveOffer());
-    this.elements.copyAnswerBtn.addEventListener("click", () => this.copyAnswerToClipboard());
+    this.elements.connectBtn.addEventListener("click", () =>
+      this.receiveOffer()
+    );
+    this.elements.copyAnswerBtn.addEventListener("click", () =>
+      this.copyAnswerToClipboard()
+    );
 
     // Input validation
     this.elements.connectionInput.addEventListener("input", (e) => {
@@ -114,12 +128,16 @@ class WebRTCOnboarding {
       this.dc.addEventListener("open", (e) => this.dcOpen(e));
       this.dc.addEventListener("message", (e) => this.dcMessage(e));
       this.log("Creating offer...");
-      this.log(`ICE Gathering State before offer: ${this.pc.iceGatheringState}`);
-      
+      this.log(
+        `ICE Gathering State before offer: ${this.pc.iceGatheringState}`
+      );
+
       const offer = await this.pc.createOffer();
       this.log(`Offer created: ${JSON.stringify(offer).substring(0, 100)}`);
       await this.pc.setLocalDescription(offer);
-      this.log(`Local description set. ICE Gathering State: ${this.pc.iceGatheringState}`);
+      this.log(
+        `Local description set. ICE Gathering State: ${this.pc.iceGatheringState}`
+      );
       this.log("Waiting for ICE candidates...");
       this.state = "offerCreating";
     } catch (err) {
@@ -134,23 +152,26 @@ class WebRTCOnboarding {
       this.log("Parsing offer JSON...");
       let desc = JSON.parse(this.elements.connectionInput.value);
       this.log(`Offer parsed: ${JSON.stringify(desc).substring(0, 100)}...`);
-      
+
       if (!("sessionId" in desc)) {
-        this.setStateAndStatus("error", "Erreur: l'offre n'a pas de sessionId.");
+        this.setStateAndStatus(
+          "error",
+          "Erreur: l'offre n'a pas de sessionId."
+        );
         this.log("ERROR: No sessionId in offer");
         return;
       }
-      
+
       this.sessionId = desc.sessionId;
       this.log(`Session ID: ${this.sessionId}`);
       delete desc.sessionId;
-      
+
       this.log("Setting remote description (offer)...");
       await this.pc.setRemoteDescription(desc);
       this.log("Remote description set, creating answer...");
       await this.pc.setLocalDescription(await this.pc.createAnswer());
       this.log("Answer created, waiting for ICE candidates...");
-      
+
       this.elements.connectBtn.disabled = true;
       this.elements.scanBtn.disabled = true;
       this.elements.connectionInput.disabled = true;
@@ -258,17 +279,22 @@ class WebRTCOnboarding {
           }
 
           this.log(`Offer complete with sessionId: ${this.sessionId}`);
-          this.log(`Offer length: ${this.elements.connectionCode.value.length} chars`);
-          
+          this.log(
+            `Offer length: ${this.elements.connectionCode.value.length} chars`
+          );
+
           // Auto-show wait response section after QR code is displayed
           // This happens automatically so it works on tablets (scan only, no copy)
           setTimeout(() => {
             this.minimizeOfferAndShowWaitResponse();
           }, 800); // Small delay to let QR code render
-          
+
           this.isOfferor = true;
           this.state = "waitAnswer";
-          this.setStateAndStatus("waitAnswer", "Partagez le code avec l'enquêté");
+          this.setStateAndStatus(
+            "waitAnswer",
+            "Partagez le code avec l'enquêté"
+          );
         }
         break;
 
@@ -279,22 +305,30 @@ class WebRTCOnboarding {
 
           // Generate QR Code for the answer
           this.log(`Génération QR code pour la réponse`);
-          if (typeof generateQRCode === "function" && this.elements.qrCanvasAnswer) {
+          if (
+            typeof generateQRCode === "function" &&
+            this.elements.qrCanvasAnswer
+          ) {
             generateQRCode(JSON.stringify(answerData), "qrCanvasAnswer");
           } else {
             this.log(`Erreur: generateQRCode non disponible`);
           }
 
           this.log(`Answer complete`);
-          this.log(`Answer length: ${this.elements.answerCode.value.length} chars`);
-          
+          this.log(
+            `Answer length: ${this.elements.answerCode.value.length} chars`
+          );
+
           // Hide scan offer section and show answer display
           setTimeout(() => {
             this.hideScanOfferAndShowAnswer();
           }, 0);
-          
+
           this.state = "waitConnect";
-          this.setStateAndStatus("waitConnect", "Partagez votre réponse avec l'enquêteur");
+          this.setStateAndStatus(
+            "waitConnect",
+            "Partagez votre réponse avec l'enquêteur"
+          );
         }
         break;
     }
@@ -310,7 +344,7 @@ class WebRTCOnboarding {
         this.connectionEstablished = true;
         this.setStateAndStatus("connected", "Connexion établie !");
         this.elements.connectedActions.classList.remove("hidden");
-        
+
         // Auto-start for interviewee (guest), they don't need to click
         if (!this.isOfferor) {
           this.log("Auto-starting application for interviewee");
@@ -329,17 +363,55 @@ class WebRTCOnboarding {
       case "disconnected":
         this.log("Connection disconnected");
         this.setStateAndStatus("disconnected", "Connexion interrompue");
+        this.handleDisconnection();
+
         break;
 
       case "failed":
         this.log("Connection failed");
         this.setStateAndStatus("failed", "Échec de la connexion");
+        this.handleDisconnection();
         break;
 
       case "closed":
         this.log("Connection closed");
         this.setStateAndStatus("closed", "Connexion fermée");
+        this.handleDisconnection();
+
         break;
+    }
+  }
+  // New method to handle disconnection cleanup and UI updates
+  handleDisconnection() {
+    // 1. Informer webrtcSync de la déconnexion
+    if (window.webrtcSync) {
+      window.webrtcSync.connected = false;
+      window.webrtcSync.updateStatusIndicator(); // Badge rouge
+    }
+
+    // 2. Nettoyer sessionStorage
+    sessionStorage.setItem("webrtc_connected", "false");
+
+    // 3. Si on est dans LifeStories, afficher le bouton reconnecter
+    const lifestoriesContainer = document.getElementById("lifestoriesContainer");
+    if (lifestoriesContainer && !lifestoriesContainer.classList.contains("hidden")) {
+      this.showReconnectButton();
+    }
+  }
+
+  // Show reconnect button when disconnection occurs
+  showReconnectButton() {
+    const reconnectContainer = document.getElementById("reconnect-container");
+    const reconnectBtn = document.getElementById("reconnect-btn");
+    
+    if (reconnectContainer && reconnectBtn) {
+      reconnectContainer.classList.remove("hidden");
+      
+      // Add click listener to redirect to onboarding
+      reconnectBtn.onclick = () => {
+        this.log("User requested reconnection - returning to onboarding");
+        window.location.reload(); // Reload the page to restart onboarding
+      };
     }
   }
 
@@ -363,32 +435,47 @@ class WebRTCOnboarding {
 
     // IMPORTANT: Sauvegarder le rôle AVANT de configurer webrtcSync
     sessionStorage.setItem("webrtc_connected", "true");
-    sessionStorage.setItem("webrtc_isOfferor", this.isOfferor ? "true" : "false");
+    sessionStorage.setItem(
+      "webrtc_isOfferor",
+      this.isOfferor ? "true" : "false"
+    );
     sessionStorage.setItem("webrtc_sessionId", this.sessionId || "");
-    this.log(`📝 SessionStorage sauvegardé: isOfferor=${this.isOfferor}, sessionId=${this.sessionId}`);
+    this.log(
+      `📝 SessionStorage sauvegardé: isOfferor=${this.isOfferor}, sessionId=${this.sessionId}`
+    );
 
     // Enregistrer le data channel globalement pour webrtc-sync.js
     if (typeof window !== "undefined") {
       window.webrtcDataChannel = this.dc;
       this.log("Data channel exporté globalement (window.webrtcDataChannel)");
-      
+
       // Notifier webrtc-sync que le data channel est prêt
       this.log(`DEBUG: window.webrtcSync existe? ${!!window.webrtcSync}`);
-      this.log(`DEBUG: window.webrtcSync.setDataChannel existe? ${!!(window.webrtcSync && typeof window.webrtcSync.setDataChannel === 'function')}`);
-      
-      if (window.webrtcSync && typeof window.webrtcSync.setDataChannel === 'function') {
+      this.log(
+        `DEBUG: window.webrtcSync.setDataChannel existe? ${!!(
+          window.webrtcSync &&
+          typeof window.webrtcSync.setDataChannel === "function"
+        )}`
+      );
+
+      if (
+        window.webrtcSync &&
+        typeof window.webrtcSync.setDataChannel === "function"
+      ) {
         window.webrtcSync.setDataChannel(this.dc);
         this.log("Data channel transmis à webrtcSync");
       } else {
-        this.log("ERREUR: webrtcSync non disponible ou setDataChannel manquant!");
+        this.log(
+          "ERREUR: webrtcSync non disponible ou setDataChannel manquant!"
+        );
       }
     }
-    
+
     // Utiliser setTimeout + ajouter la classe .show
     const elements = this.elements;
     setTimeout(() => {
       elements.connectedActions.classList.remove("hidden");
-      elements.connectedActions.classList.add('show');
+      elements.connectedActions.classList.add("show");
     }, 0);
   }
 
@@ -418,7 +505,7 @@ class WebRTCOnboarding {
           );
           this.log("Copied to clipboard");
           this.showMessage("Copié dans le presse-papiers", "success");
-          
+
           // Minimize offer and show wait response after copy (interviewer only)
           if (this.isOfferor && this.state === "waitAnswer") {
             this.minimizeOfferAndShowWaitResponse();
@@ -440,7 +527,7 @@ class WebRTCOnboarding {
       document.execCommand("copy");
       this.elements.connectionCode.disabled = disabled;
       this.showMessage("Code sélectionné (Ctrl+C pour copier)", "info");
-      
+
       // Minimize offer and show wait response after copy (interviewer only)
       if (this.isOfferor && this.state === "waitAnswer") {
         this.minimizeOfferAndShowWaitResponse();
@@ -456,9 +543,7 @@ class WebRTCOnboarding {
       switch (result.state) {
         case "granted":
         case "prompt":
-          await navigator.clipboard.writeText(
-            this.elements.answerCode.value
-          );
+          await navigator.clipboard.writeText(this.elements.answerCode.value);
           this.log("Answer copied to clipboard");
           this.showMessage("Réponse copiée dans le presse-papiers", "success");
           break;
@@ -512,7 +597,7 @@ class WebRTCOnboarding {
       this.log("Offer already minimized, skipping");
       return;
     }
-    
+
     this.log("Minimizing offer and showing wait response");
     this.elements.offerDisplay.classList.add("minimized");
     this.elements.waitResponse.classList.remove("hidden");
@@ -538,33 +623,37 @@ class WebRTCOnboarding {
     this.log("Starting LifeStories application...");
 
     // SessionStorage déjà sauvegardé dans dcOpen(), juste vérifier
-    this.log(`DEBUG startApp: window.webrtcSync existe? ${!!window.webrtcSync}`);
-    this.log(`DEBUG startApp: window.webrtcDataChannel existe? ${!!window.webrtcDataChannel}`);
-    
+    this.log(
+      `DEBUG startApp: window.webrtcSync existe? ${!!window.webrtcSync}`
+    );
+    this.log(
+      `DEBUG startApp: window.webrtcDataChannel existe? ${!!window.webrtcDataChannel}`
+    );
+
     // Pas besoin de re-transmettre le data channel, déjà fait dans dcOpen()
 
     // Cacher l'onboarding et afficher LifeStories
-    const onboarding = document.querySelector('.onboarding-container');
-    const debugPanel = document.getElementById('debugPanel');
-    const lifestories = document.getElementById('lifestoriesContainer');
-    
-    if (onboarding) onboarding.classList.add('hidden');
-    if (debugPanel) debugPanel.style.display = 'none';
+    const onboarding = document.querySelector(".onboarding-container");
+    const debugPanel = document.getElementById("debugPanel");
+    const lifestories = document.getElementById("lifestoriesContainer");
+
+    if (onboarding) onboarding.classList.add("hidden");
+    if (debugPanel) debugPanel.style.display = "none";
     if (lifestories) {
-      lifestories.classList.add('active');
-      
+      lifestories.classList.add("active");
+
       // Si c'est le viewer (pas l'offeror), activer le mode viewer
       if (!this.isOfferor) {
-        lifestories.classList.add('viewer-mode');
+        lifestories.classList.add("viewer-mode");
         this.log("Mode VIEWER activé - questionnaire masqué");
       } else {
         this.log("Mode HÔTE activé - questionnaire visible");
       }
     }
-    
+
     // Dispatcher un événement pour initialiser Split.js
-    document.dispatchEvent(new Event('lifestoriesShown'));
-    
+    document.dispatchEvent(new Event("lifestoriesShown"));
+
     this.log("LifeStories UI activated, onboarding hidden");
   }
 
@@ -593,7 +682,7 @@ class WebRTCOnboarding {
       this.elements.processResponseBtn.disabled = false;
       this.showMessage("Réponse scannée ! Traitement en cours...", "success");
       this.scanningResponse = false;
-      
+
       // Auto-process the answer after scan
       setTimeout(() => {
         this.processAnswer();
@@ -603,7 +692,7 @@ class WebRTCOnboarding {
       this.elements.connectionInput.value = data;
       this.elements.connectBtn.disabled = false;
       this.showMessage("QR Code scanné ! Connexion en cours...", "success");
-      
+
       // Auto-receive the offer after scan
       setTimeout(() => {
         this.receiveOffer();

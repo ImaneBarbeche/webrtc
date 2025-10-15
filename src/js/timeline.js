@@ -54,8 +54,9 @@ const options = {
         remove: true,      // Permet de supprimer un item
         overrideItems: false  // Autoriser ces options à remplacer les paramètres "editable" de l'élément
     },
-    // Calcul dynamique : année naissance (2001) → année actuelle + 5 ans
-    zoomMin: 365 * 24 * 60 * 60 * 1000 * (new Date().getFullYear() - 2001 + 10), // Durée totale + 10 ans de marge
+    // // Calcul dynamique : année naissance (2001) → année actuelle + 5 ans
+    // zoomMin: 365 * 24 * 60 * 60 * 1000 * (new Date().getFullYear() - 2001 + 10), // Durée totale + 10 ans de marge
+    zoomMin:365 * 24 * 60 * 60 * 1000 * 12, //zoom min à l'année et max 5 années
     min: new Date(),
     max: new Date(`${new Date().getFullYear()}-12-31`),
     showCurrentTime: false, // Ne pas afficher la ligne de temps actuelle
