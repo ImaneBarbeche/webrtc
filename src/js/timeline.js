@@ -64,6 +64,7 @@ const options = {
     align: "center",
     stack: true,
     end: new Date(`${new Date().getFullYear()}-12-31`), 
+    verticalScroll: true,
     xss:{
         filterOptions:{
             allowList: {
