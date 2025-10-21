@@ -23,7 +23,6 @@ body {
 .onboarding-container {
     position: relative;
     z-index: 1000;
-    display: none;
 }
 
 /* Masquer l'onboarding quand on passe à LifeStories */

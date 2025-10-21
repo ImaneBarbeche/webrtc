@@ -58,7 +58,7 @@ const options = {
     min: new Date(),
     max: new Date(`${new Date().getFullYear() + 5}-12-31`),
     showCurrentTime: false, // Ne pas afficher la ligne de temps actuelle
-    orientation: 'both', // Option pour définir l'orientation (top/bottom)
+    orientation: 'top', // Option pour définir l'orientation (top/bottom)
     margin: {item:{vertical: 30, horizontal: 0}},
     align: "center",
     stack: true,
