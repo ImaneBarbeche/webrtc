@@ -89,10 +89,16 @@ body {
     color: white;
 }
 
+#webrtc-status.disconnected {
+    background-color: #dc3545;
+    color: white;
+}
+
 #webrtc-status.standalone {
     background-color: #6c757d;
     color: white;
 }
+
 
 #webrtc-status .dot {
     width: 8px;
@@ -106,3 +112,45 @@ body {
     0%, 100% { opacity: 1; }
     50% { opacity: 0.3; }
 }
+
+/* Reconnect button */
+#reconnect-container {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 2000;
+    background: rgba(0, 0, 0, 0.8);
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+#reconnect-container.hidden {
+    display: none;
+}
+
+.reconnect-button {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    font-size: 18px;
+    font-weight: bold;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.reconnect-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.reconnect-button:active {
+    transform: translateY(0);
+}
+

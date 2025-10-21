@@ -1,4 +1,3 @@
-
 import * as utils from "./utils.js"
 import state from "./state.js"
 import { ajouterEpisode } from "./episodes.js";
@@ -54,10 +53,7 @@ const options = {
         remove: true,      // Permet de supprimer un item
         overrideItems: false  // Autoriser ces options à remplacer les paramètres "editable" de l'élément
     },
-    // Calcul dynamique : année naissance (2001) → année actuelle + 5 ans
-    // zoomMin: 365 * 24 * 60 * 60 * 1000 * (new Date().getFullYear() - 2001 + 10), // Durée totale + 10 ans de marge
-    // zoomMin:365 * 24 * 60 * 60 * 1000 * 12, //zoom min à l'année et max 5 années
-     zoomMin: 1000 * 60 * 60 * 24 * 365 * 1,  // 5 years in ms
+    zoomMin: 1000 * 60 * 60 * 24 * 365 * 1,  // 5 years in ms
     zoomMax: 1000 * 60 * 60 * 24 * 365 * 50, // 50 years in ms
     min: new Date(),
     max: new Date(`${new Date().getFullYear() + 5}-12-31`),
