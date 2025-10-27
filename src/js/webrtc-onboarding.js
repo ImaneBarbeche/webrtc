@@ -10,7 +10,7 @@ class WebRTCOnboarding {
 
     this.initializeElements();
     this.setupEventListeners();
-    this.initialize("Ready to start connection");
+    this.initialize("Prêt à connecter");
   }
 
   initializeElements() {
@@ -32,7 +32,8 @@ class WebRTCOnboarding {
       codeBadge: document.getElementById("codeBadge"),
       qrCanvas: document.getElementById("qrCanvas"),
       connectionCode: document.getElementById("connectionCode"),
-      copyBtn: document.getElementById("copyBtn"),
+  copyBtn: document.getElementById("copyBtn"),
+  continueOfferBtn: document.getElementById("continueOfferBtn"),
       scanResponseBtn: document.getElementById("scanResponseBtn"),
       responseInput: document.getElementById("responseInput"),
       processResponseBtn: document.getElementById("processResponseBtn"),
@@ -56,6 +57,12 @@ class WebRTCOnboarding {
   }
 
   setupEventListeners() {
+    // Ajout du bouton continuer pour l'enquêteur
+    if (this.elements.continueOfferBtn) {
+      this.elements.continueOfferBtn.addEventListener("click", () => {
+        this.minimizeOfferAndShowWaitResponse();
+      });
+    }
     // Role selection
     this.elements.selectInterviewer.addEventListener("click", () =>
       this.selectInterviewerRole()
@@ -285,9 +292,9 @@ class WebRTCOnboarding {
 
           // Auto-show wait response section after QR code is displayed
           // This happens automatically so it works on tablets (scan only, no copy)
-          setTimeout(() => {
-            this.minimizeOfferAndShowWaitResponse();
-          }, 800); // Small delay to let QR code render
+          // setTimeout(() => {
+          //   this.minimizeOfferAndShowWaitResponse();
+          // }, 800); // Small delay to let QR code render
 
           this.isOfferor = true;
           this.state = "waitAnswer";
@@ -592,18 +599,16 @@ class WebRTCOnboarding {
 
   // Minimize offer display and show wait response section (interviewer)
   minimizeOfferAndShowWaitResponse() {
-    // Avoid double minimization - check if already minimized
-    if (this.elements.offerDisplay.classList.contains("minimized")) {
-      this.log("Offer already minimized, skipping");
+    // Masquer complètement la vue QR code
+    if (this.elements.offerDisplay.classList.contains("hidden")) {
+      this.log("Offer already hidden, skipping");
       return;
     }
 
-    this.log("Minimizing offer and showing wait response");
-    this.elements.offerDisplay.classList.add("minimized");
+    this.log("Masquage de la vue QR code et affichage du scan");
+    this.elements.offerDisplay.classList.add("hidden");
+    this.elements.offerDisplay.classList.remove("minimized");
     this.elements.waitResponse.classList.remove("hidden");
-    if (this.elements.codeBadge) {
-      this.elements.codeBadge.classList.remove("hidden");
-    }
   }
 
   // Hide scan offer and show answer display (interviewee)

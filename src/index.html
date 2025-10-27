@@ -1,170 +1,235 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>LifeStories - Connexion Collaborative</title>
     <link rel="icon" type="image/x-icon" href="favicon.ico" />
-    
+
     <!-- CSS Bibliothèques externes -->
-    <link href="libs/vis-timeline/vis-timeline-graph2d.min.css" rel="stylesheet" type="text/css">
-    <link rel="stylesheet" href="libs/leaflet/leaflet.css"/>
-    <link href="libs/sweetalert2/sweetalert2.min.css" rel="stylesheet" type="text/css"/>
+    <link
+      href="libs/vis-timeline/vis-timeline-graph2d.min.css"
+      rel="stylesheet"
+      type="text/css"
+    />
+    <link rel="stylesheet" href="libs/leaflet/leaflet.css" />
+    <link
+      href="libs/sweetalert2/sweetalert2.min.css"
+      rel="stylesheet"
+      type="text/css"
+    />
 
     <script src="libs/vis-timeline/vis-timeline-graph2d.min.js"></script>
 
-    
     <!-- CSS Application LifeStories -->
     <link rel="stylesheet" href="css/app.css" />
     <link rel="stylesheet" href="css/onboarding.css" />
     <link rel="stylesheet" href="css/questionnaire.css" />
     <link rel="stylesheet" href="css/calendar.css" />
-    <link href="css/bloc_border.css" rel="stylesheet" type="text/css"/>
-    <link href="css/splitscreen.css" rel="stylesheet" type="text/css" media="all"/>
-</head>
+    <link href="css/bloc_border.css" rel="stylesheet" type="text/css" />
+    <link
+      href="css/splitscreen.css"
+      rel="stylesheet"
+      type="text/css"
+      media="all"
+    />
+  </head>
 
-<body>
-
+  <body>
     <div class="onboarding-container">
-        <div class="header">
-            <h1>🔗 LifeStories</h1>
-            <p>Connexion collaborative pour explorer les parcours de vie</p>
+      <header>
+        <img src="../src/assets/imgs/LFlogo.png" alt="Logo LifeStories" width="80" height="80">
+        <h1>LifeStories</h1>
+      </header>
+
+      <div class="connection-status">
+        <div id="status-indicator" class="status offline"></div>
+        <span id="status-text">Hors ligne</span>
+      </div>
+
+      <!-- Step 1: Role Selection -->
+      <div class="role-selection" id="roleSelection">
+        <h2>Choisissez votre rôle</h2>
+        <p>...et laissez le voyage commencer</p>
+        <div class="role-cards">
+          <div class="role-card">
+              
+              <button id="selectInterviewer" class="primary-btn">
+                <img
+                  src="assets/imgs/enqueteur.png"
+                  alt="Enquêteur"
+                  class="role-icon"
+                />
+              <span>Enquêteur</span>
+            </button>
+          </div>
+
+          
+          <div class="role-card">
+              <button id="selectInterviewee" class="primary-btn">
+                <img
+                  src="assets/imgs/enqueté.png"
+                  alt="Enquêté"
+                  class="role-icon"
+                />
+                <span>Enquêté</span>
+              </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2A: Interviewer Flow (Host) -->
+      <div class="interviewer-flow hidden" id="interviewerFlow">
+        <!-- Offer display -->
+        <div class="offer-display" id="offerDisplay">
+          <h3 id="offerTitle">Time to connect</h3>
+          <div class="qr-section">
+            <canvas id="qrCanvas"></canvas>
+            <textarea
+              id="connectionCode"
+              readonly
+              placeholder="Génération du code..."
+            ></textarea>
+            <button id="copyBtn" class="copy-btn">📋 Copier le code</button>
+          </div>
+          <button
+            id="continueOfferBtn"
+            class="primary-btn"
+            style="float: right; margin: 32px 0 0 0"
+          >
+            Continuer
+          </button>
         </div>
 
-        <div class="connection-status">
-            <div id="status-indicator" class="status offline"></div>
-            <span id="status-text">Hors ligne</span>
+        <!-- Waiting for response -->
+        <div class="wait-response hidden" id="waitResponse">
+          <h3>⏳ En attente de la réponse</h3>
+          <p>L'enquêté doit scanner votre code et vous fournir sa réponse</p>
+          <div class="scan-area">
+            <div class="scan-frame">
+              <button id="scanResponseBtn" class="scan-btn" title="Scanner la réponse" aria-label="Scanner la réponse">
+                📷 Scanner la réponse
+              </button>
+              <div class="corner top-left"></div>
+              <div class="corner top-right"></div>
+              <div class="corner bottom-left"></div>
+              <div class="corner bottom-right"></div>
+            </div>
+          </div>
+          <div class="manual-input">
+            <textarea
+              id="responseInput"
+              placeholder="Ou collez la réponse ici..."
+            ></textarea>
+            <button id="processResponseBtn" class="secondary-btn" disabled>
+              Traiter la réponse
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2B: Interviewee Flow (Guest) -->
+      <div class="interviewee-flow hidden" id="intervieweeFlow">
+        <!-- Scan/paste offer -->
+        <div class="scan-offer" id="scanOffer">
+          <h3>📥 Recevoir le code de l'enquêteur</h3>
+          <p>Scannez le QR code ou collez le code fourni par l'enquêteur</p>
+          <button id="scanBtn" class="scan-btn">📷 Scanner le QR Code</button>
+          <div class="manual-input">
+            <textarea
+              id="connectionInput"
+              placeholder="Ou collez le code de connexion ici..."
+            ></textarea>
+            <button id="btn1" class="secondary-btn" disabled>
+              Recevoir le code
+            </button>
+          </div>
         </div>
 
-        <!-- Step 1: Role Selection -->
-        <div class="role-selection" id="roleSelection">
-            <h2>Choisissez votre rôle</h2>
-            <div class="role-cards">
-                <div class="role-card">
-                    <button id="selectInterviewer" class="primary-btn">Enquêteur</button>
-                </div>
-                
-                <div class="role-card">
-                    <button id="selectInterviewee" class="primary-btn">Enquêté</button>
-                </div>
-            </div>
+        <!-- Answer display -->
+        <div class="answer-display hidden" id="answerDisplay">
+          <h3>📤 Votre réponse</h3>
+          <p>Partagez ce code avec l'enquêteur</p>
+          <div class="qr-section">
+            <canvas id="qrCanvasAnswer"></canvas>
+            <textarea
+              id="answerCode"
+              readonly
+              placeholder="Génération de la réponse..."
+            ></textarea>
+            <button id="copyAnswerBtn" class="copy-btn">
+              📋 Copier la réponse
+            </button>
+          </div>
         </div>
+      </div>
 
-        <!-- Step 2A: Interviewer Flow (Host) -->
-        <div class="interviewer-flow hidden" id="interviewerFlow">
-            <!-- Offer display -->
-            <div class="offer-display" id="offerDisplay">
-                <h3>📤 Votre code de connexion <span class="code-badge hidden" id="codeBadge">✓ Code disponible</span></h3>
-                <p>Partagez ce code avec l'enquêté</p>
-                <div class="qr-section">
-                    <canvas id="qrCanvas"></canvas>
-                    <textarea id="connectionCode" readonly placeholder="Génération du code..."></textarea>
-                    <button id="copyBtn" class="copy-btn">📋 Copier le code</button>
-                </div>
-            </div>
-            
-            <!-- Waiting for response -->
-            <div class="wait-response hidden" id="waitResponse">
-                <h3>⏳ En attente de la réponse</h3>
-                <p>L'enquêté doit scanner votre code et vous fournir sa réponse</p>
-                <button id="scanResponseBtn" class="scan-btn">📷 Scanner la réponse</button>
-                <div class="manual-input">
-                    <textarea id="responseInput" placeholder="Ou collez la réponse ici..."></textarea>
-                    <button id="processResponseBtn" class="secondary-btn" disabled>Traiter la réponse</button>
-                </div>
-            </div>
+      <div class="status-section">
+        <div id="statusMessage" class="status-message"></div>
+        <div class="progress-bar hidden" id="progressBar">
+          <div class="progress-fill"></div>
         </div>
+      </div>
 
-        <!-- Step 2B: Interviewee Flow (Guest) -->
-        <div class="interviewee-flow hidden" id="intervieweeFlow">
-            <!-- Scan/paste offer -->
-            <div class="scan-offer" id="scanOffer">
-                <h3>📥 Recevoir le code de l'enquêteur</h3>
-                <p>Scannez le QR code ou collez le code fourni par l'enquêteur</p>
-                <button id="scanBtn" class="scan-btn">📷 Scanner le QR Code</button>
-                <div class="manual-input">
-                    <textarea id="connectionInput" placeholder="Ou collez le code de connexion ici..."></textarea>
-                    <button id="btn1" class="secondary-btn" disabled>Recevoir le code</button>
-                </div>
-            </div>
-            
-            <!-- Answer display -->
-            <div class="answer-display hidden" id="answerDisplay">
-                <h3>📤 Votre réponse</h3>
-                <p>Partagez ce code avec l'enquêteur</p>
-                <div class="qr-section">
-                    <canvas id="qrCanvasAnswer"></canvas>
-                    <textarea id="answerCode" readonly placeholder="Génération de la réponse..."></textarea>
-                    <button id="copyAnswerBtn" class="copy-btn">📋 Copier la réponse</button>
-                </div>
-            </div>
+      <div class="actions hidden" id="connectedActions">
+        <h3>✅ Connexion établie !</h3>
+        <p>Lancement de LifeStories...</p>
+        <div class="auto-start-indicator">
+          <div class="spinner"></div>
         </div>
-
-        <div class="status-section">
-            <div id="statusMessage" class="status-message"></div>
-            <div class="progress-bar hidden" id="progressBar">
-                <div class="progress-fill"></div>
-            </div>
-        </div>
-
-        <div class="actions hidden" id="connectedActions">
-            <h3>✅ Connexion établie !</h3>
-            <p>Lancement de LifeStories...</p>
-            <div class="auto-start-indicator">
-                <div class="spinner"></div>
-            </div>
-        </div>
-    </div> 
+      </div>
+    </div>
     <!-- Fin de .onboarding-container -->
 
     <!-- Debug panel (hidden by default) -->
     <div class="debug-panel hidden" id="debugPanel">
-        <button class="debug-toggle" onclick="document.getElementById('debugLog').classList.toggle('visible')">🐛</button>
-        <div id="debugLog" class="debug-log hidden"></div>
+      <button
+        class="debug-toggle"
+        onclick="document.getElementById('debugLog').classList.toggle('visible')"
+      >
+        🐛
+      </button>
+      <div id="debugLog" class="debug-log hidden"></div>
     </div>
 
     <!-- Section LifeStories (cachée au démarrage) -->
     <div class="lifestories-container" id="lifestoriesContainer">
-        <!-- Indicateur de statut WebRTC -->
-        <div id="webrtc-status" class="standalone">
-            <span class="dot"></span>
-            <span id="webrtc-status-text">Mode standalone</span>
+      <!-- Indicateur de statut WebRTC -->
+      <div id="webrtc-status" class="standalone">
+        <span class="dot"></span>
+        <span id="webrtc-status-text">Mode standalone</span>
+      </div>
+
+      <!-- Bouton de reconnexion (caché par défaut) -->
+      <div id="reconnect-container" class="hidden">
+        <button id="reconnect-btn" class="reconnect-button">
+          🔄 Reconnecter
+        </button>
+      </div>
+
+      <div class="split">
+        <!-- Left side-->
+        <div id="questionnaire">
+          <h2>Questionnaire</h2>
+          <div id="questions"></div>
         </div>
 
-        <!-- Bouton de reconnexion (caché par défaut) -->
-        <div id="reconnect-container" class="hidden">
-            <button id="reconnect-btn" class="reconnect-button">
-                🔄 Reconnecter
-            </button>
-        </div>
-        
-        <div class="split">
-            <!-- Left side-->
-            <div id="questionnaire">
-                <h2>Questionnaire</h2>
-                <div id="questions"></div>
-            </div>
+        <!-- Right side-->
+        <div id="trajectories" class="split vertical">
+          <div id="canvas">
+            <h2>Calendrier de vie</h2>
+            <div id="timeline"></div>
+            <button id="save">Save</button>
+            <button id="load">Load</button>
+          </div>
 
-            <!-- Right side-->
-            <div id="trajectories" class="split vertical">
-                
-                <div id="canvas">
-                    <h2>Calendrier de vie</h2>
-                    <div id="timeline"></div>  
-                    <button id="save">Save</button>
-                    <button id="load">Load</button>
-                    
-                </div>
-                
-                <div id="bricks">
-                    <h2>Synthèse</h2>
-                    <div id="moreInfos"></div>
-                </div>  
-                <div id="map"></div>
-            
-                
-            </div>
+          <div id="bricks">
+            <h2>Synthèse</h2>
+            <div id="moreInfos"></div>
+          </div>
+          <div id="map"></div>
         </div>
+      </div>
     </div>
 
     <!-- Scripts Onboarding -->
@@ -172,12 +237,12 @@
     <script src="js/qr-gen.js"></script>
     <script src="js/qr-scan.js"></script>
     <script src="js/webrtc-onboarding.js"></script>
-    
+
     <!-- Scripts LifeStories (libs externes) -->
     <script src="libs/sweetalert2/sweetalert2.min.js"></script>
     <script src="libs/leaflet/leaflet.js"></script>
     <script src="libs/split.js/split.min.js"></script>
-    
+
     <!-- XState UMD - doit être chargé avant les modules -->
     <script src="libs/xstate/xstate.js"></script>
     <!-- Scripts LifeStories (modules) -->
@@ -186,31 +251,32 @@
     <script type="module" src="js/utils.js"></script>
     <script type="module" src="js/stateMachine.js"></script>
     <script type="module" src="js/webrtc-sync.js"></script>
-    
+
     <script>
-        // Initialiser Split.js quand LifeStories est affiché
-        document.addEventListener('lifestoriesShown', () => {
-            // Petit délai pour que le DOM soit complètement rendu
-            setTimeout(() => {
-                // Vérifier si on est en mode viewer
-                const isViewer = sessionStorage.getItem('webrtc_isOfferor') === 'false';
-                
-                // Initialiser Split.js seulement en mode hôte
-                if (!isViewer) {
-                    Split(['#questionnaire', '#trajectories'], {
-                        sizes: [20, 80],
-                        minSize: 100,
-                        gutterSize: 8,
-                        cursor: 'col-resize',
-                    });
-                }
-                
-                // Forcer un redraw de la timeline après l'affichage (si elle existe)
-                if (window.timeline && typeof window.timeline.redraw === 'function') {
-                    window.timeline.redraw();
-                }
-            }, 100);
-        });
+      // Initialiser Split.js quand LifeStories est affiché
+      document.addEventListener("lifestoriesShown", () => {
+        // Petit délai pour que le DOM soit complètement rendu
+        setTimeout(() => {
+          // Vérifier si on est en mode viewer
+          const isViewer =
+            sessionStorage.getItem("webrtc_isOfferor") === "false";
+
+          // Initialiser Split.js seulement en mode hôte
+          if (!isViewer) {
+            Split(["#questionnaire", "#trajectories"], {
+              sizes: [20, 80],
+              minSize: 100,
+              gutterSize: 8,
+              cursor: "col-resize",
+            });
+          }
+
+          // Forcer un redraw de la timeline après l'affichage (si elle existe)
+          if (window.timeline && typeof window.timeline.redraw === "function") {
+            window.timeline.redraw();
+          }
+        }, 100);
+      });
     </script>
-</body>
+  </body>
 </html>
