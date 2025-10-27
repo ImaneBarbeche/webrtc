@@ -222,7 +222,7 @@ body {
 
 #connectionCode,
 #answerCode {
-  display: none;
+  /* display: none; */
   width: 100%;
   max-width: 500px;
   padding: 15px;
@@ -309,7 +309,13 @@ body {
   box-shadow: 0 8px 16px #fee7b7;
 }
 
-Camera-like frame for the interviewer scan button
+.scan-btn {
+  background: #ff6f61;
+  color: white;
+  width: 100%;
+}
+
+/* Camera-like frame for the interviewer scan button */
 #scanResponseBtn {
   width: 240px;
   height: 240px;
@@ -409,7 +415,7 @@ Camera-like frame for the interviewer scan button
 }
 
 .manual-input {
-  display: none;
+  /* display: none; */
   flex-direction: column;
   gap: 10px;
 }

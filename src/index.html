@@ -82,7 +82,7 @@
       <div class="interviewer-flow hidden" id="interviewerFlow">
         <!-- Offer display -->
         <div class="offer-display" id="offerDisplay">
-          <h3 id="offerTitle">Time to connect</h3>
+          <h3 id="offerTitle">Il est temps de se connecter</h3>
           <div class="qr-section">
             <canvas id="qrCanvas"></canvas>
             <textarea
@@ -103,12 +103,11 @@
 
         <!-- Waiting for response -->
         <div class="wait-response hidden" id="waitResponse">
-          <h3>⏳ En attente de la réponse</h3>
-          <p>L'enquêté doit scanner votre code et vous fournir sa réponse</p>
+          <h3>Vous avez bientôt finit</h3>
+          <p>Vous devez scanner le code QR de l'enqueté</p>
           <div class="scan-area">
             <div class="scan-frame">
-              <button id="scanResponseBtn" class="scan-btn" title="Scanner la réponse" aria-label="Scanner la réponse">
-                📷 Scanner la réponse
+              <button id="scanResponseBtn" class="scan-btn" title="Scanner la réponse">
               </button>
               <div class="corner top-left"></div>
               <div class="corner top-right"></div>
@@ -132,9 +131,18 @@
       <div class="interviewee-flow hidden" id="intervieweeFlow">
         <!-- Scan/paste offer -->
         <div class="scan-offer" id="scanOffer">
-          <h3>📥 Recevoir le code de l'enquêteur</h3>
-          <p>Scannez le QR code ou collez le code fourni par l'enquêteur</p>
-          <button id="scanBtn" class="scan-btn">📷 Scanner le QR Code</button>
+          <h3>Il est temps de se connecter</h3>
+          <p>Scannez le QR code fourni par l'enquêteur</p>
+          <div class="scan-area">
+            <div class="scan-frame">
+              <button id="scanBtn" class="scan-btn" title="Scanner le QR Code">
+              </button>
+              <div class="corner top-left"></div>
+              <div class="corner top-right"></div>
+              <div class="corner bottom-left"></div>
+              <div class="corner bottom-right"></div>
+            </div>
+          </div>
           <div class="manual-input">
             <textarea
               id="connectionInput"
@@ -148,7 +156,7 @@
 
         <!-- Answer display -->
         <div class="answer-display hidden" id="answerDisplay">
-          <h3>📤 Votre réponse</h3>
+          <h3>Vous avez bientôt finit</h3>
           <p>Partagez ce code avec l'enquêteur</p>
           <div class="qr-section">
             <canvas id="qrCanvasAnswer"></canvas>
@@ -197,13 +205,13 @@
       <!-- Indicateur de statut WebRTC -->
       <div id="webrtc-status" class="standalone">
         <span class="dot"></span>
-        <span id="webrtc-status-text">Mode standalone</span>
+        <span id="webrtc-status-text">Mode hors ligne</span>
       </div>
 
       <!-- Bouton de reconnexion (caché par défaut) -->
       <div id="reconnect-container" class="hidden">
         <button id="reconnect-btn" class="reconnect-button">
-          🔄 Reconnecter
+          Se reconnecter
         </button>
       </div>
 

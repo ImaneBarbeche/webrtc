@@ -10,7 +10,7 @@ class WebRTCOnboarding {
 
     this.initializeElements();
     this.setupEventListeners();
-    this.initialize("Prêt à connecter");
+    this.initialize("Prêt à se connecter");
   }
 
   initializeElements() {
@@ -32,8 +32,8 @@ class WebRTCOnboarding {
       codeBadge: document.getElementById("codeBadge"),
       qrCanvas: document.getElementById("qrCanvas"),
       connectionCode: document.getElementById("connectionCode"),
-  copyBtn: document.getElementById("copyBtn"),
-  continueOfferBtn: document.getElementById("continueOfferBtn"),
+      copyBtn: document.getElementById("copyBtn"),
+      continueOfferBtn: document.getElementById("continueOfferBtn"),
       scanResponseBtn: document.getElementById("scanResponseBtn"),
       responseInput: document.getElementById("responseInput"),
       processResponseBtn: document.getElementById("processResponseBtn"),
@@ -125,7 +125,7 @@ class WebRTCOnboarding {
     this.isOfferor = false;
     this.elements.roleSelection.classList.add("hidden");
     this.elements.intervieweeFlow.classList.remove("hidden");
-    this.setStateAndStatus("off", "En attente du code de l'enquêteur");
+    this.setStateAndStatus("off", "En attente de connexion...");
   }
 
   // Interviewer: Create offer automatically
@@ -300,7 +300,7 @@ class WebRTCOnboarding {
           this.state = "waitAnswer";
           this.setStateAndStatus(
             "waitAnswer",
-            "Partagez le code avec l'enquêté"
+            "En attente de connexion..."
           );
         }
         break;
@@ -334,7 +334,7 @@ class WebRTCOnboarding {
           this.state = "waitConnect";
           this.setStateAndStatus(
             "waitConnect",
-            "Partagez votre réponse avec l'enquêteur"
+            "En attente de connexion..."
           );
         }
         break;
@@ -400,8 +400,13 @@ class WebRTCOnboarding {
     sessionStorage.setItem("webrtc_connected", "false");
 
     // 3. Si on est dans LifeStories, afficher le bouton reconnecter
-    const lifestoriesContainer = document.getElementById("lifestoriesContainer");
-    if (lifestoriesContainer && !lifestoriesContainer.classList.contains("hidden")) {
+    const lifestoriesContainer = document.getElementById(
+      "lifestoriesContainer"
+    );
+    if (
+      lifestoriesContainer &&
+      !lifestoriesContainer.classList.contains("hidden")
+    ) {
       this.showReconnectButton();
     }
   }
@@ -410,10 +415,10 @@ class WebRTCOnboarding {
   showReconnectButton() {
     const reconnectContainer = document.getElementById("reconnect-container");
     const reconnectBtn = document.getElementById("reconnect-btn");
-    
+
     if (reconnectContainer && reconnectBtn) {
       reconnectContainer.classList.remove("hidden");
-      
+
       // Add click listener to redirect to onboarding
       reconnectBtn.onclick = () => {
         this.log("User requested reconnection - returning to onboarding");

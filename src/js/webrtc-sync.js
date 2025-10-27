@@ -231,7 +231,7 @@ class WebRTCSync {
     if (this.connected && this.dc && this.dc.readyState === 'open') {
       // ✅ CONNECTÉ
       statusElement.className = "connected";
-      const role = this.isOfferor ? "HÔTE" : "VIEWER";
+      const role = this.isOfferor ? "Enquêteur" : "Enquêté";
       statusText.textContent = `Connecté (${role})`;
     } else if (wasConnected && !this.connected) {
       // ❌ DÉCONNECTÉ (était connecté avant, plus maintenant)
@@ -239,9 +239,9 @@ class WebRTCSync {
       const role = this.isOfferor ? "HÔTE" : "VIEWER";
       statusText.textContent = `Déconnecté (${role})`;
     } else {
-      // ⚪ STANDALONE (jamais connecté)
+      // ⚪ Hors ligne (jamais connecté)
       statusElement.className = "standalone";
-      statusText.textContent = "Mode standalone";
+      statusText.textContent = "Hors ligne";
     }
   }
 
