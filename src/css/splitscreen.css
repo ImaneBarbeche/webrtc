@@ -128,7 +128,7 @@
     border: none !important;
     border-radius: 2rem;
     padding: 0;
-    border-block: 0.2rem solid transparent !important;
+    border-block: 0.4rem solid transparent !important;
     border-radius: 2rem !important;
     background-clip: padding-box;
     /* padding: 1rem; */
@@ -145,6 +145,30 @@
         border-bottom-left-radius: 0 !important;
         border-bottom-right-radius: 0 !important;
     } 
+}
+
+.vis-label.vis-nesting-group.expanded::before {
+    content: ''
+}
+
+.vis-label.vis-nesting-group.collapsed::before {
+    content: ''
+}
+
+.vis-group {
+  overflow: hidden;
+  transition: height 0.3s ease, opacity 0.3s ease;
+}
+
+.vis-group.collapsing,
+.vis-group.expanding {
+  will-change: height, opacity;
+}
+
+.vis-group.hidden {
+  opacity: 0;
+  height: 0 !important;
+  pointer-events: none;
 }
 
 .vis-labelset .vis-label .vis-inner {
@@ -224,11 +248,22 @@
     border: 2px solid black;
 } */
 
-.vis-panel.vis-left .vis-content .vis-labelset .vis-label.vis-nesting-group.expanded.vis-group-level-0 ~ .vis-label.vis-nested-group:not(:has(~ .vis-label.vis-nested-group)) {
+/* .vis-panel.vis-left .vis-content .vis-labelset .vis-label.vis-nesting-group.expanded.vis-group-level-0 ~ .vis-label.vis-nested-group:not(:has(~ .vis-label.vis-nested-group)) {
     border-bottom-right-radius: 2rem;
     border-bottom-left-radius: 2rem;
-    /* background-color: green !important;
-    border: 2px solid black; */
+} */
+
+/* .vis-panel.vis-left .vis-content .vis-labelset .vis-label.vis-nesting-group.expanded.vis-group-level-0 ~ .vis-label.vis-nested-group:not(:has(~ .vis-label.vis-nested-group)) {
+    border-bottom-right-radius: 2rem;
+    border-bottom-left-radius: 2rem;
+} */
+
+.vis-label.vis-nested-group:has(+ .vis-nesting-group.vis-group-level-0),
+.vis-label.vis-nested-group:last-of-type {
+  border-bottom-left-radius: 2rem;
+  border-bottom-right-radius: 2rem;
+    /* border-bottom: 0.6rem solid transparent !important; */
+
 }
 
 /* .vis-label.vis-nesting-group.expanded.vis-group-level-0 ~ .vis-label.vis-group-level-unknown-but-gte1:last-of-type { 
@@ -247,15 +282,18 @@
 
 }
 
-.vis-item.vis-range.green {
+.vis-item.vis-range.green, .vis-item.vis-range.red, .vis-item.vis-range.blue {
     background-color: #EABCA5;
     border: none;
     border-inline: 0.2rem solid transparent;
-    /* border-style: outset; */
     border-radius: 2rem !important;
     background-clip: padding-box;
-    /* border-radius: 2rem; */
+}
 
-    /* margin-inline: 1rem; */
-    /* padding-block: 1rem; */
+.vis-item.vis-range.red {
+    background-color: #a5beea;
+}
+
+.vis-item.vis-range.blue {
+    background-color: #eaada5;
 }
