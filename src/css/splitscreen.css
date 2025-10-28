@@ -55,7 +55,7 @@
         transform: translateX(50%);
         background-color: inherit;
         pointer-events: none;
-        box-shadow: 0rem 0.08rem var(--primary-beige);
+        box-shadow: 0rem 0.15rem var(--primary-beige);
 
     }
 }
@@ -75,7 +75,7 @@
     margin-left: 5px;
 }
 
-.highlight.green {
+/* .highlight.green {
     box-shadow: rgba(150, 235, 150, 0.4) 0px 5px, rgba(150, 235, 150, 0.3) 0px 10px, rgba(150, 235, 150, 0.2) 0px 15px, rgba(150, 235, 150, 0.1) 0px 20px, rgba(150, 235, 150, 0.05) 0px 25px;
     font-weight: bold !important;
 }
@@ -88,7 +88,7 @@
 .highlight.blue {
     box-shadow: rgba(110, 139, 230, 0.4) 0px 5px, rgba(110, 139, 230, 0.3) 0px 10px, rgba(110, 139, 230, 0.2) 0px 15px, rgba(110, 139, 230, 0.1) 0px 20px, rgba(110, 139, 230, 0.05) 0px 25px;
     font-weight: bold !important;
-}
+} */
 
 /* Surbrillance drag */
 /* .vis-group.line_13{
@@ -209,12 +209,65 @@
 
     margin-inline: 1rem;
     padding-block: .3rem;
-    /* position: relative; */
 
     /* hiding the truncated text effect */
-    overflow: hidden;
+    /* overflow-x: hidden; */
+    /* Update: We can't use it with overflow-y: visible, and since we want to show an element below the label for the highlight, the logic of the fade effect had to change */
+    /* overflow-y: visible; */
+    transition: filter 0.3s ease-in-out;
+
+    &::before {
+        content: "";
+        background-color: var(--label-color);
+        /* background-image: radial-gradient(red 10%, transparent); */
+        /* background-color: red; */
+        bottom: -0.2rem;
+        height: 0.8rem;
+        pointer-events: none;
+        position: absolute;
+        right: 50%;
+        transform: translateX(50%);
+        width: 80%;
+        filter: blur(0.3rem) saturate(1.1);
+        /* filter: url(#noiseFilter); */
+        
+        z-index: -10 !important;
+        opacity: 0;
+        transition: opacity 0.3s ease-in-out;
+    }
+    &::after {
+        /* content: ""; */
+        background-color: transparent;
+        bottom: -0.4rem;
+        height: 0.6rem;
+        pointer-events: none;
+        position: absolute;
+        right: 50%;
+        transform: translateX(50%);
+        width: 80%;
+        /* filter: blur(0.3rem) saturate(0.6); */
+        backdrop-filter: blur(10px);
+        filter: blur(0.2rem);
+        /* z-index: -10 !important; */
+        z-index: 99 !important;
+        opacity: 0;
+        transition: opacity 0.3s ease-in-out;
+        filter: url(#noiseFilter) brightness(1.9);
+        mix-blend-mode:multiply;
+        /* mix-blend-mode: multiply ; */
+        /* -webkit-mask: linear-gradient(white, white); */
+    mask-composite: intersect;
+
+        
+    }
 
 
+
+}
+
+.svg-noise {
+  width: 0;
+  height: 0;
 }
 
 .vis-item.vis-range.green, .vis-item.vis-range.red, .vis-item.vis-range.blue {
@@ -235,20 +288,37 @@
     --label-color: #eaada5;
 }
 
+.highlight {
+    filter: saturate(1.4) brightness(0.98);
+    
+    &::before, &::after {
+        opacity: 1 !important;
+    }
+
+}
+
 .vis-item-overflow {
     position: relative;
+    border-radius: 4rem;
+    /* overflow: visible !important; */
+    /* making sure it looks good on tiny elements */
+    border-inline-end: inset .2rem transparent;
+    /* background-color: blue; */
 
     &::before {
         content: "";
-        background-image: linear-gradient(to right,transparent 20%,var(--label-color));
-        /* background-image: linear-gradient(to right,transparent 20%,red); */
-        bottom: -.2rem;
+        /* background-image: linear-gradient(to right,transparent 10%,var(--label-color)); */
+        /* background-image: linear-gradient(to right,transparent 0% 10%,red 50%); */
+        background-image: linear-gradient(to right,transparent 0% 10%,var(--label-color) 70%);
         height: 100%;
         pointer-events: none;
         position: absolute;
-        /* border-radius: 4rem; */
-        right: 0;
-        width: 40%;
+        border-radius: 4rem;
+        /* logical right */
+        inset-inline-end: -0.2rem;
+        width: 20%;
+        min-width: 2rem;
+        max-width: 4rem;
         z-index: 20;
 
     }

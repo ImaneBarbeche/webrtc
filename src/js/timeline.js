@@ -46,13 +46,14 @@ let isCustomBarMoving = false
 
 // Options principales pour la timeline
 const options = {
-    editable: {
-        add: true,         // Permettre l'ajout d'items
-        updateTime: true,  // Permet de modifier la durée des items (drag)
-        updateGroup: true, // Permet de changer un item de groupe (drag)
-        remove: true,      // Permet de supprimer un item
-        overrideItems: false  // Autoriser ces options à remplacer les paramètres "editable" de l'élément
-    },
+    // editable: {
+    //     add: true,         // Permettre l'ajout d'items
+    //     updateTime: true,  // Permet de modifier la durée des items (drag)
+    //     updateGroup: true, // Permet de changer un item de groupe (drag)
+    //     remove: true,      // Permet de supprimer un item
+    //     overrideItems: false  // Autoriser ces options à remplacer les paramètres "editable" de l'élément
+    // },
+    editable: false,
     zoomMin: 1000 * 60 * 60 * 24 * 365 * 1,  // 5 years in ms
     zoomMax: 1000 * 60 * 60 * 24 * 365 * 50, // 50 years in ms
     min: new Date(),
