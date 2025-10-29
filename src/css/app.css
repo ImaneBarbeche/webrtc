@@ -7,8 +7,10 @@
 :root {
     /* --primary-beige: #F6F1E8; */
     --primary-beige: white;
+    --primary-beige: #FDFAF4;
     --primary-dark: #2E2E2E;
     --primary-grey: #FAFAFA;
+    --primary-grey: #f4e6da;
     /* --primary-grey: rgb(201, 135, 135); */
 }
 

@@ -215,26 +215,38 @@
     /* Update: We can't use it with overflow-y: visible, and since we want to show an element below the label for the highlight, the logic of the fade effect had to change */
     /* overflow-y: visible; */
     transition: filter 0.3s ease-in-out;
+        /* box-shadow: 0rem 0.2rem 0.2rem -0.2rem red; */
+/* filter: drop-shadow(0rem 0.2rem 0.3rem var(--label-color)); */
+        /* box-shadow: 0rem 0.2rem 0.5rem -0.2rem var(--label-color); */
 
+ 
     &::before {
         content: "";
         background-color: var(--label-color);
-        /* background-image: radial-gradient(red 10%, transparent); */
         /* background-color: red; */
-        bottom: -0.2rem;
-        height: 0.8rem;
+        /* background-color: color-mix(in srgb, var(--label-color), transparent 90%); */
+        /* background: transparent; */
+        /* filter: drop-shadow(0rem 0.2rem 0.3rem color-mix(in srgb, var(--label-color), var(--primary-dark) 10%)); */
+        filter: drop-shadow(0rem 0.2rem 0.3rem var(--label-color));
+        /* box-shadow: 0rem 0.2rem 0.2rem -0.2rem red; */
+        border-radius: inherit;
+        /* box-shadow: 0rem 0.1rem 2px 0rem red, 0rem 0.7rem 0px -1.9rem blue, 0rem 0.7rem 2px -0.3rem yellow, 0rem 1.3rem 0px -0.5rem green, 0rem 1.3rem 2px -0.5rem purple; */
+        
+        bottom: 0rem;
+        height: 50%;
         pointer-events: none;
         position: absolute;
         right: 50%;
         transform: translateX(50%);
         width: 80%;
-        filter: blur(0.3rem) saturate(1.1);
-        /* filter: url(#noiseFilter); */
+        /* filter: blur(0.3rem) saturate(1.1); */
         
-        z-index: -10 !important;
+        z-index: -100 !important;
+        z-index: -2 !important;
         opacity: 0;
         transition: opacity 0.3s ease-in-out;
     }
+
     &::after {
         /* content: ""; */
         background-color: transparent;
@@ -290,6 +302,7 @@
 
 .highlight {
     filter: saturate(1.4) brightness(0.98);
+    /* filter: saturate(1.4) brightness(0.98) drop-shadow(0rem 0.1rem 0.2rem color-mix(in srgb, var(--label-color), var(--primary-dark) 10%)); */
     
     &::before, &::after {
         opacity: 1 !important;
@@ -304,6 +317,12 @@
     /* making sure it looks good on tiny elements */
     border-inline-end: inset .2rem transparent;
     /* background-color: blue; */
+
+    /*   using this to clip the image and avoiding overflow: hidden on the container, thus showing the label correctly   */
+    /* -webkit-mask: linear-gradient(white, white); /* full mask */
+    /* -webkit-mask-composite: destination-in;
+    mask-composite: intersect;
+    border-radius: inherit; */
 
     &::before {
         content: "";
@@ -322,4 +341,43 @@
         z-index: 20;
 
     }
+
+        /* &::after {
+        content: "";
+        background-color: var(--label-color);
+        background-color: red;
+        filter: drop-shadow(0rem 0.2rem 0.3rem var(--label-color));
+        border-radius: inherit;
+        
+        bottom: -0.6rem;
+        height: 50%;
+        pointer-events: none;
+        position: absolute;
+        right: 50%;
+        transform: translateX(50%);
+        width: 80%;       
+        z-index: 20 !important; 
+        opacity: 1;
+        transition: opacity 0.3s ease-in-out;
+    } */
+}
+
+.vis-panel.vis-center {
+    mask-image: linear-gradient(
+        to right,
+        transparent 0,
+        black 2%,
+        black 98%,
+        transparent 100%
+    );
+    -webkit-mask-image: linear-gradient(
+        to right,
+        transparent 0,
+        black 2%,
+        black 98%,
+        transparent 100%
+    );
+    /* mask-mode: luminance; */
+    mask-composite: intersect;
+    -webkit-mask-composite: destination-in;
 }
