@@ -27,25 +27,34 @@ body {
 }
 
 .onboarding-container {
-  background: rgba(255, 255, 255, 0.4);
-  border-radius: 20px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  /* background: rgba(255, 255, 255, 0.4); */
+  /* border-radius: 20px; */
+  /* box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1); */
+  /* backdrop-filter: blur(16px); */
+  /* -webkit-backdrop-filter: blur(16px); */
+  /* border: 1px solid rgba(255, 255, 255, 0.3); */
   padding: 40px;
   max-width: 800px;
   width: 90%;
   text-align: center;
 }
 
+header {
+    position: absolute;
+    top: 0px;
+    left: -200px;
+    display: flex;
+    align-items: center;
+    gap: 10px; 
+}
+
 .header h1 {
   font-size: 2.5rem;
   margin-bottom: 10px;
-  background: black;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  /* background: black; */
+  /* -webkit-background-clip: text; */
+  /* -webkit-text-fill-color: transparent; */
+  /* background-clip: text; */
 }
 
 .header p {
@@ -53,6 +62,7 @@ body {
   font-size: 1.1rem;
   margin-bottom: 30px;
 }
+
 
 .connection-status {
   display: flex;
@@ -62,6 +72,9 @@ body {
   padding: 15px;
   border-radius: 10px;
   /* background: #f8f9fa; */
+  position: absolute;
+  top: 0;
+  right: -200px;
 }
 
 .status {
@@ -160,7 +173,6 @@ body {
   margin: 20px 0;
 }
 
-
 .offer-display h3,
 .wait-response h3,
 .scan-offer h3,
@@ -183,19 +195,18 @@ body {
   display: none;
 }
 
-
 /* Wait response - highlighted when active */
 .wait-response {
   /* background: linear-gradient(135deg, #667eea15, #764ba215); */
-  border: 2px solid #ffe6a7;
+  /* border: 2px solid #ffe6a7; */
   border-radius: 15px;
   padding: 25px;
 }
 
-.wait-response h3 {
-  color: #667eea;
+/* .wait-response h3 {
+  color: #000000;
   font-size: 1.6rem;
-}
+} */
 
 /* QR Section - both for offer and answer */
 .qr-section {
@@ -212,7 +223,7 @@ body {
 #qrCanvas,
 #qrCanvasAnswer {
   margin: 10px auto;
-  border: 2px solid #e9ecef;
+  /* border: 2px solid #e9ecef; */
   border-radius: 10px;
   padding: 15px;
   background: white;
@@ -226,7 +237,7 @@ body {
   width: 100%;
   max-width: 500px;
   padding: 15px;
-  border: 2px solid #e9ecef;
+  /* border: 2px solid #e9ecef; */
   border-radius: 8px;
   font-family: "Courier New", monospace;
   font-size: 0.85rem;
@@ -284,7 +295,6 @@ body {
   font-size: 0.9rem;
 }
 
-.primary-btn,
 .secondary-btn,
 .scan-btn,
 .copy-btn,
@@ -298,15 +308,41 @@ body {
   font-size: 1rem;
 }
 
-.primary-btn {
+.interviewee-btn, .interviewer-btn {
   background: transparent;
-  border: 2px solid #fee7b7;
-  color: black; 
+  color: black;
+   padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1rem;
 }
 
-.primary-btn:hover {
+.continue-btn {
+  background: black;
+  color: white;
+   padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+}
+
+.interviewee-btn:hover, .interviewer-btn:hover, .continue-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 16px #fee7b7;
+}
+
+.interviewer-btn.selected {
+background-color: #b7e9ff5a;
+}
+
+.interviewee-btn.selected {
+background-color: #fee7b76e;
 }
 
 .scan-btn {
@@ -326,7 +362,7 @@ body {
   justify-content: center;
   font-size: 1.05rem;
   margin: 20px auto; /* center horizontally */
-  box-shadow: 0 12px 32px rgba(0,0,0,0.35);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
 }
 
 #scanResponseBtn:hover {
@@ -349,7 +385,7 @@ body {
   justify-content: center;
   background: #fff; /* white inner square */
   border-radius: 8px;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.06);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
 }
 .scan-frame .scan-btn {
   width: 100%;
@@ -364,7 +400,9 @@ body {
   align-items: center;
   justify-content: center;
 }
-.scan-frame .scan-btn:hover { transform: none; }
+.scan-frame .scan-btn:hover {
+  transform: none;
+}
 
 .corner {
   position: absolute;
@@ -372,32 +410,71 @@ body {
   height: 44px;
   pointer-events: none;
 }
-.corner::before, .corner::after {
+.corner::before,
+.corner::after {
   content: "";
   position: absolute;
   background: #111;
   border-radius: 3px;
 }
-.corner::before { /* horizontal */
+.corner::before {
+  /* horizontal */
   height: 6px;
   width: 28px;
 }
-.corner::after { /* vertical */
+.corner::after {
+  /* vertical */
   width: 6px;
   height: 28px;
 }
-.top-left { left: -8px; top: -8px; }
-.top-left::before { left: 0; top: 0; }
-.top-left::after  { left: 0; top: 0; }
-.top-right { right: -8px; top: -8px; }
-.top-right::before { right: 0; top: 0; }
-.top-right::after  { right: 0; top: 0; }
-.bottom-left { left: -8px; bottom: -8px; }
-.bottom-left::before { left: 0; bottom: 0; }
-.bottom-left::after  { left: 0; bottom: 0; }
-.bottom-right { right: -8px; bottom: -8px; }
-.bottom-right::before { right: 0; bottom: 0; }
-.bottom-right::after  { right: 0; bottom: 0; }
+.top-left {
+  left: -8px;
+  top: -8px;
+}
+.top-left::before {
+  left: 0;
+  top: 0;
+}
+.top-left::after {
+  left: 0;
+  top: 0;
+}
+.top-right {
+  right: -8px;
+  top: -8px;
+}
+.top-right::before {
+  right: 0;
+  top: 0;
+}
+.top-right::after {
+  right: 0;
+  top: 0;
+}
+.bottom-left {
+  left: -8px;
+  bottom: -8px;
+}
+.bottom-left::before {
+  left: 0;
+  bottom: 0;
+}
+.bottom-left::after {
+  left: 0;
+  bottom: 0;
+}
+.bottom-right {
+  right: -8px;
+  bottom: -8px;
+}
+.bottom-right::before {
+  right: 0;
+  bottom: 0;
+}
+.bottom-right::after {
+  right: 0;
+  bottom: 0;
+}
 
 .secondary-btn {
   background: #6c757d;
@@ -672,3 +749,22 @@ body {
 #debugLog.visible {
   display: block;
 }
+
+#confirm-button {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    padding: 10px 20px;
+    background-color: #060606;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    display: none; /* Caché par défaut */
+}
+
+#confirm-button.visible {
+    display: block; /* Affiche le bouton lorsqu'il est visible */
+}
+
+

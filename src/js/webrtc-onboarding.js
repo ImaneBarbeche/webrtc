@@ -65,10 +65,10 @@ class WebRTCOnboarding {
     }
     // Role selection
     this.elements.selectInterviewer.addEventListener("click", () =>
-      this.selectInterviewerRole()
+      this.highlightCard("enqueteur")
     );
     this.elements.selectInterviewee.addEventListener("click", () =>
-      this.selectIntervieweeRole()
+      this.highlightCard("enquete")
     );
 
     // Interviewer (Host) actions
@@ -99,6 +99,28 @@ class WebRTCOnboarding {
     this.elements.responseInput.addEventListener("input", (e) => {
       this.elements.processResponseBtn.disabled = !e.target.value.trim();
     });
+
+    // Card selection for interviewer
+    const cards = document.querySelectorAll('.card');
+    const confirmButton = document.getElementById('confirm-button');
+    let selectedCard = null;
+
+    cards.forEach(card => {
+        card.addEventListener('click', () => {
+            cards.forEach(c => c.classList.remove('selected'));
+            card.classList.add('selected');
+            selectedCard = card.id;
+            confirmButton.classList.add('visible');
+        });
+    });
+
+    confirmButton.addEventListener('click', () => {
+    if (this.selectedRole === 'enqueteur') {
+        this.selectInterviewerRole();
+    } else if (this.selectedRole === 'enquete') {
+        this.selectIntervieweeRole();
+    }
+});
   }
 
   log(message) {
@@ -118,6 +140,7 @@ class WebRTCOnboarding {
     this.elements.interviewerFlow.classList.remove("hidden");
     this.setStateAndStatus("offerCreating", "Création de la session...");
     this.createOffer();
+    document.getElementById('confirm-button').classList.remove('visible');
   }
 
   selectIntervieweeRole() {
@@ -126,6 +149,7 @@ class WebRTCOnboarding {
     this.elements.roleSelection.classList.add("hidden");
     this.elements.intervieweeFlow.classList.remove("hidden");
     this.setStateAndStatus("off", "En attente de connexion...");
+    document.getElementById('confirm-button').classList.remove('visible');
   }
 
   // Interviewer: Create offer automatically
@@ -708,6 +732,19 @@ class WebRTCOnboarding {
         this.receiveOffer();
       }, 500); // Small delay to show success message
     }
+  }
+
+  highlightCard(role) {
+    const cards = [this.elements.selectInterviewer, this.elements.selectInterviewee];
+    const confirmButton = document.getElementById('confirm-button');
+    cards.forEach(card => card.classList.remove('selected'));
+    if (role === "enqueteur") {
+        this.elements.selectInterviewer.classList.add('selected');
+    } else if (role === "enquete") {
+        this.elements.selectInterviewee.classList.add('selected');
+    }
+    confirmButton.classList.add('visible');
+    this.selectedRole = role;
   }
 }
 
