@@ -116,7 +116,33 @@ function getAttributes(event){
   }
 }
 
+/**
+ * Affiche un toast de notification
+ * @param {string} title - Titre de l'alerte
+ * @param {string} text - Texte de l'alerte
+ * @param {string} icon - Type d'icône (success, error, warning, info)
+ * @param {number} timer - Durée d'affichage en ms (optionnel)
+ */
+function prettyAlert(title, text, icon = 'info', timer = 2000) {
+  const Toast = Swal.mixin({
+    toast: true,
+    position: 'top-end',
+    showConfirmButton: false,
+    timer: timer,
+    timerProgressBar: true,
+    didOpen: (toast) => {
+      toast.addEventListener('mouseenter', Swal.stopTimer)
+      toast.addEventListener('mouseleave', Swal.resumeTimer)
+    }
+  });
+
+  Toast.fire({
+    icon: icon,
+    title: title,
+    text: text
+  });
+}
 
   
 
-export { prettyPrompt, prettyEpisode, prettyConfirm, getAttributes }
+export { prettyPrompt, prettyEpisode, prettyConfirm, getAttributes, prettyAlert }

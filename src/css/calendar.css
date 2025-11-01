@@ -23,6 +23,37 @@
     
 }
 
+/* Styles pour les groupes landmarks */
+.vis-label.vis-nesting-group {
+    cursor: pointer;
+}
+
+/* Effet hover pour indiquer qu'on peut faire un appui long */
+.vis-label.vis-nested-group:hover {
+    background-color: rgba(0, 123, 255, 0.05);
+    transition: background-color 0.2s ease;
+}
+
+/* Animation pour l'appui long */
+.vis-label.vis-nested-group:active {
+    background-color: rgba(0, 123, 255, 0.15);
+    transition: background-color 0.5s ease;
+}
+
+/* Style pour les groupes qui sont des landmarks */
+.vis-label.vis-nested-group.landmark {
+    font-weight: bold;
+    border-left: 3px solid #007bff;
+}
+
+/* Amélioration tactile pour tablettes */
+@media (hover: none) and (pointer: coarse) {
+    .vis-label.vis-nested-group {
+        padding: 8px;
+        min-height: 44px; /* Taille minimale tactile recommandée */
+    }
+}
+
 
 
 /* ========================================

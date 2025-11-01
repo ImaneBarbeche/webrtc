@@ -7,6 +7,14 @@ import { test_items } from "./dataset.js";
  *****************************************************************************************************
  * timeline.js gère l'initialisation, le rendu graphique et les interactions possibles du calendrier *
  *                                                                                                   *
+ * FONCTIONNALITÉS LANDMARKS :                                                                       *
+ * - Clic simple sur un groupe parent : ouvre/ferme les sous-groupes                                *
+ * - Appui long (500ms) sur un sous-groupe : bascule son statut landmark                            *
+ *   → Fonctionne aussi bien sur desktop que sur tablette/mobile                                    *
+ * - Les landmarks sont les sous-groupes dont les items restent visibles sur la ligne parent        *
+ *   même quand le groupe parent est fermé                                                          *
+ * - Un feedback visuel (toast) confirme l'activation/désactivation du landmark                     *
+ *                                                                                                   *
  *****************************************************************************************************
 */
 
@@ -15,20 +23,20 @@ import { test_items } from "./dataset.js";
 
 const groupsData = [
     // MIGRATOIRE
-    { id: 1, content: "Migratoire", nestedGroups: [11,12,13], showNested: true, className: "vert", landmarkChildren: [13]},
+    { id: 1, content: "Migratoire", nestedGroups: [11,12,13], showNested: true, className: "vert"},
     { id: 11, content: "Statut résidentiel", dependsOn: 12, className: "line_11"},
     { id: 12, content: "Logement", dependsOn: 13, className: "line_12"},
-    { id: 13, content: "📍 Commune", keyof: 1, className: "line_13", isLandmark: true},
+    { id: 13, content: "Commune", keyof: 1, className: "line_13"},
     
     // SCOLAIRE
-    { id: 2, content: "Scolaire", nestedGroups: [21,22,23], showNested: false, className: "bleu", landmarkChildren: [23]},
+    { id: 2, content: "Scolaire", nestedGroups: [21,22,23], showNested: false, className: "bleu"},
     { id: 21, content: "Établissements", dependsOn: 23, className: "line_21"},
     { id: 22, content: "Formations", dependsOn: 23, className: "line_22"},
-    { id: 23, content: "📍 Diplômes", keyof: 2, className: "line_23", isLandmark: true},
+    { id: 23, content: "Diplômes", keyof: 2, className: "line_23"},
     
     // PROFESSIONNELLE
-    { id: 3, content: "Professionnelle", nestedGroups: [31,32], showNested: false, className: "rouge", landmarkChildren: [31]},
-    { id: 31, content: "📍 Postes", keyof: 3, className: "line_31", isLandmark: true},
+    { id: 3, content: "Professionnelle", nestedGroups: [31,32], showNested: false, className: "rouge"},
+    { id: 31, content: "Postes", keyof: 3, className: "line_31"},
     { id: 32, content: "Contrats", dependsOn: 31, className: "line_32"}
 ];
 
@@ -230,12 +238,109 @@ window.timeline = timeline;
  * GESTION DES LANDMARKS (REPÈRES TEMPORELS)
  * Permet d'afficher certains sous-groupes sur la ligne parent quand celui-ci est fermé
  */
-timeline.on('click', function(properties) {
-    // Vérifier si c'est un clic sur un label de groupe parent (qui a des nestedGroups)
+
+/**
+ * Bascule le statut landmark d'un sous-groupe
+ * @param {number} groupId - ID du sous-groupe à basculer
+ */
+function toggleLandmark(groupId) {
+    const group = groups.get(groupId);
+    
+    // Vérifier si c'est bien un sous-groupe (qui a nestedInGroup)
+    if (!group || !group.nestedInGroup) {
+        console.warn('Ce groupe n\'est pas un sous-groupe');
+        return;
+    }
+    
+    const parentGroup = groups.get(group.nestedInGroup);
+    if (!parentGroup) return;
+    
+    // Initialiser landmarkChildren si nécessaire
+    if (!parentGroup.landmarkChildren) {
+        parentGroup.landmarkChildren = [];
+    }
+    
+    // Basculer le statut landmark
+    const isCurrentlyLandmark = group.isLandmark || false;
+    group.isLandmark = !isCurrentlyLandmark;
+    
+    // Mettre à jour landmarkChildren du parent
+    if (group.isLandmark) {
+        // Ajouter à landmarkChildren si pas déjà présent
+        if (!parentGroup.landmarkChildren.includes(groupId)) {
+            parentGroup.landmarkChildren.push(groupId);
+        }
+        // Ajouter l'icône 📍 si pas présent
+        if (!group.content.includes('📍')) {
+            group.content = '📍 ' + group.content.trim();
+        }
+    } else {
+        // Retirer de landmarkChildren
+        parentGroup.landmarkChildren = parentGroup.landmarkChildren.filter(id => id !== groupId);
+        // Retirer l'icône 📍
+        group.content = group.content.replace('📍 ', '').trim();
+    }
+    
+    // Mettre à jour les groupes
+    groups.update(group);
+    groups.update(parentGroup);
+    
+    console.log(`Landmark ${group.isLandmark ? 'activé' : 'désactivé'} pour: ${group.content}`);
+    
+    // Feedback visuel avec SweetAlert2
+    utils.prettyAlert(
+        group.isLandmark ? '📍 Landmark activé' : 'Landmark désactivé',
+        `${group.content.replace('📍 ', '')} ${group.isLandmark ? 'restera visible' : 'ne sera plus visible'} quand le groupe est fermé`,
+        'success',
+        1500
+    );
+}
+
+// Gestion de l'appui long pour les landmarks (desktop et tablette)
+let longPressTimer = null;
+let longPressTarget = null;
+const LONG_PRESS_DURATION = 500; // 500ms pour déclencher l'appui long
+
+timeline.on('mouseDown', function(properties) {
     if (properties.what === 'group-label' && properties.group) {
         const clickedGroup = groups.get(properties.group);
         
-        // Vérifier si ce groupe a des landmarks définis
+        // Seulement pour les sous-groupes
+        if (clickedGroup && clickedGroup.nestedInGroup) {
+            longPressTarget = properties.group;
+            
+            // Démarrer le timer d'appui long
+            longPressTimer = setTimeout(() => {
+                // Appui long détecté : basculer le landmark
+                toggleLandmark(longPressTarget);
+                longPressTarget = null; // Marquer comme traité
+            }, LONG_PRESS_DURATION);
+        }
+    }
+});
+
+timeline.on('mouseUp', function(properties) {
+    // Annuler le timer si on relâche avant la durée requise
+    if (longPressTimer) {
+        clearTimeout(longPressTimer);
+        longPressTimer = null;
+    }
+});
+
+timeline.on('click', function(properties) {
+    // Vérifier si c'est un clic sur un label de groupe
+    if (properties.what === 'group-label' && properties.group) {
+        const clickedGroup = groups.get(properties.group);
+        
+        // Si c'était un appui long traité, ne pas continuer
+        if (longPressTarget === null && clickedGroup && clickedGroup.nestedInGroup) {
+            // On vient de traiter un appui long, réinitialiser
+            longPressTarget = undefined;
+            return;
+        }
+        longPressTarget = undefined;
+        
+        // Vérifier si ce groupe a des landmarks définis (logique normale de fermeture/ouverture)
         if (clickedGroup && clickedGroup.landmarkChildren && clickedGroup.landmarkChildren.length > 0) {
             
             // Petit délai pour que vis.js finisse de toggle le groupe
@@ -410,4 +515,4 @@ document.getElementById('load').addEventListener('click',function (){
 //wrapper
 
 // Exposer timeline et les datasets pour les autres fichiers
-export { timeline, items, groups, handleDragStart, handleDragEnd };
+export { timeline, items, groups, handleDragStart, handleDragEnd, toggleLandmark };
