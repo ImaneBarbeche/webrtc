@@ -466,10 +466,24 @@ timeline.on("timechange", function (event) {
   // Vérifier si la barre verticale passe sur un item
   items.forEach((item) => {
     var itemStart = new Date(item.start).getTime();
-    var itemEnd = item.end ? new Date(item.end).getTime() : itemStart + stepSize; // Si pas de fin, un jour par défaut
+    var itemEnd = item.end ? new Date(item.end).getTime() : itemStart;
     console.log(item)
-    // Si la barre verticale est dans l'intervalle de l'item, on le surligne
-    if (snappedTime >= itemStart && snappedTime <= itemEnd) {
+    
+    // Pour les événements ponctuels, vérifier si on est dans la même année
+    // Pour les périodes, vérifier si on est dans l'intervalle
+    let isInRange;
+    if (item.type === "point" || item.type === "box") {
+      // Pour les points et box, comparer les années
+      const itemYear = new Date(item.start).getFullYear();
+      const barYear = new Date(snappedTime).getFullYear();
+      isInRange = itemYear === barYear;
+    } else {
+      // Pour les périodes, vérifier l'intervalle classique
+      isInRange = snappedTime >= itemStart && snappedTime <= itemEnd;
+    }
+    
+    // Si la barre verticale passe sur l'item, on le surligne
+    if (isInRange) {
       // Ajouter une classe CSS pour surligner l'item
       item.className += item.className.includes('highlight') ? '' : ' highlight'
       items.update(item)
@@ -477,17 +491,33 @@ timeline.on("timechange", function (event) {
       let groupObject = groups.get(item.group)
       let groupName = groupObject.nestedInGroup ? `${groups.get(groupObject.nestedInGroup).content} --> ${groupObject.content}` : groupObject.content
       let ageDebut = new Date(item.start).getFullYear() - new Date(timeline.options.start).getFullYear()
-      let ageFin = new Date(item.end).getFullYear() - new Date(timeline.options.start).getFullYear()
-      let duration = new Date(item.end).getFullYear() - new Date(item.start).getFullYear()
-      let html = `<div class='card'>
-                    <h3>${groupName}</h3>
-                    <h4>${item.content}</h4>
-                    <ul>
-                      <li>De ${new Date(item.start).getFullYear()} à ${new Date(item.end).getFullYear()}</li>
-                      <li>De ${ageDebut} an(s) à ${ageFin} an(s)</li>
-                      <li>Durée: ${duration} an(s)</li>
-                    </ul>
-                  </div>`
+      
+      let html;
+      if (item.type === "point" || item.type === "box") {
+        // Pour les événements ponctuels (brevet, diplômes, etc.)
+        html = `<div class='card'>
+                  <h3>${groupName}</h3>
+                  <h4>${item.content}</h4>
+                  <ul>
+                    <li>Année: ${new Date(item.start).getFullYear()}</li>
+                    <li>Âge: ${ageDebut} an(s)</li>
+                  </ul>
+                </div>`
+      } else {
+        // Pour les périodes (range)
+        let ageFin = new Date(item.end).getFullYear() - new Date(timeline.options.start).getFullYear()
+        let duration = new Date(item.end).getFullYear() - new Date(item.start).getFullYear()
+        html = `<div class='card'>
+                  <h3>${groupName}</h3>
+                  <h4>${item.content}</h4>
+                  <ul>
+                    <li>De ${new Date(item.start).getFullYear()} à ${new Date(item.end).getFullYear()}</li>
+                    <li>De ${ageDebut} an(s) à ${ageFin} an(s)</li>
+                    <li>Durée: ${duration} an(s)</li>
+                  </ul>
+                </div>`
+      }
+      
       console.log(groups.get(item.group))
       document.getElementById('moreInfos').innerHTML += html
     }
