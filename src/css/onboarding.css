@@ -13,18 +13,7 @@ body {
   align-items: center;
   justify-content: center;
   color: #333;
-  background: radial-gradient(
-      ellipse 50vw 35vh at 0% 100%,
-      #ffe6a7 80%,
-      transparent 100%
-    ),
-    radial-gradient(
-      ellipse 50vw 35vh at 100% 0%,
-      #b7eaff 80%,
-      transparent 100%
-    ),
-    #f7ede2;
-  background-attachment: fixed;
+  background-color: var(--primary-beige);
 }
 
 .onboarding-container {

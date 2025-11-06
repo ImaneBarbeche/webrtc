@@ -75,39 +75,7 @@
     margin-left: 5px;
 }
 
-.highlight.green {
-    box-shadow: rgba(150, 235, 150, 0.4) 0px 5px, rgba(150, 235, 150, 0.3) 0px 10px, rgba(150, 235, 150, 0.2) 0px 15px, rgba(150, 235, 150, 0.1) 0px 20px, rgba(150, 235, 150, 0.05) 0px 25px;
-    font-weight: bold !important;
-}
-
-.highlight.red {
-    box-shadow: rgba(231, 104, 104, 0.4) 0px 5px, rgba(231, 104, 104, 0.3) 0px 10px, rgba(231, 104, 104, 0.2) 0px 15px, rgba(231, 104, 104, 0.1) 0px 20px, rgba(231, 104, 104, 0.05) 0px 25px;
-    font-weight: bold !important;
-}
-
-.highlight.blue {
-    box-shadow: rgba(110, 139, 230, 0.4) 0px 5px, rgba(110, 139, 230, 0.3) 0px 10px, rgba(110, 139, 230, 0.2) 0px 15px, rgba(110, 139, 230, 0.1) 0px 20px, rgba(110, 139, 230, 0.05) 0px 25px;
-    font-weight: bold !important;
-}
-
-/* Surbrillance drag */
-/* .vis-group.line_13{
-    
-} */
-
-/* .vis-center{
-} */
-
-/* .vis-center .vis-group:not(.line_13){
-    
-} */
-
-/* #mask{
-    
-} */
-
 .vis-group {
-    /* background-color: red; */
     border: none !important;
 }
 
@@ -136,8 +104,6 @@
     .vis-inner {
         border: none !important;
         border-radius: 0rem !important;
-        /* background-color: red !important; */
-        /* padding: 1rem !important; */
     }
 
     &.expanded {
@@ -151,37 +117,6 @@
     padding: 1rem;
     /* border-radius: 0rem !important; */
 }
-
-
-/* .vis-labelset .vis-label:last-child:not(.vis-group-level-0) {
-    background-color: red;
-}
-
-.vis-label.vis-group-level-unknown-but-gte1:last-child {
-    background-color: red !important;
-    border-bottom-left-radius: 2rem;
-    border-bottom-right-radius: 2rem;
-} */
-
-/* .vis-ltr .vis-label:not(.vis-nesting-group):not(.vis-group-level-0) {
-    background-color: var(--primary-grey);
-
-    &:last-of-type {
-        background-color: red !important;
-        border: 2px solid red;
-        border-radius: 2rem !important;
-    }
-}
-
-.vis-ltr .vis-label:not(.vis-nesting-group):not(.vis-group-level-0):last-child {
-    background-color: red !important;
-    outline: dashed red !important;
-}
-
-.vis-ltr .vis-label:not(.vis-nesting-group):not(.vis-group-level-0):last-of-type {
-    background-color: blue !important;
-    outline: dashed blue !important;
-} */
 
 .vis-label.vis-nested-group.vis-group-level-unknown-but-gte1 {
     border: none;
@@ -200,45 +135,9 @@
     }
 }
 
-/* .vis-ltr .vis-label.vis-nested-group:last-of-type {
-    background-color: red !important;
-} */
-
-/* .vis-label.vis-nested-group:last-of-type, */
-/* .vis-label.vis-group-level-unknown-but-gte1:nth-of-type(4) {
-    background-color: blue !important;
-    border: 2px solid black;
-} */
-
-/* .vis-label.vis-nesting-group.expanded.vis-group-level-0 ~ .vis-label.vis-group-level-unknown-but-gte1 {
-    background-color: blue;
-} */
-
-/* .vis-label.vis-nesting-group.expanded.vis-group-level-0 ~ .vis-label.vis-group-level-unknown-but-gte1:nth-of-type(4) { */
-    /* background-color: red !important; */
-    /* border: 2px solid black;
-} */
-
-/* .vis-label.vis-nesting-group.expanded.vis-group-level-0 ~ .vis-label.vis-nested-group.vis-group-level-unknown-but-gte1:last-of-type {
-    background-color: green !important;
-    border: 2px solid black;
-} */
-
 .vis-panel.vis-left .vis-content .vis-labelset .vis-label.vis-nesting-group.expanded.vis-group-level-0 ~ .vis-label.vis-nested-group:not(:has(~ .vis-label.vis-nested-group)) {
     border-bottom-right-radius: 2rem;
     border-bottom-left-radius: 2rem;
-    /* background-color: green !important;
-    border: 2px solid black; */
-}
-
-/* .vis-label.vis-nesting-group.expanded.vis-group-level-0 ~ .vis-label.vis-group-level-unknown-but-gte1:last-of-type { 
-    background-color: red !important;
-} */
-
-/* 
-.vis-label.vis-nested-groupvis-label.vis-group-level-unknown-but-gte1 {
-    background-color: red !important;
-} */
 
 .vis-item.vis-range {
     margin-inline: 1rem;
@@ -251,11 +150,7 @@
     background-color: #EABCA5;
     border: none;
     border-inline: 0.2rem solid transparent;
-    /* border-style: outset; */
     border-radius: 2rem !important;
     background-clip: padding-box;
-    /* border-radius: 2rem; */
-
-    /* margin-inline: 1rem; */
-    /* padding-block: 1rem; */
+}
 }
