@@ -1,0 +1,132 @@
+/* HomePage - Layout principal */
+.homepage-container {
+  display: flex;
+  width: 100%;
+  height: 100vh;
+  background-color: #F6F1E8;
+}
+
+/* Section gauche - 50% */
+.homepage-left {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+}
+
+/* Fenêtre contenant les SVG */
+.svg-window {
+  position: relative;
+  width: 400px;
+  height: 500px;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  padding: 20px;
+}
+
+/* Positionnement des formes SVG */
+.shape {
+  position: absolute;
+  opacity: 0.9;
+}
+
+.shape-green {
+  top: 30px;
+  right: 50px;
+  width: 250px;
+  height: auto;
+}
+
+.shape-blue {
+  bottom: 150px;
+  left: 30px;
+  width: 180px;
+  height: auto;
+}
+
+.shape-yellow {
+  bottom: 80px;
+  left: 100px;
+  width: 200px;
+  height: auto;
+}
+
+/* Section droite - 50% */
+.homepage-right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 0 80px;
+}
+
+/* Titre */
+.homepage-title {
+  font-size: 64px;
+  font-weight: 400;
+  color: #2E2E2E;
+  margin: 0 0 30px 0;
+  line-height: 1.2;
+  font-family: 'Courier New', monospace;
+}
+
+/* Sous-titre */
+.homepage-subtitle {
+  font-size: 14px;
+  color: #666;
+  margin: 0 0 50px 0;
+  font-weight: 400;
+}
+
+/* Bouton Start */
+.homepage-start-btn {
+  background: #2E2E2E;
+  color: white;
+  border: none;
+  padding: 14px 50px;
+  font-size: 16px;
+  font-weight: 500;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+}
+
+.homepage-start-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+}
+
+.homepage-start-btn:active {
+  transform: translateY(0);
+}
+
+/* Responsive - Tablette */
+@media (max-width: 1024px) {
+  .homepage-container {
+    flex-direction: column;
+  }
+
+  .homepage-left {
+    padding: 30px;
+  }
+
+  .svg-window {
+    width: 300px;
+    height: 400px;
+  }
+
+  .homepage-right {
+    padding: 30px;
+    align-items: center;
+    text-align: center;
+  }
+
+  .homepage-title {
+    font-size: 48px;
+  }
+}
