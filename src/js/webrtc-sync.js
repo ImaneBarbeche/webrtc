@@ -218,30 +218,28 @@ class WebRTCSync {
    * Mettre à jour l'indicateur visuel de statut WebRTC
    */
   updateStatusIndicator() {
-    const statusElement = document.getElementById("webrtc-status");
-    const statusText = document.getElementById("webrtc-status-text");
-
-    if (!statusElement || !statusText) {
-      return; // L'indicateur n'existe pas sur cette page
-    }
-
     // Vérifier si on a été connecté avant (pour distinguer "jamais connecté" vs "déconnecté")
     const wasConnected = sessionStorage.getItem('webrtc_connected') === 'true';
 
+    let status, role;
+
     if (this.connected && this.dc && this.dc.readyState === 'open') {
       // ✅ CONNECTÉ
-      statusElement.className = "connected";
-      const role = this.isOfferor ? "Enquêteur" : "Enquêté";
-      statusText.textContent = `Connecté (${role})`;
+      status = "connected";
+      role = this.isOfferor ? "offeror" : "answerer";
     } else if (wasConnected && !this.connected) {
       // ❌ DÉCONNECTÉ (était connecté avant, plus maintenant)
-      statusElement.className = "disconnected";
-      const role = this.isOfferor ? "HÔTE" : "VIEWER";
-      statusText.textContent = `Déconnecté (${role})`;
+      status = "disconnected";
+      role = this.isOfferor ? "offeror" : "answerer";
     } else {
       // ⚪ Hors ligne (jamais connecté)
-      statusElement.className = "standalone";
-      statusText.textContent = "Hors ligne";
+      status = "standalone";
+      role = null;
+    }
+
+    // Appeler la fonction React si disponible
+    if (window.updateWebRTCStatus) {
+      window.updateWebRTCStatus(role, status);
     }
   }
 

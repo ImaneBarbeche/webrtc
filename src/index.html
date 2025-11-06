@@ -38,14 +38,11 @@
   <body>
         <div class="onboarding-container">
       <header>
-        <img src="../src/assets/imgs/LFlogo.png" alt="Logo LifeStories" width="80" height="80">
+        <img src="./assets/imgs/LFlogo.png" alt="Logo LifeStories">
         <h1>LifeStories</h1>
       </header>
 
-      <div class="connection-status">
-        <div id="status-indicator" class="status offline"></div>
-        <span id="status-text">Hors ligne</span>
-      </div>
+      <div id="status-root"></div>
 
       <!-- Step 1: Role Selection -->
       <div class="role-selection" id="roleSelection">
@@ -205,16 +202,18 @@
     <!-- Section LifeStories (cachée au démarrage) -->
     <div class="lifestories-container" id="lifestoriesContainer">
       <!-- Indicateur de statut WebRTC -->
-      <div id="webrtc-status" class="standalone">
-        <span class="dot"></span>
-        <span id="webrtc-status-text">Mode hors ligne</span>
-      </div>
+      <div id="webrtc-status-root"></div>
 
       <!-- Bouton de reconnexion (caché par défaut) -->
       <div id="reconnect-container" class="hidden">
-        <button id="reconnect-btn" class="reconnect-button">
-          Se reconnecter
-        </button>
+        <div>
+          <h1>Connexion perdue</h1>
+          <img src="assets/imgs/connectionlost.png" alt="Connexion perdue">
+          <span>Connexion perdue : veuillez vous reconnecter</span>
+          <button id="reconnect-btn" class="reconnect-button">
+            Se reconnecter
+          </button>
+        </div>
       </div>
 
       <div class="split">
@@ -243,6 +242,7 @@
     </div>
 
     <!-- Scripts Onboarding -->
+    <script type="module" src="/main.js"></script>
     <script src="js/qrcode.min.js"></script>
     <script src="js/qr-gen.js"></script>
     <script src="js/qr-scan.js"></script>

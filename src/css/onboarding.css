@@ -740,20 +740,7 @@ background-color: #fee7b76e;
 
 /* Responsive design */
 @media (max-width: 768px) {
-  body {
-    background: radial-gradient(
-        ellipse 60vw 30vh at 0% 100%,
-        #ffe6a7 80%,
-        transparent 100%
-      ),
-      radial-gradient(
-        ellipse 60vw 30vh at 100% 0%,
-        #b7eaff 80%,
-        transparent 100%
-      ),
-      #f7ede2;
-  }
-  
+
   .connection-modes,
   .role-cards {
     grid-template-columns: 1fr;
@@ -806,21 +793,7 @@ background-color: #fee7b76e;
 }
 
 /* Tablette 11" (landscape: 1024x768, portrait: 768x1024) */
-@media (min-width: 769px) and (max-width: 1200px) {
-  body {
-    background: radial-gradient(
-        ellipse 45vw 40vh at 0% 100%,
-        #ffe6a7 80%,
-        transparent 100%
-      ),
-      radial-gradient(
-        ellipse 45vw 40vh at 100% 0%,
-        #b7eaff 80%,
-        transparent 100%
-      ),
-      #f7ede2;
-  }
-  
+@media (min-width: 769px) and (max-width: 1200px) {  
   .onboarding-container {
     max-width: 90%;
     padding: 100px 30px 30px 30px;

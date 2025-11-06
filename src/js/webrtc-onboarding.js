@@ -101,26 +101,26 @@ class WebRTCOnboarding {
     });
 
     // Card selection for interviewer
-    const cards = document.querySelectorAll('.card');
-    const confirmButton = document.getElementById('confirm-button');
+    const cards = document.querySelectorAll(".card");
+    const confirmButton = document.getElementById("confirm-button");
     let selectedCard = null;
 
-    cards.forEach(card => {
-        card.addEventListener('click', () => {
-            cards.forEach(c => c.classList.remove('selected'));
-            card.classList.add('selected');
-            selectedCard = card.id;
-            confirmButton.classList.add('visible');
-        });
+    cards.forEach((card) => {
+      card.addEventListener("click", () => {
+        cards.forEach((c) => c.classList.remove("selected"));
+        card.classList.add("selected");
+        selectedCard = card.id;
+        confirmButton.classList.add("visible");
+      });
     });
 
-    confirmButton.addEventListener('click', () => {
-    if (this.selectedRole === 'enqueteur') {
+    confirmButton.addEventListener("click", () => {
+      if (this.selectedRole === "enqueteur") {
         this.selectInterviewerRole();
-    } else if (this.selectedRole === 'enquete') {
+      } else if (this.selectedRole === "enquete") {
         this.selectIntervieweeRole();
-    }
-});
+      }
+    });
   }
 
   log(message) {
@@ -140,7 +140,7 @@ class WebRTCOnboarding {
     this.elements.interviewerFlow.classList.remove("hidden");
     this.setStateAndStatus("offerCreating", "Création de la session...");
     this.createOffer();
-    document.getElementById('confirm-button').classList.remove('visible');
+    document.getElementById("confirm-button").classList.remove("visible");
   }
 
   selectIntervieweeRole() {
@@ -149,7 +149,7 @@ class WebRTCOnboarding {
     this.elements.roleSelection.classList.add("hidden");
     this.elements.intervieweeFlow.classList.remove("hidden");
     this.setStateAndStatus("off", "En attente de connexion...");
-    document.getElementById('confirm-button').classList.remove('visible');
+    document.getElementById("confirm-button").classList.remove("visible");
   }
 
   // Interviewer: Create offer automatically
@@ -259,8 +259,18 @@ class WebRTCOnboarding {
   }
 
   setStateAndStatus(newState, statusText) {
+    const statusTextToValue = {
+      "Hors ligne": "offline",
+      "Connexion en cours...": "connecting",
+      Connecté: "connected",
+    };
     this.state = newState;
-    this.elements.statusText.innerText = statusText;
+    // Convertir le texte en valeur technique
+    const statusValue = statusTextToValue[statusText] || "offline";
+    // Appeler la fonction React si disponible
+    if (window.updateReactStatus) {
+      window.updateReactStatus(statusValue);
+    }
     this.log(`State: ${newState}, Status: ${statusText}`);
   }
 
@@ -322,10 +332,7 @@ class WebRTCOnboarding {
 
           this.isOfferor = true;
           this.state = "waitAnswer";
-          this.setStateAndStatus(
-            "waitAnswer",
-            "En attente de connexion..."
-          );
+          this.setStateAndStatus("waitAnswer", "En attente de connexion...");
         }
         break;
 
@@ -356,10 +363,7 @@ class WebRTCOnboarding {
           }, 0);
 
           this.state = "waitConnect";
-          this.setStateAndStatus(
-            "waitConnect",
-            "En attente de connexion..."
-          );
+          this.setStateAndStatus("waitConnect", "En attente de connexion...");
         }
         break;
     }
@@ -735,15 +739,18 @@ class WebRTCOnboarding {
   }
 
   highlightCard(role) {
-    const cards = [this.elements.selectInterviewer, this.elements.selectInterviewee];
-    const confirmButton = document.getElementById('confirm-button');
-    cards.forEach(card => card.classList.remove('selected'));
+    const cards = [
+      this.elements.selectInterviewer,
+      this.elements.selectInterviewee,
+    ];
+    const confirmButton = document.getElementById("confirm-button");
+    cards.forEach((card) => card.classList.remove("selected"));
     if (role === "enqueteur") {
-        this.elements.selectInterviewer.classList.add('selected');
+      this.elements.selectInterviewer.classList.add("selected");
     } else if (role === "enquete") {
-        this.elements.selectInterviewee.classList.add('selected');
+      this.elements.selectInterviewee.classList.add("selected");
     }
-    confirmButton.classList.add('visible');
+    confirmButton.classList.add("visible");
     this.selectedRole = role;
   }
 }
