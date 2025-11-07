@@ -112,63 +112,95 @@ document.addEventListener("DOMContentLoaded", async () => {
             eventType = "ANSWER_BIRTH_YEAR";
             eventKey = "birthdate";
             break;
-          case "askBirthCommune":
-            questionText = "Où habitaient vos parents à votre naissance ?";
+
+          case "birthPlaceIntro":
+            questionText = "Où habitaient vos parents à votre naissance ? Dans quelle commune et département (France) ou pays (étranger) ?";
+            responseType = "info";  // Nouveau type pour afficher un texte + bouton suivant
+            eventType = "NEXT";
+            break;
+
+          case "askCurrentCommune":
+            questionText = "Dans quelle commune (ville) ?";
             responseType = "input";
-            eventType = "ANSWER_BIRTH_COMMUNE";
+            eventType = "ANSWER_CURRENT_COMMUNE";
             eventKey = "commune";
             break;
-          case "askAlwaysLivedThere":
+
+          case "askDepartementOrPays":
+            questionText = "Dans quel département (France) ou pays (étranger) ?";
+            responseType = "input";
+            eventType = "ANSWER_DEPARTEMENT";
+            eventKey = "departement";
+            break;
+
+          case "askAlwaysLivedInCommune":
             questionText = `Avez-vous toujours vécu à ${state.context.communes[state.context.currentCommuneIndex]} ?`;
             responseType = "choice";
             choices = ["Yes", "No"];
             break;
-          case "askNewCommune":
-            questionText = "Pouvez-vous nous indiquer les communes et départements (ou pays si étranger) de vos différents lieux de résidence puis les placer ?";
+
+          case "askMultipleCommunes":
+            questionText = `Pouvez-vous citer les communes dans lesquelles vous avez vécu ?`;
             responseType = "inputlist";
-            eventType = "ANSWER_NEW_COMMUNE";
-            eventKey = "commune";
+            eventType = "ANSWER_MULTIPLE_COMMUNES";
+            eventKey = "communes";
             break;
-          case "askArrivalYear":
+
+          case "askCommuneArrivalYear":
             questionText = `En quelle année êtes-vous arrivé à ${state.context.communes[state.context.currentCommuneIndex]} ?`;
             responseType = "input";
-            eventType = "ANSWER_ARRIVAL_YEAR";
+            eventType = "ANSWER_COMMUNE_ARRIVAL";
             eventKey = "start";
             break;
-          case "askSameHousing":
+
+          case "askCommuneDepartureYear":
+            questionText = `En quelle année avez-vous quitté ${state.context.communes[state.context.currentCommuneIndex]} ?`;
+            responseType = "input";
+            eventType = "ANSWER_COMMUNE_DEPARTURE";
+            eventKey = "end";
+            break;
+
+          case "askSameHousingInCommune":
             questionText = `Avez-vous toujours vécu dans le même logement à ${state.context.communes[state.context.currentCommuneIndex]} ?`;
             responseType = "choice";
             choices = ["Yes", "No"];
             break;
-          case "askSplitHousing":
-            questionText = "En quelle année avez-vous déménagé ?";
-            responseType = "input";
-            eventType = "ANSWER_HOUSING_SPLIT_YEAR";
-            eventKey = "split";
+
+          case "askMultipleHousings":
+            questionText = `Nous allons faire la liste des logements successifs que vous avez occupés dans ${state.context.communes[state.context.currentCommuneIndex]} depuis votre arrivée.`;
+            responseType = "inputlist";
+            eventType = "ANSWER_MULTIPLE_HOUSINGS";
+            eventKey = "logements";
             break;
-          case "askHousingArrivalYear":
-            questionText = "En quelle année êtes-vous entré dans ce logement ?";
+
+          case "askHousingArrivalAge":
+            questionText = `Quel âge ou en quelle année avez-vous emménagé dans le logement ${state.context.currentLogementIndex + 1} ?`;
             responseType = "input";
-            eventType = "ANSWER_HOUSING_ARRIVAL_YEAR"
+            eventType = "ANSWER_HOUSING_ARRIVAL";
             eventKey = "start";
             break;
-          case "askHousingDepartureYear":
-            questionText = "En quelle année avez-vous quitté ce logement ?";
+
+          case "askHousingDepartureAge":
+            questionText = `À quel âge ou en quelle année avez-vous quitté ce logement ?`;
             responseType = "input";
-            eventType = "ANSWER_HOUSING_DEPARTURE_YEAR"
+            eventType = "ANSWER_HOUSING_DEPARTURE";
             eventKey = "end";
             break;
-          case "askHousingStatus":
-            questionText =  "Quel a été votre statut dans ce logement ?";
-            responseType = "choice";
-            choices = ["Locataire", "Proprietaire"];
+
+          case "askHousingOccupationStatusEntry":
+            questionText = `Quel était votre statut d'occupation à l'arrivée dans le logement (début) ?`;
+            responseType = "input";
+            eventType = "ANSWER_STATUS_ENTRY";
             eventKey = "statut_res";
             break;
-          case "askChangeHousingStatus":
-            questionText =  "Avez-vous changé de statut d'occupation entre l'entrée et la sortie du logement ?";
-            responseType = "choice";
-            choices = ["Yes", "No"];
+
+          case "askHousingOccupationStatusExit":
+            questionText = `Quel était votre statut d'occupation au départ du logement / actuellement (fin) ?`;
+            responseType = "input";
+            eventType = "ANSWER_STATUS_EXIT";
+            eventKey = "statut_res";
             break;
+
           case "surveyComplete":
             questionText = "Merci, vous avez terminé l'enquête !";
             responseType = "none";
@@ -179,15 +211,26 @@ document.addEventListener("DOMContentLoaded", async () => {
         questionDiv.classList.add("question");
         questionDiv.innerHTML += `<p>${questionText}</p>`;
 
+        // Gestion du type INFO (texte informatif + bouton suivant)
+        if (responseType === "info") {
+            const nextBtn = document.createElement("button");
+            nextBtn.innerText = "Suivant";
+            nextBtn.addEventListener("click", () => {
+              sendEvent({ type: eventType });
+              nextBtn.disabled = true;
+            });
+            questionDiv.appendChild(nextBtn);
+        }
+
         // Gestion des réponses INPUT (ex: une commune, une année)
-        if (responseType === "input") {
+        else if (responseType === "input") {
             const input = document.createElement("input");
             input.type = "text";
             input.placeholder = "Votre réponse";
             input.addEventListener("keypress", (event) => {
               if (event.key === "Enter" && input.value.trim() !== "" && eventType) {
                 let eventData = { type: eventType };
-                eventData[eventKey] = eventKey == "commune" ?  [input.value] : input.value//cas special pour commune en cas d'ajout multiples de commun. la valeur des communes sera toujours dans un tableau
+                eventData[eventKey] = input.value;
                 sendEvent(eventData); // Utiliser sendEvent au lieu de surveyService.send
                 event.target.closest('.question').querySelectorAll('input').forEach(input => {
                   input.disabled = true; 

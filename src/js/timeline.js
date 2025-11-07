@@ -230,6 +230,7 @@ const options = {
 // Charger les données sauvegardées AVANT de créer la timeline
 const savedItems = localStorage.getItem('lifestories_items');
 const savedGroups = localStorage.getItem('lifestories_groups');
+const savedOptions = localStorage.getItem('lifestories_options');
 
 if (savedItems) {
   try {
@@ -262,6 +263,25 @@ if (savedGroups) {
   }
 }
 
+// Restaurer les options de la timeline (min, max, start, end)
+if (savedOptions) {
+  try {
+    const parsedOptions = JSON.parse(savedOptions);
+    if (parsedOptions.min) options.min = new Date(parsedOptions.min);
+    if (parsedOptions.max) options.max = new Date(parsedOptions.max);
+    if (parsedOptions.start) options.start = new Date(parsedOptions.start);
+    if (parsedOptions.end) options.end = new Date(parsedOptions.end);
+    console.log('✅ Options de timeline restaurées:', {
+      min: options.min,
+      max: options.max,
+      start: options.start,
+      end: options.end
+    });
+  } catch (e) {
+    console.error('❌ Erreur lors du chargement des options:', e);
+  }
+}
+
 // Création de la timeline avec les données chargées
 const container = document.getElementById('timeline');
 const timeline = new vis.Timeline(container, items, groups, options);
@@ -273,6 +293,16 @@ window.timeline = timeline;
 timeline.on('changed', () => {
   localStorage.setItem('lifestories_items', JSON.stringify(items.get()));
   localStorage.setItem('lifestories_groups', JSON.stringify(groups.get()));
+  
+  // Sauvegarder aussi les options importantes de la timeline
+  const currentOptions = {
+    min: timeline.options.min,
+    max: timeline.options.max,
+    start: timeline.options.start,
+    end: timeline.options.end
+  };
+  localStorage.setItem('lifestories_options', JSON.stringify(currentOptions));
+  
   console.log('💾 Données sauvegardées dans localStorage');
 });
 /**

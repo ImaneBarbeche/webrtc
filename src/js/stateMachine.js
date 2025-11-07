@@ -15,8 +15,12 @@ export const surveyMachine = createMachine({
   initial: 'askBirthYear',
   context: {
     birthYear: 0,
-    communes: [],
+    birthPlace: '',           // Lieu de naissance des parents
+    communes: [],             // Liste des communes
+    departements: [],         // Liste des départements/pays associés
     currentCommuneIndex: 0,
+    logements: [],            // Liste des logements par commune
+    currentLogementIndex: 0,
     group: 13,
     lastEpisode: null,
   },
@@ -25,147 +29,174 @@ export const surveyMachine = createMachine({
       on: {
         ANSWER_BIRTH_YEAR: {
           actions: ['setupCalendar'],
-          target: 'askBirthCommune'
+          target: 'birthPlaceIntro'
         }
       }
     },
     
-    askBirthCommune: {
+    birthPlaceIntro: {
       on: {
-        ANSWER_BIRTH_COMMUNE: {
-          actions: [
-            'addCommune',
-            {
-              type: 'addCalendarEpisode', params: {start: "timeline_init"}
-            },
-          ],
-          target: 'askAlwaysLivedThere'
+        NEXT: {
+          target: 'askCurrentCommune'
         }
       }
     },
-    askAlwaysLivedThere: {
+
+    askCurrentCommune: {
+      on: {
+        ANSWER_CURRENT_COMMUNE: {
+          actions: ['addCommune'],
+          target: 'askDepartementOrPays'
+        }
+      }
+    },
+
+    askDepartementOrPays: {
+      on: {
+        ANSWER_DEPARTEMENT: {
+          actions: [
+            'addDepartement',
+            {
+              type: 'addCalendarEpisode', params: {start: "timeline_init"}
+            }
+          ],
+          target: 'askAlwaysLivedInCommune'
+        }
+      }
+    },
+
+    askAlwaysLivedInCommune: {
       on: {
         YES: {
           actions: [
             {
               type: 'modifyCalendarEpisode', params: {end: timeline.options.end}
-            },
+            }
+          ],
+          target: 'askSameHousingInCommune'
+        },
+        NO: 'askMultipleCommunes'
+      }
+    },
+
+    askMultipleCommunes: {
+      on: {
+        ANSWER_MULTIPLE_COMMUNES: {
+          actions: [
+            'addMultipleCommunes',
             'resetCommune',
             'nextGroup'
           ],
-          target: 'askSameHousing',
+          target: 'placeNextCommuneOnTimeline'
+        }
+      }
+    },
+
+    placeNextCommuneOnTimeline: {
+      always: [
+        {
+          guard: 'moreCommunesToProcess',
+          actions: ['nextCommune'],
+          target: 'askCommuneArrivalYear'
         },
-        NO: 'askNewCommune'
-      }
+        {
+          target: 'askSameHousingInCommune'
+        }
+      ]
     },
-    askNewCommune: {
+
+    askCommuneArrivalYear: {
       on: {
-        ANSWER_NEW_COMMUNE: {
-          actions: [
-            'addCommune',
-            'resetCommune',
-            'nextGroup',
-          ],
-          target: 'askSameHousing'
+        ANSWER_COMMUNE_ARRIVAL: {
+          actions: ['addCalendarEpisode'],
+          target: 'askCommuneDepartureYear'
         }
       }
     },
-    askArrivalYear: {
+
+    askCommuneDepartureYear: {
       on: {
-        ANSWER_ARRIVAL_YEAR: {
-          actions: [
-            'extendPreviousCalendarEpisode',
-            'modifyCalendarEpisode',
-          ],
-          target: 'askAlwaysLivedThere'
+        ANSWER_COMMUNE_DEPARTURE: {
+          actions: ['modifyCalendarEpisode'],
+          target: 'placeNextCommuneOnTimeline'
         }
       }
     },
-    askSameHousing: {
+
+    askSameHousingInCommune: {
       on: {
-        YES: [
-          {
-            actions: [
-              'addCalendarEpisode',
-            ],
-            target: 'askHousingStatus'
-          },
-        ],
-        NO: [
-          {
-            actions: [
-              'addCalendarEpisode'
-            ],
-            target: 'askSplitHousing'
-          }
-        ]
-      }
-    },
-    askSplitHousing: {
-      on: {
-        ANSWER_HOUSING_SPLIT_YEAR: {
-          actions: [
-            'splitHousingEpisode'
-          ],
-          target: 'askHousingStatus'
-        }
-      }
-    },
-    askHousingArrivalYear: {
-      on: {
-        ANSWER_HOUSING_ARRIVAL_YEAR: {
-          actions: [
-            'modifyCalendarEpisode'
-          ],
-          target: 'askHousingDepartureYear'
-        }
-      }
-    },
-    askHousingDepartureYear: {
-      on: {
-        ANSWER_HOUSING_DEPARTURE_YEAR: {
-          actions: [
-            'modifyCalendarEpisode',
-          ],
-          target: 'askHousingStatus'
-        }
-      }
-    },
-    askHousingStatus: {
-      on: {
-        LOCATAIRE: {
-          actions: [
-            'nextGroup',
-            'addCalendarEpisode'
-          ],
-          target: 'askChangeHousingStatus'
+        YES: {
+          actions: ['addCalendarEpisode'],
+          target: 'askHousingOccupationStatusEntry'
         },
-        PROPRIETAIRE: {
+        NO: 'askMultipleHousings'
+      }
+    },
+
+    askMultipleHousings: {
+      on: {
+        ANSWER_MULTIPLE_HOUSINGS: {
           actions: [
-            'nextGroup',
-            'addCalendarEpisode'
+            'addMultipleHousings',
+            'resetLogement'
           ],
-          target: 'askChangeHousingStatus'
+          target: 'askHousingArrivalAge'
         }
       }
     },
-    askChangeHousingStatus: {
+
+    askHousingArrivalAge: {
       on: {
-        YES: 'surveyComplete',
-        NO: [
-          {
-            guard: 'moreCommunesToProcess',
-            actions: [
-              'previousGroup',
-              'nextCommune',
-            ],
-            target: 'askSameHousing', // a changer
-          },
-          {
-            target: 'surveyComplete',
-          }
-        ]
+        ANSWER_HOUSING_ARRIVAL: {
+          actions: ['addCalendarEpisode'],
+          target: 'askHousingDepartureAge'
+        }
       }
+    },
+
+    askHousingDepartureAge: {
+      on: {
+        ANSWER_HOUSING_DEPARTURE: {
+          actions: ['modifyCalendarEpisode'],
+          target: 'askHousingOccupationStatusEntry'
+        }
+      }
+    },
+
+    askHousingOccupationStatusEntry: {
+      on: {
+        ANSWER_STATUS_ENTRY: {
+          actions: ['nextGroup', 'addCalendarEpisode'],
+          target: 'askHousingOccupationStatusExit'
+        }
+      }
+    },
+
+    askHousingOccupationStatusExit: {
+      on: {
+        ANSWER_STATUS_EXIT: {
+          actions: ['modifyCalendarEpisode'],
+          target: 'checkMoreHousings'
+        }
+      }
+    },
+
+    checkMoreHousings: {
+      always: [
+        {
+          guard: 'moreLogementsToProcess',
+          actions: ['nextLogement'],
+          target: 'askHousingArrivalAge'
+        },
+        {
+          guard: 'moreCommunesToProcess',
+          actions: ['nextCommune', 'previousGroup'],
+          target: 'askSameHousingInCommune'
+        },
+        {
+          target: 'surveyComplete'
+        }
+      ]
     },
     surveyComplete: {
       type: 'final'
@@ -173,9 +204,46 @@ export const surveyMachine = createMachine({
   }
 }, {
   actions: {
+    saveBirthPlace: assign({
+      birthPlace: ({context, event}) => event.birthPlace
+    }),
+
     addCommune: assign({
       communes: ({context, event}) => {
-        //ajouterEpisode(context.event.value,context.context.episodeStartDate,0,)
+        return [...context.communes, event.commune];
+      }
+    }),
+
+    addDepartement: assign({
+      departements: ({context, event}) => {
+        return [...context.departements, event.departement];
+      }
+    }),
+
+    addMultipleCommunes: assign({
+      communes: ({context, event}) => {
+        // Pour simplifier, on ajoute juste les communes pour l'instant
+        return [...context.communes, ...event.communes];
+      }
+    }),
+
+    addMultipleHousings: assign({
+      logements: ({context, event}) => {
+        // Pour la commune courante, stocker la liste des logements
+        return event.logements || [];
+      }
+    }),
+
+    resetLogement: assign({
+      currentLogementIndex: () => 0
+    }),
+
+    nextLogement: assign({
+      currentLogementIndex: ({context}) => context.currentLogementIndex + 1
+    }),
+
+    addCommune: assign({
+      communes: ({context, event}) => {
         return [...context.communes, ...event.commune];
       }
     }),
@@ -325,6 +393,9 @@ export const surveyMachine = createMachine({
   guards: {
     moreCommunesToProcess: (context) => {
       return context.context.currentCommuneIndex < context.context.communes.length - 1
+    },
+    moreLogementsToProcess: (context) => {
+      return context.context.currentLogementIndex < context.context.logements.length - 1
     }
   }
 });
