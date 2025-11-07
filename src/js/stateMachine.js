@@ -83,9 +83,7 @@ export const surveyMachine = createMachine({
       on: {
         ANSWER_MULTIPLE_COMMUNES: {
           actions: [
-            'addMultipleCommunes',
-            'resetCommune',
-            'nextGroup'
+            'addMultipleCommunes'
           ],
           target: 'placeNextCommuneOnTimeline'
         }
@@ -96,7 +94,6 @@ export const surveyMachine = createMachine({
       always: [
         {
           guard: 'moreCommunesToProcess',
-          actions: ['nextCommune'],
           target: 'askCommuneArrivalYear'
         },
         {
@@ -117,7 +114,7 @@ export const surveyMachine = createMachine({
     askCommuneDepartureYear: {
       on: {
         ANSWER_COMMUNE_DEPARTURE: {
-          actions: ['modifyCalendarEpisode'],
+          actions: ['modifyCalendarEpisode', 'nextCommune'],
           target: 'placeNextCommuneOnTimeline'
         }
       }
@@ -222,8 +219,11 @@ export const surveyMachine = createMachine({
 
     addMultipleCommunes: assign({
       communes: ({context, event}) => {
-        // Pour simplifier, on ajoute juste les communes pour l'instant
         return [...context.communes, ...event.communes];
+      },
+      currentCommuneIndex: ({context}) => {
+        // Positionner l'index sur la première nouvelle commune ajoutée
+        return context.communes.length;
       }
     }),
 
@@ -392,7 +392,7 @@ export const surveyMachine = createMachine({
   },
   guards: {
     moreCommunesToProcess: (context) => {
-      return context.context.currentCommuneIndex < context.context.communes.length - 1
+      return context.context.currentCommuneIndex < context.context.communes.length
     },
     moreLogementsToProcess: (context) => {
       return context.context.currentLogementIndex < context.context.logements.length - 1

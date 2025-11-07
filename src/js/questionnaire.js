@@ -292,12 +292,12 @@ document.addEventListener("DOMContentLoaded", async () => {
           nextQBtn.addEventListener("click", () => {
             let list_communes_not_sorted = [];
             responseList.querySelectorAll('li').forEach(e=> list_communes_not_sorted.push(e.innerHTML))
-            let list_communes = items.get().filter(i => list_communes_not_sorted.includes(i.content))
-              list_communes.sort((a, b) => (new Date(a.start)) - (new Date(b.start)) )
-              list_communes = list_communes.map(i => i.content)
-            let eventData = { type: "ANSWER_NEW_COMMUNE" };
-              eventData[eventKey] = list_communes;
-            sendEvent(eventData); // Utiliser sendEvent au lieu de surveyService.send
+            
+            // Utiliser eventType défini dans le switch au lieu de "ANSWER_NEW_COMMUNE" codé en dur
+            let eventData = { type: eventType };
+            eventData[eventKey] = list_communes_not_sorted;
+            sendEvent(eventData);
+            nextQBtn.disabled = true;
           });
       
           questionDiv.appendChild(nextQBtn);
