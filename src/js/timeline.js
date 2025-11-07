@@ -54,13 +54,14 @@ let isCustomBarMoving = false
 
 // Options principales pour la timeline
 const options = {
-    editable: {
-        add: true,         // Permettre l'ajout d'items
-        updateTime: true,  // Permet de modifier la durée des items (drag)
-        updateGroup: true, // Permet de changer un item de groupe (drag)
-        remove: true,      // Permet de supprimer un item
-        overrideItems: false  // Autoriser ces options à remplacer les paramètres "editable" de l'élément
-    },
+    // editable: {
+    //     add: true,         // Permettre l'ajout d'items
+    //     updateTime: true,  // Permet de modifier la durée des items (drag)
+    //     updateGroup: true, // Permet de changer un item de groupe (drag)
+    //     remove: true,      // Permet de supprimer un item
+    //     overrideItems: false  // Autoriser ces options à remplacer les paramètres "editable" de l'élément
+    // },
+    editable: false,
     zoomMin: 1000 * 60 * 60 * 24 * 365 * 1,  // 5 years in ms
     zoomMax: 1000 * 60 * 60 * 24 * 365 * 50, // 50 years in ms
     min: new Date(),
@@ -84,7 +85,9 @@ const options = {
             span: ['class'],
             p: ['class'],
             b: [],
-            br:[]
+            br:[],
+            div: ['class','title'],
+            img: ['src','alt','class','width','height']
             }
         }
     },
@@ -116,6 +119,16 @@ const options = {
             return '';
         }
       }
+    },
+    template: function (item, element, data) {
+      if (!item) return '';
+      if (item.type === 'box' && item.category === 'degree') {
+        return `
+            <img src="./assets/icon/degree.svg" alt="${item.content}" />
+                `;
+      }
+      // fallback: original content (keeps existing behaviour)
+      return item.content;
     },
     // TODO: format, affichage année
     // TODO: tooltip
@@ -605,6 +618,8 @@ timeline.on("timechange", function (event) {
     }
   });
 });
+
+
 
 
 document.getElementById('save').addEventListener('click',function (){

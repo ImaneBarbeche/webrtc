@@ -55,7 +55,7 @@
         transform: translateX(50%);
         background-color: inherit;
         pointer-events: none;
-        box-shadow: 0rem 0.08rem var(--primary-beige);
+        box-shadow: 0rem 0.15rem var(--primary-beige);
 
     }
 }
@@ -75,6 +75,37 @@
     margin-left: 5px;
 }
 
+/* .highlight.green {
+    box-shadow: rgba(150, 235, 150, 0.4) 0px 5px, rgba(150, 235, 150, 0.3) 0px 10px, rgba(150, 235, 150, 0.2) 0px 15px, rgba(150, 235, 150, 0.1) 0px 20px, rgba(150, 235, 150, 0.05) 0px 25px;
+    font-weight: bold !important;
+}
+
+.highlight.red {
+    box-shadow: rgba(231, 104, 104, 0.4) 0px 5px, rgba(231, 104, 104, 0.3) 0px 10px, rgba(231, 104, 104, 0.2) 0px 15px, rgba(231, 104, 104, 0.1) 0px 20px, rgba(231, 104, 104, 0.05) 0px 25px;
+    font-weight: bold !important;
+}
+
+.highlight.blue {
+    box-shadow: rgba(110, 139, 230, 0.4) 0px 5px, rgba(110, 139, 230, 0.3) 0px 10px, rgba(110, 139, 230, 0.2) 0px 15px, rgba(110, 139, 230, 0.1) 0px 20px, rgba(110, 139, 230, 0.05) 0px 25px;
+    font-weight: bold !important;
+} */
+
+/* Surbrillance drag */
+/* .vis-group.line_13{
+    
+} */
+
+/* .vis-center{
+} */
+
+/* .vis-center .vis-group:not(.line_13){
+    
+} */
+
+/* #mask{
+    
+} */
+
 .vis-group {
     border: none !important;
 }
@@ -92,14 +123,29 @@
 }
 
 .vis-label.vis-group-level-0 {
+    --label-color: red;
+
     background-color: var(--primary-grey);
+    background-color: color-mix(in srgb, var(--primary-beige) 40%, var(--primary-light));;
+    /* box-shadow: 0px 0.1rem 0.1rem var(--secondary-grey); */
+    filter: drop-shadow(0px 0.15rem 0.1rem var(--secondary-grey));
+
+    
+    display: flex;
+    align-items: center;
+
+    /* background-color: color-mix(in srgb, var(--label-color), var(--primary-grey)); */
+    /* background-color: red; */
     border: none !important;
     border-radius: 2rem;
     padding: 0;
-    border-block: 0.2rem solid transparent !important;
+    border-block: 0.4rem solid transparent !important;
+    border-inline: 0.4rem solid transparent !important;
     border-radius: 2rem !important;
     background-clip: padding-box;
     /* padding: 1rem; */
+    /* transition: background-color 1s ease; */
+
 
     .vis-inner {
         border: none !important;
@@ -107,10 +153,54 @@
     }
 
     &.expanded {
+        background-color: color-mix(in srgb, var(--label-color), var(--primary-grey));
+        /* background-color: red; */
+        filter: none;
         border-bottom: none !important;
         border-bottom-left-radius: 0 !important;
         border-bottom-right-radius: 0 !important;
+
+        
+
+        &.vert {
+            --label-color: #EABCA5;
+        }
+
+        &.bleu {
+            --label-color: #eaada5;
+        }
+
+        &.rouge {
+            --label-color: #a5beea;
+        }
     } 
+
+}
+
+.vis-label.vis-nesting-group.expanded::before {
+    content: ''
+}
+
+.vis-label.vis-nesting-group.collapsed::before {
+    content: ''
+}
+
+
+
+.vis-group {
+  overflow: hidden;
+  transition: height 0.3s ease, opacity 0.3s ease;
+}
+
+.vis-group.collapsing,
+.vis-group.expanding {
+  will-change: height, opacity;
+}
+
+.vis-group.hidden {
+  opacity: 0;
+  height: 0 !important;
+  pointer-events: none;
 }
 
 .vis-labelset .vis-label .vis-inner {
@@ -119,10 +209,32 @@
 }
 
 .vis-label.vis-nested-group.vis-group-level-unknown-but-gte1 {
+    --label-color: red;
+
     border: none;
     border-bottom: none !important;
-    background-color: var(--primary-grey);
+    background-color: color-mix(in srgb, var(--label-color), var(--primary-grey));
+    border-inline: 0.4rem solid transparent !important;
+    background-clip: padding-box;
 }
+
+/* we have to do this because they are not descendants, but rather siblings :/ */
+
+.vis-label.vis-group-level-0.vert,
+.vis-label.vis-group-level-0.vert ~ .vis-label.vis-nested-group {
+    --label-color: #EABCA5;
+}
+
+.vis-label.vis-group-level-0.bleu,
+.vis-label.vis-group-level-0.bleu ~ .vis-label.vis-nested-group {
+    --label-color: #eaada5;
+}
+
+.vis-label.vis-group-level-0.rouge,
+.vis-label.vis-group-level-0.rouge ~ .vis-label.vis-nested-group {
+    --label-color: #a5beea;
+}
+
 
 .vis-ltr .vis-label.vis-nested-group .vis-inner {
     padding-left: 0rem;
@@ -131,26 +243,228 @@
     list-style-position: inside;
 
     &::marker {
-        color: color-mix(in srgb, var(--primary-grey), black 20%);
+        color: var(--label-color);
+        font-size: 1.5rem;
     }
 }
 
-.vis-panel.vis-left .vis-content .vis-labelset .vis-label.vis-nesting-group.expanded.vis-group-level-0 ~ .vis-label.vis-nested-group:not(:has(~ .vis-label.vis-nested-group)) {
-    border-bottom-right-radius: 2rem;
-    border-bottom-left-radius: 2rem;
-
-.vis-item.vis-range {
-    margin-inline: 1rem;
-    padding-block: .3rem;
-    /* position: relative; */
+.vis-label.vis-nested-group:has(+ .vis-nesting-group.vis-group-level-0),
+.vis-label.vis-nested-group:last-of-type {
+  border-bottom-left-radius: 2rem;
+  border-bottom-right-radius: 2rem;
+    /* border-bottom: 0.6rem solid transparent !important; */
 
 }
 
-.vis-item.vis-range.green {
-    background-color: #EABCA5;
+.vis-item.vis-range, .vis-item.vis-box {
+    --label-color: red;
+
+    background-color: var(--label-color) !important;
+
+    margin-inline: 1rem;
+    padding-block: .3rem;
+
+    /* hiding the truncated text effect */
+    /* overflow-x: hidden; */
+    /* Update: We can't use it with overflow-y: visible, and since we want to show an element below the label for the highlight, the logic of the fade effect had to change */
+    /* overflow-y: visible; */
+    transition: filter 0.3s ease-in-out;
+        /* box-shadow: 0rem 0.2rem 0.2rem -0.2rem red; */
+/* filter: drop-shadow(0rem 0.2rem 0.3rem var(--label-color)); */
+        /* box-shadow: 0rem 0.2rem 0.5rem -0.2rem var(--label-color); */
+
+ 
+    &::before {
+        content: "";
+        background-color: var(--label-color);
+        /* background-color: red; */
+        /* background-color: color-mix(in srgb, var(--label-color), transparent 90%); */
+        /* background: transparent; */
+        /* filter: drop-shadow(0rem 0.2rem 0.3rem color-mix(in srgb, var(--label-color), var(--primary-dark) 10%)); */
+        filter: drop-shadow(0rem 0.2rem 0.3rem var(--label-color));
+        /* box-shadow: 0rem 0.2rem 0.2rem -0.2rem red; */
+        border-radius: inherit;
+        /* box-shadow: 0rem 0.1rem 2px 0rem red, 0rem 0.7rem 0px -1.9rem blue, 0rem 0.7rem 2px -0.3rem yellow, 0rem 1.3rem 0px -0.5rem green, 0rem 1.3rem 2px -0.5rem purple; */
+        
+        bottom: 0rem;
+        height: 50%;
+        pointer-events: none;
+        position: absolute;
+        right: 50%;
+        transform: translateX(50%);
+        width: 80%;
+        /* filter: blur(0.3rem) saturate(1.1); */
+        
+        z-index: -100 !important;
+        z-index: -2 !important;
+        opacity: 0;
+        transition: opacity 0.3s ease-in-out;
+    }
+
+    &::after {
+        /* content: ""; */
+        background-color: transparent;
+        bottom: -0.4rem;
+        height: 0.6rem;
+        pointer-events: none;
+        position: absolute;
+        right: 50%;
+        transform: translateX(50%);
+        width: 80%;
+        /* filter: blur(0.3rem) saturate(0.6); */
+        backdrop-filter: blur(10px);
+        filter: blur(0.2rem);
+        /* z-index: -10 !important; */
+        z-index: 99 !important;
+        opacity: 0;
+        transition: opacity 0.3s ease-in-out;
+        filter: url(#noiseFilter) brightness(1.9);
+        mix-blend-mode:multiply;
+        /* mix-blend-mode: multiply ; */
+        /* -webkit-mask: linear-gradient(white, white); */
+        mask-composite: intersect;
+
+        
+    }
+
+
+
+}
+
+.vis-item.vis-box {
+    padding-inline: .3rem;
+    aspect-ratio: 1 / 1;
+    /* hard-coding it to have the same height as the rest */
+    max-height: 41.1px; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: none !important;
+
+
+    .vis-item-content {
+        display: flex;
+    }
+}
+
+.vis-label.vis-nested-group {
+    min-height: 71px !important;
+}
+
+/* .vis-group {
+    min-height: 71px !important;
+} */
+
+
+.svg-noise {
+  width: 0;
+  height: 0;
+}
+
+.vis-item.vis-range.green, .vis-item.vis-range.red, .vis-item.vis-range.blue, .vis-item.vis-box {
+    --label-color: #EABCA5;
+
     border: none;
     border-inline: 0.2rem solid transparent;
     border-radius: 2rem !important;
     background-clip: padding-box;
 }
+
+/* .vis-box {
+    outline: none;
+} */
+
+.vis-item.vis-range.red, .vis-item.vis-box.red {
+    --label-color: #a5beea;
+
+}
+
+.vis-item.vis-range.blue, .vis-item.vis-box.blue {
+    --label-color: #eaada5;
+}
+
+.vis-item.vis-line,.vis-item.vis-dot {
+    display: none;
+}
+
+.highlight {
+    filter: saturate(1.4) brightness(0.98);
+    /* filter: saturate(1.4) brightness(0.98) drop-shadow(0rem 0.1rem 0.2rem color-mix(in srgb, var(--label-color), var(--primary-dark) 10%)); */
+    
+    &::before, &::after {
+        opacity: 1 !important;
+    }
+
+}
+
+.vis-item-overflow {
+    position: relative;
+    border-radius: 4rem;
+    /* overflow: visible !important; */
+    /* making sure it looks good on tiny elements */
+    border-inline-end: inset .2rem transparent;
+    /* background-color: blue; */
+
+    /*   using this to clip the image and avoiding overflow: hidden on the container, thus showing the label correctly   */
+    /* -webkit-mask: linear-gradient(white, white); /* full mask */
+    /* -webkit-mask-composite: destination-in;
+    mask-composite: intersect;
+    border-radius: inherit; */
+
+    &::before {
+        content: "";
+        /* background-image: linear-gradient(to right,transparent 10%,var(--label-color)); */
+        /* background-image: linear-gradient(to right,transparent 0% 10%,red 50%); */
+        background-image: linear-gradient(to right,transparent 0% 10%,var(--label-color) 70%);
+        height: 100%;
+        pointer-events: none;
+        position: absolute;
+        border-radius: 4rem;
+        /* logical right */
+        inset-inline-end: -0.2rem;
+        width: 20%;
+        min-width: 2rem;
+        max-width: 4rem;
+        z-index: 20;
+
+    }
+
+        /* &::after {
+        content: "";
+        background-color: var(--label-color);
+        background-color: red;
+        filter: drop-shadow(0rem 0.2rem 0.3rem var(--label-color));
+        border-radius: inherit;
+        
+        bottom: -0.6rem;
+        height: 50%;
+        pointer-events: none;
+        position: absolute;
+        right: 50%;
+        transform: translateX(50%);
+        width: 80%;       
+        z-index: 20 !important; 
+        opacity: 1;
+        transition: opacity 0.3s ease-in-out;
+    } */
+}
+
+.vis-panel.vis-center {
+    mask-image: linear-gradient(
+        to right,
+        transparent 0,
+        black 2%,
+        black 98%,
+        transparent 100%
+    );
+    -webkit-mask-image: linear-gradient(
+        to right,
+        transparent 0.5%,
+        black 4%,
+        black 96%,
+        transparent 100%
+    );
+    /* mask-mode: luminance; */
+    mask-composite: intersect;
+    -webkit-mask-composite: destination-in;
 }

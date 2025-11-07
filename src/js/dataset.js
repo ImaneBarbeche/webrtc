@@ -121,7 +121,7 @@ export const test_items=[
           "type": "range",
           "content": "Locataire (seul)",
           "start": "2024-01-01T00:00:00.000Z",
-          "end": "2025-12-31T00:00:00.000Z",
+          "end": "2C025-12-31T00:00:00.000Z",
           "group": 11,
           "className": "green"
         },
@@ -133,32 +133,39 @@ export const test_items=[
         // Diplômes (groupe 23 - LANDMARK)
         {
           "id": "scol_diplome_1",
-          "type": "point",
+          "type": "box",
           "content": "Brevet des collèges",
+          "category": "degree",
           "start": "2015-06-25T00:00:00.000Z",
+          "end": "2C025-12-31T00:00:00.000Z",
+
+
           "group": 23,
           "className": "blue"
         },
         {
           "id": "scol_diplome_2",
-          "type": "point",
+          "type": "box",
           "content": "Baccalauréat S",
+          "category": "degree",
           "start": "2018-06-20T00:00:00.000Z",
           "group": 23,
           "className": "blue"
         },
         {
           "id": "scol_diplome_3",
-          "type": "point",
+          "type": "box",
           "content": "Licence Informatique",
+          "category": "degree",
           "start": "2021-06-15T00:00:00.000Z",
           "group": 23,
           "className": "blue"
         },
         {
           "id": "scol_diplome_4",
-          "type": "point",
+          "type": "box",
           "content": "Master Data Science",
+          "category": "degree",
           "start": "2023-09-30T00:00:00.000Z",
           "group": 23,
           "className": "blue"

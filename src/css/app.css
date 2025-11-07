@@ -5,10 +5,17 @@
 
 
 :root {
-    --primary-beige: #F6F1E8;
-    /* --primary-beige: white; */
+    /* --primary-beige: #F6F1E8; */
+    --primary-beige: white;
+    --primary-beige: #FDFAF4;
     --primary-dark: #2E2E2E;
+    --primary-light: white;
     --primary-grey: #FAFAFA;
+    --primary-grey: #f2f2f2;
+    --primary-grey: color-mix(in srgb, var(--primary-light) 60%, transparent);
+    --secondary-grey: color-mix(in srgb, var(--primary-dark) 15%, transparent);
+    /* --primary-grey: #f4e6da; */
+    /* --primary-grey: rgb(201, 135, 135); */
 }
 
 body {
@@ -35,7 +42,7 @@ body {
 
 /* Container LifeStories (questionnaire + calendrier) */
 .lifestories-container {
-    display: none; /* Caché au démarrage */
+    /* display: none; Caché au démarrage */
     position: relative;
     width: 100%;
     height: 100vh;
