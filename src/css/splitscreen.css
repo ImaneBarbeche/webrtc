@@ -124,15 +124,29 @@
 }
 
 .vis-label.vis-group-level-0 {
+    --label-color: red;
+
     background-color: var(--primary-grey);
+    background-color: color-mix(in srgb, var(--primary-beige) 40%, var(--primary-light));;
+    /* box-shadow: 0px 0.1rem 0.1rem var(--secondary-grey); */
+    filter: drop-shadow(0px 0.15rem 0.1rem var(--secondary-grey));
+
+    
+    display: flex;
+    align-items: center;
+
+    /* background-color: color-mix(in srgb, var(--label-color), var(--primary-grey)); */
     /* background-color: red; */
     border: none !important;
     border-radius: 2rem;
     padding: 0;
     border-block: 0.4rem solid transparent !important;
+    border-inline: 0.4rem solid transparent !important;
     border-radius: 2rem !important;
     background-clip: padding-box;
     /* padding: 1rem; */
+    /* transition: background-color 1s ease; */
+
 
     .vis-inner {
         border: none !important;
@@ -142,10 +156,28 @@
     }
 
     &.expanded {
+        background-color: color-mix(in srgb, var(--label-color), var(--primary-grey));
+        /* background-color: red; */
+        filter: none;
         border-bottom: none !important;
         border-bottom-left-radius: 0 !important;
         border-bottom-right-radius: 0 !important;
+
+        
+
+        &.vert {
+            --label-color: #EABCA5;
+        }
+
+        &.bleu {
+            --label-color: #eaada5;
+        }
+
+        &.rouge {
+            --label-color: #a5beea;
+        }
     } 
+
 }
 
 .vis-label.vis-nesting-group.expanded::before {
@@ -155,6 +187,8 @@
 .vis-label.vis-nesting-group.collapsed::before {
     content: ''
 }
+
+
 
 .vis-group {
   overflow: hidden;
@@ -178,10 +212,32 @@
 }
 
 .vis-label.vis-nested-group.vis-group-level-unknown-but-gte1 {
+    --label-color: red;
+
     border: none;
     border-bottom: none !important;
-    background-color: var(--primary-grey);
+    background-color: color-mix(in srgb, var(--label-color), var(--primary-grey));
+    border-inline: 0.4rem solid transparent !important;
+    background-clip: padding-box;
 }
+
+/* we have to do this because they are not descendants, but rather siblings :/ */
+
+.vis-label.vis-group-level-0.vert,
+.vis-label.vis-group-level-0.vert ~ .vis-label.vis-nested-group {
+    --label-color: #EABCA5;
+}
+
+.vis-label.vis-group-level-0.bleu,
+.vis-label.vis-group-level-0.bleu ~ .vis-label.vis-nested-group {
+    --label-color: #eaada5;
+}
+
+.vis-label.vis-group-level-0.rouge,
+.vis-label.vis-group-level-0.rouge ~ .vis-label.vis-nested-group {
+    --label-color: #a5beea;
+}
+
 
 .vis-ltr .vis-label.vis-nested-group .vis-inner {
     padding-left: 0rem;
@@ -190,10 +246,10 @@
     list-style-position: inside;
 
     &::marker {
-        color: color-mix(in srgb, var(--primary-grey), black 20%);
+        color: var(--label-color);
+        font-size: 1.5rem;
     }
 }
-
 
 .vis-label.vis-nested-group:has(+ .vis-nesting-group.vis-group-level-0),
 .vis-label.vis-nested-group:last-of-type {
