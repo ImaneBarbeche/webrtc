@@ -328,6 +328,21 @@ timeline.on('mouseUp', function(properties) {
 });
 
 timeline.on('click', function(properties) {
+    // ACCESSIBILITÉ : Clic sur l'axe temporel pour déplacer la barre verticale
+    if (properties.what === 'axis' && properties.time) {
+        // Déplacer la barre custom à la date cliquée
+        const clickedTime = new Date(properties.time);
+        // Arrondir à l'année pour cohérence avec le snap
+        const yearStart = new Date(clickedTime.getFullYear(), 0, 1);
+        timeline.setCustomTime(yearStart, customTimeId);
+        
+        // Déclencher manuellement la mise à jour de la synthèse
+        // (normalement géré par l'événement timechange, mais on le force ici)
+        timeline.emit('timechange', { id: customTimeId, time: yearStart });
+        
+        return; // Sortir pour ne pas traiter d'autres clics
+    }
+    
     // Vérifier si c'est un clic sur un label de groupe
     if (properties.what === 'group-label' && properties.group) {
         const clickedGroup = groups.get(properties.group);
