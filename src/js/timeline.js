@@ -77,7 +77,9 @@ const options = {
             span: ['class'],
             p: ['class'],
             b: [],
-            br:[]
+            br:[],
+            div: ['class','title'],
+            img: ['src','alt','class','width','height']
             }
         }
     },
@@ -109,6 +111,16 @@ const options = {
             return '';
         }
       }
+    },
+    template: function (item, element, data) {
+      if (!item) return '';
+      if (item.type === 'box' && item.category === 'degree') {
+        return `
+            <img src="./assets/icon/degree.svg" alt="${item.content}" />
+                `;
+      }
+      // fallback: original content (keeps existing behaviour)
+      return item.content;
     },
     // TODO: format, affichage année
     // TODO: tooltip
