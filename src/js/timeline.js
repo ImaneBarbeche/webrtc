@@ -227,13 +227,54 @@ const options = {
 
 };
 
-// Création de la timeline
+// Charger les données sauvegardées AVANT de créer la timeline
+const savedItems = localStorage.getItem('lifestories_items');
+const savedGroups = localStorage.getItem('lifestories_groups');
+
+if (savedItems) {
+  try {
+    const parsedItems = JSON.parse(savedItems);
+    items.clear();
+    items.add(parsedItems);
+    console.log('✅ Items chargés depuis localStorage:', parsedItems.length);
+  } catch (e) {
+    console.error('❌ Erreur lors du chargement des items:', e);
+  }
+}
+
+if (savedGroups) {
+  try {
+    const parsedGroups = JSON.parse(savedGroups);
+    // On restaure uniquement l'état dynamique (showNested, landmarks, etc.)
+    parsedGroups.forEach(savedGroup => {
+      const existingGroup = groups.get(savedGroup.id);
+      if (existingGroup) {
+        groups.update({
+          id: savedGroup.id,
+          showNested: savedGroup.showNested,
+          landmark: savedGroup.landmark
+        });
+      }
+    });
+    console.log('✅ État des groupes restauré depuis localStorage');
+  } catch (e) {
+    console.error('❌ Erreur lors du chargement des groupes:', e);
+  }
+}
+
+// Création de la timeline avec les données chargées
 const container = document.getElementById('timeline');
 const timeline = new vis.Timeline(container, items, groups, options);
 
 // Exporter la timeline globalement
 window.timeline = timeline;
 
+// Sauvegarder automatiquement à chaque changement
+timeline.on('changed', () => {
+  localStorage.setItem('lifestories_items', JSON.stringify(items.get()));
+  localStorage.setItem('lifestories_groups', JSON.stringify(groups.get()));
+  console.log('💾 Données sauvegardées dans localStorage');
+});
 /**
  * GESTION DES LANDMARKS (REPÈRES TEMPORELS)
  * Permet d'afficher certains sous-groupes sur la ligne parent quand celui-ci est fermé
@@ -284,9 +325,7 @@ function toggleLandmark(groupId) {
     // Mettre à jour les groupes
     groups.update(group);
     groups.update(parentGroup);
-    
-    console.log(`Landmark ${group.isLandmark ? 'activé' : 'désactivé'} pour: ${group.content}`);
-    
+        
     // Feedback visuel avec SweetAlert2
     utils.prettyAlert(
         group.isLandmark ? '📍 Landmark activé' : 'Landmark désactivé',
@@ -408,13 +447,13 @@ function handleDragStart(event) {
 
   const isEvent = event.target.id.split("_")[0] == "ev";
   let item;
-  if(isEvent){
+  if (isEvent) {
     item = {
       id: new Date(),
       type: (isEvent ? "point" : "range"),
       content: event.target.innerHTML,
     };
-  }else{
+  } else {
     item = {
       id: new Date(),
       type: (isEvent ? "point" : "range"),
@@ -436,7 +475,6 @@ function handleDragStart(event) {
 
 function handleDragEnd(event){
   let line = `line_${event.target.closest("ul").id.split('_')[1]}`
-  console.log(line)
   event.target.style.opacity = "initial";
 }
 
@@ -533,16 +571,13 @@ timeline.on("timechange", function (event) {
                 </div>`
       }
       
-      console.log(groups.get(item.group))
       document.getElementById('moreInfos').innerHTML += html
     }
   });
 });
 
 
-console.log(timeline)
 document.getElementById('save').addEventListener('click',function (){
-  console.log(items.get())
   var data = items.get({
       type: {
       start: 'ISODate',
@@ -550,12 +585,10 @@ document.getElementById('save').addEventListener('click',function (){
       }
   });
   let temp = JSON.stringify(data, null, 2);
-  console.log(temp)
   });
 
 document.getElementById('load').addEventListener('click',function (){
   test_items.forEach(i => items.add(i))
-  console.log(items.get())
   });
 //wrapper
 
