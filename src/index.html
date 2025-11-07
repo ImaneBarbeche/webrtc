@@ -24,6 +24,7 @@
     <!-- CSS Application LifeStories -->
     <link rel="stylesheet" href="css/app.css" />
     <link rel="stylesheet" href="css/onboarding.css" />
+    <link rel="stylesheet" href="css/homepage.css" />
     <link rel="stylesheet" href="css/questionnaire.css" />
     <link rel="stylesheet" href="css/calendar.css" />
     <link href="css/bloc_border.css" rel="stylesheet" type="text/css" />
@@ -36,9 +37,10 @@
   </head>
 
   <body>
-        <div class="onboarding-container">
+    <div id="homepage-root"></div>
+    <div class="onboarding-container" style="display: none;">
       <header>
-        <img src="./assets/imgs/LFlogo.png" alt="Logo LifeStories">
+        <img src="./assets/imgs/LFlogo.png" alt="Logo LifeStories" />
         <h1>LifeStories</h1>
       </header>
 
@@ -50,27 +52,25 @@
         <p>...et laissez le voyage commencer</p>
         <div class="role-cards">
           <div class="role-card">
-              
-              <button id="selectInterviewer" class="interviewer-btn">
-                <img
-                  src="assets/imgs/enqueteur.png"
-                  alt="Enquêteur"
-                  class="role-icon"
-                />
+            <button id="selectInterviewer" class="interviewer-btn">
+              <img
+                src="assets/imgs/enqueteur.png"
+                alt="Enquêteur"
+                class="role-icon"
+              />
               <span>Enquêteur</span>
             </button>
           </div>
 
-          
           <div class="role-card">
-              <button id="selectInterviewee" class="interviewee-btn">
-                <img
-                  src="assets/imgs/enqueté.png"
-                  alt="Enquêté"
-                  class="role-icon"
-                />
-                <span>Enquêté</span>
-              </button>
+            <button id="selectInterviewee" class="interviewee-btn">
+              <img
+                src="assets/imgs/enqueté.png"
+                alt="Enquêté"
+                class="role-icon"
+              />
+              <span>Enquêté</span>
+            </button>
           </div>
         </div>
       </div>
@@ -104,8 +104,11 @@
           <p>Vous devez scanner le code QR de l'enqueté</p>
           <div class="scan-area">
             <div class="scan-frame">
-              <button id="scanResponseBtn" class="scan-btn" title="Scanner la réponse">
-              </button>
+              <button
+                id="scanResponseBtn"
+                class="scan-btn"
+                title="Scanner la réponse"
+              ></button>
               <div class="corner top-left"></div>
               <div class="corner top-right"></div>
               <div class="corner bottom-left"></div>
@@ -132,8 +135,11 @@
           <p>Scannez le QR code fourni par l'enquêteur</p>
           <div class="scan-area">
             <div class="scan-frame">
-              <button id="scanBtn" class="scan-btn" title="Scanner le QR Code">
-              </button>
+              <button
+                id="scanBtn"
+                class="scan-btn"
+                title="Scanner le QR Code"
+              ></button>
               <div class="corner top-left"></div>
               <div class="corner top-right"></div>
               <div class="corner bottom-left"></div>
@@ -208,7 +214,7 @@
       <div id="reconnect-container" class="hidden">
         <div>
           <h1>Connexion perdue</h1>
-          <img src="assets/imgs/connectionlost.png" alt="Connexion perdue">
+          <img src="assets/imgs/connectionlost.png" alt="Connexion perdue" />
           <span>Connexion perdue : veuillez vous reconnecter</span>
           <button id="reconnect-btn" class="reconnect-button">
             Se reconnecter

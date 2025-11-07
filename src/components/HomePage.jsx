@@ -1,5 +1,4 @@
 import React from 'react';
-import '../css/homepage.css';
 
 export default function HomePage({ onStart }) {
   return (
@@ -16,12 +15,12 @@ export default function HomePage({ onStart }) {
       {/* Section droite - Texte et bouton */}
       <div className="homepage-right">
         <h1 className="homepage-title">
-          Share.<br />
-          Visualize.
+          Partagez.<br />
+          Visualisez.
         </h1>
-        <p className="homepage-subtitle">Your memories are valuable to us.</p>
+        <p className="homepage-subtitle">Lorem ipsum dolor sit amet consectetur adipisicing elit. Suscipit ullam obcaecati, ad unde recusandae, ut qui alias consectetur voluptatem nobis debitis quod consequuntur, quos maiores laboriosam voluptas repellendus modi consequatur.</p>
         <button className="homepage-start-btn" onClick={onStart}>
-          Start
+          Commencer
         </button>
       </div>
     </div>

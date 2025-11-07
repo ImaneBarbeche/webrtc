@@ -8,9 +8,13 @@
       "default",
       {
         "ignore": [
-          "color: color-mix(in srgb, var(--primary-grey), black 20%)"
+          "color: color-mix(in srgb, var(--primary-grey), black 20%)",
+          "backdrop-filter"
         ]
       }
-    ]
+    ],
+    "css-prefix-order": "off",
+    "button-type": "off",
+    "no-inline-styles": "off"
   }
 }
