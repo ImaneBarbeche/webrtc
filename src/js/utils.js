@@ -10,7 +10,6 @@ function prettyPrompt(item, attributes, callback) {
  
     // Générer des inputs HTML en fonction des attributs
     let inputFields = attributes.map(attr => {
-      console.log(item)
       const fieldId = attr.replace(/\s+/g, '_').toLowerCase();
       //const defaultValue =  (typeof item.attributes[attr] === "object" ? item.attributes[attr].name : item.attributes[attr]) || '';  // Utilise la valeur existante ou une chaîne vide si elle n'existe pas
       

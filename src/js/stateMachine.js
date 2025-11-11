@@ -71,7 +71,10 @@ export const surveyMachine = createMachine({
           actions: [
             {
               type: 'modifyCalendarEpisode', params: {end: timeline.options.end}
-            }
+            },
+            ({context}) => console.log("🔵 askAlwaysLivedInCommune YES - Groupe AVANT nextGroup:", context.group),
+            'nextGroup',  // Passer de groupe 13 (commune) à groupe 12 (type logement)
+            ({context}) => console.log("🔵 askAlwaysLivedInCommune YES - Groupe APRÈS nextGroup:", context.group)
           ],
           target: 'askSameHousingInCommune'
         },
@@ -97,6 +100,7 @@ export const surveyMachine = createMachine({
           target: 'askCommuneArrivalYear'
         },
         {
+          actions: ['nextGroup'],  // Passer de groupe 13 (commune) à groupe 12 (logement)
           target: 'askSameHousingInCommune'
         }
       ]
@@ -105,7 +109,7 @@ export const surveyMachine = createMachine({
     askCommuneArrivalYear: {
       on: {
         ANSWER_COMMUNE_ARRIVAL: {
-          actions: ['addCalendarEpisode'],
+          actions: ['closePreviousCommuneEpisode', 'addCalendarEpisode'],
           target: 'askCommuneDepartureYear'
         }
       }
@@ -121,9 +125,16 @@ export const surveyMachine = createMachine({
     },
 
     askSameHousingInCommune: {
+      entry: [
+        ({context}) => console.log("🟢 Entry dans askSameHousingInCommune - Groupe:", context.group)
+      ],
       on: {
         YES: {
-          actions: ['addCalendarEpisode'],
+          actions: [
+            ({context}) => console.log("🟢 askSameHousingInCommune YES - Groupe AVANT addCalendar:", context.group),
+            'addCalendarEpisode',     // Créer épisode dans groupe 12 (logement)
+            ({context}) => console.log("🟢 askSameHousingInCommune YES - Groupe APRÈS addCalendar:", context.group)
+          ],
           target: 'askHousingOccupationStatusEntry'
         },
         NO: 'askMultipleHousings'
@@ -161,9 +172,14 @@ export const surveyMachine = createMachine({
     },
 
     askHousingOccupationStatusEntry: {
+      entry: [
+        ({context}) => console.log("🚪 Entry dans askHousingOccupationStatusEntry - Groupe AVANT nextGroup:", context.group),
+        'nextGroup',
+        ({context}) => console.log("🚪 Entry dans askHousingOccupationStatusEntry - Groupe APRÈS nextGroup:", context.group)
+      ],
       on: {
         ANSWER_STATUS_ENTRY: {
-          actions: ['nextGroup', 'addCalendarEpisode'],
+          actions: ['addCalendarEpisode'],  // Créer épisode dans groupe 11 (statut)
           target: 'askHousingOccupationStatusExit'
         }
       }
@@ -242,37 +258,53 @@ export const surveyMachine = createMachine({
       currentLogementIndex: ({context}) => context.currentLogementIndex + 1
     }),
 
-    addCommune: assign({
-      communes: ({context, event}) => {
-        return [...context.communes, ...event.commune];
-      }
-    }),
-
-    addLogement: assign({
-      communes: ({context, event}) => {
-        return
-      }
-    }),
-
     // Ajoute l'épisode au calendrier et change le contexte lastEpisode, si un parametre start est spécifié alors le privilégier, sinon utiliser context.lastEpisode.end
     addCalendarEpisode: assign ({
       lastEpisode: ({context, event}, params) => {
+        console.log("🔍 addCalendarEpisode - Groupe actuel:", context.group, "Event type:", event.type);
         let defaultStart = context.lastEpisode?.end;
         let defaultEnd = 0;
         let endDate = 0;
         let startDate = 0;
         
         if(params?.start == "timeline_init"){
-          startDate = timeline.options.start
+          startDate = timeline.options.start;
+          // Pour la commune de naissance, mettre la fin à la fin de la timeline par défaut
+          defaultEnd = timeline.options.end;
+        }
+        
+        // Si l'événement contient "start", c'est une année d'arrivée
+        if(event.start){
+          startDate = new Date(`${event.start}-01-01`);
         }
         
         if(groups.get(context.group).dependsOn){
           let filteritems = (items.get()).filter(i => i.group == groups.get(context.group).dependsOn)
-          defaultStart = filteritems[context.currentCommuneIndex].start
-          defaultEnd = filteritems[context.currentCommuneIndex].end
+          // Utiliser le dernier item du groupe parent (le plus récent)
+          let parentItem = filteritems.length > 0 ? filteritems[filteritems.length - 1] : null;
+          if (parentItem) {
+            defaultStart = parentItem.start
+            defaultEnd = parentItem.end
+          }
         }
-        let trick = event.type == "ANSWER_BIRTH_COMMUNE" ? event.commune[0] : event.commune//trick addfirstquestion
-        let truc = ajouterEpisode(trick||event.statut_res, startDate || defaultStart, endDate || defaultEnd,context.group);
+        
+        // Déterminer le contenu de l'épisode
+        let content;
+        if (event.type == "ANSWER_BIRTH_COMMUNE") {
+          content = event.commune[0];
+        } else if (event.commune) {
+          content = event.commune;
+        } else if (event.statut_res) {
+          content = event.statut_res;
+        } else if (event.type === "YES" && context.group === 12) {
+          // Pour "même logement", utiliser un libellé descriptif
+          content = "Logement unique";
+        } else {
+          // Utiliser la commune courante du contexte
+          content = context.communes[context.currentCommuneIndex];
+        }
+        
+        let truc = ajouterEpisode(content, startDate || defaultStart, endDate || defaultEnd, context.group);
         return truc
       }
     }),
@@ -289,6 +321,20 @@ export const surveyMachine = createMachine({
         
       }
     }),
+
+    closePreviousCommuneEpisode: ({context, event}) => {
+      // Fermer l'épisode de la commune précédente à la date d'arrivée dans la nouvelle
+      const allItems = items.get();
+      // Trouver tous les épisodes de communes (group 13)
+      const communeEpisodes = allItems.filter(i => i.group === 13);
+      
+      // Prendre le dernier épisode créé (le plus récent dans le tableau)
+      if (communeEpisodes.length > 0 && event.start) {
+        const lastCommuneEpisode = communeEpisodes[communeEpisodes.length - 1];
+        const arrivalDate = new Date(`${event.start}-01-01`);
+        modifierEpisode(lastCommuneEpisode.id, { end: arrivalDate });
+      }
+    },
 
     extendPreviousCalendarEpisode:({context, event}) => {
       

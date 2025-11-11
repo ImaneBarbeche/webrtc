@@ -14,7 +14,6 @@ function initializeStatusComponent() {
     }
     root = createRoot(container);
     root.render(<WebRTCStatus role={currentRole} status={currentStatus} />);
-    console.log('React WebRTC Status component initialized');
 }
 
 window.updateWebRTCStatus = function(role, status) {
@@ -27,7 +26,6 @@ window.updateWebRTCStatus = function(role, status) {
     }
 };
 
-console.log('window.updateWebRTCStatus is now available');
 
 // Initialiser quand le DOM est prêt
 if (document.readyState === 'loading') {

@@ -15,7 +15,6 @@ function initializeStatusComponent() {
   
   root = createRoot(container);
   root.render(<Status status={currentStatus} />);
-  console.log('React Status component initialized');
 }
 
 // Initialiser quand le DOM est prêt
@@ -30,10 +29,8 @@ window.updateReactStatus = function(newStatus) {
   currentStatus = newStatus;
   if (root) {
     root.render(<Status status={currentStatus} />);
-    console.log(`React Status updated to: ${newStatus}`);
   } else {
     console.warn('React Status called but root not initialized yet');
   }
 };
 
-console.log('window.updateReactStatus is now available');

@@ -27,7 +27,6 @@ class WebRTCSync {
       // Essayer de récupérer le data channel depuis window
       this.tryConnectDataChannel();
     } else {
-      console.log("Pas de connexion WebRTC détectée");
       this.updateStatusIndicator(); // Afficher "Mode standalone"
     }
   }
@@ -254,9 +253,7 @@ class WebRTCSync {
       reconnectContainer.classList.remove("hidden");
       
       // Add click listener to redirect to onboarding
-      reconnectBtn.onclick = () => {
-        console.log("User requested reconnection - returning to onboarding");
-        
+      reconnectBtn.onclick = () => {        
         // Clear WebRTC state
         sessionStorage.setItem("webrtc_connected", "false");
         

@@ -161,13 +161,19 @@ document.addEventListener("DOMContentLoaded", async () => {
             break;
 
           case "askSameHousingInCommune":
-            questionText = `Avez-vous toujours vécu dans le même logement à ${state.context.communes[state.context.currentCommuneIndex]} ?`;
+            // Utiliser le dernier index valide (currentCommuneIndex - 1 car on vient de finir de traiter les communes)
+            const communeIndex = Math.max(0, state.context.currentCommuneIndex - 1);
+            const currentCommune = state.context.communes[communeIndex] || "cette commune";
+            questionText = `Avez-vous toujours vécu dans le même logement à ${currentCommune} ?`;
             responseType = "choice";
             choices = ["Yes", "No"];
             break;
 
           case "askMultipleHousings":
-            questionText = `Nous allons faire la liste des logements successifs que vous avez occupés dans ${state.context.communes[state.context.currentCommuneIndex]} depuis votre arrivée.`;
+            // Utiliser le dernier index valide
+            const communeIndexMulti = Math.max(0, state.context.currentCommuneIndex - 1);
+            const currentCommuneMulti = state.context.communes[communeIndexMulti] || "cette commune";
+            questionText = `Nous allons faire la liste des logements successifs que vous avez occupés dans ${currentCommuneMulti} depuis votre arrivée.`;
             responseType = "inputlist";
             eventType = "ANSWER_MULTIPLE_HOUSINGS";
             eventKey = "logements";

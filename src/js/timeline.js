@@ -250,7 +250,6 @@ if (savedItems) {
     const parsedItems = JSON.parse(savedItems);
     items.clear();
     items.add(parsedItems);
-    console.log('✅ Items chargés depuis localStorage:', parsedItems.length);
   } catch (e) {
     console.error('❌ Erreur lors du chargement des items:', e);
   }
@@ -270,7 +269,6 @@ if (savedGroups) {
         });
       }
     });
-    console.log('✅ État des groupes restauré depuis localStorage');
   } catch (e) {
     console.error('❌ Erreur lors du chargement des groupes:', e);
   }
@@ -284,12 +282,6 @@ if (savedOptions) {
     if (parsedOptions.max) options.max = new Date(parsedOptions.max);
     if (parsedOptions.start) options.start = new Date(parsedOptions.start);
     if (parsedOptions.end) options.end = new Date(parsedOptions.end);
-    console.log('✅ Options de timeline restaurées:', {
-      min: options.min,
-      max: options.max,
-      start: options.start,
-      end: options.end
-    });
   } catch (e) {
     console.error('❌ Erreur lors du chargement des options:', e);
   }
@@ -316,7 +308,6 @@ timeline.on('changed', () => {
   };
   localStorage.setItem('lifestories_options', JSON.stringify(currentOptions));
   
-  console.log('💾 Données sauvegardées dans localStorage');
 });
 /**
  * GESTION DES LANDMARKS (REPÈRES TEMPORELS)
@@ -443,10 +434,7 @@ timeline.on('click', function(properties) {
             // Petit délai pour que vis.js finisse de toggle le groupe
             setTimeout(() => {
                 const updatedGroup = groups.get(properties.group);
-                const isClosed = !updatedGroup.showNested;
-                
-                console.log(`Groupe ${updatedGroup.content} ${isClosed ? 'fermé' : 'ouvert'}`);
-                
+                const isClosed = !updatedGroup.showNested;                
                 // Pour chaque landmark défini
                 updatedGroup.landmarkChildren.forEach(landmarkId => {
                     let landmarkItems;
@@ -460,9 +448,7 @@ timeline.on('click', function(properties) {
                             filter: item => item.group === properties.group && item._originalGroup === landmarkId 
                         });
                     }
-                    
-                    console.log(`Traitement de ${landmarkItems.length} items du landmark ${landmarkId}`);
-                    
+                                      
                     landmarkItems.forEach(item => {
                         if (isClosed) {
                             // Groupe fermé : afficher les items sur le parent
@@ -526,7 +512,6 @@ timeline.on('timechanged',function (event){
 })
 
 /*timeline.on('dragover',function (event) {
-  console.log(event)
   items.remove('temp')
   let startDate = new Date(event.snappedTime)
   let endDate = new Date(`${startDate.getFullYear()+1}-01-01`)
@@ -563,7 +548,6 @@ timeline.on("timechange", function (event) {
   items.forEach((item) => {
     var itemStart = new Date(item.start).getTime();
     var itemEnd = item.end ? new Date(item.end).getTime() : itemStart;
-    console.log(item)
     
     // Pour les événements ponctuels, vérifier si on est dans la même année
     // Pour les périodes, vérifier si on est dans l'intervalle
