@@ -121,7 +121,7 @@ export const test_items=[
           "type": "range",
           "content": "Locataire (seul)",
           "start": "2024-01-01T00:00:00.000Z",
-          "end": "2C025-12-31T00:00:00.000Z",
+          "end": "2025-12-31T00:00:00.000Z",
           "group": 11,
           "className": "green"
         },
@@ -137,7 +137,7 @@ export const test_items=[
           "content": "Brevet des collèges",
           "category": "degree",
           "start": "2015-06-25T00:00:00.000Z",
-          "end": "2C025-12-31T00:00:00.000Z",
+          "end": "2025-12-31T00:00:00.000Z",
 
 
           "group": 23,

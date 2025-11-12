@@ -2,7 +2,7 @@ import { ajouterEpisode, modifierEpisode } from "./episodes.js"
 import { timeline, items, groups, handleDragStart, handleDragEnd } from "./timeline.js";
 import state from "./state.js"
 
-import { surveyMachine, surveyService } from "./stateMachine.js";
+import { surveyMachine, surveyService, initializeSurveyService } from "./stateMachine.js";
 
 /**
  ************************************************************************************************************
@@ -26,6 +26,12 @@ function handleRemoteMessage(message) {
         // Synchroniser l'état complet (utile pour rattrapage)
         // Note: XState v5 n'a pas de méthode simple pour forcer un état
         // On pourrait recréer le service ou envoyer des événements pour arriver au bon état
+    } else if (message.type === 'RESET_ALL_DATA') {
+        // L'enquêteur a demandé une réinitialisation complète
+        console.log('📥 Message RESET reçu - réinitialisation de toutes les données');
+        import('./stateMachine.js').then(module => {
+          module.resetAllData();
+        });
     }
 }
 
@@ -64,8 +70,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         enableWebRTCSync();
     });
     
-    // Initialisation de la machine à états
-    surveyService.start();
+    // Initialisation de la machine à états avec restauration si nécessaire
+    initializeSurveyService();
     surveyService.subscribe((state) => {
         renderQuestion(state); // Mise à jour à chaque transition
     });
@@ -319,4 +325,28 @@ function initWithTimeline(timelineInstance) {
     console.log("Timeline reçue :", timelineInstance);
     // Utilisation de timelineInstance ici
 }
+
+// Gestionnaire du bouton de réinitialisation
+document.addEventListener('DOMContentLoaded', () => {
+  const resetButton = document.getElementById('resetButton');
+  if (resetButton) {
+    resetButton.addEventListener('click', () => {
+      // Demander confirmation
+      if (confirm('⚠️ Êtes-vous sûr de vouloir tout réinitialiser ? Toutes les données (questionnaire + timeline) seront perdues.')) {
+        // Si on est connecté en WebRTC, envoyer un message de reset à l'autre appareil
+        if (window.webrtcSync && window.webrtcSync.connected) {
+          console.log('📤 Envoi du message RESET à l\'autre appareil');
+          window.webrtcSync.sendMessage({
+            type: 'RESET_ALL_DATA'
+          });
+        }
+        
+        // Réinitialiser localement
+        import('./stateMachine.js').then(module => {
+          module.resetAllData();
+        });
+      }
+    });
+  }
+});
 

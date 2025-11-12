@@ -207,6 +207,32 @@ class WebRTCSync {
   }
 
   /**
+   * Envoyer un message générique
+   * @param {Object} messageData - Les données du message
+   */
+  sendMessage(messageData) {
+    if (!this.connected || !this.dc) {
+      console.warn("⚠️ Impossible d'envoyer le message: data channel non connecté");
+      return false;
+    }
+
+    try {
+      const message = {
+        ...messageData,
+        timestamp: Date.now(),
+        sender: this.isOfferor ? "host" : "guest",
+      };
+
+      this.dc.send(JSON.stringify(message));
+      console.log('📤 Message envoyé:', message.type);
+      return true;
+    } catch (err) {
+      console.error("❌ Erreur envoi message:", err);
+      return false;
+    }
+  }
+
+  /**
    * Vérifier si la synchronisation est active
    */
   isActive() {

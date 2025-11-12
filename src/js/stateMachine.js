@@ -10,25 +10,80 @@ import { timeline, groups, items } from "./timeline.js";
 ********************************************************************************
 */
 
+// Fonction pour charger le contexte sauvegardé
+function loadSavedContext() {
+  try {
+    const savedContext = localStorage.getItem('lifestories_context');
+    const savedState = localStorage.getItem('lifestories_current_state');
+    
+    if (savedContext) {
+      const context = JSON.parse(savedContext);
+      console.log('✅ Contexte restauré depuis localStorage:', context);
+      return { context, savedState };
+    }
+  } catch (e) {
+    console.error('❌ Erreur lors du chargement du contexte:', e);
+  }
+  return { context: null, savedState: null };
+}
+
+// Fonction pour sauvegarder le contexte
+function saveContext(context, state) {
+  try {
+    // Créer une copie du contexte sans lastEpisode (car il contient des références circulaires)
+    const contextToSave = {
+      birthYear: context.birthYear,
+      birthPlace: context.birthPlace,
+      communes: context.communes,
+      departements: context.departements,
+      currentCommuneIndex: context.currentCommuneIndex,
+      logements: context.logements,
+      currentLogementIndex: context.currentLogementIndex,
+      group: context.group,
+    };
+    
+    localStorage.setItem('lifestories_context', JSON.stringify(contextToSave));
+    localStorage.setItem('lifestories_current_state', JSON.stringify(state));
+  } catch (e) {
+    console.error('❌ Erreur lors de la sauvegarde du contexte:', e);
+  }
+}
+
+// Fonction pour réinitialiser toutes les données
+export function resetAllData() {
+  localStorage.removeItem('lifestories_context');
+  localStorage.removeItem('lifestories_current_state');
+  localStorage.removeItem('lifestories_items');
+  localStorage.removeItem('lifestories_groups');
+  localStorage.removeItem('lifestories_options');
+  console.log('🗑️ Toutes les données ont été effacées');
+  window.location.reload();
+}
+
+// Charger le contexte initial ou utiliser les valeurs par défaut
+const { context: savedContext, savedState } = loadSavedContext();
+
+const defaultContext = {
+  birthYear: 0,
+  birthPlace: '',           // Lieu de naissance des parents
+  communes: [],             // Liste des communes
+  departements: [],         // Liste des départements/pays associés
+  currentCommuneIndex: 0,
+  logements: [],            // Liste des logements par commune
+  currentLogementIndex: 0,
+  group: 13,
+  lastEpisode: null,
+};
+
 export const surveyMachine = createMachine({
   id: 'survey',
   initial: 'askBirthYear',
-  context: {
-    birthYear: 0,
-    birthPlace: '',           // Lieu de naissance des parents
-    communes: [],             // Liste des communes
-    departements: [],         // Liste des départements/pays associés
-    currentCommuneIndex: 0,
-    logements: [],            // Liste des logements par commune
-    currentLogementIndex: 0,
-    group: 13,
-    lastEpisode: null,
-  },
+  context: defaultContext,
   states: {
     askBirthYear: {
       on: {
         ANSWER_BIRTH_YEAR: {
-          actions: ['setupCalendar'],
+          actions: ['saveBirthYear', 'setupCalendar'],
           target: 'birthPlaceIntro'
         }
       }
@@ -217,6 +272,10 @@ export const surveyMachine = createMachine({
   }
 }, {
   actions: {
+    saveBirthYear: assign({
+      birthYear: ({context, event}) => parseInt(event.birthdate)
+    }),
+
     saveBirthPlace: assign({
       birthPlace: ({context, event}) => event.birthPlace
     }),
@@ -446,4 +505,43 @@ export const surveyMachine = createMachine({
   }
 });
 
+// Créer le service et le configurer avec les données sauvegardées
 export const surveyService = interpret(surveyMachine);
+
+// Fonction pour initialiser le service avec l'état sauvegardé
+export function initializeSurveyService() {
+  // Démarrer le service
+  surveyService.start();
+  
+  // Si on a un contexte sauvegardé, restaurer les options de la timeline
+  if (savedContext && savedContext.birthYear && savedContext.birthYear > 0) {
+    console.log('📅 Restauration du calendrier pour l\'année:', savedContext.birthYear);
+    timeline.setOptions({
+      min: new Date(`${savedContext.birthYear}-01-01`), 
+      start: new Date(`${savedContext.birthYear}-01-01`)
+    });
+    
+    // Restaurer aussi le format de l'âge
+    timeline.setOptions({
+      format: {
+        minorLabels: function(date, scale, step) {
+          switch (scale) {
+            case 'year':
+              const age = new Date(date).getFullYear() - savedContext.birthYear;
+              return '<b>' + new Date(date).getFullYear() + '</b></br><b>' + age + `</b> ${age != 0 && age != 1 ? 'ans' : 'an'}`;
+            default:
+              return vis.moment(date).format(scale === 'month' ? 'MMM' : 'D');
+          }
+        }
+      }
+    });
+  }
+  
+  // Sauvegarder le contexte après chaque transition
+  surveyService.subscribe((state) => {
+    saveContext(state.context, state.value);
+  });
+}
+
+// Exporter pour que questionnaire.js puisse l'utiliser
+export { savedContext, savedState };
