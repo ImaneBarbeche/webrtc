@@ -34,6 +34,7 @@
       type="text/css"
       media="all"
     />
+    <link rel="stylesheet" href="css/sidebar.css" />
   </head>
 
   <body>
@@ -194,17 +195,6 @@
     </div>
     <!-- Fin de .onboarding-container -->
 
-    <!-- Debug panel (hidden by default) -->
-    <div class="debug-panel hidden" id="debugPanel">
-      <button
-        class="debug-toggle"
-        onclick="document.getElementById('debugLog').classList.toggle('visible')"
-      >
-        🐛
-      </button>
-      <div id="debugLog" class="debug-log hidden"></div>
-    </div>
-
     <!-- Section LifeStories (cachée au démarrage) -->
     <div class="lifestories-container" id="lifestoriesContainer">
       <!-- Indicateur de statut WebRTC -->
@@ -281,9 +271,39 @@
           // Vérifier si on est en mode viewer
           const isViewer =
             sessionStorage.getItem("webrtc_isOfferor") === "false";
+          const isInterviewer = sessionStorage.getItem("webrtc_isOfferor") === "true";
 
-          // Initialiser Split.js seulement en mode hôte
-          if (!isViewer) {
+          // Vue enquêteur : masquer le calendrier et la synthèse, afficher uniquement le questionnaire
+          if (isInterviewer) {
+            // Ajouter une classe au body pour permettre le CSS de la sidebar
+            document.body.classList.add('interviewer-mode');
+            
+            const trajectoriesSection = document.getElementById("trajectories");
+            const questionnaireSection = document.getElementById("questionnaire");
+            if (trajectoriesSection) {
+              trajectoriesSection.style.display = "none";
+            }
+            if (questionnaireSection) {
+              questionnaireSection.style.width = "100%";
+              questionnaireSection.style.maxWidth = "100%";
+            }
+          }
+
+          // Vue enquêté : masquer le questionnaire, afficher uniquement le calendrier
+          if (isViewer) {
+            const questionnaireSection = document.getElementById("questionnaire");
+            const trajectoriesSection = document.getElementById("trajectories");
+            if (questionnaireSection) {
+              questionnaireSection.style.display = "none";
+            }
+            if (trajectoriesSection) {
+              trajectoriesSection.style.width = "100%";
+              trajectoriesSection.style.maxWidth = "100%";
+            }
+          }
+
+          // Initialiser Split.js seulement si les deux sections sont visibles (ni enquêteur ni enquêté)
+          if (!isViewer && !isInterviewer) {
             Split(["#questionnaire", "#trajectories"], {
               sizes: [20, 80],
               minSize: 100,

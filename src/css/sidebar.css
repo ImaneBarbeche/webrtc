@@ -1,0 +1,166 @@
+.sidebar {
+  position: fixed;
+  left: 20px;
+  top: 20px;
+  height: calc(100vh - 40px);
+  background: white;
+  color: black;
+  transition: width 0.3s ease, border-radius 0.3s ease;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+}
+
+.sidebar.open {
+  width: 250px;
+  border-radius: 30px; /* Arrondi prononcé quand ouverte */
+}
+
+.sidebar.closed {
+  width: 80px;
+  border-radius: 30px; /* Forme arrondie/pilule quand fermée */
+}
+
+.sidebar-header {
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.sidebar.closed .sidebar-header {
+  padding: 15px;
+  justify-content: center;
+}
+
+.sidebar.closed .sidebar-header .sidebar-logo {
+  display: none;
+}
+
+.sidebar-divider {
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(to right, transparent, #ddd 20%, #ddd 80%, transparent);
+  margin: 0;
+}
+
+.sidebar.closed .sidebar-header h3 {
+  display: none;
+}
+
+.sidebar-toggle {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  width: 32px;
+  height: 32px;
+}
+
+.sidebar-toggle:hover {
+  background: rgba(0, 0, 0, 0.05);
+  transform: scale(1.1);
+}
+
+.toggle-icon-svg {
+  width: 20px;
+  height: 20px;
+  color: #333;
+  transition: transform 0.3s ease;
+}
+
+/* Rotation de l'icône quand la sidebar est fermée */
+.sidebar.closed .toggle-icon-svg {
+  transform: rotate(180deg);
+}
+
+.sidebar-content {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 20px;
+}
+
+.nav-button {
+  background: rgba(0, 0, 0, 0.05);
+  border: none;
+  color: black;
+  padding: 15px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: left;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  white-space: nowrap;
+}
+
+.nav-icon {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.nav-icon-img {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.nav-text {
+  flex: 1;
+}
+
+/* Quand la sidebar est fermée */
+.sidebar.closed .nav-button {
+  padding: 12px;
+  justify-content: center;
+}
+
+.sidebar.closed .nav-icon {
+  font-size: 24px;
+}
+
+.sidebar.closed .nav-icon-img {
+  width: 24px;
+  height: 24px;
+}
+
+.nav-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateX(5px);
+}
+
+.nav-button.active {
+  background: #3498db;
+}
+
+/* Ajuster le contenu principal pour laisser de l'espace pour la sidebar flottante */
+/* Appliquer la marge seulement en mode enquêteur */
+body.interviewer-mode .lifestories-container {
+  margin-left: 290px; /* 250px sidebar + 40px espace */
+  transition: margin-left 0.3s ease;
+}
+
+body.interviewer-mode .sidebar.closed ~ .lifestories-container {
+  margin-left: 120px; /* 80px sidebar + 40px espace */
+}
+
+.sidebar-logo {
+  width: 30px;
+  height: auto;
+  margin-right: 10px;
+}

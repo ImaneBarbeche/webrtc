@@ -1,0 +1,10 @@
+<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Rectangle gauche (panneau étroit) -->
+  <rect x="2" y="4" width="6" height="16" rx="2" fill="#0ea5e9"/>
+  
+  <!-- Rectangle haut droit -->
+  <rect x="10" y="4" width="12" height="7" rx="2" fill="#3b82f6"/>
+  
+  <!-- Rectangle bas droit -->
+  <rect x="10" y="13" width="12" height="7" rx="2" fill="#93c5fd"/>
+</svg>
