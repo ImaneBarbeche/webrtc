@@ -636,6 +636,33 @@ document.getElementById('load').addEventListener('click',function (){
   test_items.forEach(i => items.add(i))
   });
 //wrapper
+let summaryOpen = false;
+const summaryContainer = document.getElementById("bricks")
+
+const toggleSummary = (() => {
+  console.log("click")
+
+  if(!summaryOpen) {
+    summaryContainer.classList.add("show-summary")
+    summaryOpen = true
+  }
+  else {
+    summaryContainer.classList.remove("show-summary")
+    summaryOpen = false
+  }
+  })
+
+const viewSummaryBtn = document.getElementById('view-summary') 
+const closeSummaryBtn = document.getElementById('close-summary') 
+
+viewSummaryBtn.addEventListener('click', toggleSummary);
+
+closeSummaryBtn.addEventListener('click', toggleSummary);
+
+
+  
+  
+
 
 // Exposer timeline et les datasets pour les autres fichiers
 export { timeline, items, groups, handleDragStart, handleDragEnd, toggleLandmark };

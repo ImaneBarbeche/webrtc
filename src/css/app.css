@@ -14,12 +14,14 @@
     --primary-grey: #f2f2f2;
     --primary-grey: color-mix(in srgb, var(--primary-light) 60%, transparent);
     --secondary-grey: color-mix(in srgb, var(--primary-dark) 15%, transparent);
+    --muted-beige: color-mix(in srgb, var(--primary-beige) 60%, transparent);
     /* --primary-grey: #f4e6da; */
     /* --primary-grey: rgb(201, 135, 135); */
 }
 
 body {
     background-color: var(--primary-beige);
+    padding: 0.5rem;
 }
 
 /* ========================================

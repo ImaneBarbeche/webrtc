@@ -27,7 +27,7 @@
 
 /* components style */
 #questionnaire, #canvas, #bricks {
-    margin: 15px;
+    /* margin: 15px; */
     overflow-y: auto;
 }
 
@@ -120,6 +120,10 @@
 
 .vis-panel.vis-top, .vis-panel.vis-bottom {
     border: none;
+}
+
+.vis-panel.vis-left.vis-vertical-scroll {
+    mask-image: linear-gradient( to top, transparent 0.5%, black 2%, black 98%, transparent 100% );
 }
 
 .vis-label.vis-group-level-0 {
@@ -460,8 +464,15 @@
     -webkit-mask-image: linear-gradient(
         to right,
         transparent 0.5%,
-        black 4%,
-        black 96%,
+        black 2%,
+        black 98%,
+        transparent 100%
+    ),
+    linear-gradient(
+        to top,
+        transparent 0.5%,
+        black 2%,
+        black 98%,
         transparent 100%
     );
     /* mask-mode: luminance; */
