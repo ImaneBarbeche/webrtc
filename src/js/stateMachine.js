@@ -18,7 +18,6 @@ function loadSavedContext() {
     
     if (savedContext) {
       const context = JSON.parse(savedContext);
-      console.log('✅ Contexte restauré depuis localStorage:', context);
       return { context, savedState };
     }
   } catch (e) {
@@ -56,7 +55,6 @@ export function resetAllData() {
   localStorage.removeItem('lifestories_items');
   localStorage.removeItem('lifestories_groups');
   localStorage.removeItem('lifestories_options');
-  console.log('🗑️ Toutes les données ont été effacées');
   window.location.reload();
 }
 
@@ -127,9 +125,7 @@ export const surveyMachine = createMachine({
             {
               type: 'modifyCalendarEpisode', params: {end: timeline.options.end}
             },
-            ({context}) => console.log("🔵 askAlwaysLivedInCommune YES - Groupe AVANT nextGroup:", context.group),
             'nextGroup',  // Passer de groupe 13 (commune) à groupe 12 (type logement)
-            ({context}) => console.log("🔵 askAlwaysLivedInCommune YES - Groupe APRÈS nextGroup:", context.group)
           ],
           target: 'askSameHousingInCommune'
         },
@@ -151,11 +147,14 @@ export const surveyMachine = createMachine({
     placeNextCommuneOnTimeline: {
       always: [
         {
-          guard: 'moreCommunesToProcess',
+          guard: 'hasMoreCommunesToPlace',
           target: 'askCommuneArrivalYear'
         },
         {
-          actions: ['nextGroup'],  // Passer de groupe 13 (commune) à groupe 12 (logement)
+          actions: [
+            'nextGroup',  // Passer de groupe 13 (commune) à groupe 12 (logement)
+            'resetCommune'  // Réinitialiser l'index pour recommencer à la première commune
+          ],
           target: 'askSameHousingInCommune'
         }
       ]
@@ -181,14 +180,15 @@ export const surveyMachine = createMachine({
 
     askSameHousingInCommune: {
       entry: [
-        ({context}) => console.log("🟢 Entry dans askSameHousingInCommune - Groupe:", context.group)
       ],
       on: {
         YES: {
           actions: [
-            ({context}) => console.log("🟢 askSameHousingInCommune YES - Groupe AVANT addCalendar:", context.group),
+            assign({
+              logements: ({context}) => ['Logement unique'],
+              currentLogementIndex: 0
+            }),
             'addCalendarEpisode',     // Créer épisode dans groupe 12 (logement)
-            ({context}) => console.log("🟢 askSameHousingInCommune YES - Groupe APRÈS addCalendar:", context.group)
           ],
           target: 'askHousingOccupationStatusEntry'
         },
@@ -228,9 +228,7 @@ export const surveyMachine = createMachine({
 
     askHousingOccupationStatusEntry: {
       entry: [
-        ({context}) => console.log("🚪 Entry dans askHousingOccupationStatusEntry - Groupe AVANT nextGroup:", context.group),
         'nextGroup',
-        ({context}) => console.log("🚪 Entry dans askHousingOccupationStatusEntry - Groupe APRÈS nextGroup:", context.group)
       ],
       on: {
         ANSWER_STATUS_ENTRY: {
@@ -250,18 +248,29 @@ export const surveyMachine = createMachine({
     },
 
     checkMoreHousings: {
+      entry: [
+      ],
       always: [
         {
           guard: 'moreLogementsToProcess',
-          actions: ['nextLogement'],
+          actions: [
+            'nextLogement',
+            'previousGroup',  // Remonter de groupe 11 (statut) à groupe 12 (logement)
+          ],
           target: 'askHousingArrivalAge'
         },
         {
           guard: 'moreCommunesToProcess',
-          actions: ['nextCommune', 'previousGroup'],
+          actions: [
+            'nextCommune',  // Passer à la commune suivante
+            'resetLogement',  // Réinitialiser l'index des logements pour la prochaine commune
+            'previousGroup',  // 11 → 12
+          ],
           target: 'askSameHousingInCommune'
         },
         {
+          actions: [
+          ],
           target: 'surveyComplete'
         }
       ]
@@ -320,7 +329,7 @@ export const surveyMachine = createMachine({
     // Ajoute l'épisode au calendrier et change le contexte lastEpisode, si un parametre start est spécifié alors le privilégier, sinon utiliser context.lastEpisode.end
     addCalendarEpisode: assign ({
       lastEpisode: ({context, event}, params) => {
-        console.log("🔍 addCalendarEpisode - Groupe actuel:", context.group, "Event type:", event.type);
+        console.log("🔍 addCalendarEpisode - Groupe actuel:", context.group, "Event type:", event.type, "Event:", event);
         let defaultStart = context.lastEpisode?.end;
         let defaultEnd = 0;
         let endDate = 0;
@@ -332,18 +341,64 @@ export const surveyMachine = createMachine({
           defaultEnd = timeline.options.end;
         }
         
-        // Si l'événement contient "start", c'est une année d'arrivée
+        // Si l'événement contient "start", c'est une année d'arrivée ou un âge
         if(event.start){
-          startDate = new Date(`${event.start}-01-01`);
+          // Parser la valeur pour extraire le nombre (gère "12 ans", "12", "2010", etc.)
+          let value = event.start.toString().trim();
+          // Extraire le premier nombre de la chaîne
+          let match = value.match(/\d+/);
+          if (match) {
+            let num = parseInt(match[0]);
+            
+            // Déterminer si c'est un âge ou une année
+            // Si < 200, on considère que c'est un âge, sinon c'est une année
+            if (num < 200) {
+              // C'est un âge, convertir en année
+              let year = context.birthYear + num;
+              startDate = new Date(`${year}-01-01`);
+              console.log(`📅 Âge ${num} → Année ${year}`);
+            } else {
+              // C'est une année directement
+              startDate = new Date(`${num}-01-01`);
+              console.log(`📅 Année ${num}`);
+            }
+          }
         }
         
-        if(groups.get(context.group).dependsOn){
-          let filteritems = (items.get()).filter(i => i.group == groups.get(context.group).dependsOn)
-          // Utiliser le dernier item du groupe parent (le plus récent)
-          let parentItem = filteritems.length > 0 ? filteritems[filteritems.length - 1] : null;
-          if (parentItem) {
-            defaultStart = parentItem.start
-            defaultEnd = parentItem.end
+        // Vérifier si le groupe existe et a des dépendances
+        const currentGroup = groups.get(context.group);
+        console.log("🔍 addCalendarEpisode - currentGroup:", currentGroup, "dependsOn:", currentGroup?.dependsOn);
+        
+        if(currentGroup && currentGroup.dependsOn){
+          // Pour les logements (groupe 12), toujours utiliser currentCommuneIndex pour trouver la bonne commune
+          if (context.group === 12 && currentGroup.dependsOn === 13) {
+            let filteritems = (items.get()).filter(i => i.group == currentGroup.dependsOn);
+            let parentItem = filteritems[context.currentCommuneIndex];
+            console.log("🏘️ Sélection de la commune à l'index", context.currentCommuneIndex, ":", parentItem?.content);
+            
+            if (parentItem) {
+              console.log("📍 Parent item sélectionné:", parentItem.content, "Dates:", parentItem.start, "→", parentItem.end);
+              defaultStart = parentItem.start;
+              defaultEnd = parentItem.end;
+            }
+          }
+          // Si lastEpisode est du groupe parent, l'utiliser directement (pour les autres groupes)
+          else if (context.lastEpisode && context.lastEpisode.group === currentGroup.dependsOn) {
+            console.log("� Utilisation de lastEpisode comme parent:", context.lastEpisode.content);
+            defaultStart = context.lastEpisode.start;
+            defaultEnd = context.lastEpisode.end;
+          } else {
+            // Chercher le parent approprié - prendre le dernier item du groupe parent
+            let filteritems = (items.get()).filter(i => i.group == currentGroup.dependsOn)
+            console.log("🔍 Items du groupe parent (" + currentGroup.dependsOn + "):", filteritems);
+            
+            let parentItem = filteritems.length > 0 ? filteritems[filteritems.length - 1] : null;
+            
+            if (parentItem) {
+              console.log("📍 Parent item sélectionné:", parentItem.content, "Dates:", parentItem.start, "→", parentItem.end);
+              defaultStart = parentItem.start
+              defaultEnd = parentItem.end
+            }
           }
         }
         
@@ -358,6 +413,9 @@ export const surveyMachine = createMachine({
         } else if (event.type === "YES" && context.group === 12) {
           // Pour "même logement", utiliser un libellé descriptif
           content = "Logement unique";
+        } else if (context.group === 12 && context.logements && context.logements.length > 0) {
+          // Pour un logement spécifique, utiliser le nom du logement
+          content = context.logements[context.currentLogementIndex];
         } else {
           // Utiliser la commune courante du contexte
           content = context.communes[context.currentCommuneIndex];
@@ -375,8 +433,49 @@ export const surveyMachine = createMachine({
         if(params){
           return modifierEpisode(context.lastEpisode.id, params);
         }
+        
+        // Parser les modifications pour convertir âge→année si nécessaire
         const { type, ...modifs } = event;
-        return modifierEpisode(context.lastEpisode.id,modifs);
+        
+        // Si on a un 'end' qui est une chaîne (âge ou année), le parser
+        if (modifs.end && typeof modifs.end === 'string') {
+          let value = modifs.end.toString().trim();
+          let match = value.match(/\d+/);
+          if (match) {
+            let num = parseInt(match[0]);
+            
+            if (num < 200) {
+              // C'est un âge, convertir en année
+              let year = context.birthYear + num;
+              modifs.end = new Date(`${year}-01-01`);
+              console.log(`📅 Départ - Âge ${num} → Année ${year}`);
+            } else {
+              // C'est une année directement
+              modifs.end = new Date(`${num}-01-01`);
+              console.log(`📅 Départ - Année ${num}`);
+            }
+          }
+        }
+        
+        // Même chose pour 'start' si présent
+        if (modifs.start && typeof modifs.start === 'string') {
+          let value = modifs.start.toString().trim();
+          let match = value.match(/\d+/);
+          if (match) {
+            let num = parseInt(match[0]);
+            
+            if (num < 200) {
+              let year = context.birthYear + num;
+              modifs.start = new Date(`${year}-01-01`);
+              console.log(`📅 Arrivée - Âge ${num} → Année ${year}`);
+            } else {
+              modifs.start = new Date(`${num}-01-01`);
+              console.log(`📅 Arrivée - Année ${num}`);
+            }
+          }
+        }
+        
+        return modifierEpisode(context.lastEpisode.id, modifs);
         
       }
     }),
@@ -496,11 +595,25 @@ export const surveyMachine = createMachine({
     })
   },
   guards: {
+    hasMoreCommunesToPlace: (context) => {
+      // Pour le placement initial des communes sur la timeline
+      // On vérifie si l'index actuel est encore dans le tableau
+      const result = context.context.currentCommuneIndex < context.context.communes.length;
+      console.log("🔍 Guard hasMoreCommunesToPlace:", result, `(${context.context.currentCommuneIndex} < ${context.context.communes.length})`, "Communes:", context.context.communes);
+      return result;
+    },
     moreCommunesToProcess: (context) => {
-      return context.context.currentCommuneIndex < context.context.communes.length
+      // Pour le traitement des logements
+      // On vient de terminer la commune à currentCommuneIndex
+      // On vérifie s'il reste des communes NON encore traitées
+      const result = context.context.currentCommuneIndex + 1 < context.context.communes.length;
+      console.log("🔍 Guard moreCommunesToProcess:", result, `(${context.context.currentCommuneIndex + 1} < ${context.context.communes.length})`, "Communes:", context.context.communes);
+      return result;
     },
     moreLogementsToProcess: (context) => {
-      return context.context.currentLogementIndex < context.context.logements.length - 1
+      const result = context.context.currentLogementIndex < context.context.logements.length - 1;
+      console.log("🔍 Guard moreLogementsToProcess:", result, `(${context.context.currentLogementIndex} < ${context.context.logements.length - 1})`, "Logements:", context.context.logements);
+      return result;
     }
   }
 });
@@ -515,7 +628,6 @@ export function initializeSurveyService() {
   
   // Si on a un contexte sauvegardé, restaurer les options de la timeline
   if (savedContext && savedContext.birthYear && savedContext.birthYear > 0) {
-    console.log('📅 Restauration du calendrier pour l\'année:', savedContext.birthYear);
     timeline.setOptions({
       min: new Date(`${savedContext.birthYear}-01-01`), 
       start: new Date(`${savedContext.birthYear}-01-01`)
