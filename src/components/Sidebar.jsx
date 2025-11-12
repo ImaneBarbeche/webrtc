@@ -1,9 +1,20 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 
 function Sidebar() {
   const [isOpen, setIsOpen] = useState(true);
   const [currentView, setCurrentView] = useState('questionnaire'); // 'dashboard', 'questionnaire', 'calendar', 'split'
   const splitInstanceRef = useRef(null);
+  
+  // Gérer la classe sur le body quand l'état open/closed change
+  useEffect(() => {
+    if (isOpen) {
+      document.body.classList.add('sidebar-open');
+      document.body.classList.remove('sidebar-closed');
+    } else {
+      document.body.classList.add('sidebar-closed');
+      document.body.classList.remove('sidebar-open');
+    }
+  }, [isOpen]);
   
   const handleNavigation = (view) => {
     setCurrentView(view);

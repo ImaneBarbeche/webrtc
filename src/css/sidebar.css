@@ -10,6 +10,7 @@
   display: flex;
   flex-direction: column;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  overflow-x: hidden; 
 }
 
 .sidebar.open {
@@ -150,13 +151,14 @@
 
 /* Ajuster le contenu principal pour laisser de l'espace pour la sidebar flottante */
 /* Appliquer la marge seulement en mode enquêteur */
-body.interviewer-mode .lifestories-container {
-  margin-left: 290px; /* 250px sidebar + 40px espace */
+body.interviewer-mode.sidebar-closed .lifestories-container {
+  margin-left: 120px; /* 80px sidebar fermée + 40px espace */
   transition: margin-left 0.3s ease;
 }
 
-body.interviewer-mode .sidebar.closed ~ .lifestories-container {
-  margin-left: 120px; /* 80px sidebar + 40px espace */
+body.interviewer-mode.sidebar-open .lifestories-container {
+  margin-left: 290px; /* 250px sidebar + 40px espace */
+  transition: margin-left 0.3s ease;
 }
 
 .sidebar-logo {
