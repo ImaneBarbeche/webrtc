@@ -123,7 +123,7 @@ export const surveyMachine = createMachine({
         YES: {
           actions: [
             {
-              type: 'modifyCalendarEpisode', params: {end: timeline.options.end}
+              type: 'modifyCalendarEpisode', params: {end: 'timeline_end'}
             },
             'nextGroup',  // Passer de groupe 13 (commune) à groupe 12 (type logement)
           ],
@@ -336,9 +336,9 @@ export const surveyMachine = createMachine({
         let startDate = 0;
         
         if(params?.start == "timeline_init"){
-          startDate = timeline.options.start;
+          startDate = window.timeline?.options?.start || new Date();
           // Pour la commune de naissance, mettre la fin à la fin de la timeline par défaut
-          defaultEnd = timeline.options.end;
+          defaultEnd = window.timeline?.options?.end || new Date();
         }
         
         // Si l'événement contient "start", c'est une année d'arrivée ou un âge
@@ -430,6 +430,11 @@ export const surveyMachine = createMachine({
     // Modifie l'épisode du calendrier et change le contexte lastEpisode TODO POUR CA IL FAUT MODIFIER QUESTIONNAIREJS POUR CHANGER LE SEND COMMUNE
     modifyCalendarEpisode: assign ({
       lastEpisode: ({context, event}, params) => {
+        // Gérer le cas spécial 'timeline_end'
+        if(params && params.end === 'timeline_end'){
+          params = { ...params, end: window.timeline?.options?.end || new Date() };
+        }
+        
         if(params){
           return modifierEpisode(context.lastEpisode.id, params);
         }
@@ -530,7 +535,7 @@ export const surveyMachine = createMachine({
               case 'month':
                 return vis.moment(date).format('MMM');
               case 'year':
-                const age = new Date(date).getFullYear() - new Date(timeline.options.start).getFullYear()
+                const age = new Date(date).getFullYear() - new Date(window.timeline?.options?.start || new Date()).getFullYear()
                 return '<b>'+new Date(date).getFullYear() + '</b></br><b>'+ age + `</b> ${age != 0 && age != 1 ? 'ans' : 'an'}`
                 
               default:
@@ -628,25 +633,30 @@ export function initializeSurveyService() {
   
   // Si on a un contexte sauvegardé, restaurer les options de la timeline
   if (savedContext && savedContext.birthYear && savedContext.birthYear > 0) {
-    timeline.setOptions({
-      min: new Date(`${savedContext.birthYear}-01-01`), 
-      start: new Date(`${savedContext.birthYear}-01-01`)
-    });
-    
-    // Restaurer aussi le format de l'âge
-    timeline.setOptions({
-      format: {
-        minorLabels: function(date, scale, step) {
-          switch (scale) {
-            case 'year':
-              const age = new Date(date).getFullYear() - savedContext.birthYear;
-              return '<b>' + new Date(date).getFullYear() + '</b></br><b>' + age + `</b> ${age != 0 && age != 1 ? 'ans' : 'an'}`;
-            default:
-              return vis.moment(date).format(scale === 'month' ? 'MMM' : 'D');
+    // Vérifier que timeline existe avant de l'utiliser
+    if (window.timeline) {
+      window.timeline.setOptions({
+        min: new Date(`${savedContext.birthYear}-01-01`), 
+        start: new Date(`${savedContext.birthYear}-01-01`)
+      });
+      
+      // Restaurer aussi le format de l'âge
+      window.timeline.setOptions({
+        format: {
+          minorLabels: function(date, scale, step) {
+            switch (scale) {
+              case 'year':
+                const age = new Date(date).getFullYear() - savedContext.birthYear;
+                return '<b>' + new Date(date).getFullYear() + '</b></br><b>' + age + `</b> ${age != 0 && age != 1 ? 'ans' : 'an'}`;
+              default:
+                return vis.moment(date).format(scale === 'month' ? 'MMM' : 'D');
+            }
           }
         }
-      }
-    });
+      });
+    } else {
+      console.warn('⚠️ Timeline pas encore initialisée, options non restaurées');
+    }
   }
   
   // Sauvegarder le contexte après chaque transition

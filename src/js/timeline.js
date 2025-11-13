@@ -287,28 +287,9 @@ if (savedOptions) {
   }
 }
 
-// Création de la timeline avec les données chargées
-const container = document.getElementById('timeline');
-const timeline = new vis.Timeline(container, items, groups, options);
+// Déclarer timeline en dehors pour pouvoir l'exporter
+let timeline;
 
-// Exporter la timeline globalement
-window.timeline = timeline;
-
-// Sauvegarder automatiquement à chaque changement
-timeline.on('changed', () => {
-  localStorage.setItem('lifestories_items', JSON.stringify(items.get()));
-  localStorage.setItem('lifestories_groups', JSON.stringify(groups.get()));
-  
-  // Sauvegarder aussi les options importantes de la timeline
-  const currentOptions = {
-    min: timeline.options.min,
-    max: timeline.options.max,
-    start: timeline.options.start,
-    end: timeline.options.end
-  };
-  localStorage.setItem('lifestories_options', JSON.stringify(currentOptions));
-  
-});
 /**
  * GESTION DES LANDMARKS (REPÈRES TEMPORELS)
  * Permet d'afficher certains sous-groupes sur la ligne parent quand celui-ci est fermé
@@ -369,14 +350,50 @@ function toggleLandmark(groupId) {
     );
 }
 
-// Gestion de l'appui long pour les landmarks (desktop et tablette)
+// Variables globales pour l'appui long
 let longPressTimer = null;
 let longPressTarget = null;
 let longPressStartPos = null;
 const LONG_PRESS_DURATION = 500; // 500ms pour déclencher l'appui long
 const LONG_PRESS_MOVE_THRESHOLD = 5; //px
 
-timeline.on('mouseDown', function(properties) {
+// Variable pour la barre verticale
+let stepSize = 1000 * 60 * 60 * 24; // 1 jour en millisecondes
+
+// Création de la timeline avec les données chargées - attendre que tout soit chargé
+document.addEventListener('DOMContentLoaded', function() {
+  const container = document.getElementById('timeline');
+  
+  // Attendre que les styles soient appliqués
+  setTimeout(() => {
+    timeline = new vis.Timeline(container, items, groups, options);
+    
+    // Exporter la timeline globalement
+    window.timeline = timeline;
+
+    // Forcer un redraw pour appliquer les styles CSS
+    timeline.redraw();
+
+    // Émettre un événement personnalisé pour signaler que la timeline est prête
+    document.dispatchEvent(new CustomEvent('timelineReady'));
+
+    // Sauvegarder automatiquement à chaque changement
+  timeline.on('changed', () => {
+    localStorage.setItem('lifestories_items', JSON.stringify(items.get()));
+    localStorage.setItem('lifestories_groups', JSON.stringify(groups.get()));
+    
+    // Sauvegarder aussi les options importantes de la timeline
+    const currentOptions = {
+      min: timeline.options.min,
+      max: timeline.options.max,
+      start: timeline.options.start,
+      end: timeline.options.end
+    };
+    localStorage.setItem('lifestories_options', JSON.stringify(currentOptions));
+  });
+
+  // Gestion de l'appui long pour les landmarks
+  timeline.on('mouseDown', function(properties) {
     if (properties.what === 'group-label' && properties.group) {
         const clickedGroup = groups.get(properties.group);
         
@@ -394,9 +411,9 @@ timeline.on('mouseDown', function(properties) {
             }, LONG_PRESS_DURATION);
         }
     }
-});
+  });
 
-timeline.on('mouseMove', function(properties) {
+  timeline.on('mouseMove', function(properties) {
     if (longPressTimer && longPressStartPos && properties.event) {
         const dx = Math.abs(properties.event.clientX - longPressStartPos.x);
         const dy = Math.abs(properties.event.clientY - longPressStartPos.y);
@@ -406,18 +423,18 @@ timeline.on('mouseMove', function(properties) {
             longPressStartPos = null;
         }
     }
-});
+  });
 
-timeline.on('mouseUp', function(properties) {
+  timeline.on('mouseUp', function(properties) {
     // Annuler le timer si on relâche avant la durée requise
     if (longPressTimer) {
         clearTimeout(longPressTimer);
         longPressTimer = null;
         longPressStartPos = null;
     }
-});
+  });
 
-timeline.on('click', function(properties) {
+  timeline.on('click', function(properties) {
     // ACCESSIBILITÉ : Clic sur l'axe temporel pour déplacer la barre verticale
     if (properties.what === 'axis' && properties.time) {
         // Déplacer la barre custom à la date cliquée
@@ -485,7 +502,109 @@ timeline.on('click', function(properties) {
             }, 50); // Délai court pour laisser vis.js finir son rendu
         }
     }
-});
+  });
+
+  timeline.on('timechanged', function (event) {
+    isCustomBarMoving = false;
+  });
+
+  /**
+   * VERTICAL BAR COMPONENT
+   */
+  let customTimeId = timeline.addCustomTime(`${timeline.options.end.getFullYear() - 10}-01-01`, "custom-bar");
+  timeline.on("timechange", function (event) {
+    isCustomBarMoving = true
+    var selectedTime = event.time.getTime();
+    var snappedTime = Math.round(selectedTime / stepSize) * stepSize;
+
+    // Déplacer la barre à la position ajustée
+    timeline.setCustomTime(new Date(snappedTime), customTimeId);
+
+    // Réinitialiser le style des items
+    items.forEach((item) => {
+      if (item.className.includes("highlight")) { 
+        item.className = item.className.replace("highlight","")
+        items.update(item)
+      }
+    });
+
+    document.getElementById('moreInfos').innerHTML = ''
+    // Vérifier si la barre verticale passe sur un item
+    items.forEach((item) => {
+      var itemStart = new Date(item.start).getTime();
+      var itemEnd = item.end ? new Date(item.end).getTime() : itemStart;
+      
+      // Pour les événements ponctuels, vérifier si on est dans la même année
+      // Pour les périodes, vérifier si on est dans l'intervalle
+      let isInRange;
+      if (item.type === "point" || item.type === "box") {
+        // Pour les points et box, comparer les années
+        const itemYear = new Date(item.start).getFullYear();
+        const barYear = new Date(snappedTime).getFullYear();
+        isInRange = itemYear === barYear;
+      } else {
+        // Pour les périodes, vérifier l'intervalle classique
+        isInRange = snappedTime >= itemStart && snappedTime <= itemEnd;
+      }
+      
+      // Si la barre verticale passe sur l'item, on le surligne
+      if (isInRange) {
+        // Ajouter une classe CSS pour surligner l'item
+        item.className += item.className.includes('highlight') ? '' : ' highlight'
+        items.update(item)
+        //details
+        let groupObject = groups.get(item.group)
+        let groupName = groupObject.nestedInGroup ? `${groups.get(groupObject.nestedInGroup).content} --> ${groupObject.content}` : groupObject.content
+        let ageDebut = new Date(item.start).getFullYear() - new Date(timeline.options.start).getFullYear()
+        
+        let html;
+        if (item.type === "point" || item.type === "box") {
+          // Pour les événements ponctuels (brevet, diplômes, etc.)
+          html = `<div class='card'>
+                    <h3>${groupName}</h3>
+                    <h4>${item.content}</h4>
+                    <ul>
+                      <li>Année: ${new Date(item.start).getFullYear()}</li>
+                      <li>Âge: ${ageDebut} an(s)</li>
+                    </ul>
+                  </div>`
+        } else {
+          // Pour les périodes (range)
+          let ageFin = new Date(item.end).getFullYear() - new Date(timeline.options.start).getFullYear()
+          let duration = new Date(item.end).getFullYear() - new Date(item.start).getFullYear()
+          html = `<div class='card'>
+                    <h3>${groupName}</h3>
+                    <h4>${item.content}</h4>
+                    <ul>
+                      <li>De ${new Date(item.start).getFullYear()} à ${new Date(item.end).getFullYear()}</li>
+                      <li>De ${ageDebut} an(s) à ${ageFin} an(s)</li>
+                      <li>Durée: ${duration} an(s)</li>
+                    </ul>
+                  </div>`
+        }
+        
+        document.getElementById('moreInfos').innerHTML += html
+      }
+    });
+  });
+
+  document.getElementById('save').addEventListener('click', function () {
+    var data = items.get({
+        type: {
+        start: 'ISODate',
+        end: 'ISODate'
+        }
+    });
+    let temp = JSON.stringify(data, null, 2);
+  });
+
+  document.getElementById('load').addEventListener('click', function () {
+    test_items.forEach(i => items.add(i))
+  });
+
+  }, 100); // Fin du setTimeout
+
+}); // FIN du DOMContentLoaded
 
 function handleDragStart(event) {
   
@@ -523,120 +642,6 @@ function handleDragEnd(event){
   let line = `line_${event.target.closest("ul").id.split('_')[1]}`
   event.target.style.opacity = "initial";
 }
-
-timeline.on('timechanged',function (event){
-  isCustomBarMoving = false;
-})
-
-/*timeline.on('dragover',function (event) {
-  items.remove('temp')
-  let startDate = new Date(event.snappedTime)
-  let endDate = new Date(`${startDate.getFullYear()+1}-01-01`)
-  let group = event.group
-  let content = "drop"
-  let id = 'temp'
-  let item = {start: startDate, group: group, content: content, end: endDate, id: id}
-  items.add(item)
-})*/
-
-/**
- * VERTICAL BAR COMPONENT
- */
-var stepSize = 1000 * 60 * 60 * 24; // 1 jour en millisecondes
-let customTimeId = timeline.addCustomTime(`${timeline.options.end.getFullYear() - 10}-01-01`, "custom-bar");
-timeline.on("timechange", function (event) {
-  isCustomBarMoving = true
-  var selectedTime = event.time.getTime();
-  var snappedTime = Math.round(selectedTime / stepSize) * stepSize;
-
-  // Déplacer la barre à la position ajustée
-  timeline.setCustomTime(new Date(snappedTime), customTimeId);
-
-  // Réinitialiser le style des items
-  items.forEach((item) => {
-    if (item.className.includes("highlight")) { 
-      item.className = item.className.replace("highlight","")
-      items.update(item)
-    }
-  });
-
-  document.getElementById('moreInfos').innerHTML = ''
-  // Vérifier si la barre verticale passe sur un item
-  items.forEach((item) => {
-    var itemStart = new Date(item.start).getTime();
-    var itemEnd = item.end ? new Date(item.end).getTime() : itemStart;
-    
-    // Pour les événements ponctuels, vérifier si on est dans la même année
-    // Pour les périodes, vérifier si on est dans l'intervalle
-    let isInRange;
-    if (item.type === "point" || item.type === "box") {
-      // Pour les points et box, comparer les années
-      const itemYear = new Date(item.start).getFullYear();
-      const barYear = new Date(snappedTime).getFullYear();
-      isInRange = itemYear === barYear;
-    } else {
-      // Pour les périodes, vérifier l'intervalle classique
-      isInRange = snappedTime >= itemStart && snappedTime <= itemEnd;
-    }
-    
-    // Si la barre verticale passe sur l'item, on le surligne
-    if (isInRange) {
-      // Ajouter une classe CSS pour surligner l'item
-      item.className += item.className.includes('highlight') ? '' : ' highlight'
-      items.update(item)
-      //details
-      let groupObject = groups.get(item.group)
-      let groupName = groupObject.nestedInGroup ? `${groups.get(groupObject.nestedInGroup).content} --> ${groupObject.content}` : groupObject.content
-      let ageDebut = new Date(item.start).getFullYear() - new Date(timeline.options.start).getFullYear()
-      
-      let html;
-      if (item.type === "point" || item.type === "box") {
-        // Pour les événements ponctuels (brevet, diplômes, etc.)
-        html = `<div class='card'>
-                  <h3>${groupName}</h3>
-                  <h4>${item.content}</h4>
-                  <ul>
-                    <li>Année: ${new Date(item.start).getFullYear()}</li>
-                    <li>Âge: ${ageDebut} an(s)</li>
-                  </ul>
-                </div>`
-      } else {
-        // Pour les périodes (range)
-        let ageFin = new Date(item.end).getFullYear() - new Date(timeline.options.start).getFullYear()
-        let duration = new Date(item.end).getFullYear() - new Date(item.start).getFullYear()
-        html = `<div class='card'>
-                  <h3>${groupName}</h3>
-                  <h4>${item.content}</h4>
-                  <ul>
-                    <li>De ${new Date(item.start).getFullYear()} à ${new Date(item.end).getFullYear()}</li>
-                    <li>De ${ageDebut} an(s) à ${ageFin} an(s)</li>
-                    <li>Durée: ${duration} an(s)</li>
-                  </ul>
-                </div>`
-      }
-      
-      document.getElementById('moreInfos').innerHTML += html
-    }
-  });
-});
-
-
-
-
-document.getElementById('save').addEventListener('click',function (){
-  var data = items.get({
-      type: {
-      start: 'ISODate',
-      end: 'ISODate'
-      }
-  });
-  let temp = JSON.stringify(data, null, 2);
-  });
-
-document.getElementById('load').addEventListener('click',function (){
-  test_items.forEach(i => items.add(i))
-  });
-//wrapper
 
 // Exposer timeline et les datasets pour les autres fichiers
 export { timeline, items, groups, handleDragStart, handleDragEnd, toggleLandmark };

@@ -61,6 +61,7 @@ function enableWebRTCSync() {
 
 document.addEventListener("DOMContentLoaded", async () => {
     const container = document.getElementById("questions");
+    let isInitialized = false;
     
     // Essayer d'activer WebRTC au chargement
     enableWebRTCSync();
@@ -70,13 +71,23 @@ document.addEventListener("DOMContentLoaded", async () => {
         enableWebRTCSync();
     });
     
-    // Initialisation de la machine à états avec restauration si nécessaire
-    initializeSurveyService();
+    // S'abonner aux changements d'état
     surveyService.subscribe((state) => {
-        renderQuestion(state); // Mise à jour à chaque transition
+        // Ne rendre que si déjà initialisé (évite le double rendu au démarrage)
+        if (isInitialized) {
+            renderQuestion(state);
+        }
     });
     
-    renderQuestion(surveyService.getSnapshot()); // Utilisation de .getSnapshot()
+    // Attendre que la timeline soit prête avant d'initialiser le service
+    document.addEventListener('timelineReady', () => {
+        // Initialisation de la machine à états avec restauration si nécessaire
+        initializeSurveyService();
+        // Marquer comme initialisé
+        isInitialized = true;
+        // Rendre la première question après l'initialisation
+        renderQuestion(surveyService.getSnapshot());
+    }, { once: true });
 
     /**
      * Envoyer un événement (local + remote si WebRTC activé)
