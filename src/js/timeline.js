@@ -662,6 +662,37 @@ viewSummaryBtn.addEventListener('click', toggleSummary);
 
 closeSummaryBtn.addEventListener('click', toggleSummary);  
 
+const zoomInBtn = document.getElementById('zoom-in') 
+const zoomOutBtn = document.getElementById('zoom-out') 
+
+zoomInBtn?.addEventListener('click', () => {
+  console.log("click")
+  timeline.zoomIn(0.5)
+});
+
+zoomOutBtn?.addEventListener('click', () => {
+  timeline.zoomOut(0.5)
+});
+
+function move(percentage) {
+  var range = timeline.getWindow();
+  var interval = range.end - range.start;
+
+  timeline.setWindow({
+    start: range.start.valueOf() - interval * percentage,
+    end: range.end.valueOf() - interval * percentage,
+  });
+}
+
+const moveBackwardsBtn = document.getElementById('move-backwards') 
+const moveForwardsBtn = document.getElementById('move-forwards') 
+
+moveBackwardsBtn?.addEventListener('click', () => {
+  move(0.5)
+});
+moveForwardsBtn?.addEventListener('click', () => {
+  move(-0.5)
+});
 
 // Exposer timeline et les datasets pour les autres fichiers
 export { timeline, items, groups, handleDragStart, handleDragEnd, toggleLandmark };

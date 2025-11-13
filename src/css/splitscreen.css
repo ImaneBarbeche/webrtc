@@ -10,7 +10,10 @@
 
 .split.vertical{
     flex-direction: column;
-    display: block;
+    /* display: block; */
+    justify-content: space-between;
+    gap: unset;
+    padding: unset;
     position: relative;
 }
 

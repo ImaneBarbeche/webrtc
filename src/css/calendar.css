@@ -75,6 +75,22 @@
     background-color: #0056b3;
 }
 
+
+.calendar-info-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: auto;
+    /* margin-inline: 1.5rem; */
+
+    .btn-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 1.625rem;
+    }
+}
+
+
 /* ========================================
    SYNTHÈSE (BRICKS)
    ======================================== */
