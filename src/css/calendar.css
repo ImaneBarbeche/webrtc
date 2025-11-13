@@ -88,6 +88,15 @@
         align-items: center;
         gap: 1.625rem;
     }
+
+    button {
+        padding: 0.5rem;
+        appearance: unset;
+        border: none;
+        border-radius: 2rem;
+        background-color: var(--primary-grey);
+        box-shadow: 0px 0.15rem 0.1rem var(--secondary-grey);
+    }
 }
 
 
