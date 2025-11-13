@@ -24,7 +24,7 @@
 body {
     background-color: var(--primary-beige);
     /* for the summary modal */
-    overflow-y: hidden;
+    /* overflow-y: hidden; */
     /* padding: 1rem; */
     /* margin: 1rem; */
 }
@@ -56,7 +56,7 @@ h2, h3, h4 {
 
 /* Container LifeStories (questionnaire + calendrier) */
 .lifestories-container {
-    /* display: none;  */
+    display: none; 
     position: relative;
     width: 100%;
     height: 100vh;
