@@ -2,6 +2,8 @@
  * app.css - Styles généraux de l'application LifeStories
  * Gère le layout principal, les transitions et le mode viewer
  */
+@import url('https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,100..900;1,100..900&display=swap');
+
 
 
 :root {
@@ -14,12 +16,24 @@
     --primary-grey: #f2f2f2;
     --primary-grey: color-mix(in srgb, var(--primary-light) 60%, transparent);
     --secondary-grey: color-mix(in srgb, var(--primary-dark) 15%, transparent);
+    --muted-beige: color-mix(in srgb, var(--primary-beige) 60%, transparent);
     /* --primary-grey: #f4e6da; */
     /* --primary-grey: rgb(201, 135, 135); */
 }
 
 body {
     background-color: var(--primary-beige);
+    /* for the summary modal */
+    overflow-y: hidden;
+    /* padding: 1rem; */
+    /* margin: 1rem; */
+}
+
+h2, h3, h4 {
+    font-family: 'Raleway', serif;
+    font-weight: 400;
+    /* font-size: 3rem; */
+    /* font-size: 2rem; */
 }
 
 /* ========================================
@@ -42,7 +56,7 @@ body {
 
 /* Container LifeStories (questionnaire + calendrier) */
 .lifestories-container {
-    display: none; 
+    /* display: none;  */
     position: relative;
     width: 100%;
     height: 100vh;

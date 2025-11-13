@@ -75,18 +75,87 @@
     background-color: #0056b3;
 }
 
+
+.calendar-info-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: auto;
+    /* margin-inline: 1.5rem; */
+
+    .btn-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 1.625rem;
+    }
+
+    button {
+        padding: 0.5rem;
+        appearance: unset;
+        border: none;
+        border-radius: 2rem;
+        background-color: var(--primary-grey);
+        box-shadow: 0px 0.15rem 0.1rem var(--secondary-grey);
+    }
+}
+
+
 /* ========================================
    SYNTHÈSE (BRICKS)
    ======================================== */
 
 #bricks {
-    padding: 10px;
+    /* display: none; */
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+    height: calc(100% - 4.8rem);
+    /* height: 100%; */
+    width: 100%;
+    position: absolute;
+    top: 4.8rem;
+    right: 0;
+    padding: 2.125rem;
+    /* margin: 2.125rem; */
+    background-color: var(--muted-beige);
+    border-radius: 2.5rem;
+    backdrop-filter: blur(10rem) saturate(150%);
+    z-index: 99;
+    transform: translateY(2rem);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    /* transition: opacity 0.3s ease, transform 0.3s ease, visibility 0s linear 0.3s; */
+    /* background-color: red; */
+
+}
+
+.show-summary {
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: all !important;
+    transform: translateY(0) !important;
+    /* transition: opacity 0.3s ease, transform 0.2s ease; */
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    /* transition: opacity 0.3s ease, transform 0.2s ease, visibility 0s linear 0s; */
+}
+
+.title-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 2.125rem;
 }
 
 #moreInfos {
     /* Styles pour les informations supplémentaires */
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
 }
 
 /* ========================================
    CARTE
    ======================================== */
+
+
+/* * {
+    border: 1px solid blue;
+} */

@@ -38,7 +38,7 @@
   </head>
 
   <body>
-    <div id="homepage-root"></div>
+    <div id="homepage-root hidden"></div>
     <div class="onboarding-container" style="display: none;">
       <header>
         <img src="./assets/imgs/LFlogo.png" alt="Logo LifeStories" />
@@ -227,16 +227,45 @@
         <!-- Right side-->
         <div id="trajectories" class="split vertical">
           <div id="canvas">
-            <h2>Calendrier de vie</h2>
+            <!-- <h2>Calendrier de vie</h2> -->
             <div id="timeline"></div>
             <button id="save">Save</button>
             <button id="load">Load</button>
           </div>
 
-          <div id="bricks">
+          <!-- <div id="bricks">
             <h2>Synthèse</h2>
+            <button id="close-summary">❌</button>
             <div id="moreInfos"></div>
-          </div>
+          </div> -->
+          <!-- <dialog id="bricks">
+            <div>
+              <h2>Synthèse</h2>
+              <button id="close-summary">❌</button>
+            </div>
+            <div id="moreInfos"></div>
+          </dialog> -->
+          <section id="bricks">
+            <div class="title-row">
+              <h2>Synthèse</h2>
+              <button id="close-summary">❌</button>
+            </div>
+            <div id="moreInfos" class="stat-wrapper"></div>
+          </section>
+          <section class="calendar-info-bar">
+            <h2>1. Hardcoded title</h2>
+            <div class="btn-wrapper">
+              <div class="btn-group">
+                <button id="move-backwards">⬅️</button>
+                <button id="move-forwards">➡️</button>
+              </div>
+              <div class="btn-group">
+                <button id="zoom-out">🔎➖</button>
+                <button id="zoom-in">🔎➕</button>
+              </div>
+              <button id="view-summary">view summary</button>
+            </div>
+          </section>
           <div id="map"></div>
         </div>
       </div>
