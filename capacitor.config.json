@@ -1,6 +1,6 @@
 {
   "appId": "com.example.webrtc",
-  "appName": "webrtcsaviour",
+  "appName": "LifeStories",
   "webDir": "dist",
   "plugins": {
     "SplashScreen": {
