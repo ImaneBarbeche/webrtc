@@ -92,7 +92,7 @@ function Sidebar() {
   return (
     <div className={`sidebar ${isOpen ? 'open' : 'closed'}`}>
       <div className="sidebar-header">
-        <img src="./assets/imgs/LFlogo.png" alt="Logo" className="sidebar-logo" />
+        <img src="./assets/imgs/logo.png" alt="Logo" className="sidebar-logo" />
         <h3>LifeStories</h3>
         <button className="sidebar-toggle" onClick={() => setIsOpen(!isOpen)}>
           <img 
