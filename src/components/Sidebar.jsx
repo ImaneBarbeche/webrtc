@@ -33,7 +33,6 @@ function Sidebar() {
         // TODO: Afficher le dashboard (à créer)
         if (questionnaireSection) questionnaireSection.style.display = 'none';
         if (trajectoriesSection) trajectoriesSection.style.display = 'none';
-        console.log('Navigation vers Dashboard (à implémenter)');
         break;
         
       case 'questionnaire':

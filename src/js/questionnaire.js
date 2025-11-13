@@ -28,7 +28,6 @@ function handleRemoteMessage(message) {
         // On pourrait recréer le service ou envoyer des événements pour arriver au bon état
     } else if (message.type === 'RESET_ALL_DATA') {
         // L'enquêteur a demandé une réinitialisation complète
-        console.log('📥 Message RESET reçu - réinitialisation de toutes les données');
         import('./stateMachine.js').then(module => {
           module.resetAllData();
         });
@@ -81,7 +80,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     // ⚠️ IMPORTANT : Attendre le prochain tick pour que l'état soit restauré
     setTimeout(() => {
         const currentState = surveyService.getSnapshot();
-        console.log('🎯 Render initial du questionnaire - État:', currentState.value);
         renderQuestion(currentState);
     }, 0);
 
@@ -340,7 +338,6 @@ document.addEventListener('DOMContentLoaded', () => {
       if (confirm('⚠️ Êtes-vous sûr de vouloir tout réinitialiser ? Toutes les données (questionnaire + timeline) seront perdues.')) {
         // Si on est connecté en WebRTC, envoyer un message de reset à l'autre appareil
         if (window.webrtcSync && window.webrtcSync.connected) {
-          console.log('📤 Envoi du message RESET à l\'autre appareil');
           window.webrtcSync.sendMessage({
             type: 'RESET_ALL_DATA'
           });

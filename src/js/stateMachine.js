@@ -19,11 +19,7 @@ function loadSavedContext() {
     if (savedContextStr) {
       const context = JSON.parse(savedContextStr);
       const state = savedStateStr ? JSON.parse(savedStateStr) : null;
-      
-      console.log('📦 Chargement depuis localStorage:');
-      console.log('   - Context:', context);
-      console.log('   - State:', state);
-      
+            
       return { context, savedState: state };
     }
   } catch (e) {
@@ -46,11 +42,7 @@ function saveContext(context, state) {
       currentLogementIndex: context.currentLogementIndex,
       group: context.group,
     };
-    
-    console.log('💾 Sauvegarde dans localStorage:');
-    console.log('   - State:', state);
-    console.log('   - Context:', contextToSave);
-    
+        
     localStorage.setItem('lifestories_context', JSON.stringify(contextToSave));
     localStorage.setItem('lifestories_current_state', JSON.stringify(state));
   } catch (e) {
@@ -90,7 +82,6 @@ function getLastEpisodeFromTimeline() {
     if (allItems && allItems.length > 0) {
       // Retourner le dernier item ajouté
       const lastItem = allItems[allItems.length - 1];
-      console.log('📌 Dernier épisode récupéré depuis timeline:', lastItem);
       return lastItem;
     }
   } catch (e) {
@@ -112,10 +103,6 @@ if (savedContext) {
 
 // Utiliser l'état sauvegardé si disponible, sinon démarrer au début
 const initialState = savedState || 'askBirthYear';
-
-console.log('🔧 Configuration de la machine:');
-console.log('   - Initial state:', initialState);
-console.log('   - Initial context:', initialContext);
 
 export const surveyMachine = createMachine({
   id: 'survey',
@@ -381,7 +368,6 @@ export const surveyMachine = createMachine({
     // Ajoute l'épisode au calendrier et change le contexte lastEpisode, si un parametre start est spécifié alors le privilégier, sinon utiliser context.lastEpisode.end
     addCalendarEpisode: assign ({
       lastEpisode: ({context, event}, params) => {
-        console.log("🔍 addCalendarEpisode - Groupe actuel:", context.group, "Event type:", event.type, "Event:", event);
         let defaultStart = context.lastEpisode?.end;
         let defaultEnd = 0;
         let endDate = 0;
@@ -408,46 +394,38 @@ export const surveyMachine = createMachine({
               // C'est un âge, convertir en année
               let year = context.birthYear + num;
               startDate = new Date(`${year}-01-01`);
-              console.log(`📅 Âge ${num} → Année ${year}`);
             } else {
               // C'est une année directement
               startDate = new Date(`${num}-01-01`);
-              console.log(`📅 Année ${num}`);
             }
           }
         }
         
         // Vérifier si le groupe existe et a des dépendances
         const currentGroup = groups.get(context.group);
-        console.log("🔍 addCalendarEpisode - currentGroup:", currentGroup, "dependsOn:", currentGroup?.dependsOn);
         
         if(currentGroup && currentGroup.dependsOn){
           // Pour les logements (groupe 12), toujours utiliser currentCommuneIndex pour trouver la bonne commune
           if (context.group === 12 && currentGroup.dependsOn === 13) {
             let filteritems = (items.get()).filter(i => i.group == currentGroup.dependsOn);
             let parentItem = filteritems[context.currentCommuneIndex];
-            console.log("🏘️ Sélection de la commune à l'index", context.currentCommuneIndex, ":", parentItem?.content);
             
             if (parentItem) {
-              console.log("📍 Parent item sélectionné:", parentItem.content, "Dates:", parentItem.start, "→", parentItem.end);
               defaultStart = parentItem.start;
               defaultEnd = parentItem.end;
             }
           }
           // Si lastEpisode est du groupe parent, l'utiliser directement (pour les autres groupes)
           else if (context.lastEpisode && context.lastEpisode.group === currentGroup.dependsOn) {
-            console.log("� Utilisation de lastEpisode comme parent:", context.lastEpisode.content);
             defaultStart = context.lastEpisode.start;
             defaultEnd = context.lastEpisode.end;
           } else {
             // Chercher le parent approprié - prendre le dernier item du groupe parent
             let filteritems = (items.get()).filter(i => i.group == currentGroup.dependsOn)
-            console.log("🔍 Items du groupe parent (" + currentGroup.dependsOn + "):", filteritems);
             
             let parentItem = filteritems.length > 0 ? filteritems[filteritems.length - 1] : null;
             
             if (parentItem) {
-              console.log("📍 Parent item sélectionné:", parentItem.content, "Dates:", parentItem.start, "→", parentItem.end);
               defaultStart = parentItem.start
               defaultEnd = parentItem.end
             }
@@ -506,11 +484,9 @@ export const surveyMachine = createMachine({
               // C'est un âge, convertir en année
               let year = context.birthYear + num;
               modifs.end = new Date(`${year}-01-01`);
-              console.log(`📅 Départ - Âge ${num} → Année ${year}`);
             } else {
               // C'est une année directement
               modifs.end = new Date(`${num}-01-01`);
-              console.log(`📅 Départ - Année ${num}`);
             }
           }
         }
@@ -525,10 +501,8 @@ export const surveyMachine = createMachine({
             if (num < 200) {
               let year = context.birthYear + num;
               modifs.start = new Date(`${year}-01-01`);
-              console.log(`📅 Arrivée - Âge ${num} → Année ${year}`);
             } else {
               modifs.start = new Date(`${num}-01-01`);
-              console.log(`📅 Arrivée - Année ${num}`);
             }
           }
         }
@@ -663,7 +637,6 @@ export const surveyMachine = createMachine({
       // Pour le placement initial des communes sur la timeline
       // On vérifie si l'index actuel est encore dans le tableau
       const result = context.context.currentCommuneIndex < context.context.communes.length;
-      console.log("🔍 Guard hasMoreCommunesToPlace:", result, `(${context.context.currentCommuneIndex} < ${context.context.communes.length})`, "Communes:", context.context.communes);
       return result;
     },
     moreCommunesToProcess: (context) => {
@@ -671,12 +644,10 @@ export const surveyMachine = createMachine({
       // On vient de terminer la commune à currentCommuneIndex
       // On vérifie s'il reste des communes NON encore traitées
       const result = context.context.currentCommuneIndex + 1 < context.context.communes.length;
-      console.log("🔍 Guard moreCommunesToProcess:", result, `(${context.context.currentCommuneIndex + 1} < ${context.context.communes.length})`, "Communes:", context.context.communes);
       return result;
     },
     moreLogementsToProcess: (context) => {
       const result = context.context.currentLogementIndex < context.context.logements.length - 1;
-      console.log("🔍 Guard moreLogementsToProcess:", result, `(${context.context.currentLogementIndex} < ${context.context.logements.length - 1})`, "Logements:", context.context.logements);
       return result;
     }
   }
@@ -694,7 +665,6 @@ export function initializeSurveyService() {
   if (savedContext && savedState) {
     const lastEpisode = getLastEpisodeFromTimeline();
     if (lastEpisode) {
-      console.log('🔄 Restauration de lastEpisode:', lastEpisode);
       // Mettre à jour le contexte du service
       surveyService.send({
         type: 'RESTORE_LAST_EPISODE',
@@ -703,7 +673,6 @@ export function initializeSurveyService() {
     }
   }
   
-  console.log('✅ Service démarré à l\'état:', surveyService.getSnapshot().value);
   
   // Si on a un contexte sauvegardé, restaurer les options de la timeline
   if (initialContext && initialContext.birthYear && initialContext.birthYear > 0) {
@@ -740,7 +709,6 @@ export function initializeSurveyService() {
  * PAS pour la persistance après fermeture (localStorage fait ça)
  */
 export function restoreFromRemoteState(remoteState) {
-  console.log('🔄 Restauration depuis l\'état distant (WebRTC sync):', remoteState);
   
   // Sauvegarder dans localStorage (pour persistance)
   saveContext(remoteState.context, remoteState.value);
