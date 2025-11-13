@@ -114,6 +114,53 @@ export const surveyMachine = createMachine({
       actions: assign({
         lastEpisode: ({ event }) => event.lastEpisode
       })
+    },
+    // 🆕 Événement global pour mettre à jour une réponse sans changer d'état
+    UPDATE_ANSWER: {
+      actions: assign(({ context, event }) => {
+        // Mettre à jour le contexte selon le type de réponse
+        const updates = {};
+        
+        if (event.key) {
+          updates[event.key] = event.value;
+        }
+        
+        // Si on modifie un épisode, le mettre à jour dans la timeline
+        if (event.updateEpisode) {
+          // Trouver l'épisode à modifier selon la clé
+          let episodeToUpdate = null;
+          
+          if (event.key === 'statut_res') {
+            // Chercher l'épisode de statut (groupe 11)
+            const allItems = items.get();
+            const statusEpisodes = allItems.filter(item => item.group === 11);
+            if (statusEpisodes.length > 0) {
+              episodeToUpdate = statusEpisodes[statusEpisodes.length - 1]; // Prendre le dernier
+            }
+          } else {
+            // Pour les autres, utiliser lastEpisode
+            episodeToUpdate = context.lastEpisode;
+          }
+          
+          if (episodeToUpdate) {
+            const modifs = {};
+            modifs[event.key] = event.value;
+            modifierEpisode(episodeToUpdate.id, modifs);
+          } else {
+            console.warn('⚠️ Aucun épisode trouvé pour la modification');
+          }
+        } else if (event.key === 'commune') {
+          // Pour les communes, modifier l'épisode même si updateEpisode est false
+          const allItems = items.get();
+          const communeEpisodes = allItems.filter(item => item.group === 13);
+          if (communeEpisodes.length > 0) {
+            const lastCommuneEpisode = communeEpisodes[communeEpisodes.length - 1];
+            modifierEpisode(lastCommuneEpisode.id, {content: event.value});
+          }
+        }
+        
+        return updates;
+      })
     }
   },
   states: {

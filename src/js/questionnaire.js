@@ -72,9 +72,18 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Initialisation de la machine à états avec restauration si nécessaire
     initializeSurveyService();
     
+    // Tracker le dernier état pour éviter les re-renders inutiles
+    let lastRenderedState = null;
+    
     // S'abonner aux changements d'état
     surveyService.subscribe((state) => {
-        renderQuestion(state); // Mise à jour à chaque transition
+        // Ne re-render que si l'état a vraiment changé (pas juste le contexte)
+        if (lastRenderedState !== state.value) {
+            lastRenderedState = state.value;
+            renderQuestion(state); // Mise à jour à chaque transition
+        } else {
+            console.log('🔄 Contexte mis à jour, mais état inchangé - pas de re-render');
+        }
     });
     
     // ⚠️ IMPORTANT : Attendre le prochain tick pour que l'état soit restauré
@@ -84,14 +93,110 @@ document.addEventListener("DOMContentLoaded", async () => {
     }, 0);
 
     /**
-     * Envoyer un événement (local + remote si WebRTC activé)
+     * 🛡️ Vérifie si on est sur la question actuelle (pas une modification d'historique)
      */
-    function sendEvent(eventData) {
+    function isCurrentQuestion(eventType) {
+        const currentState = surveyService.getSnapshot();
+        const currentValue = currentState.value;
+        
+        // Mapping complet des événements vers leurs états attendus
+        const eventToStateMap = {
+            // Naissance
+            'ANSWER_BIRTH_YEAR': 'askBirthYear',
+            'NEXT': null, // NEXT peut venir de plusieurs états
+            'ANSWER_CURRENT_COMMUNE': 'askCurrentCommune',
+            'ANSWER_DEPARTEMENT': 'askDepartementOrPays',
+            
+            // Commune
+            'YES': null, // YES/NO peuvent venir de plusieurs états
+            'NO': null,
+            'ANSWER_MULTIPLE_COMMUNES': 'askMultipleCommunes',
+            'ANSWER_COMMUNE_ARRIVAL_YEAR': 'askCommuneArrivalYear',
+            'ANSWER_COMMUNE_DEPARTURE_YEAR': 'askCommuneDepartureYear',
+            
+            // Logement
+            'ANSWER_MULTIPLE_HOUSINGS': 'askMultipleHousings',
+            'ANSWER_HOUSING_ARRIVAL_AGE': 'askHousingArrivalAge',
+            'ANSWER_HOUSING_DEPARTURE_AGE': 'askHousingDepartureAge',
+            'ANSWER_HOUSING_OCCUPATION_STATUS_ENTRY': 'askHousingOccupationStatusEntry',
+            'ANSWER_HOUSING_OCCUPATION_STATUS_EXIT': 'askHousingOccupationStatusExit',
+            'ANSWER_STATUS_ENTRY': 'askHousingOccupationStatusEntry',
+            'ANSWER_STATUS_EXIT': 'askHousingOccupationStatusExit',
+            
+            // Épisodes
+            'ADD_EPISODE': 'recapEpisode',
+            'MODIFY_EPISODE': 'recapEpisode',
+            'CREATE_NEW_EPISODE': 'recapEpisode'
+        };
+        
+        const expectedState = eventToStateMap[eventType];
+        
+        // Si l'événement n'a pas de mapping strict (NEXT, YES, NO), on considère que c'est OK
+        if (expectedState === null || expectedState === undefined) {
+            return true;
+        }
+        
+        const isCurrent = expectedState === currentValue;
+        return isCurrent;
+    }
+
+    /**
+     * Envoyer un événement (local + remote si WebRTC activé)
+     * 🛡️ Protection anti-double soumission : distingue modification vs nouvelle réponse
+     */
+    function sendEvent(eventData, allowAdvance = true) {
         // Vérifier si on est hôte
         if (!isHost) {
             console.warn('⛔ VIEWER ne peut pas envoyer d\'événements');
             return; // Bloquer l'envoi
-        }        
+        }
+        
+        // 🛡️ Protection : si c'est une modification d'historique, envoyer UPDATE_ANSWER
+        if (!allowAdvance || !isCurrentQuestion(eventData.type)) {            
+            // Extraire la clé et la valeur de l'événement original
+            const originalEvent = eventData;
+            let key = null;
+            let value = null;
+            let updateEpisode = false;
+            
+            // Déterminer la clé selon le type d'événement
+            if (originalEvent.statut_res !== undefined) {
+                key = 'statut_res';
+                value = originalEvent.statut_res;
+                updateEpisode = true;
+            } else if (originalEvent.start !== undefined) {
+                key = 'start';
+                value = originalEvent.start;
+                updateEpisode = true;
+            } else if (originalEvent.end !== undefined) {
+                key = 'end';
+                value = originalEvent.end;
+                updateEpisode = true;
+            } else if (originalEvent.commune !== undefined) {
+                key = 'commune';
+                value = originalEvent.commune;
+            } else if (originalEvent.birthYear !== undefined) {
+                key = 'birthYear';
+                value = originalEvent.birthYear;
+            }
+            
+            // Envoyer l'événement UPDATE_ANSWER au lieu de l'événement original
+            const updateEvent = {
+                type: 'UPDATE_ANSWER',
+                key: key,
+                value: value,
+                updateEpisode: updateEpisode
+            };
+            
+            surveyService.send(updateEvent);
+            
+            if (syncEnabled && window.webrtcSync) {
+                window.webrtcSync.sendEvent(updateEvent);
+            }
+            
+            return; // ⛔ Ne pas continuer avec l'événement normal
+        }
+        
         // Envoyer localement
         surveyService.send(eventData);
     
@@ -232,7 +337,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             nextBtn.innerText = "Suivant";
             nextBtn.addEventListener("click", () => {
               sendEvent({ type: eventType });
-              nextBtn.disabled = true;
+              // ❌ Retiré : nextBtn.disabled = true;
             });
             questionDiv.appendChild(nextBtn);
         }
@@ -247,9 +352,10 @@ document.addEventListener("DOMContentLoaded", async () => {
                 let eventData = { type: eventType };
                 eventData[eventKey] = input.value;
                 sendEvent(eventData); // Utiliser sendEvent au lieu de surveyService.send
-                event.target.closest('.question').querySelectorAll('input').forEach(input => {
-                  input.disabled = true; 
-                });
+                // ❌ Retiré : désactivation des inputs
+                // event.target.closest('.question').querySelectorAll('input').forEach(input => {
+                //   input.disabled = true; 
+                // });
               }
             });
             questionDiv.appendChild(input);
@@ -264,10 +370,10 @@ document.addEventListener("DOMContentLoaded", async () => {
               let eventData = { type: choice.toUpperCase() };
               eventData[eventKey] = choice;  
               sendEvent(eventData); // Utiliser sendEvent au lieu de surveyService.send
-                event.target.closest('.question').querySelectorAll('button').forEach(btn => {
-                  btn.disabled = true; 
-                });
-
+              // ❌ Retiré : désactivation des boutons
+              // event.target.closest('.question').querySelectorAll('button').forEach(btn => {
+              //   btn.disabled = true; 
+              // });
             });
             questionDiv.appendChild(button);
             });
@@ -312,7 +418,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             let eventData = { type: eventType };
             eventData[eventKey] = list_communes_not_sorted;
             sendEvent(eventData);
-            nextQBtn.disabled = true;
+            // ❌ Retiré : nextQBtn.disabled = true;
           });
       
           questionDiv.appendChild(nextQBtn);
