@@ -72,11 +72,18 @@ document.addEventListener("DOMContentLoaded", async () => {
     
     // Initialisation de la machine à états avec restauration si nécessaire
     initializeSurveyService();
+    
+    // S'abonner aux changements d'état
     surveyService.subscribe((state) => {
         renderQuestion(state); // Mise à jour à chaque transition
     });
     
-    renderQuestion(surveyService.getSnapshot()); // Utilisation de .getSnapshot()
+    // ⚠️ IMPORTANT : Attendre le prochain tick pour que l'état soit restauré
+    setTimeout(() => {
+        const currentState = surveyService.getSnapshot();
+        console.log('🎯 Render initial du questionnaire - État:', currentState.value);
+        renderQuestion(currentState);
+    }, 0);
 
     /**
      * Envoyer un événement (local + remote si WebRTC activé)

@@ -13,12 +13,18 @@ import { timeline, groups, items } from "./timeline.js";
 // Fonction pour charger le contexte sauvegardé
 function loadSavedContext() {
   try {
-    const savedContext = localStorage.getItem('lifestories_context');
-    const savedState = localStorage.getItem('lifestories_current_state');
+    const savedContextStr = localStorage.getItem('lifestories_context');
+    const savedStateStr = localStorage.getItem('lifestories_current_state');
     
-    if (savedContext) {
-      const context = JSON.parse(savedContext);
-      return { context, savedState };
+    if (savedContextStr) {
+      const context = JSON.parse(savedContextStr);
+      const state = savedStateStr ? JSON.parse(savedStateStr) : null;
+      
+      console.log('📦 Chargement depuis localStorage:');
+      console.log('   - Context:', context);
+      console.log('   - State:', state);
+      
+      return { context, savedState: state };
     }
   } catch (e) {
     console.error('❌ Erreur lors du chargement du contexte:', e);
@@ -40,6 +46,10 @@ function saveContext(context, state) {
       currentLogementIndex: context.currentLogementIndex,
       group: context.group,
     };
+    
+    console.log('💾 Sauvegarde dans localStorage:');
+    console.log('   - State:', state);
+    console.log('   - Context:', contextToSave);
     
     localStorage.setItem('lifestories_context', JSON.stringify(contextToSave));
     localStorage.setItem('lifestories_current_state', JSON.stringify(state));
@@ -73,10 +83,52 @@ const defaultContext = {
   lastEpisode: null,
 };
 
+// Fonction pour récupérer le dernier épisode depuis la timeline
+function getLastEpisodeFromTimeline() {
+  try {
+    const allItems = items.get();
+    if (allItems && allItems.length > 0) {
+      // Retourner le dernier item ajouté
+      const lastItem = allItems[allItems.length - 1];
+      console.log('📌 Dernier épisode récupéré depuis timeline:', lastItem);
+      return lastItem;
+    }
+  } catch (e) {
+    console.warn('⚠️ Impossible de récupérer le dernier épisode:', e);
+  }
+  return null;
+}
+
+// Utiliser le contexte sauvegardé si disponible
+let initialContext = savedContext || defaultContext;
+
+// Si on restaure un état, récupérer aussi le lastEpisode depuis la timeline
+if (savedContext) {
+  initialContext = {
+    ...initialContext,
+    lastEpisode: getLastEpisodeFromTimeline()
+  };
+}
+
+// Utiliser l'état sauvegardé si disponible, sinon démarrer au début
+const initialState = savedState || 'askBirthYear';
+
+console.log('🔧 Configuration de la machine:');
+console.log('   - Initial state:', initialState);
+console.log('   - Initial context:', initialContext);
+
 export const surveyMachine = createMachine({
   id: 'survey',
-  initial: 'askBirthYear',
-  context: defaultContext,
+  initial: initialState, // ✅ Utiliser l'état sauvegardé !
+  context: initialContext, // ✅ Utiliser le contexte sauvegardé !
+  on: {
+    // Événement global pour restaurer lastEpisode après chargement
+    RESTORE_LAST_EPISODE: {
+      actions: assign({
+        lastEpisode: ({ event }) => event.lastEpisode
+      })
+    }
+  },
   states: {
     askBirthYear: {
       on: {
@@ -430,6 +482,12 @@ export const surveyMachine = createMachine({
     // Modifie l'épisode du calendrier et change le contexte lastEpisode TODO POUR CA IL FAUT MODIFIER QUESTIONNAIREJS POUR CHANGER LE SEND COMMUNE
     modifyCalendarEpisode: assign ({
       lastEpisode: ({context, event}, params) => {
+        // Vérifier que lastEpisode existe avant de l'utiliser
+        if (!context.lastEpisode || !context.lastEpisode.id) {
+          console.warn('⚠️ lastEpisode est null dans modifyCalendarEpisode');
+          return null;
+        }
+        
         if(params){
           return modifierEpisode(context.lastEpisode.id, params);
         }
@@ -473,6 +531,12 @@ export const surveyMachine = createMachine({
               console.log(`📅 Arrivée - Année ${num}`);
             }
           }
+        }
+        
+        // Vérifier que lastEpisode existe avant de l'utiliser
+        if (!context.lastEpisode || !context.lastEpisode.id) {
+          console.warn('⚠️ lastEpisode est null, impossible de modifier l\'épisode');
+          return null;
         }
         
         return modifierEpisode(context.lastEpisode.id, modifs);
@@ -623,14 +687,29 @@ export const surveyService = interpret(surveyMachine);
 
 // Fonction pour initialiser le service avec l'état sauvegardé
 export function initializeSurveyService() {
-  // Démarrer le service
+  // Démarrer le service (l'état initial est déjà configuré dans la machine)
   surveyService.start();
   
+  // 🆕 IMPORTANT : Restaurer lastEpisode APRÈS le démarrage
+  if (savedContext && savedState) {
+    const lastEpisode = getLastEpisodeFromTimeline();
+    if (lastEpisode) {
+      console.log('🔄 Restauration de lastEpisode:', lastEpisode);
+      // Mettre à jour le contexte du service
+      surveyService.send({
+        type: 'RESTORE_LAST_EPISODE',
+        lastEpisode: lastEpisode
+      });
+    }
+  }
+  
+  console.log('✅ Service démarré à l\'état:', surveyService.getSnapshot().value);
+  
   // Si on a un contexte sauvegardé, restaurer les options de la timeline
-  if (savedContext && savedContext.birthYear && savedContext.birthYear > 0) {
+  if (initialContext && initialContext.birthYear && initialContext.birthYear > 0) {
     timeline.setOptions({
-      min: new Date(`${savedContext.birthYear}-01-01`), 
-      start: new Date(`${savedContext.birthYear}-01-01`)
+      min: new Date(`${initialContext.birthYear}-01-01`), 
+      start: new Date(`${initialContext.birthYear}-01-01`)
     });
     
     // Restaurer aussi le format de l'âge
@@ -639,7 +718,7 @@ export function initializeSurveyService() {
         minorLabels: function(date, scale, step) {
           switch (scale) {
             case 'year':
-              const age = new Date(date).getFullYear() - savedContext.birthYear;
+              const age = new Date(date).getFullYear() - initialContext.birthYear;
               return '<b>' + new Date(date).getFullYear() + '</b></br><b>' + age + `</b> ${age != 0 && age != 1 ? 'ans' : 'an'}`;
             default:
               return vis.moment(date).format(scale === 'month' ? 'MMM' : 'D');
@@ -652,6 +731,27 @@ export function initializeSurveyService() {
   // Sauvegarder le contexte après chaque transition
   surveyService.subscribe((state) => {
     saveContext(state.context, state.value);
+  });
+}
+
+/**
+ * Restaurer l'état depuis un état distant (WebRTC)
+ * IMPORTANT : Utilisé UNIQUEMENT pour la synchronisation en temps réel
+ * PAS pour la persistance après fermeture (localStorage fait ça)
+ */
+export function restoreFromRemoteState(remoteState) {
+  console.log('🔄 Restauration depuis l\'état distant (WebRTC sync):', remoteState);
+  
+  // Sauvegarder dans localStorage (pour persistance)
+  saveContext(remoteState.context, remoteState.value);
+  
+  // Arrêter le service actuel
+  surveyService.stop();
+  
+  // Redémarrer avec le nouvel état
+  surveyService.start({
+    value: remoteState.value,
+    context: remoteState.context
   });
 }
 
