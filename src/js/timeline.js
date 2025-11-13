@@ -643,7 +643,10 @@ const toggleSummary = (() => {
   console.log("click")
 
   if(!summaryOpen) {
-    summaryContainer.classList.add("show-summary")
+    summaryContainer.style.visibility = "visible"
+    requestAnimationFrame(() => {
+      summaryContainer.classList.add("show-summary")
+    })
     summaryOpen = true
   }
   else {
@@ -657,11 +660,7 @@ const closeSummaryBtn = document.getElementById('close-summary')
 
 viewSummaryBtn.addEventListener('click', toggleSummary);
 
-closeSummaryBtn.addEventListener('click', toggleSummary);
-
-
-  
-  
+closeSummaryBtn.addEventListener('click', toggleSummary);  
 
 
 // Exposer timeline et les datasets pour les autres fichiers
