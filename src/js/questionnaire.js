@@ -28,7 +28,6 @@ function handleRemoteMessage(message) {
         // On pourrait recréer le service ou envoyer des événements pour arriver au bon état
     } else if (message.type === 'RESET_ALL_DATA') {
         // L'enquêteur a demandé une réinitialisation complète
-        console.log('📥 Message RESET reçu - réinitialisation de toutes les données');
         import('./stateMachine.js').then(module => {
           module.resetAllData();
         });
@@ -183,6 +182,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             questionText = `Avez-vous toujours vécu dans le même logement à ${currentCommune} ?`;
             responseType = "choice";
             choices = ["Yes", "No"];
+            eventKey = "response";  // ← Changer la clé pour YES/NO
             break;
 
           case "askMultipleHousings":
@@ -268,7 +268,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             button.innerText = choice;
             button.addEventListener("click", (event) => {
               let eventData = { type: choice.toUpperCase() };
-              eventData[eventKey] = choice;  
+              eventData[eventKey] = choice;
               sendEvent(eventData); // Utiliser sendEvent au lieu de surveyService.send
                 event.target.closest('.question').querySelectorAll('button').forEach(btn => {
                   btn.disabled = true; 
@@ -344,7 +344,6 @@ document.addEventListener('DOMContentLoaded', () => {
       if (confirm('⚠️ Êtes-vous sûr de vouloir tout réinitialiser ? Toutes les données (questionnaire + timeline) seront perdues.')) {
         // Si on est connecté en WebRTC, envoyer un message de reset à l'autre appareil
         if (window.webrtcSync && window.webrtcSync.connected) {
-          console.log('📤 Envoi du message RESET à l\'autre appareil');
           window.webrtcSync.sendMessage({
             type: 'RESET_ALL_DATA'
           });

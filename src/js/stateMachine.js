@@ -185,7 +185,9 @@ export const surveyMachine = createMachine({
         YES: {
           actions: [
             assign({
-              logements: ({context}) => ['Logement unique'],
+              logements: ({context}) => {
+                return ['Logement unique'];
+              },
               currentLogementIndex: 0
             }),
             'addCalendarEpisode',     // Créer épisode dans groupe 12 (logement)
@@ -329,7 +331,6 @@ export const surveyMachine = createMachine({
     // Ajoute l'épisode au calendrier et change le contexte lastEpisode, si un parametre start est spécifié alors le privilégier, sinon utiliser context.lastEpisode.end
     addCalendarEpisode: assign ({
       lastEpisode: ({context, event}, params) => {
-        console.log("🔍 addCalendarEpisode - Groupe actuel:", context.group, "Event type:", event.type, "Event:", event);
         let defaultStart = context.lastEpisode?.end;
         let defaultEnd = 0;
         let endDate = 0;
@@ -356,46 +357,38 @@ export const surveyMachine = createMachine({
               // C'est un âge, convertir en année
               let year = context.birthYear + num;
               startDate = new Date(`${year}-01-01`);
-              console.log(`📅 Âge ${num} → Année ${year}`);
             } else {
               // C'est une année directement
               startDate = new Date(`${num}-01-01`);
-              console.log(`📅 Année ${num}`);
             }
           }
         }
         
         // Vérifier si le groupe existe et a des dépendances
         const currentGroup = groups.get(context.group);
-        console.log("🔍 addCalendarEpisode - currentGroup:", currentGroup, "dependsOn:", currentGroup?.dependsOn);
         
         if(currentGroup && currentGroup.dependsOn){
           // Pour les logements (groupe 12), toujours utiliser currentCommuneIndex pour trouver la bonne commune
           if (context.group === 12 && currentGroup.dependsOn === 13) {
             let filteritems = (items.get()).filter(i => i.group == currentGroup.dependsOn);
             let parentItem = filteritems[context.currentCommuneIndex];
-            console.log("🏘️ Sélection de la commune à l'index", context.currentCommuneIndex, ":", parentItem?.content);
             
             if (parentItem) {
-              console.log("📍 Parent item sélectionné:", parentItem.content, "Dates:", parentItem.start, "→", parentItem.end);
               defaultStart = parentItem.start;
               defaultEnd = parentItem.end;
             }
           }
           // Si lastEpisode est du groupe parent, l'utiliser directement (pour les autres groupes)
           else if (context.lastEpisode && context.lastEpisode.group === currentGroup.dependsOn) {
-            console.log("� Utilisation de lastEpisode comme parent:", context.lastEpisode.content);
             defaultStart = context.lastEpisode.start;
             defaultEnd = context.lastEpisode.end;
           } else {
             // Chercher le parent approprié - prendre le dernier item du groupe parent
             let filteritems = (items.get()).filter(i => i.group == currentGroup.dependsOn)
-            console.log("🔍 Items du groupe parent (" + currentGroup.dependsOn + "):", filteritems);
             
             let parentItem = filteritems.length > 0 ? filteritems[filteritems.length - 1] : null;
             
             if (parentItem) {
-              console.log("📍 Parent item sélectionné:", parentItem.content, "Dates:", parentItem.start, "→", parentItem.end);
               defaultStart = parentItem.start
               defaultEnd = parentItem.end
             }
@@ -426,8 +419,6 @@ export const surveyMachine = createMachine({
       }
     }),
 
-    // TODO : PB ordre si j'entre pau puis grenoble dans l'input et que je place en premier grenoble puis que je place pau, dans ma statemachine j'aurais ['Pau','Grenoble'] mais l'ordre correspond pas, les questions liés sont inversés : "locataire dans pau -> va tag grenoble"
-    // Modifie l'épisode du calendrier et change le contexte lastEpisode TODO POUR CA IL FAUT MODIFIER QUESTIONNAIREJS POUR CHANGER LE SEND COMMUNE
     modifyCalendarEpisode: assign ({
       lastEpisode: ({context, event}, params) => {
         // Gérer le cas spécial 'timeline_end'
@@ -453,11 +444,9 @@ export const surveyMachine = createMachine({
               // C'est un âge, convertir en année
               let year = context.birthYear + num;
               modifs.end = new Date(`${year}-01-01`);
-              console.log(`📅 Départ - Âge ${num} → Année ${year}`);
             } else {
               // C'est une année directement
               modifs.end = new Date(`${num}-01-01`);
-              console.log(`📅 Départ - Année ${num}`);
             }
           }
         }
@@ -472,10 +461,8 @@ export const surveyMachine = createMachine({
             if (num < 200) {
               let year = context.birthYear + num;
               modifs.start = new Date(`${year}-01-01`);
-              console.log(`📅 Arrivée - Âge ${num} → Année ${year}`);
             } else {
               modifs.start = new Date(`${num}-01-01`);
-              console.log(`📅 Arrivée - Année ${num}`);
             }
           }
         }
@@ -604,7 +591,6 @@ export const surveyMachine = createMachine({
       // Pour le placement initial des communes sur la timeline
       // On vérifie si l'index actuel est encore dans le tableau
       const result = context.context.currentCommuneIndex < context.context.communes.length;
-      console.log("🔍 Guard hasMoreCommunesToPlace:", result, `(${context.context.currentCommuneIndex} < ${context.context.communes.length})`, "Communes:", context.context.communes);
       return result;
     },
     moreCommunesToProcess: (context) => {
@@ -612,12 +598,10 @@ export const surveyMachine = createMachine({
       // On vient de terminer la commune à currentCommuneIndex
       // On vérifie s'il reste des communes NON encore traitées
       const result = context.context.currentCommuneIndex + 1 < context.context.communes.length;
-      console.log("🔍 Guard moreCommunesToProcess:", result, `(${context.context.currentCommuneIndex + 1} < ${context.context.communes.length})`, "Communes:", context.context.communes);
       return result;
     },
     moreLogementsToProcess: (context) => {
       const result = context.context.currentLogementIndex < context.context.logements.length - 1;
-      console.log("🔍 Guard moreLogementsToProcess:", result, `(${context.context.currentLogementIndex} < ${context.context.logements.length - 1})`, "Logements:", context.context.logements);
       return result;
     }
   }

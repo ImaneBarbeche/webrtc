@@ -665,7 +665,6 @@ let summaryOpen = false;
 const summaryContainer = document.getElementById("bricks")
 
 const toggleSummary = (() => {
-  console.log("click")
 
   if(!summaryOpen) {
     summaryContainer.style.visibility = "visible"
@@ -691,7 +690,6 @@ const zoomInBtn = document.getElementById('zoom-in')
 const zoomOutBtn = document.getElementById('zoom-out') 
 
 zoomInBtn?.addEventListener('click', () => {
-  console.log("click")
   timeline.zoomIn(0.5)
 });
 
