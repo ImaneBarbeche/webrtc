@@ -32,6 +32,7 @@ function Sidebar() {
     const questionnaireSection = document.getElementById('questionnaire');
     const trajectoriesSection = document.getElementById('trajectories');
     const dashboardSection = document.getElementById('dashboard-root');
+    const splitContainer = document.querySelector('.split');
 
     // Détruire l'instance Split.js si elle existe
     if (splitInstanceRef.current) {
@@ -41,11 +42,11 @@ function Sidebar() {
 
     switch (view) {
       case 'dashboard':
-        if (questionnaireSection) questionnaireSection.style.display = 'none';
-        if (trajectoriesSection) trajectoriesSection.style.display = 'none';
+        if (splitContainer) splitContainer.style.display = 'none';
         if (dashboardSection) dashboardSection.style.display = 'block';
         break;
       default:
+        if (splitContainer) splitContainer.style.display = 'block';
         if (dashboardSection) dashboardSection.style.display = 'none';
 
       case 'questionnaire':
@@ -55,7 +56,6 @@ function Sidebar() {
           questionnaireSection.style.width = '100%';
         }
         if (trajectoriesSection) trajectoriesSection.style.display = 'none';
-        if (dashboardSection) dashboardSection.style.display = 'none';
         break;
 
       case 'calendar':
@@ -69,7 +69,6 @@ function Sidebar() {
         if (window.timeline && typeof window.timeline.redraw === 'function') {
           setTimeout(() => window.timeline.redraw(), 100);
         }
-        if (dashboardSection) dashboardSection.style.display = 'none';
         break;
 
       case 'split':
