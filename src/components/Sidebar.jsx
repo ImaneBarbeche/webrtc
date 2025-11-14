@@ -44,13 +44,14 @@ function Sidebar() {
       case 'dashboard':
         if (splitContainer) splitContainer.style.display = 'none';
         if (dashboardSection) dashboardSection.style.display = 'block';
+        if (questionnaireSection) questionnaireSection.style.display = 'none';
+        if (trajectoriesSection) trajectoriesSection.style.display = 'none';
         break;
-      default:
-        if (splitContainer) splitContainer.style.display = 'block';
-        if (dashboardSection) dashboardSection.style.display = 'none';
-
+      
       case 'questionnaire':
         // Afficher uniquement le questionnaire
+        if (splitContainer) splitContainer.style.display = 'block';
+        if (dashboardSection) dashboardSection.style.display = 'none';
         if (questionnaireSection) {
           questionnaireSection.style.display = 'block';
           questionnaireSection.style.width = '100%';
@@ -60,6 +61,8 @@ function Sidebar() {
 
       case 'calendar':
         // Afficher calendrier + synthèse
+        if (splitContainer) splitContainer.style.display = 'block';
+        if (dashboardSection) dashboardSection.style.display = 'none';
         if (questionnaireSection) questionnaireSection.style.display = 'none';
         if (trajectoriesSection) {
           trajectoriesSection.style.display = 'block';
@@ -73,6 +76,8 @@ function Sidebar() {
 
       case 'split':
         // Vue split : questionnaire + calendrier côte à côte
+        if (splitContainer) splitContainer.style.display = 'block';
+        if (dashboardSection) dashboardSection.style.display = 'none';
         if (questionnaireSection) {
           questionnaireSection.style.display = 'block';
           questionnaireSection.style.width = ''; // Retirer la largeur forcée
@@ -98,6 +103,7 @@ function Sidebar() {
             }
           }, 100);
         }
+        break;
         break;
     }
   };
