@@ -557,7 +557,7 @@ document.addEventListener('DOMContentLoaded', function() {
         isInRange = itemYear === barYear;
       } else {
         // Pour les périodes, vérifier l'intervalle classique
-        isInRange = snappedTime >= itemStart && snappedTime <= itemEnd;
+        isInRange = snappedTime >= itemStart && snappedTime < itemEnd;
       }
       
       // Si la barre verticale passe sur l'item, on le surligne
@@ -595,7 +595,6 @@ document.addEventListener('DOMContentLoaded', function() {
               
               theme.items.forEach(({item, groupObject}) => {
                 let groupName = groupObject.content;
-                let ageDebut = new Date(item.start).getFullYear() - new Date(timeline.options.start).getFullYear();
                 
                 if (item.type === "point" || item.type === "box") {
                   html += `<div class='card'>
@@ -604,7 +603,7 @@ document.addEventListener('DOMContentLoaded', function() {
                           </div>`;
                 } else {
                   html += `<div class='card'>
-                            <h4>${item.content}</h4>
+                            <h4>${item.content} ${new Date(snappedTime).getFullYear()}</h4>
                             <p>${groupName}</p>
                           </div>`;
                 }
