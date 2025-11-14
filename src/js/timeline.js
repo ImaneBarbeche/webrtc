@@ -587,7 +587,7 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
   });
-
+//---------------- DOWNLOADING THE INTERVIEW DATA-------------//
   document.getElementById('export').addEventListener('click', function () {
     var data = items.get({
         type: {
@@ -595,6 +595,8 @@ document.addEventListener('DOMContentLoaded', function() {
         end: 'ISODate'
         }
     });
+
+    // On convertit en JSON
     let jsonString = JSON.stringify(data, null, 2);
 
     // Créer un Blob
@@ -607,11 +609,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const link = document.createElement('a');
     link.href = url;
     link.download = `timeline-data-${new Date().toISOString().split('T')[0]}.json`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    document.body.appendChild(link); // ajouter le lien à la page (invisible)
+    link.click(); // simuler un click dessus
+    document.body.removeChild(link); // retirer le lien
 
-    // Nettoyer
+    // Nettoyer - libérer la mémoire
     URL.revokeObjectURL(url);
   });
 
