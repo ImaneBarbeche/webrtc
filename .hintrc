@@ -13,7 +13,9 @@
           "background-color: color-mix(in srgb, var(--primary-beige) 40%, var(--primary-light))",
           "background-color: color-mix(in srgb, var(--label-color), var(--primary-grey))",
           "mask-composite",
-          "mask-composite: intersect"
+          "mask-composite: intersect",
+          "user-select",
+          "mask-image"
         ]
       }
     ],

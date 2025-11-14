@@ -4,6 +4,13 @@ import Dashboard from './Dashboard';
 
 function initializeDashboardComponent() {
     const container = document.getElementById('dashboard-root');
-    root = createRoot(container);
+    const root = createRoot(container);
     root.render(<Dashboard />);
+}
+
+// Initialiser quand le DOM est prêt
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeDashboardComponent);
+} else {
+    initializeDashboardComponent();
 }
