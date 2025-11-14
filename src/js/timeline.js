@@ -588,14 +588,31 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 
-  document.getElementById('save').addEventListener('click', function () {
+  document.getElementById('export').addEventListener('click', function () {
     var data = items.get({
         type: {
         start: 'ISODate',
         end: 'ISODate'
         }
     });
-    let temp = JSON.stringify(data, null, 2);
+    let jsonString = JSON.stringify(data, null, 2);
+
+    // Créer un Blob
+    const blob = new Blob([jsonString], { type: 'application/json' });
+
+    // Créer une URL temporaire
+    const url = URL.createObjectURL(blob);
+
+    // Créer et déclencher le téléchargement
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `timeline-data-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    // Nettoyer
+    URL.revokeObjectURL(url);
   });
 
   document.getElementById('load').addEventListener('click', function () {
