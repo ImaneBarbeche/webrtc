@@ -72,7 +72,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Initialisation de la machine à états avec restauration si nécessaire
     initializeSurveyService();
     
-    // 🆕 Fonction pour afficher les réponses précédentes
+    // Fonction pour afficher les réponses précédentes
     function displayPreviousAnswers() {
         const answeredQuestions = loadAnsweredQuestions();
         
@@ -81,7 +81,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         // Créer un conteneur pour les réponses précédentes
         const previousAnswersDiv = document.createElement('div');
         previousAnswersDiv.className = 'previous-answers-section';
-        previousAnswersDiv.innerHTML = '<h3>📋 Récapitulatif des réponses précédentes</h3>';
+        previousAnswersDiv.innerHTML = '<h3>Récapitulatif des réponses précédentes</h3>';
         
         answeredQuestions.forEach((item, index) => {
             const answerDiv = document.createElement('div');
@@ -131,20 +131,20 @@ document.addEventListener("DOMContentLoaded", async () => {
             lastRenderedState = state.value;
             renderQuestion(state); // Mise à jour à chaque transition
         } else {
-            console.log('🔄 Contexte mis à jour, mais état inchangé - pas de re-render');
+            console.log('Contexte mis à jour, mais état inchangé - pas de re-render');
         }
     });
     
-    // ⚠️ IMPORTANT : Attendre le prochain tick pour que l'état soit restauré
+    // IMPORTANT : Attendre le prochain tick pour que l'état soit restauré
     setTimeout(() => {
         const currentState = surveyService.getSnapshot();
-        // 🆕 Afficher les réponses précédentes AVANT la question actuelle
+        // Afficher les réponses précédentes AVANT la question actuelle
         displayPreviousAnswers();
         renderQuestion(currentState);
     }, 0);
 
     /**
-     * 🛡️ Vérifie si on est sur la question actuelle (pas une modification d'historique)
+     *  Vérifie si on est sur la question actuelle (pas une modification d'historique)
      */
     function isCurrentQuestion(eventType) {
         const currentState = surveyService.getSnapshot();
@@ -193,16 +193,16 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     /**
      * Envoyer un événement (local + remote si WebRTC activé)
-     * 🛡️ Protection anti-double soumission : distingue modification vs nouvelle réponse
+     * Protection anti-double soumission : distingue modification vs nouvelle réponse
      */
     function sendEvent(eventData, allowAdvance = true) {
         // Vérifier si on est hôte
         if (!isHost) {
-            console.warn('⛔ VIEWER ne peut pas envoyer d\'événements');
+            console.warn('VIEWER ne peut pas envoyer d\'événements');
             return; // Bloquer l'envoi
         }
         
-        // 🛡️ Protection : si c'est une modification d'historique, envoyer UPDATE_ANSWER
+        // Protection : si c'est une modification d'historique, envoyer UPDATE_ANSWER
         if (!allowAdvance || !isCurrentQuestion(eventData.type)) {            
             // Extraire la clé et la valeur de l'événement original
             const originalEvent = eventData;
@@ -245,13 +245,13 @@ document.addEventListener("DOMContentLoaded", async () => {
                 window.webrtcSync.sendEvent(updateEvent);
             }
             
-            return; // ⛔ Ne pas continuer avec l'événement normal
+            return; // Ne pas continuer avec l'événement normal
         }
         
         // Envoyer localement
         surveyService.send(eventData);
         
-        // 🆕 Sauvegarder la réponse dans l'historique
+        // Sauvegarder la réponse dans l'historique
         const currentState = surveyService.getSnapshot().value;
         saveAnsweredQuestion(currentState, eventData);
     
@@ -259,7 +259,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (syncEnabled && window.webrtcSync) {
             const sent = window.webrtcSync.sendEvent(eventData);
         } else {
-            console.warn('⚠️ WebRTC non disponible pour envoi');
+            console.warn('WebRTC non disponible pour envoi');
         }
     }
     
@@ -392,7 +392,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             nextBtn.innerText = "Suivant";
             nextBtn.addEventListener("click", () => {
               sendEvent({ type: eventType });
-              // ❌ Retiré : nextBtn.disabled = true;
+              // Retiré : nextBtn.disabled = true;
             });
             questionDiv.appendChild(nextBtn);
         }
@@ -407,7 +407,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 let eventData = { type: eventType };
                 eventData[eventKey] = input.value;
                 sendEvent(eventData); // Utiliser sendEvent au lieu de surveyService.send
-                // ❌ Retiré : désactivation des inputs
+                // Retiré : désactivation des inputs
                 // event.target.closest('.question').querySelectorAll('input').forEach(input => {
                 //   input.disabled = true; 
                 // });
@@ -425,7 +425,7 @@ document.addEventListener("DOMContentLoaded", async () => {
               let eventData = { type: choice.toUpperCase() };
               eventData[eventKey] = choice;  
               sendEvent(eventData); // Utiliser sendEvent au lieu de surveyService.send
-              // ❌ Retiré : désactivation des boutons
+              // Retiré : désactivation des boutons
               // event.target.closest('.question').querySelectorAll('button').forEach(btn => {
               //   btn.disabled = true; 
               // });
@@ -473,7 +473,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             let eventData = { type: eventType };
             eventData[eventKey] = list_communes_not_sorted;
             sendEvent(eventData);
-            // ❌ Retiré : nextQBtn.disabled = true;
+            // Retiré : nextQBtn.disabled = true;
           });
       
           questionDiv.appendChild(nextQBtn);
@@ -496,7 +496,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (resetButton) {
     resetButton.addEventListener('click', () => {
       // Demander confirmation
-      if (confirm('⚠️ Êtes-vous sûr de vouloir tout réinitialiser ? Toutes les données (questionnaire + timeline) seront perdues.')) {
+      if (confirm('Êtes-vous sûr de vouloir tout réinitialiser ? Toutes les données (questionnaire + timeline) seront perdues.')) {
         // Si on est connecté en WebRTC, envoyer un message de reset à l'autre appareil
         if (window.webrtcSync && window.webrtcSync.connected) {
           window.webrtcSync.sendMessage({

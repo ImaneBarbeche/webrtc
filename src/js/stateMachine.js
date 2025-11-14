@@ -50,7 +50,7 @@ function saveContext(context, state) {
   }
 }
 
-// 🆕 Fonction pour sauvegarder chaque réponse
+// Fonction pour sauvegarder chaque réponse
 export function saveAnsweredQuestion(state, eventData) {
   try {
     const answeredQuestions = JSON.parse(
@@ -74,7 +74,7 @@ export function saveAnsweredQuestion(state, eventData) {
   }
 }
 
-// 🆕 Fonction pour charger l'historique des réponses
+// Fonction pour charger l'historique des réponses
 export function loadAnsweredQuestions() {
   try {
     const saved = localStorage.getItem('lifestories_answered_questions');
@@ -85,7 +85,7 @@ export function loadAnsweredQuestions() {
   }
 }
 
-// 🆕 Mapping des états vers les questions
+// Mapping des états vers les questions
 export const stateToQuestionMap = {
   'askBirthYear': 'Quelle est votre année de naissance ?',
   'birthPlaceIntro': 'Où habitaient vos parents à votre naissance ?',
@@ -105,7 +105,7 @@ export const stateToQuestionMap = {
   'surveyComplete': 'Merci, vous avez terminé l\'enquête !'
 };
 
-// 🆕 Fonction pour obtenir la question à partir de l'état
+// Fonction pour obtenir la question à partir de l'état
 export function getQuestionFromState(state) {
   return stateToQuestionMap[state] || state;
 }
@@ -146,7 +146,7 @@ function getLastEpisodeFromTimeline() {
       return lastItem;
     }
   } catch (e) {
-    console.warn('⚠️ Impossible de récupérer le dernier épisode:', e);
+    console.warn('Impossible de récupérer le dernier épisode:', e);
   }
   return null;
 }
@@ -167,8 +167,8 @@ const initialState = savedState || 'askBirthYear';
 
 export const surveyMachine = createMachine({
   id: 'survey',
-  initial: initialState, // ✅ Utiliser l'état sauvegardé !
-  context: initialContext, // ✅ Utiliser le contexte sauvegardé !
+  initial: initialState, // Utiliser l'état sauvegardé !
+  context: initialContext, // Utiliser le contexte sauvegardé !
   on: {
     // Événement global pour restaurer lastEpisode après chargement
     RESTORE_LAST_EPISODE: {
@@ -176,7 +176,7 @@ export const surveyMachine = createMachine({
         lastEpisode: ({ event }) => event.lastEpisode
       })
     },
-    // 🆕 Événement global pour mettre à jour une réponse sans changer d'état
+    // Événement global pour mettre à jour une réponse sans changer d'état
     UPDATE_ANSWER: {
       actions: assign(({ context, event }) => {
         // Mettre à jour le contexte selon le type de réponse
@@ -208,7 +208,7 @@ export const surveyMachine = createMachine({
             modifs[event.key] = event.value;
             modifierEpisode(episodeToUpdate.id, modifs);
           } else {
-            console.warn('⚠️ Aucun épisode trouvé pour la modification');
+            console.warn('Aucun épisode trouvé pour la modification');
           }
         } else if (event.key === 'commune') {
           // Pour les communes, modifier l'épisode même si updateEpisode est false
@@ -564,13 +564,11 @@ export const surveyMachine = createMachine({
       }
     }),
 
-    // TODO : PB ordre si j'entre pau puis grenoble dans l'input et que je place en premier grenoble puis que je place pau, dans ma statemachine j'aurais ['Pau','Grenoble'] mais l'ordre correspond pas, les questions liés sont inversés : "locataire dans pau -> va tag grenoble"
-    // Modifie l'épisode du calendrier et change le contexte lastEpisode TODO POUR CA IL FAUT MODIFIER QUESTIONNAIREJS POUR CHANGER LE SEND COMMUNE
     modifyCalendarEpisode: assign ({
       lastEpisode: ({context, event}, params) => {
         // Vérifier que lastEpisode existe avant de l'utiliser
         if (!context.lastEpisode || !context.lastEpisode.id) {
-          console.warn('⚠️ lastEpisode est null dans modifyCalendarEpisode');
+          console.warn('lastEpisode est null dans modifyCalendarEpisode');
           return null;
         }
         
@@ -617,7 +615,7 @@ export const surveyMachine = createMachine({
         
         // Vérifier que lastEpisode existe avant de l'utiliser
         if (!context.lastEpisode || !context.lastEpisode.id) {
-          console.warn('⚠️ lastEpisode est null, impossible de modifier l\'épisode');
+          console.warn('lastEpisode est null, impossible de modifier l\'épisode');
           return null;
         }
         
@@ -769,7 +767,7 @@ export function initializeSurveyService() {
   // Démarrer le service (l'état initial est déjà configuré dans la machine)
   surveyService.start();
   
-  // 🆕 IMPORTANT : Restaurer lastEpisode APRÈS le démarrage
+  // IMPORTANT : Restaurer lastEpisode APRÈS le démarrage
   if (savedContext && savedState) {
     const lastEpisode = getLastEpisodeFromTimeline();
     if (lastEpisode) {
