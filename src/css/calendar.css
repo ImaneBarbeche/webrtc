@@ -57,10 +57,10 @@
 
 
 /* ========================================
-   BOUTONS SAVE/LOAD
+   BOUTON EXPORT/LOAD
    ======================================== */
 
-#save, #load {
+#export, #load {
     margin: 5px;
     padding: 8px 16px;
     background-color: #007bff;
@@ -71,7 +71,7 @@
     font-size: 14px;
 }
 
-#save:hover, #load:hover {
+#export:hover, #load:hover {
     background-color: #0056b3;
 }
 
