@@ -59,3 +59,65 @@
     cursor: pointer; 
     font-size: 14px
 }
+
+/* ========================================
+   RÉPONSES PRÉCÉDENTES
+   ======================================== */
+
+.previous-answers-section {
+    background-color: #e8f4f8;
+    border-left: 4px solid #28a745;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+}
+
+.previous-answers-section h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #155724;
+    font-size: 16px;
+}
+
+.previous-answer {
+    background-color: white;
+    border-left: 3px solid #28a745;
+    padding: 12px;
+    margin-bottom: 10px;
+    border-radius: 3px;
+    opacity: 0.95;
+}
+
+.previous-answer p {
+    margin: 5px 0;
+    color: #333;
+}
+
+.previous-answer .question-text {
+    font-weight: 600;
+    color: #155724;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.previous-answer .answer-content {
+    font-size: 13px;
+    color: #0d3817;
+    margin-left: 15px;
+    padding: 5px;
+    background-color: #f0f8f0;
+    border-radius: 2px;
+}
+
+.previous-answer small {
+    display: block;
+    margin-top: 8px;
+    color: #999;
+    font-size: 11px;
+}
+
+.questions-separator {
+    border: none;
+    border-top: 2px solid #ddd;
+    margin: 20px 0;
+}

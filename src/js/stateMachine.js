@@ -50,6 +50,66 @@ function saveContext(context, state) {
   }
 }
 
+// 🆕 Fonction pour sauvegarder chaque réponse
+export function saveAnsweredQuestion(state, eventData) {
+  try {
+    const answeredQuestions = JSON.parse(
+      localStorage.getItem('lifestories_answered_questions') || '[]'
+    );
+    
+    // Ajouter la nouvelle réponse
+    answeredQuestions.push({
+      state: state,
+      answer: eventData,
+      timestamp: new Date().toISOString()
+    });
+    
+    // Sauvegarder
+    localStorage.setItem(
+      'lifestories_answered_questions',
+      JSON.stringify(answeredQuestions)
+    );
+  } catch (e) {
+    console.error('❌ Erreur lors de la sauvegarde de la réponse:', e);
+  }
+}
+
+// 🆕 Fonction pour charger l'historique des réponses
+export function loadAnsweredQuestions() {
+  try {
+    const saved = localStorage.getItem('lifestories_answered_questions');
+    return saved ? JSON.parse(saved) : [];
+  } catch (e) {
+    console.error('❌ Erreur lors du chargement de l\'historique:', e);
+    return [];
+  }
+}
+
+// 🆕 Mapping des états vers les questions
+export const stateToQuestionMap = {
+  'askBirthYear': 'Quelle est votre année de naissance ?',
+  'birthPlaceIntro': 'Où habitaient vos parents à votre naissance ?',
+  'askCurrentCommune': 'Dans quelle commune (ville) ?',
+  'askDepartementOrPays': 'Dans quel département (France) ou pays (étranger) ?',
+  'askAlwaysLivedInCommune': 'Avez-vous toujours vécu dans cette commune ?',
+  'askMultipleCommunes': 'Pouvez-vous citer les communes dans lesquelles vous avez vécu ?',
+  'askCommuneArrivalYear': 'En quelle année êtes-vous arrivé ?',
+  'askCommuneDepartureYear': 'En quelle année avez-vous quitté cette commune ?',
+  'askSameHousingInCommune': 'Avez-vous toujours vécu dans le même logement ?',
+  'askMultipleHousings': 'Nous allons faire la liste des logements successifs',
+  'askHousingArrivalAge': 'À quel âge ou en quelle année avez-vous emménagé ?',
+  'askHousingDepartureAge': 'À quel âge ou en quelle année avez-vous quitté ce logement ?',
+  'askHousingOccupationStatusEntry': 'Quel était votre statut d\'occupation à l\'arrivée ?',
+  'askHousingOccupationStatusExit': 'Quel était votre statut d\'occupation au départ ?',
+  'recapEpisode': 'Récapitulatif de l\'épisode',
+  'surveyComplete': 'Merci, vous avez terminé l\'enquête !'
+};
+
+// 🆕 Fonction pour obtenir la question à partir de l'état
+export function getQuestionFromState(state) {
+  return stateToQuestionMap[state] || state;
+}
+
 // Fonction pour réinitialiser toutes les données
 export function resetAllData() {
   localStorage.removeItem('lifestories_context');
@@ -57,6 +117,7 @@ export function resetAllData() {
   localStorage.removeItem('lifestories_items');
   localStorage.removeItem('lifestories_groups');
   localStorage.removeItem('lifestories_options');
+  localStorage.removeItem('lifestories_answered_questions');
   window.location.reload();
 }
 

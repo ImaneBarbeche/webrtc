@@ -2,7 +2,7 @@ import { ajouterEpisode, modifierEpisode } from "./episodes.js"
 import { timeline, items, groups, handleDragStart, handleDragEnd } from "./timeline.js";
 import state from "./state.js"
 
-import { surveyMachine, surveyService, initializeSurveyService } from "./stateMachine.js";
+import { surveyMachine, surveyService, initializeSurveyService, saveAnsweredQuestion, loadAnsweredQuestions, getQuestionFromState } from "./stateMachine.js";
 
 /**
  ************************************************************************************************************
@@ -72,6 +72,55 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Initialisation de la machine à états avec restauration si nécessaire
     initializeSurveyService();
     
+    // 🆕 Fonction pour afficher les réponses précédentes
+    function displayPreviousAnswers() {
+        const answeredQuestions = loadAnsweredQuestions();
+        
+        if (answeredQuestions.length === 0) return; // Rien à afficher
+        
+        // Créer un conteneur pour les réponses précédentes
+        const previousAnswersDiv = document.createElement('div');
+        previousAnswersDiv.className = 'previous-answers-section';
+        previousAnswersDiv.innerHTML = '<h3>📋 Récapitulatif des réponses précédentes</h3>';
+        
+        answeredQuestions.forEach((item, index) => {
+            const answerDiv = document.createElement('div');
+            answerDiv.className = 'previous-answer';
+            
+            // Obtenir la question à partir de l'état
+            const question = getQuestionFromState(item.state);
+            
+            // Formater la réponse selon le type
+            let answerText = JSON.stringify(item.answer.value || item.answer, null, 2);
+            if (typeof item.answer === 'object') {
+                // Extraire la valeur réelle de la réponse
+                const key = Object.keys(item.answer).find(k => k !== 'type');
+                answerText = item.answer[key] || JSON.stringify(item.answer);
+            }
+            
+            // Formater comme un tableau
+            if (Array.isArray(answerText)) {
+                answerText = answerText.join(', ');
+            }
+            
+            answerDiv.innerHTML = `
+                <p class="question-text"><strong>Q${index + 1}:</strong> ${question}</p>
+                <p class="answer-content">✅ <strong>${answerText}</strong></p>
+                <small>${new Date(item.timestamp).toLocaleTimeString('fr-FR')}</small>
+            `;
+            
+            previousAnswersDiv.appendChild(answerDiv);
+        });
+        
+        // Ajouter un séparateur
+        const separator = document.createElement('hr');
+        separator.className = 'questions-separator';
+        
+        // Insérer au début du conteneur
+        container.insertBefore(separator, container.firstChild);
+        container.insertBefore(previousAnswersDiv, container.firstChild);
+    }
+    
     // Tracker le dernier état pour éviter les re-renders inutiles
     let lastRenderedState = null;
     
@@ -89,6 +138,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     // ⚠️ IMPORTANT : Attendre le prochain tick pour que l'état soit restauré
     setTimeout(() => {
         const currentState = surveyService.getSnapshot();
+        // 🆕 Afficher les réponses précédentes AVANT la question actuelle
+        displayPreviousAnswers();
         renderQuestion(currentState);
     }, 0);
 
@@ -199,6 +250,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         
         // Envoyer localement
         surveyService.send(eventData);
+        
+        // 🆕 Sauvegarder la réponse dans l'historique
+        const currentState = surveyService.getSnapshot().value;
+        saveAnsweredQuestion(currentState, eventData);
     
         
         if (syncEnabled && window.webrtcSync) {
