@@ -14,6 +14,16 @@ function Sidebar() {
       document.body.classList.add('sidebar-closed');
       document.body.classList.remove('sidebar-open');
     }
+    
+    // Mettre à jour la classe sur le dashboard-root pour adapter le padding
+    const dashboardRoot = document.getElementById('dashboard-root');
+    if (dashboardRoot) {
+      if (!isOpen) {
+        dashboardRoot.classList.add('sidebar-closed');
+      } else {
+        dashboardRoot.classList.remove('sidebar-closed');
+      }
+    }
   }, [isOpen]);
 
   const handleNavigation = (view) => {

@@ -2,14 +2,18 @@
     position: relative;
     min-height: 100vh;
     background-color: #f5f5f5;
+    transition: padding-left 0.3s ease;
+    padding-left: 250px; /* largeur sidebar ouverte */
+}
+
+#dashboard-root.sidebar-closed .dashboard {
+    padding-left: 80px; /* largeur sidebar fermée */
 }
 
 .dashboard-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    transition: padding-left 0.3s ease;
-    padding-left: 250px; /* largeur sidebar ouverte */
     padding: 20px;
 }
 
@@ -26,9 +30,8 @@
     padding: 10px 20px;
     border-radius: 5px;
     cursor: pointer;
-    padding-left: 80px; /* largeur sidebar fermée */
     font-size: 16px;
-    transition: background-color 0.3s ease; /*changement de couleur progressif*/
+    transition: background-color 0.3s ease;
 }
 
 .btn-new-interview:hover {
