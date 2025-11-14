@@ -528,6 +528,19 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
 
+    const themeData = {};
+
+    // getting parent groups
+    groups.get().forEach(group => {
+      if (group.nestedGroups && group.nestedGroups.length > 0) {
+        themeData[group.id] = {
+          name: group.content,
+          items: [],
+          className: group.className
+        };
+      }
+    });
+
     document.getElementById('moreInfos').innerHTML = ''
     // Vérifier si la barre verticale passe sur un item
     items.forEach((item) => {
@@ -554,38 +567,54 @@ document.addEventListener('DOMContentLoaded', function() {
         items.update(item)
         //details
         let groupObject = groups.get(item.group)
-        let groupName = groupObject.nestedInGroup ? `${groups.get(groupObject.nestedInGroup).content} --> ${groupObject.content}` : groupObject.content
-        let ageDebut = new Date(item.start).getFullYear() - new Date(timeline.options.start).getFullYear()
-        
-        let html;
-        if (item.type === "point" || item.type === "box") {
-          // Pour les événements ponctuels (brevet, diplômes, etc.)
-          html = `<div class='card'>
-                    <h3>${groupName}</h3>
-                    <h4>${item.content}</h4>
-                    <ul>
-                      <li>Année: ${new Date(item.start).getFullYear()}</li>
-                      <li>Âge: ${ageDebut} an(s)</li>
-                    </ul>
-                  </div>`
-        } else {
-          // Pour les périodes (range)
-          let ageFin = new Date(item.end).getFullYear() - new Date(timeline.options.start).getFullYear()
-          let duration = new Date(item.end).getFullYear() - new Date(item.start).getFullYear()
-          html = `<div class='card'>
-                    <h3>${groupName}</h3>
-                    <h4>${item.content}</h4>
-                    <ul>
-                      <li>De ${new Date(item.start).getFullYear()} à ${new Date(item.end).getFullYear()}</li>
-                      <li>De ${ageDebut} an(s) à ${ageFin} an(s)</li>
-                      <li>Durée: ${duration} an(s)</li>
-                    </ul>
-                  </div>`
+        let themeId = groupObject.nestedInGroup || item.group
+
+        // checking if a theme already exists before adding it into the array
+        if(themeData[themeId]) {
+           themeData[themeId].items.push({
+            item: item,
+            groupObject: groupObject
+          });
         }
+        // let groupName = groupObject.nestedInGroup ? `${groups.get(groupObject.nestedInGroup).content} --> ${groupObject.content}` : groupObject.content
+        // let themeName = groupObject.nestedInGroup ? groups.get(groupObject.nestedInGroup).content : null;
+        // let groupName = groupObject.content // E.g migratoire
+        // let ageDebut = new Date(item.start).getFullYear() - new Date(timeline.options.start).getFullYear()
         
-        document.getElementById('moreInfos').innerHTML += html
+
+        
       }
     });
+          let html = '';
+          Object.keys(themeData).forEach(themeId => {
+            const theme = themeData[themeId];
+            
+            if (theme.items.length > 0) {
+              html += `<div class='theme-section ${theme.className}'>
+                        <h2>${theme.name}</h2>`;
+              
+              theme.items.forEach(({item, groupObject}) => {
+                let groupName = groupObject.content;
+                let ageDebut = new Date(item.start).getFullYear() - new Date(timeline.options.start).getFullYear();
+                
+                if (item.type === "point" || item.type === "box") {
+                  html += `<div class='card'>
+                            <h4>${item.content}</h4>
+                            <p>${groupName}</p>
+                          </div>`;
+                } else {
+                  html += `<div class='card'>
+                            <h4>${item.content}</h4>
+                            <p>${groupName}</p>
+                          </div>`;
+                }
+              });
+              
+              html += `</div>`; // Close theme-section
+            }
+          });
+        document.getElementById('moreInfos').innerHTML += html
+
   });
 
   document.getElementById('save').addEventListener('click', function () {
