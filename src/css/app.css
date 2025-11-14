@@ -42,8 +42,13 @@ h2, h3, h4 {
 
 /* Container onboarding (écran de connexion WebRTC) */
 .onboarding-container {
+    display: none;
     position: relative;
     z-index: 1000;
+}
+
+#homepage-root {
+    display: none;
 }
 
 /* Masquer l'onboarding quand on passe à LifeStories */
@@ -56,7 +61,7 @@ h2, h3, h4 {
 
 /* Container LifeStories (questionnaire + calendrier) */
 .lifestories-container {
-    display: none; 
+    /* display: none;  */
     position: relative;
     width: 100%;
     height: 100vh;
