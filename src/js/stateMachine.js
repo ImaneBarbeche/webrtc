@@ -46,7 +46,7 @@ function saveContext(context, state) {
     localStorage.setItem('lifestories_context', JSON.stringify(contextToSave));
     localStorage.setItem('lifestories_current_state', JSON.stringify(state));
   } catch (e) {
-    console.error('❌ Erreur lors de la sauvegarde du contexte:', e);
+    console.error('❌ Erreur lors de la sauvegarde du contexte:', e); // silent error logging, the user won't see it - need to change this
   }
 }
 
@@ -55,14 +55,14 @@ export function saveAnsweredQuestion(state, eventData) {
   try {
     const answeredQuestions = JSON.parse(
       localStorage.getItem('lifestories_answered_questions') || '[]'
-    );
+    ); // retrieves the answered questions (array) or creates an empty array
     
     // Ajouter la nouvelle réponse
     answeredQuestions.push({
       state: state,
       answer: eventData,
       timestamp: new Date().toISOString()
-    });
+    }); // creates a chronological record of responses
     
     // Sauvegarder
     localStorage.setItem(
@@ -78,14 +78,14 @@ export function saveAnsweredQuestion(state, eventData) {
 export function loadAnsweredQuestions() {
   try {
     const saved = localStorage.getItem('lifestories_answered_questions');
-    return saved ? JSON.parse(saved) : [];
+    return saved ? JSON.parse(saved) : []; // parse the string into an array, if no stored data exists, returns an empty array as a safe default
   } catch (e) {
     console.error('❌ Erreur lors du chargement de l\'historique:', e);
     return [];
   }
 }
 
-// Mapping des états vers les questions
+// Mapping des états vers les questions pour afficher les questions et non les mots clés
 export const stateToQuestionMap = {
   'askBirthYear': 'Quelle est votre année de naissance ?',
   'birthPlaceIntro': 'Où habitaient vos parents à votre naissance ?',
@@ -108,7 +108,7 @@ export const stateToQuestionMap = {
 // Fonction pour obtenir la question à partir de l'état
 export function getQuestionFromState(state) {
   return stateToQuestionMap[state] || state;
-}
+} // uses the map from above to pair the state with the question
 
 // Fonction pour réinitialiser toutes les données
 export function resetAllData() {
@@ -126,11 +126,11 @@ const { context: savedContext, savedState } = loadSavedContext();
 
 const defaultContext = {
   birthYear: 0,
-  birthPlace: '',           // Lieu de naissance des parents
-  communes: [],             // Liste des communes
-  departements: [],         // Liste des départements/pays associés
+  birthPlace: '',// Lieu de naissance des parents
+  communes: [],// Liste des communes
+  departements: [],// Liste des départements/pays associés
   currentCommuneIndex: 0,
-  logements: [],            // Liste des logements par commune
+  logements: [],// Liste des logements par commune
   currentLogementIndex: 0,
   group: 13,
   lastEpisode: null,
@@ -162,13 +162,13 @@ if (savedContext) {
   };
 }
 
-// Utiliser l'état sauvegardé si disponible, sinon démarrer au début
+// Utiliser l'état sauvegardé si disponible, sinon démarrer au début - permet de commencer le questionnaire à la dernière question non répondue
 const initialState = savedState || 'askBirthYear';
 
 export const surveyMachine = createMachine({
   id: 'survey',
-  initial: initialState, // Utiliser l'état sauvegardé !
-  context: initialContext, // Utiliser le contexte sauvegardé !
+  initial: initialState, // Utiliser l'état sauvegardé 
+  context: initialContext, // Utiliser le contexte sauvegardé 
   on: {
     // Événement global pour restaurer lastEpisode après chargement
     RESTORE_LAST_EPISODE: {
@@ -815,18 +815,23 @@ export function initializeSurveyService() {
  * PAS pour la persistance après fermeture (localStorage fait ça)
  */
 export function restoreFromRemoteState(remoteState) {
-  
-  // Sauvegarder dans localStorage (pour persistance)
-  saveContext(remoteState.context, remoteState.value);
-  
-  // Arrêter le service actuel
-  surveyService.stop();
-  
-  // Redémarrer avec le nouvel état
-  surveyService.start({
-    value: remoteState.value,
-    context: remoteState.context
-  });
+  try {
+    // Sauvegarder dans localStorage (pour persistance)
+    saveContext(remoteState.context, remoteState.value);
+    
+    // Arrêter le service actuel
+    surveyService.stop();
+    
+    // Redémarrer avec le nouvel état
+    surveyService.start({
+      value: remoteState.value,
+      context: remoteState.context
+    });
+    
+    console.log('✅ État distant synchronisé');
+  } catch (error) {
+    console.error('❌ Erreur lors de la synchronisation distante:', error);
+  }
 }
 
 // Exporter pour que questionnaire.js puisse l'utiliser
