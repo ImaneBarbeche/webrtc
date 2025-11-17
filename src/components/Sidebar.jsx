@@ -76,7 +76,7 @@ function Sidebar() {
 
       case 'split':
         // Vue split : questionnaire + calendrier côte à côte
-        if (splitContainer) splitContainer.style.display = 'block';
+        if (splitContainer) splitContainer.style.display = 'flex';
         if (dashboardSection) dashboardSection.style.display = 'none';
         if (questionnaireSection) {
           questionnaireSection.style.display = 'block';
