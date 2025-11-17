@@ -18,16 +18,17 @@
 /* Fenêtre contenant les SVG */
 .svg-window {
   position: relative;
-  width: 185px;
-  height: 364px;
+  width: 400px;
+  height: 700px;
   background: #f3e7d1;
   border-bottom-left-radius: 0; 
   border-top-left-radius: 0;
-  border-top-right-radius: 70px;
-  border-bottom-right-radius: 70px;
+  border-top-right-radius: 200px;
+  border-bottom-right-radius: 200px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   overflow: hidden;
   padding: 20px;
+  right: 80px;
 }
 
 /* Overlay flou permanent par-dessus la SVG window */
@@ -50,7 +51,7 @@
 }
 
 /* Positionnement des formes SVG */
-.shape {
+/* .shape {
   position: absolute;
   opacity: 0.9;
 }
@@ -74,7 +75,7 @@
   left: 10px;
   width: 200px;
   height: auto;
-}
+} */
 
 /* Section droite - 50% */
 .homepage-right {
