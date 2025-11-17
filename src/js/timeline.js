@@ -591,7 +591,9 @@ document.addEventListener('DOMContentLoaded', function() {
             
             if (theme.items.length > 0) {
               html += `<div class='theme-section ${theme.className}'>
-                        <h2>${theme.name}</h2>`;
+                        <h3>${theme.name}</h3>
+                        
+                        <div class="card-wrapper">`;
               
               theme.items.forEach(({item, groupObject}) => {
                 let groupName = groupObject.content;
@@ -603,13 +605,15 @@ document.addEventListener('DOMContentLoaded', function() {
                           </div>`;
                 } else {
                   html += `<div class='card'>
-                            <h4>${item.content} ${new Date(snappedTime).getFullYear()}</h4>
+                            <h4>${item.content} 
+                           <!-- ${new Date(snappedTime).getFullYear()} -->
+                            </h4>
                             <p>${groupName}</p>
                           </div>`;
                 }
               });
               
-              html += `</div>`; // Close theme-section
+              html += `</div> </div>`; // Close theme-section
             }
           });
         document.getElementById('moreInfos').innerHTML += html

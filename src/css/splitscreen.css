@@ -68,18 +68,18 @@
     }
 }
 
-.card {
+/* .card { */
     /* border: 2px solid black;
     border-radius: 5px;
     width: fit-content;
     padding: 15px;
     float: left;
     margin-left: 10px; */
-    padding: 1rem;
+    /* padding: 1rem;
     background-color: var(--primary-light);
     border-radius: 1.875rem;
 
-}
+} */
 
 .input_list > p{
     float: left;
@@ -292,7 +292,7 @@
  
     &::before {
         content: "";
-        background-color: var(--label-color);
+        background-color: color-mix(in srgb, transparent 20%, var(--label-color));
         /* background-color: red; */
         /* background-color: color-mix(in srgb, var(--label-color), transparent 90%); */
         /* background: transparent; */
@@ -308,7 +308,7 @@
         position: absolute;
         right: 50%;
         transform: translateX(50%);
-        width: calc(100% - 1rem);
+        width: calc(100% - 1.5rem);
         /* filter: blur(0.3rem) saturate(1.1); */
         
         z-index: -100 !important;
