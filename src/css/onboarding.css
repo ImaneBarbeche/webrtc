@@ -116,7 +116,7 @@ header h1 {
 /* Role Selection */
 .role-selection {
   padding: 20px 0;
-  margin-top: 40px;
+  margin-top: 100px;
 }
 
 .role-selection h2 {
@@ -923,7 +923,7 @@ background-color: #fee7b76e;
 
 #confirm-button {
     position: absolute;
-    bottom: 20px;
+    bottom: 40px;
     right: 20px;
     padding: 10px 20px;
     background-color: #060606;
