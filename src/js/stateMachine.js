@@ -782,30 +782,34 @@ export function initializeSurveyService() {
   }
   
   
+  
   // Si on a un contexte sauvegardé, restaurer les options de la timeline
   if (initialContext && initialContext.birthYear && initialContext.birthYear > 0) {
-    timeline.setOptions({
-      min: new Date(`${initialContext.birthYear}-01-01`), 
-      start: new Date(`${initialContext.birthYear}-01-01`)
-    });
-    
-    // Restaurer aussi le format de l'âge
-    timeline.setOptions({
-      format: {
-        minorLabels: function(date, scale, step) {
-          switch (scale) {
-            case 'year':
-              const age = new Date(date).getFullYear() - initialContext.birthYear;
-              return '<b>' + new Date(date).getFullYear() + '</b></br><b>' + age + `</b> ${age != 0 && age != 1 ? 'ans' : 'an'}`;
-            default:
-              return vis.moment(date).format(scale === 'month' ? 'MMM' : 'D');
+    // Vérifier que timeline existe avant de l'utiliser
+    if (timeline && typeof timeline.setOptions === 'function') {
+      timeline.setOptions({
+        min: new Date(`${initialContext.birthYear}-01-01`), 
+        start: new Date(`${initialContext.birthYear}-01-01`)
+      });
+      
+      // Restaurer aussi le format de l'âge
+      timeline.setOptions({
+        format: {
+          minorLabels: function(date, scale, step) {
+            switch (scale) {
+              case 'year':
+                const age = new Date(date).getFullYear() - initialContext.birthYear;
+                return '<b>' + new Date(date).getFullYear() + '</b></br><b>' + age + `</b> ${age != 0 && age != 1 ? 'ans' : 'an'}`;
+              default:
+                return vis.moment(date).format(scale === 'month' ? 'MMM' : 'D');
+            }
           }
         }
-      }
-    });
-  }
-  
-  // Sauvegarder le contexte après chaque transition
+      });
+    } else {
+      console.warn('⚠️ Timeline pas encore initialisée ou setOptions non disponible');
+    }
+  }  // Sauvegarder le contexte après chaque transition
   surveyService.subscribe((state) => {
     saveContext(state.context, state.value);
   });
