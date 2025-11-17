@@ -224,7 +224,6 @@ class WebRTCSync {
       };
 
       this.dc.send(JSON.stringify(message));
-      console.log('📤 Message envoyé:', message.type);
       return true;
     } catch (err) {
       console.error("❌ Erreur envoi message:", err);

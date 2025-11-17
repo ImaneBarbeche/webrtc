@@ -2,7 +2,7 @@ import { ajouterEpisode, modifierEpisode } from "./episodes.js"
 import { timeline, items, groups, handleDragStart, handleDragEnd } from "./timeline.js";
 import state from "./state.js"
 
-import { surveyMachine, surveyService, initializeSurveyService } from "./stateMachine.js";
+import { surveyMachine, surveyService, initializeSurveyService, saveAnsweredQuestion, loadAnsweredQuestions, getQuestionFromState } from "./stateMachine.js";
 
 /**
  ************************************************************************************************************
@@ -70,41 +70,197 @@ document.addEventListener("DOMContentLoaded", async () => {
         enableWebRTCSync();
     });
     
+    // Initialisation de la machine à états avec restauration si nécessaire
+    initializeSurveyService();
+    
+    // Fonction pour afficher les réponses précédentes
+    function displayPreviousAnswers() {
+        const answeredQuestions = loadAnsweredQuestions();
+        
+        if (answeredQuestions.length === 0) return; // Rien à afficher
+        
+        // Créer un conteneur pour les réponses précédentes
+        const previousAnswersDiv = document.createElement('div');
+        previousAnswersDiv.className = 'previous-answers-section';
+        previousAnswersDiv.innerHTML = '<h3>Récapitulatif des réponses précédentes</h3>';
+        
+        answeredQuestions.forEach((item, index) => {
+            const answerDiv = document.createElement('div');
+            answerDiv.className = 'previous-answer';
+            
+            // Obtenir la question à partir de l'état
+            const question = getQuestionFromState(item.state);
+            
+            // Formater la réponse selon le type
+            let answerText = JSON.stringify(item.answer.value || item.answer, null, 2);
+            if (typeof item.answer === 'object') {
+                // Extraire la valeur réelle de la réponse
+                const key = Object.keys(item.answer).find(k => k !== 'type');
+                answerText = item.answer[key] || JSON.stringify(item.answer);
+            }
+            
+            // Formater comme un tableau
+            if (Array.isArray(answerText)) {
+                answerText = answerText.join(', ');
+            }
+            
+            answerDiv.innerHTML = `
+                <p class="question-text"><strong>Q${index + 1}:</strong> ${question}</p>
+                <p class="answer-content">✅ <strong>${answerText}</strong></p>
+                <small>${new Date(item.timestamp).toLocaleTimeString('fr-FR')}</small>
+            `;
+            
+            previousAnswersDiv.appendChild(answerDiv);
+        });
+        
+        // Ajouter un séparateur
+        const separator = document.createElement('hr');
+        separator.className = 'questions-separator';
+        
+        // Insérer au début du conteneur
+        container.insertBefore(separator, container.firstChild);
+        container.insertBefore(previousAnswersDiv, container.firstChild);
+    }
+    
+    // Tracker le dernier état pour éviter les re-renders inutiles
+    let lastRenderedState = null;
+    
     // S'abonner aux changements d'état
     surveyService.subscribe((state) => {
-        // Ne rendre que si déjà initialisé (évite le double rendu au démarrage)
-        if (isInitialized) {
-            renderQuestion(state);
+        // Ne re-render que si l'état a vraiment changé (pas juste le contexte)
+        if (lastRenderedState !== state.value) {
+            lastRenderedState = state.value;
+            renderQuestion(state); // Mise à jour à chaque transition
+        } else {
+            console.log('Contexte mis à jour, mais état inchangé - pas de re-render');
         }
     });
     
-    // Attendre que la timeline soit prête avant d'initialiser le service
-    document.addEventListener('timelineReady', () => {
-        // Initialisation de la machine à états avec restauration si nécessaire
-        initializeSurveyService();
-        // Marquer comme initialisé
-        isInitialized = true;
-        // Rendre la première question après l'initialisation
-        renderQuestion(surveyService.getSnapshot());
-    }, { once: true });
+    // IMPORTANT : Attendre le prochain tick pour que l'état soit restauré
+    setTimeout(() => {
+        const currentState = surveyService.getSnapshot();
+        // Afficher les réponses précédentes AVANT la question actuelle
+        displayPreviousAnswers();
+        renderQuestion(currentState);
+    }, 0);
+
+    /**
+     *  Vérifie si on est sur la question actuelle (pas une modification d'historique)
+     */
+    function isCurrentQuestion(eventType) {
+        const currentState = surveyService.getSnapshot();
+        const currentValue = currentState.value;
+        
+        // Mapping complet des événements vers leurs états attendus
+        const eventToStateMap = {
+            // Naissance
+            'ANSWER_BIRTH_YEAR': 'askBirthYear',
+            'NEXT': null, // NEXT peut venir de plusieurs états
+            'ANSWER_CURRENT_COMMUNE': 'askCurrentCommune',
+            'ANSWER_DEPARTEMENT': 'askDepartementOrPays',
+            
+            // Commune
+            'YES': null, // YES/NO peuvent venir de plusieurs états
+            'NO': null,
+            'ANSWER_MULTIPLE_COMMUNES': 'askMultipleCommunes',
+            'ANSWER_COMMUNE_ARRIVAL_YEAR': 'askCommuneArrivalYear',
+            'ANSWER_COMMUNE_DEPARTURE_YEAR': 'askCommuneDepartureYear',
+            
+            // Logement
+            'ANSWER_MULTIPLE_HOUSINGS': 'askMultipleHousings',
+            'ANSWER_HOUSING_ARRIVAL_AGE': 'askHousingArrivalAge',
+            'ANSWER_HOUSING_DEPARTURE_AGE': 'askHousingDepartureAge',
+            'ANSWER_HOUSING_OCCUPATION_STATUS_ENTRY': 'askHousingOccupationStatusEntry',
+            'ANSWER_HOUSING_OCCUPATION_STATUS_EXIT': 'askHousingOccupationStatusExit',
+            'ANSWER_STATUS_ENTRY': 'askHousingOccupationStatusEntry',
+            'ANSWER_STATUS_EXIT': 'askHousingOccupationStatusExit',
+            
+            // Épisodes
+            'ADD_EPISODE': 'recapEpisode',
+            'MODIFY_EPISODE': 'recapEpisode',
+            'CREATE_NEW_EPISODE': 'recapEpisode'
+        };
+        
+        const expectedState = eventToStateMap[eventType];
+        
+        // Si l'événement n'a pas de mapping strict (NEXT, YES, NO), on considère que c'est OK
+        if (expectedState === null || expectedState === undefined) {
+            return true;
+        }
+        
+        const isCurrent = expectedState === currentValue;
+        return isCurrent;
+    }
 
     /**
      * Envoyer un événement (local + remote si WebRTC activé)
+     * Protection anti-double soumission : distingue modification vs nouvelle réponse
      */
-    function sendEvent(eventData) {
+    function sendEvent(eventData, allowAdvance = true) {
         // Vérifier si on est hôte
         if (!isHost) {
-            console.warn('⛔ VIEWER ne peut pas envoyer d\'événements');
+            console.warn('VIEWER ne peut pas envoyer d\'événements');
             return; // Bloquer l'envoi
-        }        
+        }
+        
+        // Protection : si c'est une modification d'historique, envoyer UPDATE_ANSWER
+        if (!allowAdvance || !isCurrentQuestion(eventData.type)) {            
+            // Extraire la clé et la valeur de l'événement original
+            const originalEvent = eventData;
+            let key = null;
+            let value = null;
+            let updateEpisode = false;
+            
+            // Déterminer la clé selon le type d'événement
+            if (originalEvent.statut_res !== undefined) {
+                key = 'statut_res';
+                value = originalEvent.statut_res;
+                updateEpisode = true;
+            } else if (originalEvent.start !== undefined) {
+                key = 'start';
+                value = originalEvent.start;
+                updateEpisode = true;
+            } else if (originalEvent.end !== undefined) {
+                key = 'end';
+                value = originalEvent.end;
+                updateEpisode = true;
+            } else if (originalEvent.commune !== undefined) {
+                key = 'commune';
+                value = originalEvent.commune;
+            } else if (originalEvent.birthYear !== undefined) {
+                key = 'birthYear';
+                value = originalEvent.birthYear;
+            }
+            
+            // Envoyer l'événement UPDATE_ANSWER au lieu de l'événement original
+            const updateEvent = {
+                type: 'UPDATE_ANSWER',
+                key: key,
+                value: value,
+                updateEpisode: updateEpisode
+            };
+            
+            surveyService.send(updateEvent);
+            
+            if (syncEnabled && window.webrtcSync) {
+                window.webrtcSync.sendEvent(updateEvent);
+            }
+            
+            return; // Ne pas continuer avec l'événement normal
+        }
+        
         // Envoyer localement
         surveyService.send(eventData);
+        
+        // Sauvegarder la réponse dans l'historique
+        const currentState = surveyService.getSnapshot().value;
+        saveAnsweredQuestion(currentState, eventData);
     
         
         if (syncEnabled && window.webrtcSync) {
             const sent = window.webrtcSync.sendEvent(eventData);
         } else {
-            console.warn('⚠️ WebRTC non disponible pour envoi');
+            console.warn('WebRTC non disponible pour envoi');
         }
     }
     
@@ -238,7 +394,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             nextBtn.innerText = "Suivant";
             nextBtn.addEventListener("click", () => {
               sendEvent({ type: eventType });
-              nextBtn.disabled = true;
+              // Retiré : nextBtn.disabled = true;
             });
             questionDiv.appendChild(nextBtn);
         }
@@ -253,9 +409,10 @@ document.addEventListener("DOMContentLoaded", async () => {
                 let eventData = { type: eventType };
                 eventData[eventKey] = input.value;
                 sendEvent(eventData); // Utiliser sendEvent au lieu de surveyService.send
-                event.target.closest('.question').querySelectorAll('input').forEach(input => {
-                  input.disabled = true; 
-                });
+                // Retiré : désactivation des inputs
+                // event.target.closest('.question').querySelectorAll('input').forEach(input => {
+                //   input.disabled = true; 
+                // });
               }
             });
             questionDiv.appendChild(input);
@@ -270,10 +427,10 @@ document.addEventListener("DOMContentLoaded", async () => {
               let eventData = { type: choice.toUpperCase() };
               eventData[eventKey] = choice;
               sendEvent(eventData); // Utiliser sendEvent au lieu de surveyService.send
-                event.target.closest('.question').querySelectorAll('button').forEach(btn => {
-                  btn.disabled = true; 
-                });
-
+              // Retiré : désactivation des boutons
+              // event.target.closest('.question').querySelectorAll('button').forEach(btn => {
+              //   btn.disabled = true; 
+              // });
             });
             questionDiv.appendChild(button);
             });
@@ -318,7 +475,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             let eventData = { type: eventType };
             eventData[eventKey] = list_communes_not_sorted;
             sendEvent(eventData);
-            nextQBtn.disabled = true;
+            // Retiré : nextQBtn.disabled = true;
           });
       
           questionDiv.appendChild(nextQBtn);
@@ -341,7 +498,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (resetButton) {
     resetButton.addEventListener('click', () => {
       // Demander confirmation
-      if (confirm('⚠️ Êtes-vous sûr de vouloir tout réinitialiser ? Toutes les données (questionnaire + timeline) seront perdues.')) {
+      if (confirm('Êtes-vous sûr de vouloir tout réinitialiser ? Toutes les données (questionnaire + timeline) seront perdues.')) {
         // Si on est connecté en WebRTC, envoyer un message de reset à l'autre appareil
         if (window.webrtcSync && window.webrtcSync.connected) {
           window.webrtcSync.sendMessage({

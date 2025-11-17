@@ -13,12 +13,14 @@ import { timeline, groups, items } from "./timeline.js";
 // Fonction pour charger le contexte sauvegardé
 function loadSavedContext() {
   try {
-    const savedContext = localStorage.getItem('lifestories_context');
-    const savedState = localStorage.getItem('lifestories_current_state');
+    const savedContextStr = localStorage.getItem('lifestories_context');
+    const savedStateStr = localStorage.getItem('lifestories_current_state');
     
-    if (savedContext) {
-      const context = JSON.parse(savedContext);
-      return { context, savedState };
+    if (savedContextStr) {
+      const context = JSON.parse(savedContextStr);
+      const state = savedStateStr ? JSON.parse(savedStateStr) : null;
+            
+      return { context, savedState: state };
     }
   } catch (e) {
     console.error('❌ Erreur lors du chargement du contexte:', e);
@@ -40,13 +42,73 @@ function saveContext(context, state) {
       currentLogementIndex: context.currentLogementIndex,
       group: context.group,
     };
-    
+        
     localStorage.setItem('lifestories_context', JSON.stringify(contextToSave));
     localStorage.setItem('lifestories_current_state', JSON.stringify(state));
   } catch (e) {
-    console.error('❌ Erreur lors de la sauvegarde du contexte:', e);
+    console.error('❌ Erreur lors de la sauvegarde du contexte:', e); // silent error logging, the user won't see it - need to change this
   }
 }
+
+// Fonction pour sauvegarder chaque réponse
+export function saveAnsweredQuestion(state, eventData) {
+  try {
+    const answeredQuestions = JSON.parse(
+      localStorage.getItem('lifestories_answered_questions') || '[]'
+    ); // retrieves the answered questions (array) or creates an empty array
+    
+    // Ajouter la nouvelle réponse
+    answeredQuestions.push({
+      state: state,
+      answer: eventData,
+      timestamp: new Date().toISOString()
+    }); // creates a chronological record of responses
+    
+    // Sauvegarder
+    localStorage.setItem(
+      'lifestories_answered_questions',
+      JSON.stringify(answeredQuestions)
+    );
+  } catch (e) {
+    console.error('❌ Erreur lors de la sauvegarde de la réponse:', e);
+  }
+}
+
+// Fonction pour charger l'historique des réponses
+export function loadAnsweredQuestions() {
+  try {
+    const saved = localStorage.getItem('lifestories_answered_questions');
+    return saved ? JSON.parse(saved) : []; // parse the string into an array, if no stored data exists, returns an empty array as a safe default
+  } catch (e) {
+    console.error('❌ Erreur lors du chargement de l\'historique:', e);
+    return [];
+  }
+}
+
+// Mapping des états vers les questions pour afficher les questions et non les mots clés
+export const stateToQuestionMap = {
+  'askBirthYear': 'Quelle est votre année de naissance ?',
+  'birthPlaceIntro': 'Où habitaient vos parents à votre naissance ?',
+  'askCurrentCommune': 'Dans quelle commune (ville) ?',
+  'askDepartementOrPays': 'Dans quel département (France) ou pays (étranger) ?',
+  'askAlwaysLivedInCommune': 'Avez-vous toujours vécu dans cette commune ?',
+  'askMultipleCommunes': 'Pouvez-vous citer les communes dans lesquelles vous avez vécu ?',
+  'askCommuneArrivalYear': 'En quelle année êtes-vous arrivé ?',
+  'askCommuneDepartureYear': 'En quelle année avez-vous quitté cette commune ?',
+  'askSameHousingInCommune': 'Avez-vous toujours vécu dans le même logement ?',
+  'askMultipleHousings': 'Nous allons faire la liste des logements successifs',
+  'askHousingArrivalAge': 'À quel âge ou en quelle année avez-vous emménagé ?',
+  'askHousingDepartureAge': 'À quel âge ou en quelle année avez-vous quitté ce logement ?',
+  'askHousingOccupationStatusEntry': 'Quel était votre statut d\'occupation à l\'arrivée ?',
+  'askHousingOccupationStatusExit': 'Quel était votre statut d\'occupation au départ ?',
+  'recapEpisode': 'Récapitulatif de l\'épisode',
+  'surveyComplete': 'Merci, vous avez terminé l\'enquête !'
+};
+
+// Fonction pour obtenir la question à partir de l'état
+export function getQuestionFromState(state) {
+  return stateToQuestionMap[state] || state;
+} // uses the map from above to pair the state with the question
 
 // Fonction pour réinitialiser toutes les données
 export function resetAllData() {
@@ -55,6 +117,7 @@ export function resetAllData() {
   localStorage.removeItem('lifestories_items');
   localStorage.removeItem('lifestories_groups');
   localStorage.removeItem('lifestories_options');
+  localStorage.removeItem('lifestories_answered_questions');
   window.location.reload();
 }
 
@@ -63,20 +126,104 @@ const { context: savedContext, savedState } = loadSavedContext();
 
 const defaultContext = {
   birthYear: 0,
-  birthPlace: '',           // Lieu de naissance des parents
-  communes: [],             // Liste des communes
-  departements: [],         // Liste des départements/pays associés
+  birthPlace: '',// Lieu de naissance des parents
+  communes: [],// Liste des communes
+  departements: [],// Liste des départements/pays associés
   currentCommuneIndex: 0,
-  logements: [],            // Liste des logements par commune
+  logements: [],// Liste des logements par commune
   currentLogementIndex: 0,
   group: 13,
   lastEpisode: null,
 };
 
+// Fonction pour récupérer le dernier épisode depuis la timeline
+function getLastEpisodeFromTimeline() {
+  try {
+    const allItems = items.get();
+    if (allItems && allItems.length > 0) {
+      // Retourner le dernier item ajouté
+      const lastItem = allItems[allItems.length - 1];
+      return lastItem;
+    }
+  } catch (e) {
+    console.warn('Impossible de récupérer le dernier épisode:', e);
+  }
+  return null;
+}
+
+// Utiliser le contexte sauvegardé si disponible
+let initialContext = savedContext || defaultContext;
+
+// Si on restaure un état, récupérer aussi le lastEpisode depuis la timeline
+if (savedContext) {
+  initialContext = {
+    ...initialContext,
+    lastEpisode: getLastEpisodeFromTimeline()
+  };
+}
+
+// Utiliser l'état sauvegardé si disponible, sinon démarrer au début - permet de commencer le questionnaire à la dernière question non répondue
+const initialState = savedState || 'askBirthYear';
+
 export const surveyMachine = createMachine({
   id: 'survey',
-  initial: 'askBirthYear',
-  context: defaultContext,
+  initial: initialState, // Utiliser l'état sauvegardé 
+  context: initialContext, // Utiliser le contexte sauvegardé 
+  on: {
+    // Événement global pour restaurer lastEpisode après chargement
+    RESTORE_LAST_EPISODE: {
+      actions: assign({
+        lastEpisode: ({ event }) => event.lastEpisode
+      })
+    },
+    // Événement global pour mettre à jour une réponse sans changer d'état
+    UPDATE_ANSWER: {
+      actions: assign(({ context, event }) => {
+        // Mettre à jour le contexte selon le type de réponse
+        const updates = {};
+        
+        if (event.key) {
+          updates[event.key] = event.value;
+        }
+        
+        // Si on modifie un épisode, le mettre à jour dans la timeline
+        if (event.updateEpisode) {
+          // Trouver l'épisode à modifier selon la clé
+          let episodeToUpdate = null;
+          
+          if (event.key === 'statut_res') {
+            // Chercher l'épisode de statut (groupe 11)
+            const allItems = items.get();
+            const statusEpisodes = allItems.filter(item => item.group === 11);
+            if (statusEpisodes.length > 0) {
+              episodeToUpdate = statusEpisodes[statusEpisodes.length - 1]; // Prendre le dernier
+            }
+          } else {
+            // Pour les autres, utiliser lastEpisode
+            episodeToUpdate = context.lastEpisode;
+          }
+          
+          if (episodeToUpdate) {
+            const modifs = {};
+            modifs[event.key] = event.value;
+            modifierEpisode(episodeToUpdate.id, modifs);
+          } else {
+            console.warn('Aucun épisode trouvé pour la modification');
+          }
+        } else if (event.key === 'commune') {
+          // Pour les communes, modifier l'épisode même si updateEpisode est false
+          const allItems = items.get();
+          const communeEpisodes = allItems.filter(item => item.group === 13);
+          if (communeEpisodes.length > 0) {
+            const lastCommuneEpisode = communeEpisodes[communeEpisodes.length - 1];
+            modifierEpisode(lastCommuneEpisode.id, {content: event.value});
+          }
+        }
+        
+        return updates;
+      })
+    }
+  },
   states: {
     askBirthYear: {
       on: {
@@ -421,9 +568,10 @@ export const surveyMachine = createMachine({
 
     modifyCalendarEpisode: assign ({
       lastEpisode: ({context, event}, params) => {
-        // Gérer le cas spécial 'timeline_end'
-        if(params && params.end === 'timeline_end'){
-          params = { ...params, end: window.timeline?.options?.end || new Date() };
+        // Vérifier que lastEpisode existe avant de l'utiliser
+        if (!context.lastEpisode || !context.lastEpisode.id) {
+          console.warn('lastEpisode est null dans modifyCalendarEpisode');
+          return null;
         }
         
         if(params){
@@ -465,6 +613,12 @@ export const surveyMachine = createMachine({
               modifs.start = new Date(`${num}-01-01`);
             }
           }
+        }
+        
+        // Vérifier que lastEpisode existe avant de l'utiliser
+        if (!context.lastEpisode || !context.lastEpisode.id) {
+          console.warn('lastEpisode est null, impossible de modifier l\'épisode');
+          return null;
         }
         
         return modifierEpisode(context.lastEpisode.id, modifs);
@@ -612,41 +766,74 @@ export const surveyService = interpret(surveyMachine);
 
 // Fonction pour initialiser le service avec l'état sauvegardé
 export function initializeSurveyService() {
-  // Démarrer le service
+  // Démarrer le service (l'état initial est déjà configuré dans la machine)
   surveyService.start();
   
-  // Si on a un contexte sauvegardé, restaurer les options de la timeline
-  if (savedContext && savedContext.birthYear && savedContext.birthYear > 0) {
-    // Vérifier que timeline existe avant de l'utiliser
-    if (window.timeline) {
-      window.timeline.setOptions({
-        min: new Date(`${savedContext.birthYear}-01-01`), 
-        start: new Date(`${savedContext.birthYear}-01-01`)
+  // IMPORTANT : Restaurer lastEpisode APRÈS le démarrage
+  if (savedContext && savedState) {
+    const lastEpisode = getLastEpisodeFromTimeline();
+    if (lastEpisode) {
+      // Mettre à jour le contexte du service
+      surveyService.send({
+        type: 'RESTORE_LAST_EPISODE',
+        lastEpisode: lastEpisode
       });
-      
-      // Restaurer aussi le format de l'âge
-      window.timeline.setOptions({
-        format: {
-          minorLabels: function(date, scale, step) {
-            switch (scale) {
-              case 'year':
-                const age = new Date(date).getFullYear() - savedContext.birthYear;
-                return '<b>' + new Date(date).getFullYear() + '</b></br><b>' + age + `</b> ${age != 0 && age != 1 ? 'ans' : 'an'}`;
-              default:
-                return vis.moment(date).format(scale === 'month' ? 'MMM' : 'D');
-            }
+    }
+  }
+  
+  
+  // Si on a un contexte sauvegardé, restaurer les options de la timeline
+  if (initialContext && initialContext.birthYear && initialContext.birthYear > 0) {
+    timeline.setOptions({
+      min: new Date(`${initialContext.birthYear}-01-01`), 
+      start: new Date(`${initialContext.birthYear}-01-01`)
+    });
+    
+    // Restaurer aussi le format de l'âge
+    timeline.setOptions({
+      format: {
+        minorLabels: function(date, scale, step) {
+          switch (scale) {
+            case 'year':
+              const age = new Date(date).getFullYear() - initialContext.birthYear;
+              return '<b>' + new Date(date).getFullYear() + '</b></br><b>' + age + `</b> ${age != 0 && age != 1 ? 'ans' : 'an'}`;
+            default:
+              return vis.moment(date).format(scale === 'month' ? 'MMM' : 'D');
           }
         }
-      });
-    } else {
-      console.warn('⚠️ Timeline pas encore initialisée, options non restaurées');
-    }
+      }
+    });
   }
   
   // Sauvegarder le contexte après chaque transition
   surveyService.subscribe((state) => {
     saveContext(state.context, state.value);
   });
+}
+
+/**
+ * Restaurer l'état depuis un état distant (WebRTC)
+ * IMPORTANT : Utilisé UNIQUEMENT pour la synchronisation en temps réel
+ * PAS pour la persistance après fermeture (localStorage fait ça)
+ */
+export function restoreFromRemoteState(remoteState) {
+  try {
+    // Sauvegarder dans localStorage (pour persistance)
+    saveContext(remoteState.context, remoteState.value);
+    
+    // Arrêter le service actuel
+    surveyService.stop();
+    
+    // Redémarrer avec le nouvel état
+    surveyService.start({
+      value: remoteState.value,
+      context: remoteState.context
+    });
+    
+    console.log('✅ État distant synchronisé');
+  } catch (error) {
+    console.error('❌ Erreur lors de la synchronisation distante:', error);
+  }
 }
 
 // Exporter pour que questionnaire.js puisse l'utiliser
