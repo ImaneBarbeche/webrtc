@@ -50,6 +50,44 @@ groupsData.forEach(group => {
 // Création des jeux de données pour la timeline
 const items = new vis.DataSet();
 const groups = new vis.DataSet(groupsData);
+
+// Preactiver silencieusement certains landmarks (Commune=13, Diplômes=23, Postes=31) - provisoire
+(function activateInitialLandmarks() {
+  const initialLandmarks = [13, 23, 31];
+  initialLandmarks.forEach(id => {
+    const g = groups.get(id);
+    if (!g) return;
+
+    // Marquer comme landmark et ajouter une icône visuelle si nécessaire
+    g.isLandmark = true;
+    if (!String(g.content).includes('📌')) {
+      g.content = '📌 ' + (g.content || '');
+    }
+    groups.update(g);
+
+    // Mettre à jour la liste landmarkChildren du parent
+    const parentId = g.keyof || g.nestedInGroup || null;
+    if (parentId) {
+      const parent = groups.get(parentId);
+      if (parent) {
+        parent.landmarkChildren = parent.landmarkChildren || [];
+        if (!parent.landmarkChildren.includes(id)) {
+          parent.landmarkChildren.push(id);
+        }
+        groups.update(parent);
+      }
+    }
+  });
+
+  // Persister uniquement si aucune configuration des groupes n'est déjà stockée
+  try {
+    if (!localStorage.getItem('lifestories_groups')) {
+      localStorage.setItem('lifestories_groups', JSON.stringify(groups.get()));
+    }
+  } catch (e) {
+    // silent fail if storage unavailable
+  }
+})();
 let isCustomBarMoving = false
 
 // Options principales pour la timeline
