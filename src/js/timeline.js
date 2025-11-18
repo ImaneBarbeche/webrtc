@@ -354,15 +354,15 @@ function toggleLandmark(groupId) {
         if (!parentGroup.landmarkChildren.includes(groupId)) {
             parentGroup.landmarkChildren.push(groupId);
         }
-        // Ajouter l'icône 📍 si pas présent
-        if (!group.content.includes('📍')) {
-            group.content = '📍 ' + group.content.trim();
+        // Ajouter l'icône 📌 si pas présent
+        if (!group.content.includes('📌')) {
+            group.content = '📌 ' + group.content.trim();
         }
     } else {
         // Retirer de landmarkChildren
         parentGroup.landmarkChildren = parentGroup.landmarkChildren.filter(id => id !== groupId);
-        // Retirer l'icône 📍
-        group.content = group.content.replace('📍 ', '').trim();
+        // Retirer l'icône 📌
+        group.content = group.content.replace('📌 ', '').trim();
     }
     
     // Mettre à jour les groupes
@@ -371,8 +371,8 @@ function toggleLandmark(groupId) {
         
     // Feedback visuel avec SweetAlert2
     utils.prettyAlert(
-        group.isLandmark ? '📍 Landmark activé' : 'Landmark désactivé',
-        `${group.content.replace('📍 ', '')} ${group.isLandmark ? 'restera visible' : 'ne sera plus visible'} quand le groupe est fermé`,
+        group.isLandmark ? '📌 Landmark activé' : 'Landmark désactivé',
+        `${group.content.replace('📌 ', '')} ${group.isLandmark ? 'restera visible' : 'ne sera plus visible'} quand le groupe est fermé`,
         'success',
         1500
     );

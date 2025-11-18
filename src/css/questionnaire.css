@@ -10,8 +10,8 @@
 .question {
     margin-bottom: 15px;
     padding: 10px;
-    border-left: 3px solid #007bff;
-    background-color: #f8f9fa;
+    border-left: 3px solid #eabca5;
+    /* background-color: #f8f9fa; */
     border-radius: 4px;
 }
 
@@ -21,10 +21,19 @@
 
 .question input {
     margin: 8px 0;
-    padding: 6px 10px;
+    padding: 0.5rem;
     border: 1px solid #ddd;
-    border-radius: 4px;
-    width: 200px;
+    border-radius: 2rem;
+    width: 100%;
+    background-color: var(--primary-grey);
+    box-shadow: 0 0.25rem .625rem var(--secondary-grey);
+    font-size: 0.8rem;
+
+}
+
+.question input:focus-visible {
+    outline: none;
+
 }
 
 .question input:disabled {
@@ -65,8 +74,8 @@
    ======================================== */
 
 .previous-answers-section {
-    background-color: #e8f4f8;
-    border-left: 4px solid #28a745;
+    /* background-color: #e8f4f8; */
+    border-left: 4px solid #eabca5;
     padding: 15px;
     margin-bottom: 20px;
     border-radius: 4px;
@@ -80,8 +89,8 @@
 }
 
 .previous-answer {
-    background-color: white;
-    border-left: 3px solid #28a745;
+    /* background-color: white; */
+    /* border-left: 3px solid #28a745; */
     padding: 12px;
     margin-bottom: 10px;
     border-radius: 3px;
@@ -90,12 +99,12 @@
 
 .previous-answer p {
     margin: 5px 0;
-    color: #333;
+    color: #000000;
 }
 
 .previous-answer .question-text {
     font-weight: 600;
-    color: #155724;
+    color: #000000;
     margin-bottom: 8px;
     font-size: 14px;
 }
@@ -105,7 +114,7 @@
     color: #0d3817;
     margin-left: 15px;
     padding: 5px;
-    background-color: #f0f8f0;
+    /* background-color: #f0f8f0; */
     border-radius: 2px;
 }
 
@@ -118,6 +127,6 @@
 
 .questions-separator {
     border: none;
-    border-top: 2px solid #ddd;
+    /* border-top: 2px solid #f5ddd0; */
     margin: 20px 0;
 }

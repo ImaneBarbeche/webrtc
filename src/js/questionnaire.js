@@ -82,7 +82,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         // Créer un conteneur pour les réponses précédentes
         const previousAnswersDiv = document.createElement('div');
         previousAnswersDiv.className = 'previous-answers-section';
-        previousAnswersDiv.innerHTML = '<h3>Récapitulatif des réponses précédentes</h3>';
+        previousAnswersDiv.innerHTML = '<h3>Historique des réponses</h3>';
         
         answeredQuestions.forEach((item, index) => {
             const answerDiv = document.createElement('div');
@@ -106,7 +106,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             
             answerDiv.innerHTML = `
                 <p class="question-text"><strong>Q${index + 1}:</strong> ${question}</p>
-                <p class="answer-content">✅ <strong>${answerText}</strong></p>
+                <p class="answer-content"><strong>${answerText}</strong></p>
                 <small>${new Date(item.timestamp).toLocaleTimeString('fr-FR')}</small>
             `;
             
@@ -250,11 +250,15 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
         
         // Envoyer localement
+        // IMPORTANT: capturer l'état courant AVANT d'envoyer l'événement
+        // car l'envoi provoque une transition et la snapshot après envoi
+        // correspondra à l'état suivant (d'où un mauvais mapping dans l'historique).
+        const currentStateBefore = surveyService.getSnapshot().value;
         surveyService.send(eventData);
-        
-        // Sauvegarder la réponse dans l'historique
-        const currentState = surveyService.getSnapshot().value;
-        saveAnsweredQuestion(currentState, eventData);
+
+        // Sauvegarder la réponse dans l'historique en l'associant
+        // à l'état courant AVANT la transition (question posée)
+        saveAnsweredQuestion(currentStateBefore, eventData);
     
         
         if (syncEnabled && window.webrtcSync) {
