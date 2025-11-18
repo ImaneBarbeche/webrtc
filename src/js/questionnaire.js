@@ -22,6 +22,22 @@ function handleRemoteMessage(message) {
     if (message.type === 'SURVEY_EVENT') {
         // Appliquer l'événement reçu à notre machine à états
         surveyService.send(message.event);
+  } else if (message.type === 'LOAD_ITEMS') {
+    // L'enquêteur a envoyé un lot d'items à charger dans la timeline
+    try {
+      if (message.items && Array.isArray(message.items)) {
+        // Convertir les dates ISO en objets Date si nécessaire
+        const parsed = message.items.map(i => ({
+          ...i,
+          start: i.start ? new Date(i.start) : undefined,
+          end: i.end ? new Date(i.end) : undefined
+        }));
+        // items est importé depuis timeline.js
+        items.add(parsed);
+      }
+    } catch (e) {
+      console.error('Erreur lors du chargement des items distants', e);
+    }
     } else if (message.type === 'SURVEY_STATE') {
         // Synchroniser l'état complet (utile pour rattrapage)
         // Note: XState v5 n'a pas de méthode simple pour forcer un état

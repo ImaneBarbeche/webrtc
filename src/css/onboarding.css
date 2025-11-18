@@ -312,6 +312,7 @@ header h1 {
 .scan-btn,
 .copy-btn,
 .start-btn {
+  display: none;
   padding: 12px 24px;
   border: none;
   border-radius: 8px;
@@ -540,6 +541,7 @@ background-color: #fee7b76e;
 }
 
 .manual-input textarea {
+  display: none;
   padding: 12px;
   border: 2px solid #e9ecef;
   border-radius: 8px;
