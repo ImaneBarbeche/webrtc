@@ -84,12 +84,6 @@
     margin-top: auto;
     /* margin-inline: 1.5rem; */
 
-    .btn-wrapper {
-        display: flex;
-        align-items: center;
-        gap: 1.625rem;
-    }
-
     /* button {
         padding: 0.5rem;
         padding: 1rem;
@@ -100,6 +94,12 @@
         box-shadow: 0 0.25rem .625rem var(--secondary-grey);
     } */
 }
+
+    .btn-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 1.625rem;
+    }
 
 
 /* ========================================
@@ -146,7 +146,30 @@
 .title-row {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 2.125rem;
+    align-items: start;
+    /* margin-bottom: 2.125rem; */
+    margin-bottom: .425rem;
+
+    header {
+        display: block;
+        position: static;
+        align-items: start;
+        gap: unset;
+
+        p {
+            font-size: 1.1rem;
+            font-weight: 300;
+            margin-top: .5rem;
+        }
+    }
+}
+
+#bricks {
+    .btn-wrapper {
+        position: absolute;
+        bottom: 1rem;
+        right: 1rem;
+    }
 }
 
 #moreInfos {
@@ -166,17 +189,46 @@
     justify-content: space-between;
     gap: 2rem;
     overflow-y: auto;
-    height: 100%;
+    height: calc(100% - 3rem);
     padding-right: 0.5rem;
+    scrollbar-color: var(--secondary-grey) transparent;
+    scrollbar-width: thin;
+     /* scrollbar-gutter: stable both-edges; */
+    mask-image: linear-gradient( to top, transparent 0.5%, black 2%, black 98%, transparent 100% );
+    padding-top: 0.7rem;
+    /* border: 2px solid red; */
+}
 
+#moreInfos .theme-section:only-child {
+  grid-column: span 2;
 }
 
 #moreInfos .theme-section {
     --bar-width: 0.5rem;
+    --bar-color: red;
 
+    opacity: 0;
     position: relative;
     margin-left: calc(var(--bar-width) * 5);
     padding-block: 1.875rem;
+    transition: opacity 0.3s ease-in-out;
+
+        &.visible {
+            opacity: 1;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        &.vert {
+            --bar-color: #EABCA5;
+        }
+
+        &.bleu {
+            --bar-color: #eaada5;
+        }
+
+        &.rouge {
+            --bar-color: #a5beea;
+        }
 
     &:before {
         content: "";
@@ -184,7 +236,7 @@
         max-height: 18rem;
         width: var(--bar-width);
         /* placeholder */
-        background-color: #a5beea;
+        background-color: var(--bar-color);
         position: absolute;
         /* top: 50%;
         transform: translateY(-50%); */
@@ -235,6 +287,16 @@
 
     }
 
+}
+
+#moreInfos .no-info {
+    justify-self: center;
+    align-self: center;
+    grid-column: span 2;
+    text-align: center;
+    max-width: 20rem;
+    margin-bottom: 15rem;
+    opacity: 80%;
 }
 
 /* ========================================

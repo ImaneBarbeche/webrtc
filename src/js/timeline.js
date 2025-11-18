@@ -541,7 +541,27 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
 
-    document.getElementById('moreInfos').innerHTML = ''
+     let existingThemeSections = document.querySelectorAll('.theme-section')
+          // console.log("sections")
+          // console.log(existingThemeSections)
+              
+          // if(existingThemeSections.length) {
+          //   console.log("true")
+          //   requestAnimationFrame(() => {
+          //     requestAnimationFrame(() => {
+          //         existingThemeSections.forEach((section) => {
+          //           section.classList.remove("visible")
+          //         })
+          //     })
+          //   })
+            
+          // }
+
+          // setTimeout(() => {
+            document.getElementById('moreInfos').innerHTML = ''
+          // }, 300);
+
+
     // Vérifier si la barre verticale passe sur un item
     items.forEach((item) => {
       var itemStart = new Date(item.start).getTime();
@@ -581,43 +601,67 @@ document.addEventListener('DOMContentLoaded', function() {
         // let groupName = groupObject.content // E.g migratoire
         // let ageDebut = new Date(item.start).getFullYear() - new Date(timeline.options.start).getFullYear()
         
-
-        
       }
     });
+
           let html = '';
-          Object.keys(themeData).forEach(themeId => {
-            const theme = themeData[themeId];
+
+          const totalMatches = Object.values(themeData).reduce((sum, t) => sum + (t.items?.length || 0), 0);
+
+          if(totalMatches <= 0) {
+            html += `<p class="no-info">Aucune information disponible pour l'anné sélectionnée. Veuillez en sélectionner une autre.</p>`
+            let pourApres = `Selectioner une date ou utiliser la bar pour naviger entre les annés`
+          }
+
+          
+          else {
             
-            if (theme.items.length > 0) {
-              html += `<div class='theme-section ${theme.className}'>
-                        <h3>${theme.name}</h3>
-                        
-                        <div class="card-wrapper">`;
+
+
+            Object.keys(themeData).forEach(themeId => {
+              const theme = themeData[themeId];
               
-              theme.items.forEach(({item, groupObject}) => {
-                let groupName = groupObject.content;
+              if (theme.items.length > 0) {
+                html += `<div class='theme-section ${theme.className} data-year="${new Date(snappedTime).getFullYear()}"'>
+                          <h3>${theme.name}</h3>
+                          
+                          <div class="card-wrapper">`;
                 
-                if (item.type === "point" || item.type === "box") {
-                  html += `<div class='card'>
-                            <h4>${item.content}</h4>
-                            <p>${groupName}</p>
-                          </div>`;
-                } else {
-                  html += `<div class='card'>
-                            <h4>${item.content} 
-                           <!-- ${new Date(snappedTime).getFullYear()} -->
-                            </h4>
-                            <p>${groupName}</p>
-                          </div>`;
-                }
-              });
-              
-              html += `</div> </div>`; // Close theme-section
-            }
-          });
+                theme.items.forEach(({item, groupObject}) => {
+                  let groupName = groupObject.content;
+                  
+                  if (item.type === "point" || item.type === "box") {
+                    html += `<div class='card'>
+                              <h4>${item.content}</h4>
+                              <p>${groupName}</p>
+                            </div>`;
+                  } else {
+                    html += `<div class='card'>
+                              <h4>${item.content} 
+                             <!-- ${new Date(snappedTime).getFullYear()} -->
+                              </h4>
+                              <p>${groupName}</p>
+                            </div>`;
+                  }
+                });
+                
+                html += `</div> </div>`; // Close theme-section
+              }
+            });
+          }
         document.getElementById('moreInfos').innerHTML += html
 
+        let themeSections = document.querySelectorAll('.theme-section')
+
+        requestAnimationFrame(() => {
+          themeSections.forEach((section) => {
+            section.classList.add("visible")
+
+  
+          })
+        })
+        
+        document.getElementById('year').innerHTML = new Date(snappedTime).getFullYear()
   });
 
   document.getElementById('save').addEventListener('click', function () {
@@ -700,17 +744,28 @@ viewSummaryBtn.addEventListener('click', toggleSummary);
 
 closeSummaryBtn.addEventListener('click', toggleSummary);  
 
-const zoomInBtn = document.getElementById('zoom-in') 
-const zoomOutBtn = document.getElementById('zoom-out') 
+const zoomInBtns = document.querySelectorAll('#zoom-in') 
+const zoomOutBtns = document.querySelectorAll('#zoom-out') 
 
-zoomInBtn?.addEventListener('click', () => {
-  console.log("click")
-  timeline.zoomIn(0.5)
-});
+zoomInBtns.forEach((btn) => {
+  btn.addEventListener('click', () => {
+    timeline.zoomIn(0.5)
+  });
+})
 
-zoomOutBtn?.addEventListener('click', () => {
-  timeline.zoomOut(0.5)
-});
+zoomOutBtns.forEach((btn) => {
+  btn.addEventListener('click', () => {
+    timeline.zoomOut(0.5)
+  });
+})
+
+// zoomInBtn?.addEventListener('click', () => {
+//   timeline.zoomIn(0.5)
+// });
+
+// zoomOutBtn?.addEventListener('click', () => {
+//   timeline.zoomOut(0.5)
+// });
 
 function move(percentage) {
   var range = timeline.getWindow();
@@ -722,15 +777,19 @@ function move(percentage) {
   });
 }
 
-const moveBackwardsBtn = document.getElementById('move-backwards') 
-const moveForwardsBtn = document.getElementById('move-forwards') 
+const moveBackwardsBtns = document.querySelectorAll('#move-backwards') 
+const moveForwardsBtns = document.querySelectorAll('#move-forwards') 
 
-moveBackwardsBtn?.addEventListener('click', () => {
-  move(0.5)
-});
-moveForwardsBtn?.addEventListener('click', () => {
-  move(-0.5)
-});
+moveBackwardsBtns.forEach((btn) => {
+  btn.addEventListener('click', () => {
+    move(0.5)
+  });
+})
+moveForwardsBtns.forEach((btn) => {
+  btn.addEventListener('click', () => {
+    move(-0.5)
+  });
+})
 
 // Exposer timeline et les datasets pour les autres fichiers
 export { timeline, items, groups, handleDragStart, handleDragEnd, toggleLandmark };
