@@ -608,7 +608,40 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
 
-    document.getElementById('moreInfos').innerHTML = ''
+    const themeData = {};
+
+    // getting parent groups
+    groups.get().forEach(group => {
+      if (group.nestedGroups && group.nestedGroups.length > 0) {
+        themeData[group.id] = {
+          name: group.content,
+          items: [],
+          className: group.className
+        };
+      }
+    });
+
+     let existingThemeSections = document.querySelectorAll('.theme-section')
+          // console.log("sections")
+          // console.log(existingThemeSections)
+              
+          // if(existingThemeSections.length) {
+          //   console.log("true")
+          //   requestAnimationFrame(() => {
+          //     requestAnimationFrame(() => {
+          //         existingThemeSections.forEach((section) => {
+          //           section.classList.remove("visible")
+          //         })
+          //     })
+          //   })
+            
+          // }
+
+          // setTimeout(() => {
+            document.getElementById('moreInfos').innerHTML = ''
+          // }, 300);
+
+
     // Vérifier si la barre verticale passe sur un item
     items.forEach((item) => {
       var itemStart = new Date(item.start).getTime();
@@ -624,7 +657,7 @@ document.addEventListener('DOMContentLoaded', function() {
         isInRange = itemYear === barYear;
       } else {
         // Pour les périodes, vérifier l'intervalle classique
-        isInRange = snappedTime >= itemStart && snappedTime <= itemEnd;
+        isInRange = snappedTime >= itemStart && snappedTime < itemEnd;
       }
       
       // Si la barre verticale passe sur l'item, on le surligne
@@ -634,38 +667,93 @@ document.addEventListener('DOMContentLoaded', function() {
         items.update(item)
         //details
         let groupObject = groups.get(item.group)
-        let groupName = groupObject.nestedInGroup ? `${groups.get(groupObject.nestedInGroup).content} --> ${groupObject.content}` : groupObject.content
-        let ageDebut = new Date(item.start).getFullYear() - new Date(timeline.options.start).getFullYear()
-        
-        let html;
-        if (item.type === "point" || item.type === "box") {
-          // Pour les événements ponctuels (brevet, diplômes, etc.)
-          html = `<div class='card'>
-                    <h3>${groupName}</h3>
-                    <h4>${item.content}</h4>
-                    <ul>
-                      <li>Année: ${new Date(item.start).getFullYear()}</li>
-                      <li>Âge: ${ageDebut} an(s)</li>
-                    </ul>
-                  </div>`
-        } else {
-          // Pour les périodes (range)
-          let ageFin = new Date(item.end).getFullYear() - new Date(timeline.options.start).getFullYear()
-          let duration = new Date(item.end).getFullYear() - new Date(item.start).getFullYear()
-          html = `<div class='card'>
-                    <h3>${groupName}</h3>
-                    <h4>${item.content}</h4>
-                    <ul>
-                      <li>De ${new Date(item.start).getFullYear()} à ${new Date(item.end).getFullYear()}</li>
-                      <li>De ${ageDebut} an(s) à ${ageFin} an(s)</li>
-                      <li>Durée: ${duration} an(s)</li>
-                    </ul>
-                  </div>`
+        let themeId = groupObject.nestedInGroup || item.group
+
+        // checking if a theme already exists before adding it into the array
+        if(themeData[themeId]) {
+           themeData[themeId].items.push({
+            item: item,
+            groupObject: groupObject
+          });
         }
+        // let groupName = groupObject.nestedInGroup ? `${groups.get(groupObject.nestedInGroup).content} --> ${groupObject.content}` : groupObject.content
+        // let themeName = groupObject.nestedInGroup ? groups.get(groupObject.nestedInGroup).content : null;
+        // let groupName = groupObject.content // E.g migratoire
+        // let ageDebut = new Date(item.start).getFullYear() - new Date(timeline.options.start).getFullYear()
         
-        document.getElementById('moreInfos').innerHTML += html
       }
     });
+
+          let html = '';
+
+          const totalMatches = Object.values(themeData).reduce((sum, t) => sum + (t.items?.length || 0), 0);
+
+          if(totalMatches <= 0) {
+            html += `<p class="no-info">Aucune information disponible pour l'anné sélectionnée. Veuillez en sélectionner une autre.</p>`
+            let pourApres = `Selectioner une date ou utiliser la bar pour naviger entre les annés`
+          }
+
+          
+          else {
+            
+
+
+            Object.keys(themeData).forEach(themeId => {
+              const theme = themeData[themeId];
+              
+              if (theme.items.length > 0) {
+                html += `<div class='theme-section ${theme.className} data-year="${new Date(snappedTime).getFullYear()}"'>
+                          <h3>${theme.name}</h3>
+                          
+                          <div class="card-wrapper">`;
+                
+                theme.items.forEach(({item, groupObject}) => {
+                  let groupName = groupObject.content;
+                  
+                  if (item.type === "point" || item.type === "box") {
+                    html += `<div class='card'>
+                              <h4>${item.content}</h4>
+                              <p>${groupName}</p>
+                            </div>`;
+                  } else {
+                    html += `<div class='card'>
+                              <h4>${item.content} 
+                             <!-- ${new Date(snappedTime).getFullYear()} -->
+                              </h4>
+                              <p>${groupName}</p>
+                            </div>`;
+                  }
+                });
+                
+                html += `</div> </div>`; // Close theme-section
+              }
+            });
+          }
+        document.getElementById('moreInfos').innerHTML += html
+
+        let themeSections = document.querySelectorAll('.theme-section')
+
+        requestAnimationFrame(() => {
+          themeSections.forEach((section) => {
+            section.classList.add("visible")
+
+  
+          })
+        })
+        
+        document.getElementById('moreInfos').innerHTML += html
+
+        let themeSections = document.querySelectorAll('.theme-section')
+
+        requestAnimationFrame(() => {
+          themeSections.forEach((section) => {
+            section.classList.add("visible")
+
+  
+          })
+        })
+        
+        document.getElementById('year').innerHTML = new Date(snappedTime).getFullYear()
   });
 //---------------- DOWNLOADING THE INTERVIEW DATA-------------//
   document.getElementById('export').addEventListener('click', async function () {
@@ -1007,16 +1095,28 @@ viewSummaryBtn.addEventListener('click', toggleSummary);
 
 closeSummaryBtn.addEventListener('click', toggleSummary);  
 
-const zoomInBtn = document.getElementById('zoom-in') 
-const zoomOutBtn = document.getElementById('zoom-out') 
+const zoomInBtns = document.querySelectorAll('#zoom-in') 
+const zoomOutBtns = document.querySelectorAll('#zoom-out') 
 
-zoomInBtn?.addEventListener('click', () => {
-  timeline.zoomIn(0.5)
-});
+zoomInBtns.forEach((btn) => {
+  btn.addEventListener('click', () => {
+    timeline.zoomIn(0.5)
+  });
+})
 
-zoomOutBtn?.addEventListener('click', () => {
-  timeline.zoomOut(0.5)
-});
+zoomOutBtns.forEach((btn) => {
+  btn.addEventListener('click', () => {
+    timeline.zoomOut(0.5)
+  });
+})
+
+// zoomInBtn?.addEventListener('click', () => {
+//   timeline.zoomIn(0.5)
+// });
+
+// zoomOutBtn?.addEventListener('click', () => {
+//   timeline.zoomOut(0.5)
+// });
 
 function move(percentage) {
   var range = timeline.getWindow();
@@ -1028,15 +1128,19 @@ function move(percentage) {
   });
 }
 
-const moveBackwardsBtn = document.getElementById('move-backwards') 
-const moveForwardsBtn = document.getElementById('move-forwards') 
+const moveBackwardsBtns = document.querySelectorAll('#move-backwards') 
+const moveForwardsBtns = document.querySelectorAll('#move-forwards') 
 
-moveBackwardsBtn?.addEventListener('click', () => {
-  move(0.5)
-});
-moveForwardsBtn?.addEventListener('click', () => {
-  move(-0.5)
-});
+moveBackwardsBtns.forEach((btn) => {
+  btn.addEventListener('click', () => {
+    move(0.5)
+  });
+})
+moveForwardsBtns.forEach((btn) => {
+  btn.addEventListener('click', () => {
+    move(-0.5)
+  });
+})
 
 // Exposer timeline et les datasets pour les autres fichiers
 export { timeline, items, groups, handleDragStart, handleDragEnd, toggleLandmark };

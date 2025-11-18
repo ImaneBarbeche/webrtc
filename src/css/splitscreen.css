@@ -68,18 +68,18 @@
     }
 }
 
-.card {
+/* .card { */
     /* border: 2px solid black;
     border-radius: 5px;
     width: fit-content;
     padding: 15px;
     float: left;
     margin-left: 10px; */
-    padding: 1rem;
+    /* padding: 1rem;
     background-color: var(--primary-light);
     border-radius: 1.875rem;
 
-}
+} */
 
 .input_list > p{
     float: left;
@@ -292,12 +292,12 @@
  
     &::before {
         content: "";
-        background-color: var(--label-color);
+        background-color: color-mix(in srgb, transparent 20%, var(--label-color));
         /* background-color: red; */
         /* background-color: color-mix(in srgb, var(--label-color), transparent 90%); */
         /* background: transparent; */
         /* filter: drop-shadow(0rem 0.2rem 0.3rem color-mix(in srgb, var(--label-color), var(--primary-dark) 10%)); */
-        filter: drop-shadow(0rem 0.2rem 0.3rem var(--label-color));
+        filter: drop-shadow(0rem 0.2rem 0.35rem var(--label-color));
         /* box-shadow: 0rem 0.2rem 0.2rem -0.2rem red; */
         border-radius: inherit;
         /* box-shadow: 0rem 0.1rem 2px 0rem red, 0rem 0.7rem 0px -1.9rem blue, 0rem 0.7rem 2px -0.3rem yellow, 0rem 1.3rem 0px -0.5rem green, 0rem 1.3rem 2px -0.5rem purple; */
@@ -308,7 +308,7 @@
         position: absolute;
         right: 50%;
         transform: translateX(50%);
-        width: 80%;
+        width: calc(100% - 1.5rem);
         /* filter: blur(0.3rem) saturate(1.1); */
         
         z-index: -100 !important;
@@ -404,7 +404,8 @@
 }
 
 .highlight {
-    filter: saturate(1.4) brightness(0.98);
+    filter: saturate(2.2) brightness(0.98);
+    filter: saturate(2.2) brightness(1.02);
     /* filter: saturate(1.4) brightness(0.98) drop-shadow(0rem 0.1rem 0.2rem color-mix(in srgb, var(--label-color), var(--primary-dark) 10%)); */
     
     &::before, &::after {
