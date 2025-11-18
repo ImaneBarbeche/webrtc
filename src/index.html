@@ -211,14 +211,19 @@
 
       <div class="split">
         <!-- Left side-->
-        <div id="questionnaire">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+          <div id="questionnaire">
+          <div class="questionnaire-header">
             <h2 style="margin: 0;">🏠 Migratoire</h2>
-            <button id="resetButton" title="Réinitialiser le questionnaire">
-              🗑️
-            </button>
           </div>
           <div id="questions"></div>
+          <!-- Footer actions: kept at the end of the questionnaire -->
+          <div class="questionnaire-footer" style="margin-top:12px; display:flex; gap:8px; align-items:center; justify-content:flex-end;">
+            <div id="questionnaire-actions">
+              <button id="export">Export</button>
+              <button id="load">Load</button>
+            </div>
+            <button id="resetButton" title="Réinitialiser le questionnaire">🗑️</button>
+          </div>
         </div>
 
         <!-- Right side-->
@@ -226,8 +231,6 @@
           <div id="canvas">
             <!-- <h2>Calendrier de vie</h2> -->
             <div id="timeline"></div>
-            <button id="export">Export</button>
-            <button id="load">Load</button>
           </div>
           
           <!-- <div id="bricks">
