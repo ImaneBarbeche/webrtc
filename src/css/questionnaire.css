@@ -54,6 +54,7 @@
   transition: all 0.3s ease;
   font-size: 1rem;
   margin-top: 10px;
+  margin-right: 10px;
 }
 
 .question button:hover {
