@@ -437,6 +437,20 @@ document.addEventListener('DOMContentLoaded', function() {
     // Exporter la timeline globalement
     window.timeline = timeline;
 
+    // Si des items sont ajoutés après l'initialisation (ex: via WebRTC),
+    // s'assurer que la timeline s'ajuste automatiquement pour les afficher.
+    try {
+      items.on && items.on('add', function () {
+        try { timeline.fit(); } catch (e) {}
+        try { timeline.redraw(); } catch (e) {}
+      });
+      items.on && items.on('update', function () {
+        try { timeline.redraw(); } catch (e) {}
+      });
+    } catch (e) {
+      console.warn('[LifeStories] cannot attach items listeners', e);
+    }
+
     // Forcer un redraw pour appliquer les styles CSS
     timeline.redraw();
 
@@ -654,7 +668,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 //---------------- DOWNLOADING THE INTERVIEW DATA-------------//
-  document.getElementById('export').addEventListener('click', function () {
+  document.getElementById('export').addEventListener('click', async function () {
     var data = items.get({
         type: {
         start: 'ISODate',
@@ -668,23 +682,264 @@ document.addEventListener('DOMContentLoaded', function() {
     // Créer un Blob
     const blob = new Blob([jsonString], { type: 'application/json' });
 
-    // Créer une URL temporaire
-    const url = URL.createObjectURL(blob);
+    // Nom du fichier
+    const filename = `timeline-data-${new Date().toISOString().split('T')[0]}.json`;
 
-    // Créer et déclencher le téléchargement
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `timeline-data-${new Date().toISOString().split('T')[0]}.json`;
-    document.body.appendChild(link); // ajouter le lien à la page (invisible)
-    link.click(); // simuler un click dessus
-    document.body.removeChild(link); // retirer le lien
+    // Helper: convertir Blob -> base64
+    async function blobToBase64(b) {
+      const arrayBuffer = await b.arrayBuffer();
+      const bytes = new Uint8Array(arrayBuffer);
+      let binary = '';
+      const chunkSize = 0x8000;
+      for (let i = 0; i < bytes.length; i += chunkSize) {
+        const slice = bytes.subarray(i, i + chunkSize);
+        binary += String.fromCharCode.apply(null, slice);
+      }
+      return btoa(binary);
+    }
 
-    // Nettoyer - libérer la mémoire
-    URL.revokeObjectURL(url);
+    // 1) Essayer Capacitor native (Filesystem + Share) si disponible
+    try {
+      const isCapacitor = typeof window !== 'undefined' && window.Capacitor;
+      if (isCapacitor) {
+        let Filesystem, Share, Directory;
+        // Preferer window.Capacitor.Plugins quand exposé
+        if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Filesystem) {
+          Filesystem = window.Capacitor.Plugins.Filesystem;
+          Share = window.Capacitor.Plugins.Share || window.Capacitor.Plugins.SharePlugin || null;
+          // Directory peut ne pas être exposé sous forme d'objet
+          Directory = window.Capacitor.Plugins.Filesystem.Directory || (window.Capacitor.Plugins.Filesystem && window.Capacitor.Plugins.Filesystem.Directory) || null;
+        } else {
+          // Fallback import dynamique (peut échouer en web)
+          try {
+            const fs = await import('@capacitor/filesystem');
+            const sh = await import('@capacitor/share');
+            Filesystem = fs.Filesystem;
+            Share = sh.Share;
+            Directory = fs.Directory || (fs.Filesystem && fs.Filesystem.Directory) || null;
+          } catch (e) {
+            Filesystem = null;
+            Share = null;
+            Directory = null;
+          }
+        }
+
+        if (Filesystem && Share) {
+          try {
+            const base64 = await blobToBase64(blob);
+
+            // Essayer d'écrire dans Directory.Data sous un dossier LifeStories (préférable sur Android)
+            const folder = 'LifeStories';
+            let wrote = false;
+            let writtenDir = null;
+            try {
+                if (Directory && Directory.Data) {
+                try {
+                  await Filesystem.mkdir({ path: folder, directory: Directory.Data, recursive: true });
+                } catch (mkdirErr) {
+                  console.warn('[LifeStories] mkdir (Data) warning/ignored:', mkdirErr);
+                }
+                await Filesystem.writeFile({ path: `${folder}/${filename}`, data: base64, directory: Directory.Data });
+                wrote = true;
+                writtenDir = 'DATA';
+              } else if (Directory && Directory.Documents) {
+                try {
+                  await Filesystem.mkdir({ path: folder, directory: Directory.Documents, recursive: true });
+                } catch (mkdirErr) {
+                  console.warn('[LifeStories] mkdir (Documents) warning/ignored:', mkdirErr);
+                }
+                await Filesystem.writeFile({ path: `${folder}/${filename}`, data: base64, directory: Directory.Documents });
+                wrote = true;
+                writtenDir = 'DOCUMENTS';
+              } else {
+                // dernier recours : écrire sans directory
+                    const targetPath = `${folder}/${filename}`;
+                    try {
+                      // Preferred: use writeFile with recursive:true into Directory.Data
+                      if (Directory && Directory.Data) {
+                        try {
+                          await Filesystem.writeFile({ path: targetPath, data: base64, directory: Directory.Data, recursive: true });
+                          wrote = true;
+                          writtenDir = 'DATA';
+                        } catch (err) {
+                          console.warn('[LifeStories] write to DATA failed, will try DOCUMENTS', err);
+                        }
+                      }
+
+                      // Fallback: try Directory.Documents
+                      if (!wrote && Directory && Directory.Documents) {
+                        try {
+                          await Filesystem.writeFile({ path: targetPath, data: base64, directory: Directory.Documents, recursive: true });
+                          wrote = true;
+                          writtenDir = 'DOCUMENTS';
+                        } catch (err) {
+                          console.warn('[LifeStories] write to DOCUMENTS failed, will try without directory', err);
+                        }
+                      }
+
+                      // Last resort: write without directory
+                      if (!wrote) {
+                        try {
+                          await Filesystem.writeFile({ path: filename, data: base64 });
+                          wrote = true;
+                          writtenDir = null;
+                        } catch (err) {
+                          console.warn('[LifeStories] write without directory failed', err);
+                        }
+                      }
+                    } catch (outerErr) {
+                      console.warn('[LifeStories] unexpected error during write attempts', outerErr);
+                    }
+
+                    if (wrote) {
+                      // essayer d'obtenir une URI puis partager
+                      let uriResult = null;
+                      try {
+                        if (writtenDir) {
+                            // writtenDir is a string 'DATA'|'DOCUMENTS'
+                            try { uriResult = await Filesystem.getUri({ directory: writtenDir, path: targetPath }); } catch(e) { uriResult = null; }
+                          } else {
+                            try { uriResult = await Filesystem.getUri({ path: filename }); } catch (e) { uriResult = null; }
+                          }
+                      } catch (uriErr) {
+                        console.warn('[LifeStories] Capacitor getUri failed', uriErr);
+                        uriResult = null;
+                      }
+              
+                      try {
+                        if (uriResult && uriResult.uri) {
+                          await Share.share({ title: 'Export Timeline', url: uriResult.uri, dialogTitle: 'Enregistrer / partager le JSON' });
+                        } else {
+                          // Si pas d'URI, essayer de partager le contenu comme texte (fallback)
+                          await Share.share({ title: 'Export Timeline', text: jsonString });
+                        }
+                        try { utils.prettyAlert('Export', 'Fichier partagé / sauvegardé (native)', 'success', 1400); } catch(e){}
+                        console.log('[LifeStories] wrote file to', writtenDir ? `${writtenDir}/${folder}/${filename}` : filename);
+                        return; // export natif réussi
+                      } catch (shareErr) {
+                        console.warn('[LifeStories] Capacitor share failed', shareErr);
+                        // continuer vers fallback web
+                      }
+                    }
+                wrote = true;
+                writtenDir = null;
+              }
+            } catch (writeErr) {
+              console.warn('[LifeStories] Capacitor write failed', writeErr);
+            }
+
+            if (wrote) {
+              // essayer d'obtenir une URI puis partager
+              let uriResult = null;
+              try {
+                // writtenDir holds 'DATA' or 'DOCUMENTS' or null
+                if (writtenDir === 'DATA' || writtenDir === 'DOCUMENTS') {
+                  try { uriResult = await Filesystem.getUri({ directory: writtenDir, path: `${folder}/${filename}` }); } catch(e) { uriResult = null; }
+                } else {
+                  try { uriResult = await Filesystem.getUri({ path: filename }); } catch (e) { uriResult = null; }
+                }
+              } catch (uriErr) {
+                console.warn('[LifeStories] Capacitor getUri failed', uriErr);
+                uriResult = null;
+              }
+
+              try {
+                if (uriResult && uriResult.uri) {
+                  await Share.share({ title: 'Export Timeline', url: uriResult.uri, dialogTitle: 'Enregistrer / partager le JSON' });
+                } else {
+                  // Si pas d'URI, essayer de partager le contenu comme texte (fallback)
+                  await Share.share({ title: 'Export Timeline', text: jsonString });
+                }
+                try { utils.prettyAlert('Export', 'Fichier partagé / sauvegardé (native)', 'success', 1400); } catch(e){}
+                console.log('[LifeStories] wrote file to', writtenDir ? `${writtenDir}/${folder}/${filename}` : filename);
+                return; // export natif réussi
+              } catch (shareErr) {
+                console.warn('[LifeStories] Capacitor share failed', shareErr);
+                // continuer vers fallback web
+              }
+            }
+          } catch (errCap) {
+            console.warn('[LifeStories] Capacitor native export failed', errCap);
+            // continuer vers fallback
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('[LifeStories] Capacitor detection/import error', e);
+    }
+
+    // 2) Essayer Web Share API (si supporte le partage de fichiers)
+    try {
+      if (navigator && navigator.canShare) {
+        const file = new File([blob], filename, { type: 'application/json' });
+        if (navigator.canShare({ files: [file] })) {
+          try {
+            await navigator.share({ files: [file], title: 'Export Timeline' });
+            try { utils.prettyAlert('Export', 'Fichier partagé (Web Share)', 'success', 1400); } catch(e){}
+            return;
+          } catch (shareErr) {
+            console.warn('[LifeStories] navigator.share failed', shareErr);
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('[LifeStories] Web Share API check failed', e);
+    }
+
+    // 3) Fallback: téléchargement par <a> (comportement historique)
+    try {
+      // Créer une URL temporaire
+      const url = URL.createObjectURL(blob);
+
+      // Créer et déclencher le téléchargement
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link); // ajouter le lien à la page (invisible)
+      link.click(); // simuler un click dessus
+      document.body.removeChild(link); // retirer le lien
+
+      // Nettoyer - libérer la mémoire
+      URL.revokeObjectURL(url);
+      try { utils.prettyAlert('Export', 'Téléchargement démarré', 'success', 1200); } catch(e){}
+    } catch (finalErr) {
+      console.error('[LifeStories] final export fallback failed', finalErr);
+      try { utils.prettyAlert('Export', 'Impossible d\'exporter le fichier', 'error', 2000); } catch(e){}
+    }
   });
 
   document.getElementById('load').addEventListener('click', function () {
-    test_items.forEach(i => items.add(i))
+    try {
+      // If WebRTC is available and connected, broadcast the load to peers
+      if (window.webrtcSync && window.webrtcSync.isActive && window.webrtcSync.isActive()) {
+        try {
+          console.log('[LifeStories] sending LOAD_ITEMS to peer');
+          window.webrtcSync.sendMessage({ type: 'LOAD_ITEMS', items: test_items });
+          try { utils.prettyAlert('Load', 'Envoi des items au pair', 'info', 1200); } catch(e){}
+          return;
+        } catch (sendErr) {
+          console.warn('[LifeStories] send LOAD_ITEMS failed, falling back to local add', sendErr);
+        }
+      }
+
+      // Fallback: add locally (avoid duplicates)
+      test_items.forEach(i => {
+        try {
+          if (items.get(i.id)) {
+            const newId = `${i.id}_${Date.now()}`;
+            const clone = Object.assign({}, i, { id: newId });
+            items.add(clone);
+          } else {
+            items.add(i);
+          }
+        } catch (e) {
+          console.warn('[LifeStories] failed to add test item', e, i);
+        }
+      });
+      try { utils.prettyAlert('Load', 'Items ajoutés localement', 'success', 1200); } catch(e){}
+    } catch (err) {
+      console.error('[LifeStories] unexpected error in load handler', err);
+    }
   });
 
   }, 100); // Fin du setTimeout

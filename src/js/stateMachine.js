@@ -575,7 +575,20 @@ export const surveyMachine = createMachine({
         }
         
         if(params){
-          return modifierEpisode(context.lastEpisode.id, params);
+          // Normaliser des tokens spéciaux (ex: 'timeline_end', 'timeline_init')
+          const normalized = Object.assign({}, params);
+          try {
+            if (normalized.end === 'timeline_end') {
+              normalized.end = (window.timeline && window.timeline.options && window.timeline.options.end) ? window.timeline.options.end : new Date();
+            }
+            if (normalized.start === 'timeline_init') {
+              normalized.start = (window.timeline && window.timeline.options && window.timeline.options.start) ? window.timeline.options.start : new Date();
+            }
+          } catch (e) {
+            console.warn('Erreur lors de la normalisation des params de modifyCalendarEpisode', e, params);
+          }
+
+          return modifierEpisode(context.lastEpisode.id, normalized);
         }
         
         // Parser les modifications pour convertir âge→année si nécessaire

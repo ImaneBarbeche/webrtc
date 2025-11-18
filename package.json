@@ -20,6 +20,7 @@
     "@capacitor/filesystem": "^7.1.4",
     "@capacitor/share": "^7.0.2",
     "@capacitor/splash-screen": "latest",
+    "lucide": "^0.554.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "sweetalert2": "^11.24.1",

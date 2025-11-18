@@ -33,7 +33,45 @@ function handleRemoteMessage(message) {
           end: i.end ? new Date(i.end) : undefined
         }));
         // items est importé depuis timeline.js
-        items.add(parsed);
+        // Ajouter en évitant les doublons et forcer un fit/redraw si la timeline est prête
+        const toAdd = [];
+        parsed.forEach(i => {
+          try {
+            if (items.get(i.id)) {
+              // Générer un id unique si conflit
+              const newId = `${i.id}_${Date.now()}`;
+              toAdd.push(Object.assign({}, i, { id: newId }));
+            } else {
+              toAdd.push(i);
+            }
+          } catch (e) {
+            console.warn('Erreur vérif item existant', e, i);
+            toAdd.push(i);
+          }
+        });
+
+        if (toAdd.length) {
+          try {
+            // Si la timeline est déjà initialisée, ajouter et ajuster la vue
+            if (window.timeline && typeof window.timeline.fit === 'function') {
+              items.add(toAdd);
+              try { window.timeline.redraw(); } catch(e){}
+              try { window.timeline.fit(); } catch(e){}
+            } else {
+              // Persister temporairement pour traitement lorsque la timeline sera prête
+              try {
+                const existing = JSON.parse(localStorage.getItem('lifestories_pending_load_items') || '[]');
+                const merged = existing.concat(toAdd);
+                localStorage.setItem('lifestories_pending_load_items', JSON.stringify(merged));
+              } catch (e) {
+                // si localStorage indisponible, essayer d'ajouter directement (peut échouer si timeline non initialisée)
+                try { items.add(toAdd); } catch (err) { console.warn('Impossible d\'ajouter les items (timeline non prête)', err); }
+              }
+            }
+          } catch (e) {
+            console.error('Erreur lors de l\'ajout des items distants', e);
+          }
+        }
       }
     } catch (e) {
       console.error('Erreur lors du chargement des items distants', e);
@@ -158,6 +196,22 @@ document.addEventListener("DOMContentLoaded", async () => {
         // Afficher les réponses précédentes AVANT la question actuelle
         displayPreviousAnswers();
         renderQuestion(currentState);
+        // Si des items ont été stockés en attente (LOAD_ITEMS arrivés avant que la timeline
+        // ait été initialisée), les ajouter maintenant et ajuster la timeline.
+        try {
+          const pendingRaw = localStorage.getItem('lifestories_pending_load_items');
+          if (pendingRaw) {
+            const pending = JSON.parse(pendingRaw);
+            if (pending && pending.length) {
+              try { items.add(pending); } catch(e) { console.warn('items.add pending failed', e); }
+              try { window.timeline && window.timeline.redraw && window.timeline.redraw(); } catch(e){}
+              try { window.timeline && window.timeline.fit && window.timeline.fit(); } catch(e){}
+              localStorage.removeItem('lifestories_pending_load_items');
+            }
+          }
+        } catch (e) {
+          console.warn('Erreur en traitant les pending_load_items', e);
+        }
     }, 0);
 
     /**
@@ -429,10 +483,14 @@ document.addEventListener("DOMContentLoaded", async () => {
                 let eventData = { type: eventType };
                 eventData[eventKey] = input.value;
                 sendEvent(eventData); // Utiliser sendEvent au lieu de surveyService.send
-                // Retiré : désactivation des inputs
-                // event.target.closest('.question').querySelectorAll('input').forEach(input => {
-                //   input.disabled = true; 
-                // });
+                // Désactiver les inputs et boutons de cette question pour éviter les doubles soumissions
+                try {
+                  if (isHost) {
+                    const controls = questionDiv.querySelectorAll('input, button, textarea, select');
+                    controls.forEach(c => c.disabled = true);
+                    // (global buttons left enabled) only per-question controls are disabled
+                  }
+                } catch (e) { console.warn('Impossible de désactiver les contrôles', e); }
               }
             });
             questionDiv.appendChild(input);
@@ -447,10 +505,14 @@ document.addEventListener("DOMContentLoaded", async () => {
               let eventData = { type: choice.toUpperCase() };
               eventData[eventKey] = choice;
               sendEvent(eventData); // Utiliser sendEvent au lieu de surveyService.send
-              // Retiré : désactivation des boutons
-              // event.target.closest('.question').querySelectorAll('button').forEach(btn => {
-              //   btn.disabled = true; 
-              // });
+              // Désactiver les contrôles de cette question pour éviter double envoi
+              try {
+                if (isHost) {
+                  const controls = questionDiv.querySelectorAll('input, button, textarea, select');
+                  controls.forEach(c => c.disabled = true);
+                  // (global buttons left enabled) only per-question controls are disabled
+                }
+              } catch (e) { console.warn('Impossible de désactiver les contrôles', e); }
             });
             questionDiv.appendChild(button);
             });
@@ -495,7 +557,14 @@ document.addEventListener("DOMContentLoaded", async () => {
             let eventData = { type: eventType };
             eventData[eventKey] = list_communes_not_sorted;
             sendEvent(eventData);
-            // Retiré : nextQBtn.disabled = true;
+            // Désactiver les contrôles (inputs + boutons) pour éviter le double envoi
+            try {
+              if (isHost) {
+                const controls = questionDiv.querySelectorAll('input, button, textarea, select');
+                controls.forEach(c => c.disabled = true);
+                // (global buttons left enabled) only per-question controls are disabled
+              }
+            } catch (e) { console.warn('Impossible de désactiver les contrôles', e); }
           });
       
           questionDiv.appendChild(nextQBtn);

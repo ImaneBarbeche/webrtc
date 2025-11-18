@@ -62,7 +62,7 @@
 }
 
 #resetButton {
-  display: none;
+  /* display: none; */
   padding: 8px 16px;
   background: #dc3545;
   color: white;
