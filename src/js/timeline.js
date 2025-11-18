@@ -741,17 +741,6 @@ document.addEventListener('DOMContentLoaded', function() {
           })
         })
         
-        document.getElementById('moreInfos').innerHTML += html
-
-        let themeSections = document.querySelectorAll('.theme-section')
-
-        requestAnimationFrame(() => {
-          themeSections.forEach((section) => {
-            section.classList.add("visible")
-
-  
-          })
-        })
         
         document.getElementById('year').innerHTML = new Date(snappedTime).getFullYear()
   });
