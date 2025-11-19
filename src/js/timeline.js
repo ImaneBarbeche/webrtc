@@ -51,6 +51,21 @@ groupsData.forEach(group => {
 const items = new vis.DataSet();
 const groups = new vis.DataSet(groupsData);
 
+// Persister automatiquement les items dès qu'ils changent (utile si la timeline
+// n'est pas initialisée sur la page où les items sont ajoutés — ex: questionnaire)
+try {
+  if (items && typeof items.on === 'function') {
+    const persistItems = () => {
+      try { localStorage.setItem('lifestories_items', JSON.stringify(items.get())); } catch (e) { /* silent */ }
+    };
+    items.on('add', persistItems);
+    items.on('update', persistItems);
+    items.on('remove', persistItems);
+  }
+} catch (e) {
+  console.warn('[LifeStories] failed to attach persistence listeners to items', e);
+}
+
 // Preactiver silencieusement certains landmarks (Commune=13, Diplômes=23, Postes=31) - provisoire
 (function activateInitialLandmarks() {
   const initialLandmarks = [13, 23, 31];
