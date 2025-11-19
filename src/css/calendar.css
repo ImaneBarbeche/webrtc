@@ -76,6 +76,18 @@
         background-color: var(--primary-grey);
         box-shadow: 0 0.25rem .625rem var(--secondary-grey);
     } */
+    h2 {
+        /* for the icon */
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+
+            svg {
+            height: 2rem;
+            width: 2rem
+        }
+    }
+    
 }
 
     .btn-wrapper {
@@ -302,6 +314,7 @@ button:hover {
 }
 
 .secondary-button, .btn-group {
+    color: var(--primary-dark);
     padding: 0.5rem;
     padding: 1rem;
     border-radius: 2rem;
@@ -310,14 +323,32 @@ button:hover {
     box-shadow: 0 0.25rem .625rem var(--secondary-grey);
 
     &:has(button) {
-        padding: 0.5rem;
+        padding: 0rem;
 
         button {
-            padding: 0.5rem;
+            padding: 0.7rem;
         }
     }
 }
 
+.btn-group {
+    display: flex;
+    gap: 0.5rem;
+}
+
 .invisible-button {
     padding: 1rem;
+}
+
+.button-with-icon {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.7rem;
+}
+
+
+[data-lucide] {
+  color: var(--primary-dark);
+  stroke-width: 1.5;
 }

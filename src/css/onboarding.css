@@ -71,7 +71,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #333;
+  color: var(--primary-dark);
   background-color: var(--primary-beige);
 }
 
