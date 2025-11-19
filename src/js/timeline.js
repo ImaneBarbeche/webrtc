@@ -689,7 +689,7 @@ document.addEventListener('DOMContentLoaded', function() {
           const totalMatches = Object.values(themeData).reduce((sum, t) => sum + (t.items?.length || 0), 0);
 
           if(totalMatches <= 0) {
-            html += `<p class="no-info">Aucune information disponible pour l'anné sélectionnée. Veuillez en sélectionner une autre.</p>`
+            html += `<p class="no-info">Aucune information disponible pour l'année sélectionnée. Veuillez en sélectionner une autre.</p>`
             let pourApres = `Selectioner une date ou utiliser la bar pour naviger entre les annés`
           }
 
