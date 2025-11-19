@@ -1,4 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { House, NotebookText, CalendarRange, Columns2, PanelLeft, PanelRight } from 'lucide-react';
+
 
 function Sidebar() {
   const [isOpen, setIsOpen] = useState(true);
@@ -113,13 +115,22 @@ function Sidebar() {
       <div className="sidebar-header">
         <img src="./assets/imgs/logo.png" alt="Logo" className="sidebar-logo" />
         <h3>LifeStories</h3>
-        <button className="sidebar-toggle" onClick={() => setIsOpen(!isOpen)}>
-          <img
+        {/* <button className="sidebar-toggle" onClick={() => setIsOpen(!isOpen)}> */}
+          {/* <img
             src={isOpen ? "./assets/icon/sidebar-icon-open.svg" : "./assets/icon/sidebar-icon-closed.svg"}
             alt="Toggle"
             className="toggle-icon-svg"
-          />
-        </button>
+          /> */}
+          {/* <PanelLeft />
+          <PanelRight /> */}
+          <button className="sidebar-toggle" onClick={() => setIsOpen(!isOpen)}>
+            {isOpen ? (
+              <PanelRight strokeWidth={1.5} />
+            ) : (
+              <PanelLeft strokeWidth={1.5} />
+            )}
+          </button>
+        {/* </button> */}
       </div>
 
       {isOpen && <div className="sidebar-divider"></div>}
@@ -131,7 +142,9 @@ function Sidebar() {
             onClick={() => handleNavigation('dashboard')}
             title="Dashboard"
           >
-            <span className="nav-icon">📊</span>
+            <span className="nav-icon">
+              <House strokeWidth={1.5}/>
+            </span>
             {isOpen && <span className="nav-text">Dashboard</span>}
           </button>
 
@@ -140,7 +153,9 @@ function Sidebar() {
             onClick={() => handleNavigation('questionnaire')}
             title="Questionnaire"
           >
-            <span className="nav-icon">📝</span>
+            <span className="nav-icon">
+              <NotebookText  strokeWidth={1.5}/>
+              </span>
             {isOpen && <span className="nav-text">Questionnaire</span>}
           </button>
 
@@ -149,7 +164,9 @@ function Sidebar() {
             onClick={() => handleNavigation('calendar')}
             title="Calendrier & Synthèse"
           >
-            <span className="nav-icon">📅</span>
+            <span className="nav-icon">
+              <CalendarRange  strokeWidth={1.5}/>
+              </span>
             {isOpen && <span className="nav-text">Calendrier</span>}
           </button>
 
@@ -158,7 +175,9 @@ function Sidebar() {
             onClick={() => handleNavigation('split')}
             title="Vue Divisée"
           >
-            <img src="./assets/icon/split-view-icon.svg" alt="Split" className="nav-icon-img" />
+            <span className="nav-icon">
+                <Columns2  strokeWidth={1.5}/>
+              </span>
             {isOpen && <span className="nav-text">Split View</span>}
           </button>
         </nav>

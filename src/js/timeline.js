@@ -2,7 +2,7 @@ import * as utils from "./utils.js"
 import state from "./state.js"
 import { ajouterEpisode } from "./episodes.js";
 import { test_items } from "./dataset.js";
-
+// import { createIcons } from 'lucide';
 /**
  *****************************************************************************************************
  * timeline.js gère l'initialisation, le rendu graphique et les interactions possibles du calendrier *
@@ -60,8 +60,8 @@ const groups = new vis.DataSet(groupsData);
 
     // Marquer comme landmark et ajouter une icône visuelle si nécessaire
     g.isLandmark = true;
-    if (!String(g.content).includes('📌')) {
-      g.content = '📌 ' + (g.content || '');
+    if (!String(g.content).includes('📍')) {
+      g.content = '📍 ' + (g.content || '');
     }
     groups.update(g);
 
@@ -120,12 +120,15 @@ const options = {
     xss:{
         filterOptions:{
             allowList: {
-            span: ['class'],
-            p: ['class'],
-            b: [],
-            br:[],
-            div: ['class','title'],
-            img: ['src','alt','class','width','height']
+              span: ['class'],
+              p: ['class'],
+              b: [],
+              br:[],
+              div: ['class','title'],
+              img: ['src','alt','class','width','height'],
+              i: ['data-lucide'],  // allow data-lucide
+              svg: ['width', 'height', 'viewBox', 'xmlns', 'class'],
+              path: ['d', 'fill', 'stroke']
             }
         }
     },
@@ -434,8 +437,16 @@ document.addEventListener('DOMContentLoaded', function() {
   setTimeout(() => {
     timeline = new vis.Timeline(container, items, groups, options);
     
-    // Exporter la timeline globalement
-    window.timeline = timeline;
+    // // Exporter la timeline globalement
+    // window.timeline = timeline;
+
+    // // loading icons
+    // createIcons();
+  
+    // // After any group updates, call createIcons again
+    // groups.on('update', () => {
+    //   setTimeout(() => createIcons(), 50);
+    // });
 
     // Si des items sont ajoutés après l'initialisation (ex: via WebRTC),
     // s'assurer que la timeline s'ajuste automatiquement pour les afficher.
@@ -689,7 +700,7 @@ document.addEventListener('DOMContentLoaded', function() {
           const totalMatches = Object.values(themeData).reduce((sum, t) => sum + (t.items?.length || 0), 0);
 
           if(totalMatches <= 0) {
-            html += `<p class="no-info">Aucune information disponible pour l'anné sélectionnée. Veuillez en sélectionner une autre.</p>`
+            html += `<p class="no-info">Aucune information disponible pour l'année sélectionnée. Veuillez en sélectionner une autre.</p>`
             let pourApres = `Selectioner une date ou utiliser la bar pour naviger entre les annés`
           }
 
