@@ -329,12 +329,13 @@ header h1 {
 }
 
 .continue-btn {
-  background: black;
-  color: white;
+  background: var(--primary-dark);
+  color: var(--primary-beige);
   padding: 12px 24px;
   border: none;
   border-radius: 8px;
-  font-weight: 600;
+  border-radius: 2rem;
+  /* font-weight: 600; */
   cursor: pointer;
   transition: all 0.3s ease;
   font-size: 1rem;
@@ -806,10 +807,11 @@ background-color: #fee7b76e;
     bottom: 40px;
     right: 20px;
     padding: 10px 20px;
-    background-color: #060606;
-    color: white;
+    background-color: var(--primary-dark);
+    color: var(--primary-beige);
     border: none;
     border-radius: 5px;
+    border-radius: 2rem;
     cursor: pointer;
     display: none; /* Caché par défaut */
 }

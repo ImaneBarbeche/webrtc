@@ -48,12 +48,12 @@
    ======================================== */
 
 .question button {
-  background: black;
-  color: white;
+  background: var(--primary-dark);
+  color: var(--primary-beige);
   padding: 8px 12px;
   border: none;
-  border-radius: 6px;
-  font-weight: 600;
+  border-radius: 2rem;
+  /* font-weight: 600; */
   cursor: pointer;
   transition: all 0.2s ease;
   font-size: 0.9rem;
@@ -97,12 +97,12 @@
 
 #export,
 #load {
-  background: black;
-  color: white;
+  background-color: var(--primary-dark);
+  color: var(--primary-beige);
   padding: 8px 12px;
   border: none;
   border-radius: 6px;
-  font-weight: 600;
+  /* font-weight: 600; */
   cursor: pointer;
   transition: all 0.2s ease;
   font-size: 0.95rem;
@@ -111,6 +111,8 @@
   justify-content: center;
   box-sizing: border-box;
   max-width: 100%;
+  padding: 0.5rem 1rem;
+  border-radius: 2rem;
 }
 
 #export:hover,
