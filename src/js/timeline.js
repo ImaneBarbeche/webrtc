@@ -56,11 +56,22 @@ const groups = new vis.DataSet(groupsData);
 try {
   if (items && typeof items.on === 'function') {
     const persistItems = () => {
-      try { localStorage.setItem('lifestories_items', JSON.stringify(items.get())); } catch (e) { /* silent */ }
+      try {
+        const all = items.get();
+        localStorage.setItem('lifestories_items', JSON.stringify(all));
+      } catch (e) { console.warn('[LifeStories] persistItems failed', e); }
     };
-    items.on('add', persistItems);
-    items.on('update', persistItems);
-    items.on('remove', persistItems);
+
+    // Log and persist on change
+    items.on('add', function(added, senderId) {
+      persistItems();
+    });
+    items.on('update', function(updated, senderId) {
+      persistItems();
+    });
+    items.on('remove', function(removed, senderId) {
+      persistItems();
+    });
   }
 } catch (e) {
   console.warn('[LifeStories] failed to attach persistence listeners to items', e);
@@ -455,11 +466,11 @@ document.addEventListener('DOMContentLoaded', function() {
     // Si des items sont ajoutés après l'initialisation (ex: via WebRTC),
     // s'assurer que la timeline s'ajuste automatiquement pour les afficher.
     try {
-      items.on && items.on('add', function () {
+      items.on && items.on('add', function (added) {
         try { timeline.fit(); } catch (e) {}
         try { timeline.redraw(); } catch (e) {}
       });
-      items.on && items.on('update', function () {
+      items.on && items.on('update', function (updated) {
         try { timeline.redraw(); } catch (e) {}
       });
     } catch (e) {
@@ -637,11 +648,8 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
      let existingThemeSections = document.querySelectorAll('.theme-section')
-          // console.log("sections")
-          // console.log(existingThemeSections)
               
           // if(existingThemeSections.length) {
-          //   console.log("true")
           //   requestAnimationFrame(() => {
           //     requestAnimationFrame(() => {
           //         existingThemeSections.forEach((section) => {
@@ -906,7 +914,6 @@ document.addEventListener('DOMContentLoaded', function() {
                           await Share.share({ title: 'Export Timeline', text: jsonString });
                         }
                         try { utils.prettyAlert('Export', 'Fichier partagé / sauvegardé (native)', 'success', 1400); } catch(e){}
-                        console.log('[LifeStories] wrote file to', writtenDir ? `${writtenDir}/${folder}/${filename}` : filename);
                         return; // export natif réussi
                       } catch (shareErr) {
                         console.warn('[LifeStories] Capacitor share failed', shareErr);
@@ -943,7 +950,6 @@ document.addEventListener('DOMContentLoaded', function() {
                   await Share.share({ title: 'Export Timeline', text: jsonString });
                 }
                 try { utils.prettyAlert('Export', 'Fichier partagé / sauvegardé (native)', 'success', 1400); } catch(e){}
-                console.log('[LifeStories] wrote file to', writtenDir ? `${writtenDir}/${folder}/${filename}` : filename);
                 return; // export natif réussi
               } catch (shareErr) {
                 console.warn('[LifeStories] Capacitor share failed', shareErr);
@@ -1002,33 +1008,66 @@ document.addEventListener('DOMContentLoaded', function() {
 
   document.getElementById('load').addEventListener('click', function () {
     try {
-      // If WebRTC is available and connected, broadcast the load to peers
-      if (window.webrtcSync && window.webrtcSync.isActive && window.webrtcSync.isActive()) {
-        try {
-          console.log('[LifeStories] sending LOAD_ITEMS to peer');
-          window.webrtcSync.sendMessage({ type: 'LOAD_ITEMS', items: test_items });
-          try { utils.prettyAlert('Load', 'Envoi des items au pair', 'info', 1200); } catch(e){}
-          return;
-        } catch (sendErr) {
-          console.warn('[LifeStories] send LOAD_ITEMS failed, falling back to local add', sendErr);
-        }
-      }
 
-      // Fallback: add locally (avoid duplicates)
-      test_items.forEach(i => {
-        try {
-          if (items.get(i.id)) {
-            const newId = `${i.id}_${Date.now()}`;
-            const clone = Object.assign({}, i, { id: newId });
-            items.add(clone);
-          } else {
-            items.add(i);
+        // Prepare items to add locally (avoid id collisions)
+        const prepared = [];
+        test_items.forEach(i => {
+          try {
+            if (items.get(i.id)) {
+              const newId = `${i.id}_${Date.now()}`;
+              prepared.push(Object.assign({}, i, { id: newId }));
+            } else {
+              prepared.push(i);
+            }
+          } catch (e) {
+            console.warn('[LifeStories] failed to prepare test item', e, i);
+            prepared.push(i);
           }
+        });
+
+        // Add locally immediately so the caller (enquêteur) sees the items
+        try {
+          items.add(prepared);
+          try { utils.prettyAlert('Load', 'Items ajoutés localement', 'success', 1200); } catch(e){}
         } catch (e) {
-          console.warn('[LifeStories] failed to add test item', e, i);
+          console.warn('[LifeStories] failed to add prepared items locally', e);
         }
-      });
-      try { utils.prettyAlert('Load', 'Items ajoutés localement', 'success', 1200); } catch(e){}
+
+        // If WebRTC is available and connected, broadcast the prepared items to peers (don't return early)
+        if (window.webrtcSync && typeof window.webrtcSync.sendMessage === 'function') {
+          try {
+            if (window.webrtcSync.isActive && window.webrtcSync.isActive()) {
+              try { window.webrtcSync.sendMessage({ type: 'LOAD_ITEMS', items: prepared }); } catch(e) { console.warn('[LifeStories] sendMessage threw', e); }
+              try { utils.prettyAlert('Load', 'Envoi des items au pair', 'info', 1200); } catch(e){}
+            } else {
+              // Poll for a short period to allow the datachannel to open
+              let attempts = 0;
+              const maxAttempts = 25; // ~5s if interval=200ms
+              const interval = setInterval(() => {
+                attempts++;
+                try {
+                  if (window.webrtcSync.isActive && window.webrtcSync.isActive()) {
+                    try { window.webrtcSync.sendMessage({ type: 'LOAD_ITEMS', items: prepared }); } catch(e) { console.warn('[LifeStories] sendMessage threw', e); }
+                    try { utils.prettyAlert('Load', 'Envoi des items au pair', 'info', 1200); } catch(e){}
+                    clearInterval(interval);
+                    return;
+                  }
+                } catch (e) {
+                  console.warn('[LifeStories] error while polling webrtcSync', e);
+                }
+
+                if (attempts >= maxAttempts) {
+                  clearInterval(interval);
+                  console.warn('[LifeStories] WebRTC not active after wait - gave up sending prepared items');
+                }
+              }, 200);
+            }
+          } catch (sendErr) {
+            console.warn('[LifeStories] send LOAD_ITEMS failed early', sendErr);
+          }
+        } else {
+          console.warn('[LifeStories] no webrtcSync available to send LOAD_ITEMS');
+        }
     } catch (err) {
       console.error('[LifeStories] unexpected error in load handler', err);
     }

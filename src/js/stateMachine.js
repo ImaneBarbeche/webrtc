@@ -847,7 +847,6 @@ export function restoreFromRemoteState(remoteState) {
       context: remoteState.context
     });
     
-    console.log('✅ État distant synchronisé');
   } catch (error) {
     console.error('❌ Erreur lors de la synchronisation distante:', error);
   }
