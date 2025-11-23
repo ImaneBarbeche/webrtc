@@ -679,7 +679,7 @@ class WebRTCOnboarding {
     if (debugPanel) debugPanel.style.display = "none";
     if (lifestories) {
       lifestories.classList.add("active");
-
+      lifestories.style.display = "block";
       // Si c'est le viewer (pas l'offeror), activer le mode viewer
       if (!this.isOfferor) {
         lifestories.classList.add("viewer-mode");
