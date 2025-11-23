@@ -1,8 +1,28 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 export default function HomePage({ onStart }) {
+  const [devMode, setDevMode] = useState(localStorage.getItem('devMode') === 'true');
+
+  const handleToggleDevMode = () => {
+    const newMode = !devMode;
+    setDevMode(newMode);
+    localStorage.setItem('devMode', newMode);
+    window.location.reload(); // Recharge pour appliquer le mode
+  };
+
   return (
-    <div className="homepage-container">
+    <div className="homepage-container" style={{ position: 'relative' }}>
+      {/* Bouton mode développeur en haut à droite */}
+      <button
+        className="devmode-toggle"
+        style={{ position: 'absolute', top: 16, right: 16, zIndex: 10, background: devMode ? '#e0e0e0' : '#fff', border: '1px solid #ccc', borderRadius: 4, padding: '4px 10px', fontSize: 14, cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+        onClick={handleToggleDevMode}
+        title={devMode ? 'Mode standard' : 'Mode développeur'}
+      >
+        <span style={{ marginRight: 6 }}>🛠️</span>
+        {devMode ? 'Mode développeur' : 'Mode standard'}
+      </button>
+
       {/* Section gauche - Fenêtre avec SVG */}
       <div className="homepage-left">
         <div className="svg-window">

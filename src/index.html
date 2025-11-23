@@ -209,6 +209,16 @@
         </div>
       </div>
 
+      <!-- Bouton mode développeur sur la vue standard -->
+      <button
+        id="devmode-toggle-standard"
+        style="position: fixed; top: 16px; right: 16px; z-index: 1000; background: #fff; border: 1px solid #ccc; border-radius: 4px; padding: 4px 10px; font-size: 14px; cursor: pointer; display: none; align-items: center;"
+        title="Basculer le mode développeur"
+      >
+        <span style="margin-right: 6px;">🛠️</span>
+        Mode standard
+      </button>
+
       <div class="split">
         <!-- Left side-->
           <div id="questionnaire">
@@ -294,6 +304,19 @@
     <script type="module" src="js/webrtc-sync.js"></script>
 
     <script>
+      // Afficher le bouton mode développeur sur la vue standard si devMode est actif
+      document.addEventListener('DOMContentLoaded', function() {
+        if (localStorage.getItem('devMode') === 'true') {
+          const btn = document.getElementById('devmode-toggle-standard');
+          if (btn) btn.style.display = 'flex';
+          if (btn) {
+            btn.onclick = function() {
+              localStorage.setItem('devMode', 'false');
+              window.location.reload();
+            };
+          }
+        }
+      });
       // Initialiser Split.js quand LifeStories est affiché
       document.addEventListener("lifestoriesShown", () => {
         // Petit délai pour que le DOM soit complètement rendu

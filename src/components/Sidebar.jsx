@@ -115,22 +115,13 @@ function Sidebar() {
       <div className="sidebar-header">
         <img src="./assets/imgs/logo.png" alt="Logo" className="sidebar-logo" />
         <h3>LifeStories</h3>
-        {/* <button className="sidebar-toggle" onClick={() => setIsOpen(!isOpen)}> */}
-          {/* <img
-            src={isOpen ? "./assets/icon/sidebar-icon-open.svg" : "./assets/icon/sidebar-icon-closed.svg"}
-            alt="Toggle"
-            className="toggle-icon-svg"
-          /> */}
-          {/* <PanelLeft />
-          <PanelRight /> */}
-          <button className="sidebar-toggle" onClick={() => setIsOpen(!isOpen)}>
-            {isOpen ? (
-              <PanelRight strokeWidth={1.5} />
-            ) : (
-              <PanelLeft strokeWidth={1.5} />
-            )}
-          </button>
-        {/* </button> */}
+        <button className="sidebar-toggle" onClick={() => setIsOpen(!isOpen)}>
+          {isOpen ? (
+            <PanelRight strokeWidth={1.5} />
+          ) : (
+            <PanelLeft strokeWidth={1.5} />
+          )}
+        </button>
       </div>
 
       {isOpen && <div className="sidebar-divider"></div>}
