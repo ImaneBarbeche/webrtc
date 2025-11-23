@@ -2,21 +2,13 @@ import * as utils from "./utils.js";
 import state from "./state.js";
 import { ajouterEpisode } from "./episodes.js";
 import { test_items } from "./dataset.js";
-import { Filesystem, Directory } from '@capacitor/filesystem';
+// Import Capacitor Filesystem dynamiquement uniquement si natif
+let Filesystem, Directory;
 
 
 /**
  *****************************************************************************************************
  * timeline.js gère l'initialisation, le rendu graphique et les interactions possibles du calendrier *
- *                                                                                                   *
- * FONCTIONNALITÉS LANDMARKS :                                                                       *
- * - Clic simple sur un groupe parent : ouvre/ferme les sous-groupes                                *
- * - Appui long (500ms) sur un sous-groupe : bascule son statut landmark                            *
- *   → Fonctionne aussi bien sur desktop que sur tablette/mobile                                    *
- * - Les landmarks sont les sous-groupes dont les items restent visibles sur la ligne parent        *
- *   même quand le groupe parent est fermé                                                          *
- * - Un feedback visuel (toast) confirme l'activation/désactivation du landmark                     *
- *                                                                                                   *
  *****************************************************************************************************
  */
 
@@ -848,17 +840,34 @@ document
         .toISOString()
         .slice(0, 10)}.json`;
 
-      // Écrire le fichier avec Capacitor
-      const result = await Filesystem.writeFile({
-        path: filename,
-        data: jsonString,
-        directory: Directory.Documents, // ou Directory.External
-        encoding: 'utf8'
-      });
-
-      alert(`Fichier sauvegardé avec succès dans Documents : ${filename}`);
-      console.log('Fichier sauvegardé:', result.uri);
-
+      const isNative = window.Capacitor && window.Capacitor.isNativePlatform;
+      if (isNative) {
+        if (!Filesystem || !Directory) {
+          const cap = await import('@capacitor/filesystem');
+          Filesystem = cap.Filesystem;
+          Directory = cap.Directory;
+        }
+        const result = await Filesystem.writeFile({
+          path: filename,
+          data: jsonString,
+          directory: Directory.Documents, // ou Directory.External
+          encoding: 'utf8'
+        });
+        alert(`Fichier sauvegardé avec succès dans Documents : ${filename}`);
+        console.log('Fichier sauvegardé:', result.uri);
+      } else {
+        // Méthode web classique
+        const blob = new Blob([jsonString], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        setTimeout(() => URL.revokeObjectURL(url), 100);
+        alert(`Fichier téléchargé : ${filename}`);
+      }
     } catch (error) {
       console.error("Erreur d'export:", error);
       alert(`Erreur lors de l'export: ${error.message}`);

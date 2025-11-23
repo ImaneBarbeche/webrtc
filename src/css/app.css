@@ -48,14 +48,10 @@ h2, h3, h4 {
 
 /* Container onboarding (écran de connexion WebRTC) */
 .onboarding-container {
-    /* display: none; */
     position: relative;
     z-index: 1000;
 }
 
-/* #homepage-root {
-    display: none;
-} */
 
 /* Masquer l'onboarding quand on passe à LifeStories */
 .onboarding-container.hidden {
@@ -151,7 +147,6 @@ h2, h3, h4 {
     left: 0;
     width: 100vw;
     height: 100vh;
-    /* background-color: rgba(246, 241, 232, 0.4); Beige semi-transparent */
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px); /* Pour Safari */
     z-index: 2000;

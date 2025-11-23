@@ -15,7 +15,10 @@
           "mask-composite",
           "mask-composite: intersect",
           "user-select",
-          "mask-image"
+          "mask-image",
+          "scrollbar-color",
+          "scrollbar-width",
+          "background-color: color-mix(in srgb, transparent 20%, var(--label-color))"
         ]
       }
     ],
