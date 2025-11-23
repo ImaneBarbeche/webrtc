@@ -2,6 +2,8 @@ import * as utils from "./utils.js";
 import state from "./state.js";
 import { ajouterEpisode } from "./episodes.js";
 import { test_items } from "./dataset.js";
+import { Filesystem, Directory } from '@capacitor/filesystem';
+
 
 /**
  *****************************************************************************************************
@@ -830,40 +832,38 @@ document.addEventListener("DOMContentLoaded", function () {
       ).getFullYear();
     });
     //---------------- DOWNLOADING THE INTERVIEW DATA-------------//
-    document
-      .getElementById("export")
-      .addEventListener("click", async function () {
-        var data = items.get({
-          type: {
-            start: "ISODate",
-            end: "ISODate",
-          },
-        });
-
-        // On convertit en JSON
-        let jsonString = JSON.stringify(data, null, 2);
-        // Définir le nom du fichier (corrige l'erreur ReferenceError)
-        const filename = `timeline-data-${new Date()
-          .toISOString()
-          .slice(0, 10)}.json`;
-
-        // Créer un Blob
-        const blob = new Blob([jsonString], { type: "application/json" });
-
-        // Créer une URL temporaire
-        const url = URL.createObjectURL(blob);
-
-        // Créer et déclencher le téléchargement
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = filename;
-        document.body.appendChild(link); // ajouter le lien à la page (invisible)
-        link.click(); // simuler un click dessus
-        document.body.removeChild(link); // retirer le lien
-
-        // Nettoyer - libérer la mémoire
-        URL.revokeObjectURL(url);
+document
+  .getElementById("export")
+  .addEventListener("click", async function () {
+    try {
+      var data = items.get({
+        type: {
+          start: "ISODate",
+          end: "ISODate",
+        },
       });
+
+      let jsonString = JSON.stringify(data, null, 2);
+      const filename = `timeline-data-${new Date()
+        .toISOString()
+        .slice(0, 10)}.json`;
+
+      // Écrire le fichier avec Capacitor
+      const result = await Filesystem.writeFile({
+        path: filename,
+        data: jsonString,
+        directory: Directory.Documents, // ou Directory.External
+        encoding: 'utf8'
+      });
+
+      alert(`Fichier sauvegardé avec succès dans Documents : ${filename}`);
+      console.log('Fichier sauvegardé:', result.uri);
+
+    } catch (error) {
+      console.error("Erreur d'export:", error);
+      alert(`Erreur lors de l'export: ${error.message}`);
+    }
+  });
 
     document.getElementById("load").addEventListener("click", function () {
       try {
