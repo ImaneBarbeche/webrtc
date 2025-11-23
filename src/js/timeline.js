@@ -138,6 +138,7 @@ try {
 let isCustomBarMoving = false;
 
 // Options principales pour la timeline
+const birthYear = 1990; // À personnaliser selon la personne
 const options = {
   // editable: {
   //     add: true,         // Permettre l'ajout d'items
@@ -196,11 +197,12 @@ const options = {
         case "month":
           return vis.moment(date).format("MMM");
         case "year":
-          const age =
-            new Date(date).getFullYear() -
-            new Date(options.start).getFullYear();
-          return "<b>" + new Date(date).getFullYear() + "</b>";
-
+          const year = new Date(date).getFullYear();
+          const age = year - birthYear;
+          return `<div style="display:flex;flex-direction:column;align-items:center;">
+                    <b>${year}</b>
+                    <span style="font-size:12px;color:#888;">${age} ans</span>
+                  </div>`;
         default:
           return "";
       }
