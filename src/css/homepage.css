@@ -128,28 +128,43 @@
   transform: translateY(0);
 }
 
-/* Responsive - Tablette */
-/* @media (max-width: 1024px) {
+
+/* Responsive - Mobile */
+@media (max-width: 600px) {
   .homepage-container {
     flex-direction: column;
+    height: auto;
+    min-height: 100vh;
+    padding: 0;
   }
-
   .homepage-left {
-    padding: 30px;
+    padding: 10px;
+    min-width: 0;
   }
-
   .svg-window {
-    width: 300px;
-    height: 400px;
+    width: 90vw;
+    max-width: 320px;
+    height: 220px;
+    right: 0;
+    padding: 10px;
+    border-top-right-radius: 80px;
+    border-bottom-right-radius: 80px;
   }
-
   .homepage-right {
-    padding: 30px;
+    padding: 16px;
     align-items: center;
     text-align: center;
   }
-
   .homepage-title {
-    font-size: 48px;
+    font-size: 2em;
+    margin-bottom: 18px;
   }
-} */
+  .homepage-subtitle {
+    font-size: 1em;
+    margin-bottom: 24px;
+  }
+  .homepage-start-btn {
+    padding: 10px 30px;
+    font-size: 1em;
+  }
+}
