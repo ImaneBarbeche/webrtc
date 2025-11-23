@@ -1,7 +1,5 @@
-import { ajouterEpisode, modifierEpisode } from "./episodes.js"
 import { timeline, items, groups, handleDragStart, handleDragEnd } from "./timeline.js";
-import state from "./state.js"
-
+import { setBirthYear } from "./birthYear.js";
 import { surveyMachine, surveyService, initializeSurveyService, saveAnsweredQuestion, loadAnsweredQuestions, getQuestionFromState } from "./stateMachine.js";
 
 /**
@@ -482,6 +480,10 @@ document.addEventListener("DOMContentLoaded", async () => {
               if (event.key === "Enter" && input.value.trim() !== "" && eventType) {
                 let eventData = { type: eventType };
                 eventData[eventKey] = input.value;
+                // Si c'est la question de naissance, mettre à jour la timeline immédiatement
+                if (eventType === "ANSWER_BIRTH_YEAR") {
+                  setBirthYear(input.value);
+                }
                 sendEvent(eventData); // Utiliser sendEvent au lieu de surveyService.send
                 // Désactiver les inputs et boutons de cette question pour éviter les doubles soumissions
                 try {

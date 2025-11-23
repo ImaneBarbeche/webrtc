@@ -1,7 +1,8 @@
+import { activateInitialLandmarks } from "./landmarkUtils.js";
 import * as utils from "./utils.js";
-import state from "./state.js";
-import { ajouterEpisode } from "./episodes.js";
 import { test_items } from "./dataset.js";
+import { setBirthYear, getBirthYear } from "./birthYear.js";
+import { toggleLandmark } from "./landmarkUtils.js";
 // Import Capacitor Filesystem dynamiquement uniquement si natif
 let Filesystem, Directory;
 
@@ -98,47 +99,53 @@ try {
   );
 }
 
-// Preactiver silencieusement certains landmarks (Commune=13, Diplômes=23, Postes=31) - provisoire
-(function activateInitialLandmarks() {
-  const initialLandmarks = [13, 23, 31];
-  initialLandmarks.forEach((id) => {
-    const g = groups.get(id);
-    if (!g) return;
+activateInitialLandmarks(groups);
 
-    // Marquer comme landmark et ajouter une icône visuelle si nécessaire
-    g.isLandmark = true;
-    if (!String(g.content).includes("📌")) {
-      g.content = "📌 " + (g.content || "");
-    }
-    groups.update(g);
-
-    // Mettre à jour la liste landmarkChildren du parent
-    const parentId = g.keyof || g.nestedInGroup || null;
-    if (parentId) {
-      const parent = groups.get(parentId);
-      if (parent) {
-        parent.landmarkChildren = parent.landmarkChildren || [];
-        if (!parent.landmarkChildren.includes(id)) {
-          parent.landmarkChildren.push(id);
-        }
-        groups.update(parent);
-      }
-    }
-  });
-
-  // Persister uniquement si aucune configuration des groupes n'est déjà stockée
-  try {
-    if (!localStorage.getItem("lifestories_groups")) {
-      localStorage.setItem("lifestories_groups", JSON.stringify(groups.get()));
-    }
-  } catch (e) {
-    // silent fail if storage unavailable
-  }
-})();
 let isCustomBarMoving = false;
 
-// Options principales pour la timeline
-const birthYear = 1990; // À personnaliser selon la personne
+// Initialisation de la date de naissance au démarrage
+// 1. On essaie de récupérer la valeur depuis le localStorage (si déjà enregistrée)
+// 2. Si elle n'existe pas, on cherche dans les réponses du questionnaire (localStorage aussi)
+// 3. On vérifie plusieurs formats possibles pour la réponse
+// 4. Si une valeur est trouvée, on l'utilise pour initialiser l'affichage et le calcul de l'âge
+try {
+  let birthYearStored = localStorage.getItem('birthYear'); // Récupère la date de naissance enregistrée
+  if (!birthYearStored) {
+    const answeredRaw = localStorage.getItem('lifestories_answered_questions'); // Récupère toutes les réponses du questionnaire
+    if (answeredRaw) {
+      try {
+        const answeredArr = JSON.parse(answeredRaw);
+        let found = null;
+        for (const obj of answeredArr) {
+          const answer = obj.answer || {};
+          // Différents formats possibles selon la structure des réponses
+          if (answer.type === 'ANSWER_BIRTH_YEAR' && answer.birthdate) {
+            found = answer.birthdate;
+            break;
+          }
+          if (answer.key === 'birthYear' && answer.value) {
+            found = answer.value;
+            break;
+          }
+          if (answer.value && /^\d{4}$/.test(answer.value)) {
+            found = answer.value;
+            break;
+          }
+        }
+        if (found) {
+          birthYearStored = found;
+        }
+      } catch (e) {
+        console.warn('Could not parse lifestories_answered_questions:', e);
+      }
+    }
+  }
+  // Si une date de naissance est trouvée, on initialise l'affichage sticky et le calcul de l'âge
+  if (birthYearStored) {
+    setBirthYear(birthYearStored);
+  }
+} catch (e) {}
+
 const options = {
   // editable: {
   //     add: true,         // Permettre l'ajout d'items
@@ -198,10 +205,11 @@ const options = {
           return vis.moment(date).format("MMM");
         case "year":
           const year = new Date(date).getFullYear();
-          const age = year - birthYear;
+          const birthYear = getBirthYear();
+          const age = birthYear ? year - birthYear : '';
           return `<div style="display:flex;flex-direction:column;align-items:center;">
                     <b>${year}</b>
-                    <span style="font-size:12px;color:#888;">${age} ans</span>
+                    <span style="font-size:12px;color:#888;">${age !== '' ? age + ' ans' : ''}</span>
                   </div>`;
         default:
           return "";
@@ -411,70 +419,6 @@ if (savedOptions) {
 // Déclarer timeline en dehors pour pouvoir l'exporter
 let timeline;
 
-/**
- * GESTION DES LANDMARKS (REPÈRES TEMPORELS)
- * Permet d'afficher certains sous-groupes sur la ligne parent quand celui-ci est fermé
- */
-
-/**
- * Bascule le statut landmark d'un sous-groupe
- * @param {number} groupId - ID du sous-groupe à basculer
- */
-function toggleLandmark(groupId) {
-  const group = groups.get(groupId);
-
-  // Vérifier si c'est bien un sous-groupe (qui a nestedInGroup)
-  if (!group || !group.nestedInGroup) {
-    console.warn("Ce groupe n'est pas un sous-groupe");
-    return;
-  }
-
-  const parentGroup = groups.get(group.nestedInGroup);
-  if (!parentGroup) return;
-
-  // Initialiser landmarkChildren si nécessaire
-  if (!parentGroup.landmarkChildren) {
-    parentGroup.landmarkChildren = [];
-  }
-
-  // Basculer le statut landmark
-  const isCurrentlyLandmark = group.isLandmark || false;
-  group.isLandmark = !isCurrentlyLandmark;
-
-  // Mettre à jour landmarkChildren du parent
-  if (group.isLandmark) {
-    // Ajouter à landmarkChildren si pas déjà présent
-    if (!parentGroup.landmarkChildren.includes(groupId)) {
-      parentGroup.landmarkChildren.push(groupId);
-    }
-    // Ajouter l'icône 📌 si pas présent
-    if (!group.content.includes("📌")) {
-      group.content = "📌 " + group.content.trim();
-    }
-  } else {
-    // Retirer de landmarkChildren
-    parentGroup.landmarkChildren = parentGroup.landmarkChildren.filter(
-      (id) => id !== groupId
-    );
-    // Retirer l'icône 📌
-    group.content = group.content.replace("📌 ", "").trim();
-  }
-
-  // Mettre à jour les groupes
-  groups.update(group);
-  groups.update(parentGroup);
-
-  // Feedback visuel avec SweetAlert2
-  utils.prettyAlert(
-    group.isLandmark ? "📌 Landmark activé" : "Landmark désactivé",
-    `${group.content.replace("📌 ", "")} ${
-      group.isLandmark ? "restera visible" : "ne sera plus visible"
-    } quand le groupe est fermé`,
-    "success",
-    1500
-  );
-}
-
 // Variables globales pour l'appui long
 let longPressTimer = null;
 let longPressTarget = null;
@@ -558,7 +502,7 @@ document.addEventListener("DOMContentLoaded", function () {
           // Démarrer le timer d'appui long
           longPressTimer = setTimeout(() => {
             // Appui long détecté : basculer le landmark
-            toggleLandmark(longPressTarget);
+            toggleLandmark(longPressTarget, groups, utils);
             longPressTarget = null; // Marquer comme traité
             longPressStartPos = null;
           }, LONG_PRESS_DURATION);
