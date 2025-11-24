@@ -394,22 +394,25 @@ document.addEventListener(
             try {
               timeline.fit();
             } catch (e) {}
-            try {
-              timeline.redraw();
-            } catch (e) {}
+            // Redraw utile après ajout d'item pour corriger certains bugs d'affichage
+            setTimeout(() => {
+              try {
+                timeline.redraw();
+              } catch (e) {}
+            }, 0);
           });
         items.on &&
           items.on("update", function (updated) {
-            try {
-              timeline.redraw();
-            } catch (e) {}
+            // Redraw utile après modification d'un item (ex: édition via modal)
+            setTimeout(() => {
+              try {
+                timeline.redraw();
+              } catch (e) {}
+            }, 0);
           });
       } catch (e) {
         console.warn("[LifeStories] cannot attach items listeners", e);
       }
-
-      // Forcer un redraw pour appliquer les styles CSS
-      timeline.redraw();
 
       // Émettre un événement personnalisé pour signaler que la timeline est prête
       document.dispatchEvent(new CustomEvent("timelineReady"));
@@ -455,7 +458,10 @@ document.addEventListener(
             const item = items.get(longPressTargetItem);
             openEpisodeEditModal(item, function (updatedItem) {
               items.update(updatedItem);
-              timeline.redraw();
+                // Redraw après édition via modal pour corriger l'affichage
+                setTimeout(() => {
+                  timeline.redraw();
+                }, 0);
               isEditingEpisode = false;
             });
             longPressTargetItem = null;
@@ -586,11 +592,30 @@ document.addEventListener(
         // Déplacer la barre à la position ajustée
         timeline.setCustomTime(new Date(snappedTime), customTimeId);
 
-        // Réinitialiser le style des items
+        // Réinitialiser le style des items uniquement si nécessaire
         items.forEach((item) => {
-          if (item.className.includes("highlight")) {
-            item.className = item.className.replace("highlight", "");
-            items.update(item);
+          let isInRange;
+          if (item.type === "point" || item.type === "box") {
+            const itemYear = new Date(item.start).getFullYear();
+            const barYear = new Date(snappedTime).getFullYear();
+            isInRange = itemYear === barYear;
+          } else {
+            const itemStart = new Date(item.start).getTime();
+            const itemEnd = item.end ? new Date(item.end).getTime() : itemStart;
+            isInRange = snappedTime >= itemStart && snappedTime < itemEnd;
+          }
+
+          const alreadyHighlighted = item.className.includes("highlight");
+          if (isInRange) {
+            if (!alreadyHighlighted) {
+              item.className += " highlight";
+              items.update(item);
+            }
+          } else {
+            if (alreadyHighlighted) {
+              item.className = item.className.replace("highlight", "").replace(/  +/g, " ").trim();
+              items.update(item);
+            }
           }
         });
 
