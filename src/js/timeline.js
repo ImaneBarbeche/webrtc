@@ -68,25 +68,52 @@ const groupsData = [
   { id: 32, content: "Contrats", dependsOn: 31, className: "line_32" },
 ];
 
+
 // ===============================
 // VARIABLES GLOBALES ET CONSTANTES
 // ===============================
-
-// Variables globales pour l'appui long
 let longPressTarget = undefined;
-
-// Variable pour la barre verticale
 let stepSize = 1000 * 60 * 60 * 24; // 1 jour en millisecondes
-
-// Déclarer timeline en dehors pour pouvoir l'exporter
 let timeline;
-
-// Variable globale pour le suivi du déplacement de la barre custom
 let isCustomBarMoving = false;
-
 const items = new vis.DataSet();
 const groups = new vis.DataSet(groupsData);
 
+// ===============================
+// CONSTANTES ET SÉLECTIONS DOM
+// ===============================
+const summaryContainer = document.getElementById("bricks");
+const viewSummaryBtn = document.getElementById("view-summary");
+const closeSummaryBtn = document.getElementById("close-summary");
+const zoomInBtns = document.querySelectorAll("#zoom-in");
+const zoomOutBtns = document.querySelectorAll("#zoom-out");
+const moveBackwardsBtns = document.querySelectorAll("#move-backwards");
+const moveForwardsBtns = document.querySelectorAll("#move-forwards");
+
+// Bouton 'Load' pour importer les items de test
+document.getElementById("load").addEventListener("click", function () {
+  importTimelineData(items, test_items, utils);
+});
+// Bouton 'Export' pour exporter les items de la timeline
+document.getElementById("export").addEventListener("click", async function () {
+  await exportTimelineData(items);
+});
+// Appeler setupZoomNavigation APRÈS l'initialisation de timeline
+document.addEventListener("DOMContentLoaded", function () {
+  setTimeout(() => {
+    setupZoomNavigation({
+      timeline,
+      zoomInBtns,
+      zoomOutBtns,
+      moveBackwardsBtns,
+      moveForwardsBtns,
+    });
+  }, 100);
+});
+
+// ===============================
+// OPTIONS DE LA TIMELINE
+// ===============================
 const options = {
   editable: false,
   zoomMin: 1000 * 60 * 60 * 24 * 365 * 1, // 5 years in ms
@@ -162,8 +189,6 @@ const options = {
     // fallback: original content (keeps existing behaviour)
     return item.content;
   },
-  // TODO: format, affichage année
-  // TODO: tooltip
   onAdd: function (item, callback) {
     // Appel à prettyEpisode pour les éléments de type "range"
     utils.prettyEpisode(item.content, function (value) {
@@ -215,10 +240,6 @@ const options = {
   },
 
   onMoving: function (item, callback) {
-    /*if (item.start < timeline.min) item.start = timeline.min;
-        if (item.start > timeline.max) item.start = timeline.max;
-        if (item.end   > timeline.max) item.end   = timeline.max;*/
-
     callback(item); // send back the (possibly) changed item
   },
 
@@ -308,10 +329,6 @@ try {
 activateInitialLandmarks(groups);
 
 // Initialisation de la date de naissance au démarrage
-// 1. On essaie de récupérer la valeur depuis le localStorage (si déjà enregistrée)
-// 2. Si elle n'existe pas, on cherche dans les réponses du questionnaire (localStorage aussi)
-// 3. On vérifie plusieurs formats possibles pour la réponse
-// 4. Si une valeur est trouvée, on l'utilise pour initialiser l'affichage et le calcul de l'âge
 try {
   let birthYearStored = localStorage.getItem("birthYear"); // Récupère la date de naissance enregistrée
   if (!birthYearStored) {
@@ -639,41 +656,13 @@ document.addEventListener(
     });
   },
   100
-); // Fin du setTimeout
-
-const summaryContainer = document.getElementById("bricks");
-const viewSummaryBtn = document.getElementById("view-summary");
-const closeSummaryBtn = document.getElementById("close-summary");
+); // Fin du setTimeout 
+// Fin du DOMContentLoaded pour la timeline
 
 setupSummaryHandlers({ summaryContainer, viewSummaryBtn, closeSummaryBtn });
 
-const zoomInBtns = document.querySelectorAll("#zoom-in");
-const zoomOutBtns = document.querySelectorAll("#zoom-out");
-const moveBackwardsBtns = document.querySelectorAll("#move-backwards");
-const moveForwardsBtns = document.querySelectorAll("#move-forwards");
 
-// Appeler setupZoomNavigation APRÈS l'initialisation de timeline
-document.addEventListener("DOMContentLoaded", function () {
-  setTimeout(() => {
-    setupZoomNavigation({
-      timeline,
-      zoomInBtns,
-      zoomOutBtns,
-      moveBackwardsBtns,
-      moveForwardsBtns,
-    });
-  }, 100);
-});
 
-// Bouton 'Load' pour importer les items de test
-document.getElementById("load").addEventListener("click", function () {
-  importTimelineData(items, test_items, utils);
-});
-
-// Bouton 'Export' pour exporter les items de la timeline
-document.getElementById("export").addEventListener("click", async function () {
-  await exportTimelineData(items);
-});
 
 // Exposer timeline et les datasets pour les autres fichiers
 export {
