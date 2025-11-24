@@ -68,6 +68,71 @@ groupsData.forEach((group) => {
 const items = new vis.DataSet();
 const groups = new vis.DataSet(groupsData);
 
+// Restauration des données sauvegardées AVANT toute initialisation
+const savedItems = localStorage.getItem("lifestories_items");
+const savedGroups = localStorage.getItem("lifestories_groups");
+const savedOptions = localStorage.getItem("lifestories_options");
+
+if (savedItems) {
+  try {
+    const parsedItems = JSON.parse(savedItems);
+    items.clear();
+    items.add(parsedItems);
+  } catch (e) {
+    console.error("❌ Erreur lors du chargement des items:", e);
+  }
+}
+
+if (savedGroups) {
+  try {
+    const parsedGroups = JSON.parse(savedGroups);
+    // On restaure uniquement l'état dynamique (showNested, landmarks, etc.)
+    parsedGroups.forEach((savedGroup) => {
+      const existingGroup = groups.get(savedGroup.id);
+      if (existingGroup) {
+        groups.update({
+          id: savedGroup.id,
+          showNested: savedGroup.showNested,
+          landmark: savedGroup.landmark,
+        });
+      }
+    });
+  } catch (e) {
+    console.error("❌ Erreur lors du chargement des groupes:", e);
+  }
+}
+
+if (savedOptions) {
+  try {
+    const parsedOptions = JSON.parse(savedOptions);
+    // Restaurer min/max si présents
+    if (parsedOptions.min) options.min = new Date(parsedOptions.min);
+    if (parsedOptions.max) options.max = new Date(parsedOptions.max);
+    // Restaurer start en s'assurant que options.min <= start
+    if (parsedOptions.start) {
+      const startDate = new Date(parsedOptions.start);
+      if (!isNaN(startDate.getTime())) {
+        if (!options.min || options.min.getTime() > startDate.getTime()) {
+          options.min = new Date(startDate.getFullYear(), 0, 1);
+        }
+        options.start = startDate;
+      }
+    }
+    // Restaurer end en s'assurant que options.max >= end
+    if (parsedOptions.end) {
+      const endDate = new Date(parsedOptions.end);
+      if (!isNaN(endDate.getTime())) {
+        if (!options.max || options.max.getTime() < endDate.getTime()) {
+          options.max = new Date(endDate.getFullYear() + 1, 11, 31);
+        }
+        options.end = endDate;
+      }
+    }
+  } catch (e) {
+    console.error("❌ Erreur lors du chargement des options:", e);
+  }
+}
+
 // Persister automatiquement les items dès qu'ils changent (utile si la timeline
 // n'est pas initialisée sur la page où les items sont ajoutés — ex: questionnaire)
 try {
@@ -80,23 +145,12 @@ try {
         console.warn("[LifeStories] persistItems failed", e);
       }
     };
-
-    // Log and persist on change
-    items.on("add", function (added, senderId) {
-      persistItems();
-    });
-    items.on("update", function (updated, senderId) {
-      persistItems();
-    });
-    items.on("remove", function (removed, senderId) {
-      persistItems();
-    });
+    items.on("add", function (added, senderId) { persistItems(); });
+    items.on("update", function (updated, senderId) { persistItems(); });
+    items.on("remove", function (removed, senderId) { persistItems(); });
   }
 } catch (e) {
-  console.warn(
-    "[LifeStories] failed to attach persistence listeners to items",
-    e
-  );
+  console.warn("[LifeStories] failed to attach persistence listeners to items", e);
 }
 
 activateInitialLandmarks(groups);
@@ -343,78 +397,6 @@ const options = {
 };
 
 // Charger les données sauvegardées AVANT de créer la timeline
-const savedItems = localStorage.getItem("lifestories_items");
-const savedGroups = localStorage.getItem("lifestories_groups");
-const savedOptions = localStorage.getItem("lifestories_options");
-
-if (savedItems) {
-  try {
-    const parsedItems = JSON.parse(savedItems);
-    items.clear();
-    items.add(parsedItems);
-  } catch (e) {
-    console.error("❌ Erreur lors du chargement des items:", e);
-  }
-}
-
-if (savedGroups) {
-  try {
-    const parsedGroups = JSON.parse(savedGroups);
-    // On restaure uniquement l'état dynamique (showNested, landmarks, etc.)
-    parsedGroups.forEach((savedGroup) => {
-      const existingGroup = groups.get(savedGroup.id);
-      if (existingGroup) {
-        groups.update({
-          id: savedGroup.id,
-          showNested: savedGroup.showNested,
-          landmark: savedGroup.landmark,
-        });
-      }
-    });
-  } catch (e) {
-    console.error("❌ Erreur lors du chargement des groupes:", e);
-  }
-}
-
-// Restaurer les options de la timeline (min, max, start, end)
-// Ajuster `min`/`max` pour s'assurer qu'ils couvrent `start`/`end`
-// afin d'éviter que vis.js ne "clamp" la fenêtre visible sur la
-// date courante si `min` est trop récent.
-if (savedOptions) {
-  try {
-    const parsedOptions = JSON.parse(savedOptions);
-
-    // Restaurer min/max si présents
-    if (parsedOptions.min) options.min = new Date(parsedOptions.min);
-    if (parsedOptions.max) options.max = new Date(parsedOptions.max);
-
-    // Restaurer start en s'assurant que options.min <= start
-    if (parsedOptions.start) {
-      const startDate = new Date(parsedOptions.start);
-      if (!isNaN(startDate.getTime())) {
-        // Si pas de min défini ou si min est après start, le remonter
-        if (!options.min || options.min.getTime() > startDate.getTime()) {
-          options.min = new Date(startDate.getFullYear(), 0, 1);
-        }
-        options.start = startDate;
-      }
-    }
-
-    // Restaurer end en s'assurant que options.max >= end
-    if (parsedOptions.end) {
-      const endDate = new Date(parsedOptions.end);
-      if (!isNaN(endDate.getTime())) {
-        if (!options.max || options.max.getTime() < endDate.getTime()) {
-          // Étendre la borne max pour inclure la fin (on ajoute 1 an de marge)
-          options.max = new Date(endDate.getFullYear() + 1, 11, 31);
-        }
-        options.end = endDate;
-      }
-    }
-  } catch (e) {
-    console.error("❌ Erreur lors du chargement des options:", e);
-  }
-}
 
 // Déclarer timeline en dehors pour pouvoir l'exporter
 let timeline;
