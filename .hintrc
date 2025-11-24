@@ -18,7 +18,8 @@
           "mask-image",
           "scrollbar-color",
           "scrollbar-width",
-          "background-color: color-mix(in srgb, transparent 20%, var(--label-color))"
+          "background-color: color-mix(in srgb, transparent 20%, var(--label-color))",
+          "scrollbar-width: thin"
         ]
       }
     ],

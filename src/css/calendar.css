@@ -7,15 +7,6 @@
    TIMELINE / CANVAS
    ======================================== */
 
-#canvas {
-    /* Styles spécifiques au canvas de la timeline */
-}
-
-#timeline {
-    /* Styles spécifiques à la timeline vis.js */
-    /* Note: La plupart des styles viennent de vis-timeline-graph2d.min.css */
-}
-
 .vis-timeline {
     /* background-color: var(--primary-beige); */
     border: none;

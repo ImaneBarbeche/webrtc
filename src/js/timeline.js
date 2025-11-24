@@ -118,9 +118,6 @@ document.addEventListener("DOMContentLoaded", function () {
 // ===============================
 const options = {
   editable: true,
-  add: true, 
-  update: true, 
-  remove: true,
   zoomMin: 1000 * 60 * 60 * 24 * 365 * 1, // 5 years in ms
   zoomMax: 1000 * 60 * 60 * 24 * 365 * 50, // 50 years in ms
   min: new Date(),
