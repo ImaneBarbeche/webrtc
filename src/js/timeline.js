@@ -1,11 +1,22 @@
+import { exportTimelineData } from "./importExportUtils.js";
+import { importTimelineData } from "./importExportUtils.js";
 import { activateInitialLandmarks } from "./landmarkUtils.js";
 import * as utils from "./utils.js";
 import { test_items } from "./dataset.js";
 import { setBirthYear, getBirthYear } from "./birthYear.js";
 import { toggleLandmark } from "./landmarkUtils.js";
-// Import Capacitor Filesystem dynamiquement uniquement si natif
-let Filesystem, Directory;
-
+import {
+  restoreItems,
+  restoreGroups,
+  restoreOptions,
+  persistItems,
+  persistGroups,
+  persistOptions,
+} from "./timelineStorage.js";
+import { setupLongPressHandlers } from "./landmarkUtils.js";
+import { handleDragStart, handleDragEnd } from "./dragHandlers.js";
+import { toggleSummary, setupSummaryHandlers } from "./summaryUtils.js";
+import { setupZoomNavigation } from "./zoomNavigation.js";
 
 /**
  *****************************************************************************************************
@@ -57,157 +68,26 @@ const groupsData = [
   { id: 32, content: "Contrats", dependsOn: 31, className: "line_32" },
 ];
 
-// Ajout d'icônes sur certains groupes (exemple)
-groupsData.forEach((group) => {
-  if (group.type === "primary") {
-    group.content = `<span>🔑${group.content}</span>`;
-  }
-});
+// ===============================
+// VARIABLES GLOBALES ET CONSTANTES
+// ===============================
 
-// Création des jeux de données pour la timeline
+// Variables globales pour l'appui long
+let longPressTarget = undefined;
+
+// Variable pour la barre verticale
+let stepSize = 1000 * 60 * 60 * 24; // 1 jour en millisecondes
+
+// Déclarer timeline en dehors pour pouvoir l'exporter
+let timeline;
+
+// Variable globale pour le suivi du déplacement de la barre custom
+let isCustomBarMoving = false;
+
 const items = new vis.DataSet();
 const groups = new vis.DataSet(groupsData);
 
-// Restauration des données sauvegardées AVANT toute initialisation
-const savedItems = localStorage.getItem("lifestories_items");
-const savedGroups = localStorage.getItem("lifestories_groups");
-const savedOptions = localStorage.getItem("lifestories_options");
-
-if (savedItems) {
-  try {
-    const parsedItems = JSON.parse(savedItems);
-    items.clear();
-    items.add(parsedItems);
-  } catch (e) {
-    console.error("❌ Erreur lors du chargement des items:", e);
-  }
-}
-
-if (savedGroups) {
-  try {
-    const parsedGroups = JSON.parse(savedGroups);
-    // On restaure uniquement l'état dynamique (showNested, landmarks, etc.)
-    parsedGroups.forEach((savedGroup) => {
-      const existingGroup = groups.get(savedGroup.id);
-      if (existingGroup) {
-        groups.update({
-          id: savedGroup.id,
-          showNested: savedGroup.showNested,
-          landmark: savedGroup.landmark,
-        });
-      }
-    });
-  } catch (e) {
-    console.error("❌ Erreur lors du chargement des groupes:", e);
-  }
-}
-
-if (savedOptions) {
-  try {
-    const parsedOptions = JSON.parse(savedOptions);
-    // Restaurer min/max si présents
-    if (parsedOptions.min) options.min = new Date(parsedOptions.min);
-    if (parsedOptions.max) options.max = new Date(parsedOptions.max);
-    // Restaurer start en s'assurant que options.min <= start
-    if (parsedOptions.start) {
-      const startDate = new Date(parsedOptions.start);
-      if (!isNaN(startDate.getTime())) {
-        if (!options.min || options.min.getTime() > startDate.getTime()) {
-          options.min = new Date(startDate.getFullYear(), 0, 1);
-        }
-        options.start = startDate;
-      }
-    }
-    // Restaurer end en s'assurant que options.max >= end
-    if (parsedOptions.end) {
-      const endDate = new Date(parsedOptions.end);
-      if (!isNaN(endDate.getTime())) {
-        if (!options.max || options.max.getTime() < endDate.getTime()) {
-          options.max = new Date(endDate.getFullYear() + 1, 11, 31);
-        }
-        options.end = endDate;
-      }
-    }
-  } catch (e) {
-    console.error("❌ Erreur lors du chargement des options:", e);
-  }
-}
-
-// Persister automatiquement les items dès qu'ils changent (utile si la timeline
-// n'est pas initialisée sur la page où les items sont ajoutés — ex: questionnaire)
-try {
-  if (items && typeof items.on === "function") {
-    const persistItems = () => {
-      try {
-        const all = items.get();
-        localStorage.setItem("lifestories_items", JSON.stringify(all));
-      } catch (e) {
-        console.warn("[LifeStories] persistItems failed", e);
-      }
-    };
-    items.on("add", function (added, senderId) { persistItems(); });
-    items.on("update", function (updated, senderId) { persistItems(); });
-    items.on("remove", function (removed, senderId) { persistItems(); });
-  }
-} catch (e) {
-  console.warn("[LifeStories] failed to attach persistence listeners to items", e);
-}
-
-activateInitialLandmarks(groups);
-
-let isCustomBarMoving = false;
-
-// Initialisation de la date de naissance au démarrage
-// 1. On essaie de récupérer la valeur depuis le localStorage (si déjà enregistrée)
-// 2. Si elle n'existe pas, on cherche dans les réponses du questionnaire (localStorage aussi)
-// 3. On vérifie plusieurs formats possibles pour la réponse
-// 4. Si une valeur est trouvée, on l'utilise pour initialiser l'affichage et le calcul de l'âge
-try {
-  let birthYearStored = localStorage.getItem('birthYear'); // Récupère la date de naissance enregistrée
-  if (!birthYearStored) {
-    const answeredRaw = localStorage.getItem('lifestories_answered_questions'); // Récupère toutes les réponses du questionnaire
-    if (answeredRaw) {
-      try {
-        const answeredArr = JSON.parse(answeredRaw);
-        let found = null;
-        for (const obj of answeredArr) {
-          const answer = obj.answer || {};
-          // Différents formats possibles selon la structure des réponses
-          if (answer.type === 'ANSWER_BIRTH_YEAR' && answer.birthdate) {
-            found = answer.birthdate;
-            break;
-          }
-          if (answer.key === 'birthYear' && answer.value) {
-            found = answer.value;
-            break;
-          }
-          if (answer.value && /^\d{4}$/.test(answer.value)) {
-            found = answer.value;
-            break;
-          }
-        }
-        if (found) {
-          birthYearStored = found;
-        }
-      } catch (e) {
-        console.warn('Could not parse lifestories_answered_questions:', e);
-      }
-    }
-  }
-  // Si une date de naissance est trouvée, on initialise l'affichage sticky et le calcul de l'âge
-  if (birthYearStored) {
-    setBirthYear(birthYearStored);
-  }
-} catch (e) {}
-
 const options = {
-  // editable: {
-  //     add: true,         // Permettre l'ajout d'items
-  //     updateTime: true,  // Permet de modifier la durée des items (drag)
-  //     updateGroup: true, // Permet de changer un item de groupe (drag)
-  //     remove: true,      // Permet de supprimer un item
-  //     overrideItems: false  // Autoriser ces options à remplacer les paramètres "editable" de l'élément
-  // },
   editable: false,
   zoomMin: 1000 * 60 * 60 * 24 * 365 * 1, // 5 years in ms
   zoomMax: 1000 * 60 * 60 * 24 * 365 * 50, // 50 years in ms
@@ -260,10 +140,12 @@ const options = {
         case "year":
           const year = new Date(date).getFullYear();
           const birthYear = getBirthYear();
-          const age = birthYear ? year - birthYear : '';
+          const age = birthYear ? year - birthYear : "";
           return `<div style="display:flex;flex-direction:column;align-items:center;">
                     <b>${year}</b>
-                    <span style="font-size:12px;color:#888;">${age !== '' ? age + ' ans' : ''}</span>
+                    <span style="font-size:12px;color:#888;">${
+                      age !== "" ? age + " ans" : ""
+                    }</span>
                   </div>`;
         default:
           return "";
@@ -396,630 +278,401 @@ const options = {
   },
 };
 
-// Charger les données sauvegardées AVANT de créer la timeline
+// Utilisation des fonctions du module timelineStorage.js
+restoreItems(items);
+restoreGroups(groups);
+restoreOptions(options);
 
-// Déclarer timeline en dehors pour pouvoir l'exporter
-let timeline;
+// Persister automatiquement les items dès qu'ils changent (utile si la timeline
+// n'est pas initialisée sur la page où les items sont ajoutés — ex: questionnaire)
 
-// Variables globales pour l'appui long
-let longPressTimer = null;
-let longPressTarget = null;
-let longPressStartPos = null;
-const LONG_PRESS_DURATION = 500; // 500ms pour déclencher l'appui long
-const LONG_PRESS_MOVE_THRESHOLD = 5; //px
+try {
+  if (items && typeof items.on === "function") {
+    items.on("add", function () {
+      persistItems(items);
+    });
+    items.on("update", function () {
+      persistItems(items);
+    });
+    items.on("remove", function () {
+      persistItems(items);
+    });
+  }
+} catch (e) {
+  console.warn(
+    "[LifeStories] failed to attach persistence listeners to items",
+    e
+  );
+}
 
-// Variable pour la barre verticale
-let stepSize = 1000 * 60 * 60 * 24; // 1 jour en millisecondes
+activateInitialLandmarks(groups);
+
+// Initialisation de la date de naissance au démarrage
+// 1. On essaie de récupérer la valeur depuis le localStorage (si déjà enregistrée)
+// 2. Si elle n'existe pas, on cherche dans les réponses du questionnaire (localStorage aussi)
+// 3. On vérifie plusieurs formats possibles pour la réponse
+// 4. Si une valeur est trouvée, on l'utilise pour initialiser l'affichage et le calcul de l'âge
+try {
+  let birthYearStored = localStorage.getItem("birthYear"); // Récupère la date de naissance enregistrée
+  if (!birthYearStored) {
+    const answeredRaw = localStorage.getItem("lifestories_answered_questions"); // Récupère toutes les réponses du questionnaire
+    if (answeredRaw) {
+      try {
+        const answeredArr = JSON.parse(answeredRaw);
+        let found = null;
+        for (const obj of answeredArr) {
+          const answer = obj.answer || {};
+          // Différents formats possibles selon la structure des réponses
+          if (answer.type === "ANSWER_BIRTH_YEAR" && answer.birthdate) {
+            found = answer.birthdate;
+            break;
+          }
+          if (answer.key === "birthYear" && answer.value) {
+            found = answer.value;
+            break;
+          }
+          if (answer.value && /^\d{4}$/.test(answer.value)) {
+            found = answer.value;
+            break;
+          }
+        }
+        if (found) {
+          birthYearStored = found;
+        }
+      } catch (e) {
+        console.warn("Could not parse lifestories_answered_questions:", e);
+      }
+    }
+  }
+  // Si une date de naissance est trouvée, on initialise l'affichage sticky et le calcul de l'âge
+  if (birthYearStored) {
+    setBirthYear(birthYearStored);
+  }
+} catch (e) {}
 
 // Création de la timeline avec les données chargées - attendre que tout soit chargé
-document.addEventListener("DOMContentLoaded", function () {
-  const container = document.getElementById("timeline");
+document.addEventListener(
+  "DOMContentLoaded",
+  function () {
+    const container = document.getElementById("timeline");
 
-  // Attendre que les styles soient appliqués
-  setTimeout(() => {
-    timeline = new vis.Timeline(container, items, groups, options);
+    // Attendre que les styles soient appliqués
+    setTimeout(() => {
+      timeline = new vis.Timeline(container, items, groups, options);
 
-    // Exporter la timeline globalement
-    window.timeline = timeline;
+      // Exporter la timeline globalement
+      window.timeline = timeline;
 
-    // Si des items sont ajoutés après l'initialisation (ex: via WebRTC),
-    // s'assurer que la timeline s'ajuste automatiquement pour les afficher.
-    try {
-      items.on &&
-        items.on("add", function (added) {
-          try {
-            timeline.fit();
-          } catch (e) {}
-          try {
-            timeline.redraw();
-          } catch (e) {}
-        });
-      items.on &&
-        items.on("update", function (updated) {
-          try {
-            timeline.redraw();
-          } catch (e) {}
-        });
-    } catch (e) {
-      console.warn("[LifeStories] cannot attach items listeners", e);
-    }
-
-    // Forcer un redraw pour appliquer les styles CSS
-    timeline.redraw();
-
-    // Émettre un événement personnalisé pour signaler que la timeline est prête
-    document.dispatchEvent(new CustomEvent("timelineReady"));
-
-    // Sauvegarder automatiquement à chaque changement
-    timeline.on("changed", () => {
-      localStorage.setItem("lifestories_items", JSON.stringify(items.get()));
-      localStorage.setItem("lifestories_groups", JSON.stringify(groups.get()));
-
-      // Sauvegarder aussi les options importantes de la timeline
-      const currentOptions = {
-        min: timeline.options.min,
-        max: timeline.options.max,
-        start: timeline.options.start,
-        end: timeline.options.end,
-      };
-      localStorage.setItem(
-        "lifestories_options",
-        JSON.stringify(currentOptions)
-      );
-    });
-
-    // Gestion de l'appui long pour les landmarks
-    timeline.on("mouseDown", function (properties) {
-      if (properties.what === "group-label" && properties.group) {
-        const clickedGroup = groups.get(properties.group);
-
-        // Seulement pour les sous-groupes
-        if (clickedGroup && clickedGroup.nestedInGroup) {
-          longPressTarget = properties.group;
-          longPressStartPos = {
-            x: properties.event.clientX,
-            y: properties.event.clientY,
-          };
-
-          // Démarrer le timer d'appui long
-          longPressTimer = setTimeout(() => {
-            // Appui long détecté : basculer le landmark
-            toggleLandmark(longPressTarget, groups, utils);
-            longPressTarget = null; // Marquer comme traité
-            longPressStartPos = null;
-          }, LONG_PRESS_DURATION);
-        }
-      }
-    });
-
-    timeline.on("mouseMove", function (properties) {
-      if (longPressTimer && longPressStartPos && properties.event) {
-        const dx = Math.abs(properties.event.clientX - longPressStartPos.x);
-        const dy = Math.abs(properties.event.clientY - longPressStartPos.y);
-        if (dx > LONG_PRESS_MOVE_THRESHOLD || dy > LONG_PRESS_MOVE_THRESHOLD) {
-          clearTimeout(longPressTimer);
-          longPressTimer = null;
-          longPressStartPos = null;
-        }
-      }
-    });
-
-    timeline.on("mouseUp", function (properties) {
-      // Annuler le timer si on relâche avant la durée requise
-      if (longPressTimer) {
-        clearTimeout(longPressTimer);
-        longPressTimer = null;
-        longPressStartPos = null;
-      }
-    });
-
-    timeline.on("click", function (properties) {
-      // ACCESSIBILITÉ : Clic sur l'axe temporel pour déplacer la barre verticale
-      if (properties.what === "axis" && properties.time) {
-        // Déplacer la barre custom à la date cliquée
-        const clickedTime = new Date(properties.time);
-        // Arrondir à l'année pour cohérence avec le snap
-        const yearStart = new Date(clickedTime.getFullYear(), 0, 1);
-        timeline.setCustomTime(yearStart, customTimeId);
-
-        // Déclencher manuellement la mise à jour de la synthèse
-        // (normalement géré par l'événement timechange, mais on le force ici)
-        timeline.emit("timechange", { id: customTimeId, time: yearStart });
-
-        return; // Sortir pour ne pas traiter d'autres clics
+      // Si des items sont ajoutés après l'initialisation (ex: via WebRTC),
+      // s'assurer que la timeline s'ajuste automatiquement pour les afficher.
+      try {
+        items.on &&
+          items.on("add", function (added) {
+            try {
+              timeline.fit();
+            } catch (e) {}
+            try {
+              timeline.redraw();
+            } catch (e) {}
+          });
+        items.on &&
+          items.on("update", function (updated) {
+            try {
+              timeline.redraw();
+            } catch (e) {}
+          });
+      } catch (e) {
+        console.warn("[LifeStories] cannot attach items listeners", e);
       }
 
-      // Vérifier si c'est un clic sur un label de groupe
-      if (properties.what === "group-label" && properties.group) {
-        const clickedGroup = groups.get(properties.group);
+      // Forcer un redraw pour appliquer les styles CSS
+      timeline.redraw();
 
-        // Si c'était un appui long traité, ne pas continuer
-        if (
-          longPressTarget === null &&
-          clickedGroup &&
-          clickedGroup.nestedInGroup
-        ) {
-          // On vient de traiter un appui long, réinitialiser
-          longPressTarget = undefined;
-          return;
-        }
-        longPressTarget = undefined;
+      // Émettre un événement personnalisé pour signaler que la timeline est prête
+      document.dispatchEvent(new CustomEvent("timelineReady"));
 
-        // Vérifier si ce groupe a des landmarks définis (logique normale de fermeture/ouverture)
-        if (
-          clickedGroup &&
-          clickedGroup.landmarkChildren &&
-          clickedGroup.landmarkChildren.length > 0
-        ) {
-          // Petit délai pour que vis.js finisse de toggle le groupe
-          setTimeout(() => {
-            const updatedGroup = groups.get(properties.group);
-            const isClosed = !updatedGroup.showNested;
-            // Pour chaque landmark défini
-            updatedGroup.landmarkChildren.forEach((landmarkId) => {
-              let landmarkItems;
+      // Sauvegarder automatiquement à chaque changement
+      timeline.on("changed", () => {
+        localStorage.setItem("lifestories_items", JSON.stringify(items.get()));
+        localStorage.setItem(
+          "lifestories_groups",
+          JSON.stringify(groups.get())
+        );
 
-              if (isClosed) {
-                // Fermeture : chercher les items qui sont actuellement dans le landmark
-                landmarkItems = items.get({
-                  filter: (item) => item.group === landmarkId,
-                });
-              } else {
-                // Ouverture : chercher les items qui ÉTAIENT dans le landmark (actuellement sur le parent)
-                landmarkItems = items.get({
-                  filter: (item) =>
-                    item.group === properties.group &&
-                    item._originalGroup === landmarkId,
-                });
-              }
-
-              landmarkItems.forEach((item) => {
-                if (isClosed) {
-                  // Groupe fermé : afficher les items sur le parent
-                  item._originalGroup = item.group; // Sauvegarder le groupe d'origine
-                  item.group = properties.group; // Déplacer vers le parent
-                } else {
-                  // Groupe ouvert : remettre les items dans leur groupe d'origine
-                  if (item._originalGroup) {
-                    item.group = item._originalGroup;
-                    delete item._originalGroup; // Nettoyer la propriété temporaire
-                  }
-                }
-                items.update(item);
-              });
-            });
-          }, 50); // Délai court pour laisser vis.js finir son rendu
-        }
-      }
-    });
-
-    timeline.on("timechanged", function (event) {
-      isCustomBarMoving = false;
-    });
-
-    /**
-     * VERTICAL BAR COMPONENT
-     */
-    let customTimeId = timeline.addCustomTime(
-      `${timeline.options.end.getFullYear() - 10}-01-01`,
-      "custom-bar"
-    );
-    timeline.on("timechange", function (event) {
-      isCustomBarMoving = true;
-      var selectedTime = event.time.getTime();
-      var snappedTime = Math.round(selectedTime / stepSize) * stepSize;
-
-      // Déplacer la barre à la position ajustée
-      timeline.setCustomTime(new Date(snappedTime), customTimeId);
-
-      // Réinitialiser le style des items
-      items.forEach((item) => {
-        if (item.className.includes("highlight")) {
-          item.className = item.className.replace("highlight", "");
-          items.update(item);
-        }
+        // Sauvegarder aussi les options importantes de la timeline
+        const currentOptions = {
+          min: timeline.options.min,
+          max: timeline.options.max,
+          start: timeline.options.start,
+          end: timeline.options.end,
+        };
+        localStorage.setItem(
+          "lifestories_options",
+          JSON.stringify(currentOptions)
+        );
       });
 
-      const themeData = {};
+      // Initialiser la gestion d'appui long via landmarkUtils
+      setupLongPressHandlers(timeline, groups, utils);
 
-      // getting parent groups
-      groups.get().forEach((group) => {
-        if (group.nestedGroups && group.nestedGroups.length > 0) {
-          themeData[group.id] = {
-            name: group.content,
-            items: [],
-            className: group.className,
-          };
-        }
-      });
+      timeline.on("click", function (properties) {
+        // ACCESSIBILITÉ : Clic sur l'axe temporel pour déplacer la barre verticale
+        if (properties.what === "axis" && properties.time) {
+          // Déplacer la barre custom à la date cliquée
+          const clickedTime = new Date(properties.time);
+          // Arrondir à l'année pour cohérence avec le snap
+          const yearStart = new Date(clickedTime.getFullYear(), 0, 1);
+          timeline.setCustomTime(yearStart, customTimeId);
 
-      let existingThemeSections = document.querySelectorAll(".theme-section");
+          // Déclencher manuellement la mise à jour de la synthèse
+          // (normalement géré par l'événement timechange, mais on le force ici)
+          timeline.emit("timechange", { id: customTimeId, time: yearStart });
 
-      // if(existingThemeSections.length) {
-      //   requestAnimationFrame(() => {
-      //     requestAnimationFrame(() => {
-      //         existingThemeSections.forEach((section) => {
-      //           section.classList.remove("visible")
-      //         })
-      //     })
-      //   })
-
-      // }
-
-      // setTimeout(() => {
-      document.getElementById("moreInfos").innerHTML = "";
-      // }, 300);
-
-      // Vérifier si la barre verticale passe sur un item
-      items.forEach((item) => {
-        var itemStart = new Date(item.start).getTime();
-        var itemEnd = item.end ? new Date(item.end).getTime() : itemStart;
-
-        // Pour les événements ponctuels, vérifier si on est dans la même année
-        // Pour les périodes, vérifier si on est dans l'intervalle
-        let isInRange;
-        if (item.type === "point" || item.type === "box") {
-          // Pour les points et box, comparer les années
-          const itemYear = new Date(item.start).getFullYear();
-          const barYear = new Date(snappedTime).getFullYear();
-          isInRange = itemYear === barYear;
-        } else {
-          // Pour les périodes, vérifier l'intervalle classique
-          isInRange = snappedTime >= itemStart && snappedTime < itemEnd;
+          return; // Sortir pour ne pas traiter d'autres clics
         }
 
-        // Si la barre verticale passe sur l'item, on le surligne
-        if (isInRange) {
-          // Ajouter une classe CSS pour surligner l'item
-          item.className += item.className.includes("highlight")
-            ? ""
-            : " highlight";
-          items.update(item);
-          //details
-          let groupObject = groups.get(item.group);
-          let themeId = groupObject.nestedInGroup || item.group;
+        // Vérifier si c'est un clic sur un label de groupe
+        if (properties.what === "group-label" && properties.group) {
+          const clickedGroup = groups.get(properties.group);
 
-          // checking if a theme already exists before adding it into the array
-          if (themeData[themeId]) {
-            themeData[themeId].items.push({
-              item: item,
-              groupObject: groupObject,
-            });
+          // Si c'était un appui long traité, ne pas continuer
+          if (
+            longPressTarget === null &&
+            clickedGroup &&
+            clickedGroup.nestedInGroup
+          ) {
+            // On vient de traiter un appui long, réinitialiser
+            longPressTarget = undefined;
+            return;
           }
-          // let groupName = groupObject.nestedInGroup ? `${groups.get(groupObject.nestedInGroup).content} --> ${groupObject.content}` : groupObject.content
-          // let themeName = groupObject.nestedInGroup ? groups.get(groupObject.nestedInGroup).content : null;
-          // let groupName = groupObject.content // E.g migratoire
-          // let ageDebut = new Date(item.start).getFullYear() - new Date(timeline.options.start).getFullYear()
+          longPressTarget = undefined;
+
+          // Vérifier si ce groupe a des landmarks définis (logique normale de fermeture/ouverture)
+          if (
+            clickedGroup &&
+            clickedGroup.landmarkChildren &&
+            clickedGroup.landmarkChildren.length > 0
+          ) {
+            // Petit délai pour que vis.js finisse de toggle le groupe
+            setTimeout(() => {
+              const updatedGroup = groups.get(properties.group);
+              const isClosed = !updatedGroup.showNested;
+              // Pour chaque landmark défini
+              updatedGroup.landmarkChildren.forEach((landmarkId) => {
+                let landmarkItems;
+
+                if (isClosed) {
+                  // Fermeture : chercher les items qui sont actuellement dans le landmark
+                  landmarkItems = items.get({
+                    filter: (item) => item.group === landmarkId,
+                  });
+                } else {
+                  // Ouverture : chercher les items qui ÉTAIENT dans le landmark (actuellement sur le parent)
+                  landmarkItems = items.get({
+                    filter: (item) =>
+                      item.group === properties.group &&
+                      item._originalGroup === landmarkId,
+                  });
+                }
+
+                landmarkItems.forEach((item) => {
+                  if (isClosed) {
+                    // Groupe fermé : afficher les items sur le parent
+                    item._originalGroup = item.group; // Sauvegarder le groupe d'origine
+                    item.group = properties.group; // Déplacer vers le parent
+                  } else {
+                    // Groupe ouvert : remettre les items dans leur groupe d'origine
+                    if (item._originalGroup) {
+                      item.group = item._originalGroup;
+                      delete item._originalGroup; // Nettoyer la propriété temporaire
+                    }
+                  }
+                  items.update(item);
+                });
+              });
+            }, 50); // Délai court pour laisser vis.js finir son rendu
+          }
         }
       });
 
-      let html = "";
+      timeline.on("timechanged", function (event) {
+        isCustomBarMoving = false;
+      });
 
-      const totalMatches = Object.values(themeData).reduce(
-        (sum, t) => sum + (t.items?.length || 0),
-        0
+      /**
+       * VERTICAL BAR COMPONENT
+       */
+      let customTimeId = timeline.addCustomTime(
+        `${timeline.options.end.getFullYear() - 10}-01-01`,
+        "custom-bar"
       );
+      timeline.on("timechange", function (event) {
+        isCustomBarMoving = true;
+        var selectedTime = event.time.getTime();
+        var snappedTime = Math.round(selectedTime / stepSize) * stepSize;
 
-      if (totalMatches <= 0) {
-        html += `<p class="no-info">Aucune information disponible pour l'année sélectionnée. Veuillez en sélectionner une autre.</p>`;
-        let pourApres = `Selectioner une date ou utiliser la bar pour naviger entre les annés`;
-      } else {
-        Object.keys(themeData).forEach((themeId) => {
-          const theme = themeData[themeId];
+        // Déplacer la barre à la position ajustée
+        timeline.setCustomTime(new Date(snappedTime), customTimeId);
 
-          if (theme.items.length > 0) {
-            html += `<div class='theme-section ${
-              theme.className
-            } data-year="${new Date(snappedTime).getFullYear()}"'>
+        // Réinitialiser le style des items
+        items.forEach((item) => {
+          if (item.className.includes("highlight")) {
+            item.className = item.className.replace("highlight", "");
+            items.update(item);
+          }
+        });
+
+        const themeData = {};
+
+        // getting parent groups
+        groups.get().forEach((group) => {
+          if (group.nestedGroups && group.nestedGroups.length > 0) {
+            themeData[group.id] = {
+              name: group.content,
+              items: [],
+              className: group.className,
+            };
+          }
+        });
+
+        let existingThemeSections = document.querySelectorAll(".theme-section");
+
+        document.getElementById("moreInfos").innerHTML = "";
+
+        // Vérifier si la barre verticale passe sur un item
+        items.forEach((item) => {
+          var itemStart = new Date(item.start).getTime();
+          var itemEnd = item.end ? new Date(item.end).getTime() : itemStart;
+
+          // Pour les événements ponctuels, vérifier si on est dans la même année
+          // Pour les périodes, vérifier si on est dans l'intervalle
+          let isInRange;
+          if (item.type === "point" || item.type === "box") {
+            // Pour les points et box, comparer les années
+            const itemYear = new Date(item.start).getFullYear();
+            const barYear = new Date(snappedTime).getFullYear();
+            isInRange = itemYear === barYear;
+          } else {
+            // Pour les périodes, vérifier l'intervalle classique
+            isInRange = snappedTime >= itemStart && snappedTime < itemEnd;
+          }
+
+          // Si la barre verticale passe sur l'item, on le surligne
+          if (isInRange) {
+            // Ajouter une classe CSS pour surligner l'item
+            item.className += item.className.includes("highlight")
+              ? ""
+              : " highlight";
+            items.update(item);
+            //details
+            let groupObject = groups.get(item.group);
+            let themeId = groupObject.nestedInGroup || item.group;
+
+            // checking if a theme already exists before adding it into the array
+            if (themeData[themeId]) {
+              themeData[themeId].items.push({
+                item: item,
+                groupObject: groupObject,
+              });
+            }
+          }
+        });
+
+        let html = "";
+
+        const totalMatches = Object.values(themeData).reduce(
+          (sum, t) => sum + (t.items?.length || 0),
+          0
+        );
+
+        if (totalMatches <= 0) {
+          html += `<p class="no-info">Aucune information disponible pour l'année sélectionnée. Veuillez en sélectionner une autre.</p>`;
+          let pourApres = `Selectioner une date ou utiliser la bar pour naviger entre les annés`;
+        } else {
+          Object.keys(themeData).forEach((themeId) => {
+            const theme = themeData[themeId];
+
+            if (theme.items.length > 0) {
+              html += `<div class='theme-section ${
+                theme.className
+              } data-year="${new Date(snappedTime).getFullYear()}"'>
                           <h3>${theme.name}</h3>
                           
                           <div class="card-wrapper">`;
 
-            theme.items.forEach(({ item, groupObject }) => {
-              let groupName = groupObject.content;
+              theme.items.forEach(({ item, groupObject }) => {
+                let groupName = groupObject.content;
 
-              if (item.type === "point" || item.type === "box") {
-                html += `<div class='card'>
+                if (item.type === "point" || item.type === "box") {
+                  html += `<div class='card'>
                               <h4>${item.content}</h4>
                               <p>${groupName}</p>
                             </div>`;
-              } else {
-                html += `<div class='card'>
+                } else {
+                  html += `<div class='card'>
                               <h4>${item.content} 
-                             <!-- ${new Date(snappedTime).getFullYear()} -->
+                              <!-- ${new Date(snappedTime).getFullYear()} -->
                               </h4>
                               <p>${groupName}</p>
                             </div>`;
-              }
-            });
-
-            html += `</div> </div>`; // Close theme-section
-          }
-        });
-      }
-      document.getElementById("moreInfos").innerHTML += html;
-
-      let themeSections = document.querySelectorAll(".theme-section");
-
-      requestAnimationFrame(() => {
-        themeSections.forEach((section) => {
-          section.classList.add("visible");
-        });
-      });
-
-      document.getElementById("year").innerHTML = new Date(
-        snappedTime
-      ).getFullYear();
-    });
-    //---------------- DOWNLOADING THE INTERVIEW DATA-------------//
-document
-  .getElementById("export")
-  .addEventListener("click", async function () {
-    try {
-      var data = items.get({
-        type: {
-          start: "ISODate",
-          end: "ISODate",
-        },
-      });
-
-      let jsonString = JSON.stringify(data, null, 2);
-      const filename = `timeline-data-${new Date()
-        .toISOString()
-        .slice(0, 10)}.json`;
-
-      const isNative = window.Capacitor && window.Capacitor.isNativePlatform;
-      if (isNative) {
-        if (!Filesystem || !Directory) {
-          const cap = await import('@capacitor/filesystem');
-          Filesystem = cap.Filesystem;
-          Directory = cap.Directory;
-        }
-        const result = await Filesystem.writeFile({
-          path: filename,
-          data: jsonString,
-          directory: Directory.Documents, // ou Directory.External
-          encoding: 'utf8'
-        });
-        alert(`Fichier sauvegardé avec succès dans Documents : ${filename}`);
-        console.log('Fichier sauvegardé:', result.uri);
-      } else {
-        // Méthode web classique
-        const blob = new Blob([jsonString], { type: "application/json" });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = filename;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        setTimeout(() => URL.revokeObjectURL(url), 100);
-        alert(`Fichier téléchargé : ${filename}`);
-      }
-    } catch (error) {
-      console.error("Erreur d'export:", error);
-      alert(`Erreur lors de l'export: ${error.message}`);
-    }
-  });
-
-    document.getElementById("load").addEventListener("click", function () {
-      try {
-        // Prepare items to add locally (avoid id collisions)
-        const prepared = [];
-        test_items.forEach((i) => {
-          try {
-            if (items.get(i.id)) {
-              const newId = `${i.id}_${Date.now()}`;
-              prepared.push(Object.assign({}, i, { id: newId }));
-            } else {
-              prepared.push(i);
-            }
-          } catch (e) {
-            console.warn("[LifeStories] failed to prepare test item", e, i);
-            prepared.push(i);
-          }
-        });
-
-        // Add locally immediately so the caller (enquêteur) sees the items
-        try {
-          items.add(prepared);
-          try {
-            utils.prettyAlert(
-              "Load",
-              "Items ajoutés localement",
-              "success",
-              1200
-            );
-          } catch (e) {}
-        } catch (e) {
-          console.warn("[LifeStories] failed to add prepared items locally", e);
-        }
-
-        // If WebRTC is available and connected, broadcast the prepared items to peers (don't return early)
-        if (
-          window.webrtcSync &&
-          typeof window.webrtcSync.sendMessage === "function"
-        ) {
-          try {
-            if (window.webrtcSync.isActive && window.webrtcSync.isActive()) {
-              try {
-                window.webrtcSync.sendMessage({
-                  type: "LOAD_ITEMS",
-                  items: prepared,
-                });
-              } catch (e) {
-                console.warn("[LifeStories] sendMessage threw", e);
-              }
-              try {
-                utils.prettyAlert(
-                  "Load",
-                  "Envoi des items au pair",
-                  "info",
-                  1200
-                );
-              } catch (e) {}
-            } else {
-              // Poll for a short period to allow the datachannel to open
-              let attempts = 0;
-              const maxAttempts = 25; // ~5s if interval=200ms
-              const interval = setInterval(() => {
-                attempts++;
-                try {
-                  if (
-                    window.webrtcSync.isActive &&
-                    window.webrtcSync.isActive()
-                  ) {
-                    try {
-                      window.webrtcSync.sendMessage({
-                        type: "LOAD_ITEMS",
-                        items: prepared,
-                      });
-                    } catch (e) {
-                      console.warn("[LifeStories] sendMessage threw", e);
-                    }
-                    try {
-                      utils.prettyAlert(
-                        "Load",
-                        "Envoi des items au pair",
-                        "info",
-                        1200
-                      );
-                    } catch (e) {}
-                    clearInterval(interval);
-                    return;
-                  }
-                } catch (e) {
-                  console.warn(
-                    "[LifeStories] error while polling webrtcSync",
-                    e
-                  );
                 }
+              });
 
-                if (attempts >= maxAttempts) {
-                  clearInterval(interval);
-                  console.warn(
-                    "[LifeStories] WebRTC not active after wait - gave up sending prepared items"
-                  );
-                }
-              }, 200);
+              html += `</div> </div>`; // Close theme-section
             }
-          } catch (sendErr) {
-            console.warn("[LifeStories] send LOAD_ITEMS failed early", sendErr);
-          }
-        } else {
-          console.warn(
-            "[LifeStories] no webrtcSync available to send LOAD_ITEMS"
-          );
+          });
         }
-      } catch (err) {
-        console.error("[LifeStories] unexpected error in load handler", err);
-      }
+        document.getElementById("moreInfos").innerHTML += html;
+
+        let themeSections = document.querySelectorAll(".theme-section");
+
+        requestAnimationFrame(() => {
+          themeSections.forEach((section) => {
+            section.classList.add("visible");
+          });
+        });
+
+        document.getElementById("year").innerHTML = new Date(
+          snappedTime
+        ).getFullYear();
+      });
     });
-  }, 100); // Fin du setTimeout
-}); // FIN du DOMContentLoaded
+  },
+  100
+); // Fin du setTimeout
 
-function handleDragStart(event) {
-  event.dataTransfer.effectAllowed = "move";
-
-  const isEvent = event.target.id.split("_")[0] == "ev";
-  let item;
-  if (isEvent) {
-    item = {
-      id: new Date(),
-      type: isEvent ? "point" : "range",
-      content: event.target.innerHTML,
-    };
-  } else {
-    item = {
-      id: new Date(),
-      type: isEvent ? "point" : "range",
-      content: event.target.innerHTML, //event.target.value si input
-      end: timeline.options.end,
-    };
-  }
-
-  //changer le css pour hint
-  //retrouver la classe de la ligne à faire briller
-  let line = `line_${event.target.closest("ul").id.split("_")[1]}`;
-  event.target.style.opacity = "0.2";
-
-  // set event.target ID with item ID
-  //event.target.id = new Date(item.id).toISOString();
-  event.dataTransfer.setData("text", JSON.stringify(item));
-}
-
-function handleDragEnd(event) {
-  let line = `line_${event.target.closest("ul").id.split("_")[1]}`;
-  event.target.style.opacity = "initial";
-}
-let summaryOpen = false;
 const summaryContainer = document.getElementById("bricks");
-
-const toggleSummary = () => {
-  if (!summaryOpen) {
-    summaryContainer.style.visibility = "visible";
-    requestAnimationFrame(() => {
-      summaryContainer.classList.add("show-summary");
-    });
-    summaryOpen = true;
-  } else {
-    summaryContainer.classList.remove("show-summary");
-    summaryOpen = false;
-  }
-};
-
 const viewSummaryBtn = document.getElementById("view-summary");
 const closeSummaryBtn = document.getElementById("close-summary");
 
-viewSummaryBtn.addEventListener("click", toggleSummary);
-
-closeSummaryBtn.addEventListener("click", toggleSummary);
+setupSummaryHandlers({ summaryContainer, viewSummaryBtn, closeSummaryBtn });
 
 const zoomInBtns = document.querySelectorAll("#zoom-in");
 const zoomOutBtns = document.querySelectorAll("#zoom-out");
-
-zoomInBtns.forEach((btn) => {
-  btn.addEventListener("click", () => {
-    timeline.zoomIn(0.5);
-  });
-});
-
-zoomOutBtns.forEach((btn) => {
-  btn.addEventListener("click", () => {
-    timeline.zoomOut(0.5);
-  });
-});
-
-// zoomInBtn?.addEventListener('click', () => {
-//   timeline.zoomIn(0.5)
-// });
-
-// zoomOutBtn?.addEventListener('click', () => {
-//   timeline.zoomOut(0.5)
-// });
-
-function move(percentage) {
-  var range = timeline.getWindow();
-  var interval = range.end - range.start;
-
-  timeline.setWindow({
-    start: range.start.valueOf() - interval * percentage,
-    end: range.end.valueOf() - interval * percentage,
-  });
-}
-
 const moveBackwardsBtns = document.querySelectorAll("#move-backwards");
 const moveForwardsBtns = document.querySelectorAll("#move-forwards");
 
-moveBackwardsBtns.forEach((btn) => {
-  btn.addEventListener("click", () => {
-    move(0.5);
-  });
+// Appeler setupZoomNavigation APRÈS l'initialisation de timeline
+document.addEventListener("DOMContentLoaded", function () {
+  setTimeout(() => {
+    setupZoomNavigation({
+      timeline,
+      zoomInBtns,
+      zoomOutBtns,
+      moveBackwardsBtns,
+      moveForwardsBtns,
+    });
+  }, 100);
 });
-moveForwardsBtns.forEach((btn) => {
-  btn.addEventListener("click", () => {
-    move(-0.5);
-  });
+
+// Bouton 'Load' pour importer les items de test
+document.getElementById("load").addEventListener("click", function () {
+  importTimelineData(items, test_items, utils);
+});
+
+// Bouton 'Export' pour exporter les items de la timeline
+document.getElementById("export").addEventListener("click", async function () {
+  await exportTimelineData(items);
 });
 
 // Exposer timeline et les datasets pour les autres fichiers

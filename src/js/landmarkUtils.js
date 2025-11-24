@@ -1,3 +1,52 @@
+// Gestion d'appui long pour les landmarks
+let longPressTimer = null;
+let longPressTarget = null;
+let longPressStartPos = null;
+const LONG_PRESS_DURATION = 500; // 500ms pour déclencher l'appui long
+const LONG_PRESS_MOVE_THRESHOLD = 5; //px
+
+export function setupLongPressHandlers(timeline, groups, utils) {
+  timeline.on("mouseDown", function (properties) {
+    if (properties.what === "group-label" && properties.group) {
+      const clickedGroup = groups.get(properties.group);
+      // Seulement pour les sous-groupes
+      if (clickedGroup && clickedGroup.nestedInGroup) {
+        longPressTarget = properties.group;
+        longPressStartPos = {
+          x: properties.event.clientX,
+          y: properties.event.clientY,
+        };
+        // Démarrer le timer d'appui long
+        longPressTimer = setTimeout(() => {
+          // Appui long détecté : basculer le landmark
+          toggleLandmark(longPressTarget, groups, utils);
+          longPressTarget = null;
+          longPressStartPos = null;
+        }, LONG_PRESS_DURATION);
+      }
+    }
+  });
+
+  timeline.on("mouseMove", function (properties) {
+    if (longPressTimer && longPressStartPos && properties.event) {
+      const dx = Math.abs(properties.event.clientX - longPressStartPos.x);
+      const dy = Math.abs(properties.event.clientY - longPressStartPos.y);
+      if (dx > LONG_PRESS_MOVE_THRESHOLD || dy > LONG_PRESS_MOVE_THRESHOLD) {
+        clearTimeout(longPressTimer);
+        longPressTimer = null;
+        longPressStartPos = null;
+      }
+    }
+  });
+
+  timeline.on("mouseUp", function (properties) {
+    if (longPressTimer) {
+      clearTimeout(longPressTimer);
+      longPressTimer = null;
+      longPressStartPos = null;
+    }
+  });
+}
 export function activateInitialLandmarks(groups) {
   const initialLandmarks = [13, 23, 31];
   initialLandmarks.forEach((id) => {
