@@ -17,6 +17,7 @@ import { setupLongPressHandlers } from "./landmarkUtils.js";
 import { handleDragStart, handleDragEnd } from "./dragHandlers.js";
 import { toggleSummary, setupSummaryHandlers } from "./summaryUtils.js";
 import { setupZoomNavigation } from "./zoomNavigation.js";
+import { openEpisodeEditModal } from "./episodeEdit.js";
 
 /**
  *****************************************************************************************************
@@ -76,6 +77,7 @@ let longPressTarget = undefined;
 let stepSize = 1000 * 60 * 60 * 24; // 1 jour en millisecondes
 let timeline;
 let isCustomBarMoving = false;
+let isEditingEpisode = false;
 const items = new vis.DataSet();
 const groups = new vis.DataSet(groupsData);
 
@@ -115,7 +117,10 @@ document.addEventListener("DOMContentLoaded", function () {
 // OPTIONS DE LA TIMELINE
 // ===============================
 const options = {
-  editable: false,
+  editable: true,
+  add: true, 
+  update: true, 
+  remove: true,
   zoomMin: 1000 * 60 * 60 * 24 * 365 * 1, // 5 years in ms
   zoomMax: 1000 * 60 * 60 * 24 * 365 * 50, // 50 years in ms
   min: new Date(),
@@ -190,6 +195,10 @@ const options = {
     return item.content;
   },
   onAdd: function (item, callback) {
+    if (isEditingEpisode) {
+      callback(null); // Annule l'ajout si on est en édition
+      return;
+    }
     // Appel à prettyEpisode pour les éléments de type "range"
     utils.prettyEpisode(item.content, function (value) {
       if (value) {
@@ -429,7 +438,56 @@ document.addEventListener(
         );
       });
 
-      // Initialiser la gestion d'appui long via landmarkUtils
+
+      // Initialiser la gestion d'appui long pour landmarks ET items
+      let longPressTimer = null;
+      let longPressStartPos = null;
+      let longPressTargetItem = null;
+      const LONG_PRESS_DURATION = 500;
+      const LONG_PRESS_MOVE_THRESHOLD = 5;
+
+      timeline.on("mouseDown", function (properties) {
+        if (properties.what === "item" && properties.item) {
+          longPressTargetItem = properties.item;
+          longPressStartPos = {
+            x: properties.event.clientX,
+            y: properties.event.clientY,
+          };
+          longPressTimer = setTimeout(() => {
+            isEditingEpisode = true;
+            const item = items.get(longPressTargetItem);
+            openEpisodeEditModal(item, function (updatedItem) {
+              items.update(updatedItem);
+              timeline.redraw();
+              isEditingEpisode = false;
+            });
+            longPressTargetItem = null;
+            longPressStartPos = null;
+          }, LONG_PRESS_DURATION);
+        }
+      });
+
+      timeline.on("mouseMove", function (properties) {
+        if (longPressTimer && longPressStartPos && properties.event) {
+          const dx = Math.abs(properties.event.clientX - longPressStartPos.x);
+          const dy = Math.abs(properties.event.clientY - longPressStartPos.y);
+          if (dx > LONG_PRESS_MOVE_THRESHOLD || dy > LONG_PRESS_MOVE_THRESHOLD) {
+            clearTimeout(longPressTimer);
+            longPressTimer = null;
+            longPressStartPos = null;
+          }
+        }
+      });
+
+      timeline.on("mouseUp", function (properties) {
+        if (longPressTimer) {
+          clearTimeout(longPressTimer);
+          longPressTimer = null;
+          longPressStartPos = null;
+        }
+      });
+
+      // Initialiser la gestion d'appui long pour landmarks (group-label)
       setupLongPressHandlers(timeline, groups, utils);
 
       timeline.on("click", function (properties) {
@@ -660,8 +718,6 @@ document.addEventListener(
 // Fin du DOMContentLoaded pour la timeline
 
 setupSummaryHandlers({ summaryContainer, viewSummaryBtn, closeSummaryBtn });
-
-
 
 
 // Exposer timeline et les datasets pour les autres fichiers
