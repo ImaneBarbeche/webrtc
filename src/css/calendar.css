@@ -338,3 +338,20 @@ button:hover {
   color: var(--primary-dark);
   stroke-width: 1.5;
 }
+
+.vis-label .lucide {
+  vertical-align: -2px;
+  margin-right: 6px;
+  /* Ajuste la taille si besoin */
+  width: 1em;
+  height: 1em;
+}
+
+.landmark-pin.lucide {
+  vertical-align: -2px;
+  margin-right: 4px;
+  width: 1em;
+  height: 1em;
+  color: #e67e22; /* orange, modifiable */
+}
+
