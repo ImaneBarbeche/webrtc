@@ -27,7 +27,7 @@ export function setBirthYear(year) {
     sticky.style.textAlign = 'center';
     sticky.style.fontSize = '1.1em';
     sticky.innerText = birthYear;
-    timelineContainer.parentNode.insertBefore(sticky, timelineContainer);
+    // timelineContainer.parentNode.insertBefore(sticky, timelineContainer);
   } else {
     sticky.innerText = birthYear;
   }

@@ -615,7 +615,7 @@ document.addEventListener("DOMContentLoaded", function () {
       // Réinitialiser le style des items
       items.forEach((item) => {
         if (item.className.includes("highlight")) {
-          item.className = item.className.replace("highlight", "");
+          item.className = item.className.replace(" highlight", "");
           items.update(item);
         }
       });
@@ -671,10 +671,22 @@ document.addEventListener("DOMContentLoaded", function () {
         // Si la barre verticale passe sur l'item, on le surligne
         if (isInRange) {
           // Ajouter une classe CSS pour surligner l'item
-          item.className += item.className.includes("highlight")
-            ? ""
-            : " highlight";
+          item.className += item.className.includes('highlight')
+            ? ''
+            : ' highlight';
           items.update(item);
+
+          // if(item.className.includes('highlight')) {
+          //   return
+          // }
+          // else {
+          //   // setTimeout(()=>
+          //     item.className += ' highlight'
+          //     // ,20)
+          // }
+          // items.update(item);
+
+
           //details
           let groupObject = groups.get(item.group);
           let themeId = groupObject.nestedInGroup || item.group;

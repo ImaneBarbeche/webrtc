@@ -494,6 +494,23 @@
     -webkit-mask-composite: destination-in;
 }
 
+.vis-text.vis-minor {
+    position: absolute;
+    top: -1rem;
+    font-weight: 300;
+    color: var(--primary-dark);
+
+    b {
+        font-weight: 600;
+    }
+
+    .year-age {
+        opacity: 0.5;
+        font-weight: 100;
+        font-size: 0.9rem;
+    }
+}
+
 /* Responsive - Mobile */
 @media (max-width: 600px) {
     .split {

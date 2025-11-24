@@ -690,7 +690,7 @@ export const surveyMachine = createMachine({
                 return vis.moment(date).format('MMM');
               case 'year':
                 const age = new Date(date).getFullYear() - new Date(window.timeline?.options?.start || new Date()).getFullYear()
-                return '<b>'+new Date(date).getFullYear() + '</b></br><b>'+ age + `</b> ${age != 0 && age != 1 ? 'ans' : 'an'}`
+                return '<b>'+new Date(date).getFullYear() + '</b></br><span class="year-age">'+ age + ` ${age != 0 && age != 1 ? 'ans' : 'an'}</span>`
                 
               default:
                 return '';
