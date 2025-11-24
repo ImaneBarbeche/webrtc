@@ -31,7 +31,7 @@ const groupsData = [
   // MIGRATOIRE
   {
     id: 1,
-    content: "Migratoire",
+    content: '<i data-lucide="house"></i> Migratoire',
     nestedGroups: [11, 12, 13],
     showNested: true,
     className: "vert",
@@ -48,7 +48,7 @@ const groupsData = [
   // SCOLAIRE
   {
     id: 2,
-    content: "Scolaire",
+    content: '<i data-lucide="school"></i> Scolaire',
     nestedGroups: [21, 22, 23],
     showNested: false,
     className: "bleu",
@@ -60,7 +60,7 @@ const groupsData = [
   // PROFESSIONNELLE
   {
     id: 3,
-    content: "Professionnelle",
+    content: '<i data-lucide="briefcase"></i> Professionnelle',
     nestedGroups: [31, 32],
     showNested: false,
     className: "rouge",
@@ -303,6 +303,11 @@ const options = {
       return new Date(date.getFullYear(), 0, 1);
     }
   },
+    groupTemplate: function (group) {
+  const wrapper = document.createElement("span");
+  wrapper.innerHTML = group.content;
+  return wrapper;
+},
 };
 
 // Utilisation des fonctions du module timelineStorage.js
@@ -386,6 +391,11 @@ document.addEventListener(
       // Exporter la timeline globalement
       window.timeline = timeline;
 
+      // Transformer les balises Lucide en SVG après le rendu initial
+      if (window.lucide && typeof window.lucide.createIcons === "function") {
+         window.lucide.createIcons();
+      }
+
       // Si des items sont ajoutés après l'initialisation (ex: via WebRTC),
       // s'assurer que la timeline s'ajuste automatiquement pour les afficher.
       try {
@@ -398,6 +408,10 @@ document.addEventListener(
             setTimeout(() => {
               try {
                 timeline.redraw();
+                // Transformer les balises Lucide en SVG après chaque redraw
+                if (window.lucide && typeof window.lucide.createIcons === "function") {
+                  window.lucide.createIcons();
+                }
               } catch (e) {}
             }, 0);
           });
@@ -407,6 +421,10 @@ document.addEventListener(
             setTimeout(() => {
               try {
                 timeline.redraw();
+                // Transformer les balises Lucide en SVG après chaque redraw
+                if (window.lucide && typeof window.lucide.createIcons === "function") {
+                  window.lucide.createIcons();
+                }
               } catch (e) {}
             }, 0);
           });
@@ -568,6 +586,10 @@ document.addEventListener(
                   items.update(item);
                 });
               });
+              // Re-transformer les balises Lucide après ouverture/fermeture de groupe
+              if (window.lucide && typeof window.lucide.createIcons === "function") {
+                window.lucide.createIcons();
+              }
             }, 50); // Délai court pour laisser vis.js finir son rendu
           }
         }
