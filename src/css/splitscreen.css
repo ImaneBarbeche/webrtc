@@ -260,8 +260,7 @@
     list-style-position: inside;
 
     &::marker {
-        color: var(--label-color);
-        font-size: 1.5rem;
+        content: "\00a0\00a0\00a0\00a0 "; /* espace insécable pour garder l'alignement sans bullet */
     }
 }
 

@@ -53,8 +53,8 @@ export function activateInitialLandmarks(groups) {
     const g = groups.get(id);
     if (!g) return;
     g.isLandmark = true;
-    if (!String(g.content).includes('<i data-lucide="map-pin" class="lucide landmark-pin"></i>')) {
-      g.content = '<i data-lucide="map-pin" class="lucide landmark-pin"></i>' + (g.content || "");
+    if (!String(g.content).includes('<i data-lucide="pin" class="lucide landmark-pin"></i>')) {
+      g.content = '<i data-lucide="pin" class="lucide landmark-pin"></i>' + (g.content || "");
     }
     groups.update(g);
     const parentId = g.keyof || g.nestedInGroup || null;
@@ -106,8 +106,8 @@ export function toggleLandmark(groupId, groups, utils) {
         parentGroup.landmarkChildren.push(groupId);
       }
       // Ajouter l'icône Lucide du landmark sans toucher à l'icône du groupe parent
-      if (!group.content.includes('data-lucide="map-pin"')) {
-        group.content = '<i data-lucide="map-pin" class="lucide landmark-pin"></i> ' + group.content.replace(/^(<i[^>]*data-lucide=["'][^"']+["'][^>]*><\/i>\s*)*/, "").trim();
+      if (!group.content.includes('data-lucide="pin"')) {
+        group.content = '<i data-lucide="pin" class="lucide landmark-pin"></i> ' + group.content.replace(/^(<i[^>]*data-lucide=["'][^"']+["'][^>]*><\/i>\s*)*/, "").trim();
       }
     } else {
       // Retirer de landmarkChildren
@@ -115,7 +115,16 @@ export function toggleLandmark(groupId, groups, utils) {
         (id) => id !== groupId
       );
       // Retirer l'icône Lucide du landmark uniquement
-      group.content = group.content.replace(/<i[^>]*data-lucide=\"map-pin\"[^>]*><\/i>\s*/g, "").trim();
+      group.content = group.content.replace(/<i[^>]*data-lucide=\"pin\"[^>]*><\/i>\s*/g, "").trim();
+
+      // Si le parent n'a plus de landmarks, restaurer l'icône du groupe principal
+      if (parentGroup.landmarkChildren.length === 0) {
+        let iconHtml = "";
+        if (parentGroup.id === 1) iconHtml = '<i data-lucide="house"></i> ';
+        if (parentGroup.id === 2) iconHtml = '<i data-lucide="school"></i> ';
+        if (parentGroup.id === 3) iconHtml = '<i data-lucide="briefcase"></i> ';
+        parentGroup.content = iconHtml + parentGroup.content.replace(/^<i[^>]*data-lucide=["'][^"']+["'][^>]*><\/i>\s*/i, "").trim();
+      }
     }
 
     // Mettre à jour les groupes
@@ -136,7 +145,7 @@ export function toggleLandmark(groupId, groups, utils) {
     if (utils && utils.prettyAlert) {
       utils.prettyAlert(
         group.isLandmark ? "📌 Landmark activé" : "Landmark désactivé",
-        `${group.content.replace(/<i[^>]*data-lucide=\"map-pin\"[^>]*><\/i>\s*/g, "")} ${
+        `${group.content.replace(/<i[^>]*data-lucide=\"pin\"[^>]*><\/i>\s*/g, "")} ${
           group.isLandmark ? "restera visible" : "ne sera plus visible"
         } quand le groupe est fermé`,
         "success",
