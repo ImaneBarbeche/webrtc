@@ -386,7 +386,7 @@ try {
       }
     }
   }
-  // Si une date de naissance est trouvée, on initialise l'affichage sticky et le calcul de l'âge
+  // Si une date de naissance est trouvée, on initialise l'affichage birthyear et le calcul de l'âge
   if (birthYearStored) {
     setBirthYear(birthYearStored);
   }
@@ -401,7 +401,6 @@ document.addEventListener(
     // Attendre que les styles soient appliqués
     setTimeout(() => {
       timeline = new vis.Timeline(container, items, groups, options);
-
       // Exporter la timeline globalement
       window.timeline = timeline;
 
@@ -797,11 +796,7 @@ document.addEventListener(
         const age = birthYear ? selectedYear - birthYear : "";
         document.getElementById("year").innerHTML = `
   <div>${selectedYear}</div>
-  ${
-    age !== ""
-      ? `<div>${age} ans</div>`
-      : ""
-  }
+  ${age !== "" ? `<div>${age} ans</div>` : ""}
 `;
       });
     });

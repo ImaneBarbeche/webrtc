@@ -351,5 +351,26 @@ button:hover {
   height: 1em;
   color: var(--label-color);
   fill: var(--label-color);
-  filter:brightness(0.7) saturate(1.7);
+  filter: brightness(0.7) saturate(1.7);
+}
+
+/* ------------ANNEE DE NAISSANCE------------- */
+
+#birth-year {
+  position: absolute;
+  left: 6%;
+  font-size: 0.8rem;
+  font-weight: bold;
+  border-radius: 8px;
+  padding: 8px 16px;
+  margin-bottom: 12px;
+  text-align: center;
+  letter-spacing: 0.5px;
+  top: 1rem;
+}
+
+#birth-year i[data-lucide="cake"] {
+  margin-right: 6px;
+  font-size: 1.2em;    /* taille personnalisée */
+  vertical-align: middle;
 }

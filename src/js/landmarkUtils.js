@@ -1,3 +1,5 @@
+import { renderGroupLabel } from './timeline.js';
+
 // Gestion d'appui long pour les landmarks
 let longPressTimer = null;
 let longPressTarget = null;
@@ -129,11 +131,11 @@ export function toggleLandmark(groupId, groups, utils) {
     window.lucide.createIcons();
   }
 
-  // Feedback visuel avec SweetAlert2
+  // Feedback visuel simple sans icône Lucide
   if (utils && utils.prettyAlert) {
     utils.prettyAlert(
-      group.isLandmark ? "📌 Landmark activé" : "Landmark désactivé",
-      `${renderGroupLabel(group)} ${
+      group.isLandmark ? "Landmark activé" : "Landmark désactivé",
+      `${group.contentText} ${
         group.isLandmark ? "restera visible" : "ne sera plus visible"
       } quand le groupe est fermé`,
       "success",
