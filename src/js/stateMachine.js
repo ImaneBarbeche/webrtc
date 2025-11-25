@@ -666,7 +666,7 @@ export const surveyMachine = createMachine({
     },
 
     setupCalendar: ({context, event}) => {
-      timeline.setOptions({min: new Date(`${event.birthdate}-01-01`), start: new Date(`${event.birthdate}-01-01`)})
+      timeline.setOptions({min: new Date(`${event.birthdate - 4}-01-01` ), start: new Date(`${event.birthdate - 4}-01-01` )})
       timeline.setOptions({
         format:{
           minorLabels: function(date, scale, step) {
@@ -689,8 +689,13 @@ export const surveyMachine = createMachine({
               case 'month':
                 return vis.moment(date).format('MMM');
               case 'year':
-                const age = new Date(date).getFullYear() - new Date(window.timeline?.options?.start || new Date()).getFullYear()
-                return '<b>'+new Date(date).getFullYear() + '</b></br><span class="year-age">'+ age + ` ${age != 0 && age != 1 ? 'ans' : 'an'}</span>`
+                const age = new Date(date).getFullYear() - 4 - new Date(window.timeline?.options?.start || new Date()).getFullYear()
+                if(new Date(date) < new Date(`${event.birthdate - 1}-01-01` ) || new Date(date) > new Date()) {
+                  console.log(new Date(date) + "is smaller or bigger")
+                }
+                else {
+                  return '<b>'+new Date(date).getFullYear() + '</b></br><span class="year-age">'+ age + ` ${age != 0 && age != 1 ? 'ans' : 'an'}</span>`
+                }
                 
               default:
                 return '';
@@ -699,6 +704,26 @@ export const surveyMachine = createMachine({
         }
         
       });
+
+      // adding a new bar to show the birthdate
+      timeline.addCustomTime(
+        new Date(`${event.birthdate}-01-01`),
+        "birth-year-bar"
+      );
+      timeline.setCustomTimeTitle(
+        event.birthdate,
+        "birth-year-bar"
+      )
+
+      timeline.setCustomTime(
+        new Date(`${event.birthdate}-01-01`),
+        "custom-bar"
+      );
+      timeline.setCustomTimeTitle(
+        event.birthdate,
+        "custom-bar"
+      )
+      
     },
 
     splitHousingEpisode: assign({

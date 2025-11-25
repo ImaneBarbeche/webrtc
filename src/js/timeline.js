@@ -197,6 +197,7 @@ try {
   // Si une date de naissance est trouvée, on initialise l'affichage sticky et le calcul de l'âge
   if (birthYearStored) {
     setBirthYear(birthYearStored);
+    // timeline.options.start = new date(birthYearStored) - 10;
   }
 } catch (e) {}
 
@@ -521,10 +522,15 @@ document.addEventListener("DOMContentLoaded", function () {
         // Arrondir à l'année pour cohérence avec le snap
         const yearStart = new Date(clickedTime.getFullYear(), 0, 1);
         timeline.setCustomTime(yearStart, customTimeId);
+        
 
         // Déclencher manuellement la mise à jour de la synthèse
         // (normalement géré par l'événement timechange, mais on le force ici)
         timeline.emit("timechange", { id: customTimeId, time: yearStart });
+        timeline.setCustomTimeTitle(
+        new Date(snappedTime).getFullYear(),
+        "custom-bar"
+      )
 
         return; // Sortir pour ne pas traiter d'autres clics
       }
@@ -611,6 +617,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
       // Déplacer la barre à la position ajustée
       timeline.setCustomTime(new Date(snappedTime), customTimeId);
+      timeline.setCustomTimeTitle(
+        new Date(snappedTime).getFullYear(),
+        "custom-bar"
+      )
 
       // Réinitialiser le style des items
       items.forEach((item) => {

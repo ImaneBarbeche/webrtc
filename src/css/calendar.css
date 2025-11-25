@@ -201,11 +201,13 @@
     position: relative;
     margin-left: calc(var(--bar-width) * 5);
     padding-block: 1.875rem;
-    transition: opacity 0.3s ease-in-out;
+    /* TODO: Fix transition bug */
+    /* transition: opacity 0.3s ease-in-out; */
+    /* transition-delay: 0.25s; */
 
         &.visible {
             opacity: 1;
-            transition: opacity 0.3s ease-in-out;
+            /* transition: opacity 0.3s ease-in-out; */
         }
 
         &.vert {
