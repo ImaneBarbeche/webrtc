@@ -49,14 +49,16 @@ export function setupLongPressHandlers(timeline, groups, utils) {
 }
 export function activateInitialLandmarks(groups) {
   const initialLandmarks = [13, 23, 31];
+
   initialLandmarks.forEach((id) => {
     const g = groups.get(id);
     if (!g) return;
+
+    // Activer le landmark
     g.isLandmark = true;
-    if (!String(g.content).includes('<i data-lucide="pin" class="lucide landmark-pin"></i>')) {
-      g.content = '<i data-lucide="pin" class="lucide landmark-pin"></i>' + (g.content || "");
-    }
     groups.update(g);
+
+    // Mettre à jour le parent
     const parentId = g.keyof || g.nestedInGroup || null;
     if (parentId) {
       const parent = groups.get(parentId);
@@ -69,19 +71,27 @@ export function activateInitialLandmarks(groups) {
       }
     }
   });
+
+  // Sauvegarde initiale dans localStorage
   try {
     if (!localStorage.getItem("lifestories_groups")) {
       localStorage.setItem("lifestories_groups", JSON.stringify(groups.get()));
     }
   } catch (e) {
-    // silent fail if storage unavailable
+    // silent fail si storage indisponible
+  }
+
+  // Re-transformer les icônes Lucide
+  if (window.lucide && typeof window.lucide.createIcons === "function") {
+    window.lucide.createIcons();
   }
 }
+
 // Fonctions pour la gestion des landmarks (repères temporels)
 export function toggleLandmark(groupId, groups, utils) {
   const group = groups.get(groupId);
 
-  // Vérifier si c'est bien un sous-groupe (qui a nestedInGroup)
+  // Vérifier si c'est bien un sous-groupe
   if (!group || !group.nestedInGroup) {
     console.warn("Ce groupe n'est pas un sous-groupe");
     return;
@@ -95,73 +105,35 @@ export function toggleLandmark(groupId, groups, utils) {
     parentGroup.landmarkChildren = [];
   }
 
-    // Basculer le statut landmark
-    const isCurrentlyLandmark = group.isLandmark || false;
-    group.isLandmark = !isCurrentlyLandmark;
+  // Basculer le statut landmark
+  const isCurrentlyLandmark = group.isLandmark || false;
+  group.isLandmark = !isCurrentlyLandmark;
 
-    // Mettre à jour landmarkChildren du parent
-    if (group.isLandmark) {
-      // Ajouter à landmarkChildren si pas déjà présent
-      if (!parentGroup.landmarkChildren.includes(groupId)) {
-        parentGroup.landmarkChildren.push(groupId);
-      }
-      // Ajouter l'icône Lucide du landmark sans toucher à l'icône du groupe parent
-      if (!group.content.includes('data-lucide="pin"')) {
-        group.content = '<i data-lucide="pin" class="lucide landmark-pin"></i> ' + group.content.replace(/^(<i[^>]*data-lucide=["'][^"']+["'][^>]*><\/i>\s*)*/, "").trim();
-      }
-    } else {
-      // Retirer de landmarkChildren
-      parentGroup.landmarkChildren = parentGroup.landmarkChildren.filter(
-        (id) => id !== groupId
-      );
-      // Retirer l'icône Lucide du landmark uniquement
-      group.content = group.content.replace(/<i[^>]*data-lucide=\"pin\"[^>]*><\/i>\s*/g, "").trim();
-
-      // Si le parent n'a plus de landmarks, restaurer l'icône du groupe principal
-      if (parentGroup.landmarkChildren.length === 0) {
-        let iconHtml = "";
-        if (parentGroup.id === 1) iconHtml = '<i data-lucide="house"></i> ';
-        if (parentGroup.id === 2) iconHtml = '<i data-lucide="school"></i> ';
-        if (parentGroup.id === 3) iconHtml = '<i data-lucide="briefcase"></i> ';
-        parentGroup.content = iconHtml + parentGroup.content.replace(/^<i[^>]*data-lucide=["'][^"']+["'][^>]*><\/i>\s*/i, "").trim();
-      }
+  // Mettre à jour landmarkChildren du parent
+  if (group.isLandmark) {
+    if (!parentGroup.landmarkChildren.includes(groupId)) {
+      parentGroup.landmarkChildren.push(groupId);
     }
-
-    // Mettre à jour les groupes
-    groups.update(group);
-    groups.update(parentGroup);
-
-    // Forcer le redraw et la transformation Lucide pour affichage immédiat
-    if (window.timeline && typeof window.timeline.redraw === "function") {
-      window.timeline.redraw();
-      setTimeout(() => {
-        if (window.lucide && typeof window.lucide.createIcons === "function") {
-          window.lucide.createIcons();
-        }
-      }, 50);
-    }
-
-    // Feedback visuel avec SweetAlert2
-    if (utils && utils.prettyAlert) {
-      utils.prettyAlert(
-        group.isLandmark ? "📌 Landmark activé" : "Landmark désactivé",
-        `${group.content.replace(/<i[^>]*data-lucide=\"pin\"[^>]*><\/i>\s*/g, "")} ${
-          group.isLandmark ? "restera visible" : "ne sera plus visible"
-        } quand le groupe est fermé`,
-        "success",
-        1500
-      );
-    }
+  } else {
+    parentGroup.landmarkChildren = parentGroup.landmarkChildren.filter(
+      (id) => id !== groupId
+    );
+  }
 
   // Mettre à jour les groupes
   groups.update(group);
   groups.update(parentGroup);
 
-  // Feedback visuel avec SweetAlert2
+  // Re-transformer les icônes Lucide
+  if (window.lucide && typeof window.lucide.createIcons === "function") {
+    window.lucide.createIcons();
+  }
+
+  // Feedback visuel
   if (utils && utils.prettyAlert) {
     utils.prettyAlert(
       group.isLandmark ? "📌 Landmark activé" : "Landmark désactivé",
-      `${group.content.replace("📌 ", "")} ${
+      `${group.contentText} ${
         group.isLandmark ? "restera visible" : "ne sera plus visible"
       } quand le groupe est fermé`,
       "success",
@@ -169,3 +141,4 @@ export function toggleLandmark(groupId, groups, utils) {
     );
   }
 }
+

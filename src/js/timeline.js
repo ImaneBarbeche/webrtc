@@ -31,44 +31,48 @@ const groupsData = [
   // MIGRATOIRE
   {
     id: 1,
-    content: '<i data-lucide="house"></i> Migratoire',
+    contentText: "Migratoire", // texte brut
     nestedGroups: [11, 12, 13],
     showNested: true,
     className: "vert",
   },
   {
     id: 11,
-    content: "Statut résidentiel",
+    contentText: "Statut résidentiel",
     dependsOn: 12,
     className: "line_11",
   },
-  { id: 12, content: "Logement", dependsOn: 13, className: "line_12" },
-  { id: 13, content: "Commune", keyof: 1, className: "line_13" },
+  { id: 12, contentText: "Logement", dependsOn: 13, className: "line_12" },
+  { id: 13, contentText: "Commune", keyof: 1, className: "line_13" },
 
   // SCOLAIRE
   {
     id: 2,
-    content: '<i data-lucide="school"></i> Scolaire',
+    contentText: "Scolaire",
     nestedGroups: [21, 22, 23],
     showNested: false,
     className: "bleu",
   },
-  { id: 21, content: "Établissements", dependsOn: 23, className: "line_21" },
-  { id: 22, content: "Formations", dependsOn: 23, className: "line_22" },
-  { id: 23, content: "Diplômes", keyof: 2, className: "line_23" },
+  {
+    id: 21,
+    contentText: "Établissements",
+    dependsOn: 23,
+    className: "line_21",
+  },
+  { id: 22, contentText: "Formations", dependsOn: 23, className: "line_22" },
+  { id: 23, contentText: "Diplômes", keyof: 2, className: "line_23" },
 
   // PROFESSIONNELLE
   {
     id: 3,
-    content: '<i data-lucide="briefcase"></i> Professionnelle',
+    contentText: "Professionnelle",
     nestedGroups: [31, 32],
     showNested: false,
     className: "rouge",
   },
-  { id: 31, content: "Postes", keyof: 3, className: "line_31" },
-  { id: 32, content: "Contrats", dependsOn: 31, className: "line_32" },
+  { id: 31, contentText: "Postes", keyof: 3, className: "line_31" },
+  { id: 32, contentText: "Contrats", dependsOn: 31, className: "line_32" },
 ];
-
 
 // ===============================
 // VARIABLES GLOBALES ET CONSTANTES
@@ -303,11 +307,21 @@ const options = {
       return new Date(date.getFullYear(), 0, 1);
     }
   },
-    groupTemplate: function (group) {
-  const wrapper = document.createElement("span");
-  wrapper.innerHTML = group.content;
-  return wrapper;
-},
+  groupTemplate: function (group) {
+    const wrapper = document.createElement("span");
+    // Icône principale pour les groupes racine
+    let iconHtml = "";
+    if (group.id === 1) iconHtml = '<i data-lucide="house"></i> ';
+    if (group.id === 2) iconHtml = '<i data-lucide="school"></i> ';
+    if (group.id === 3) iconHtml = '<i data-lucide="briefcase"></i> ';
+    // Icône Landmark si activé
+    if (group.isLandmark) {
+      iconHtml += '<i data-lucide="pin" class="lucide landmark-pin"></i> ';
+    }
+    // Texte du groupe
+    wrapper.innerHTML = iconHtml + (group.contentText || "");
+    return wrapper;
+  },
 };
 
 // Utilisation des fonctions du module timelineStorage.js
@@ -393,7 +407,7 @@ document.addEventListener(
 
       // Transformer les balises Lucide en SVG après le rendu initial
       if (window.lucide && typeof window.lucide.createIcons === "function") {
-         window.lucide.createIcons();
+        window.lucide.createIcons();
       }
 
       // Si des items sont ajoutés après l'initialisation (ex: via WebRTC),
@@ -409,7 +423,10 @@ document.addEventListener(
               try {
                 timeline.redraw();
                 // Transformer les balises Lucide en SVG après chaque redraw
-                if (window.lucide && typeof window.lucide.createIcons === "function") {
+                if (
+                  window.lucide &&
+                  typeof window.lucide.createIcons === "function"
+                ) {
                   window.lucide.createIcons();
                 }
               } catch (e) {}
@@ -422,7 +439,10 @@ document.addEventListener(
               try {
                 timeline.redraw();
                 // Transformer les balises Lucide en SVG après chaque redraw
-                if (window.lucide && typeof window.lucide.createIcons === "function") {
+                if (
+                  window.lucide &&
+                  typeof window.lucide.createIcons === "function"
+                ) {
                   window.lucide.createIcons();
                 }
               } catch (e) {}
@@ -456,7 +476,6 @@ document.addEventListener(
         );
       });
 
-
       // Initialiser la gestion d'appui long pour landmarks ET items
       let longPressTimer = null;
       let longPressStartPos = null;
@@ -476,10 +495,10 @@ document.addEventListener(
             const item = items.get(longPressTargetItem);
             openEpisodeEditModal(item, function (updatedItem) {
               items.update(updatedItem);
-                // Redraw après édition via modal pour corriger l'affichage
-                setTimeout(() => {
-                  timeline.redraw();
-                }, 0);
+              // Redraw après édition via modal pour corriger l'affichage
+              setTimeout(() => {
+                timeline.redraw();
+              }, 0);
               isEditingEpisode = false;
             });
             longPressTargetItem = null;
@@ -492,7 +511,10 @@ document.addEventListener(
         if (longPressTimer && longPressStartPos && properties.event) {
           const dx = Math.abs(properties.event.clientX - longPressStartPos.x);
           const dy = Math.abs(properties.event.clientY - longPressStartPos.y);
-          if (dx > LONG_PRESS_MOVE_THRESHOLD || dy > LONG_PRESS_MOVE_THRESHOLD) {
+          if (
+            dx > LONG_PRESS_MOVE_THRESHOLD ||
+            dy > LONG_PRESS_MOVE_THRESHOLD
+          ) {
             clearTimeout(longPressTimer);
             longPressTimer = null;
             longPressStartPos = null;
@@ -587,10 +609,23 @@ document.addEventListener(
                 });
               });
               // Re-transformer les balises Lucide après ouverture/fermeture de groupe
-              if (window.lucide && typeof window.lucide.createIcons === "function") {
+              if (
+                window.lucide &&
+                typeof window.lucide.createIcons === "function"
+              ) {
                 window.lucide.createIcons();
               }
             }, 50); // Délai court pour laisser vis.js finir son rendu
+          } else {
+            // Pas de landmarks → quand même recréer les icônes principales
+            setTimeout(() => {
+              if (
+                window.lucide &&
+                typeof window.lucide.createIcons === "function"
+              ) {
+                window.lucide.createIcons();
+              }
+            }, 50);
           }
         }
       });
@@ -635,7 +670,10 @@ document.addEventListener(
             }
           } else {
             if (alreadyHighlighted) {
-              item.className = item.className.replace("highlight", "").replace(/  +/g, " ").trim();
+              item.className = item.className
+                .replace("highlight", "")
+                .replace(/  +/g, " ")
+                .trim();
               items.update(item);
             }
           }
@@ -647,7 +685,7 @@ document.addEventListener(
         groups.get().forEach((group) => {
           if (group.nestedGroups && group.nestedGroups.length > 0) {
             themeData[group.id] = {
-              name: group.content,
+              name: group.contentText,
               items: [],
               className: group.className,
             };
@@ -758,11 +796,10 @@ document.addEventListener(
     });
   },
   100
-); // Fin du setTimeout 
+); // Fin du setTimeout
 // Fin du DOMContentLoaded pour la timeline
 
 setupSummaryHandlers({ summaryContainer, viewSummaryBtn, closeSummaryBtn });
-
 
 // Exposer timeline et les datasets pour les autres fichiers
 export {
