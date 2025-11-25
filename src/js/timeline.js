@@ -753,24 +753,27 @@ document.addEventListener(
               html += `<div class='theme-section ${
                 theme.className
               } data-year="${new Date(snappedTime).getFullYear()}"'>
-                          <h3>${theme.name}</h3>
+
+                          <h3>${renderGroupLabel(
+                            groups.get(Number(themeId))
+                          )}</h3>
                           
                           <div class="card-wrapper">`;
 
               theme.items.forEach(({ item, groupObject }) => {
-                let groupName = groupObject.content;
+                let groupName = groupObject.contentText || "";
 
                 if (item.type === "point" || item.type === "box") {
                   html += `<div class='card'>
                               <h4>${item.content}</h4>
-                              <p>${groupName}</p>
+                              <p>${renderGroupLabel(groupObject)}</p>
                             </div>`;
                 } else {
                   html += `<div class='card'>
                               <h4>${item.content} 
                               <!-- ${new Date(snappedTime).getFullYear()} -->
                               </h4>
-                              <p>${groupName}</p>
+                              <p>${renderGroupLabel(groupObject)}</p>
                             </div>`;
                 }
               });
@@ -789,9 +792,17 @@ document.addEventListener(
           });
         });
 
-        document.getElementById("year").innerHTML = new Date(
-          snappedTime
-        ).getFullYear();
+        const selectedYear = new Date(snappedTime).getFullYear();
+        const birthYear = getBirthYear();
+        const age = birthYear ? selectedYear - birthYear : "";
+        document.getElementById("year").innerHTML = `
+  <div>${selectedYear}</div>
+  ${
+    age !== ""
+      ? `<div>${age} ans</div>`
+      : ""
+  }
+`;
       });
     });
   },
@@ -800,7 +811,21 @@ document.addEventListener(
 // Fin du DOMContentLoaded pour la timeline
 
 setupSummaryHandlers({ summaryContainer, viewSummaryBtn, closeSummaryBtn });
+// fonction utilitaire pour gérer les icones et les landmarks icons
+function renderGroupLabel(group) {
+  if (!group) return "";
 
+  let iconHtml = "";
+  if (group.id === 1) iconHtml = '<i data-lucide="house"></i> ';
+  if (group.id === 2) iconHtml = '<i data-lucide="school"></i> ';
+  if (group.id === 3) iconHtml = '<i data-lucide="briefcase"></i> ';
+
+  if (group.isLandmark) {
+    iconHtml += '<i data-lucide="pin" class="lucide landmark-pin"></i> ';
+  }
+
+  return iconHtml + (group.contentText || "");
+}
 // Exposer timeline et les datasets pour les autres fichiers
 export {
   timeline,
@@ -809,4 +834,5 @@ export {
   handleDragStart,
   handleDragEnd,
   toggleLandmark,
+  renderGroupLabel,
 };

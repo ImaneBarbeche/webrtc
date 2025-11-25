@@ -129,11 +129,11 @@ export function toggleLandmark(groupId, groups, utils) {
     window.lucide.createIcons();
   }
 
-  // Feedback visuel
+  // Feedback visuel avec SweetAlert2
   if (utils && utils.prettyAlert) {
     utils.prettyAlert(
       group.isLandmark ? "📌 Landmark activé" : "Landmark désactivé",
-      `${group.contentText} ${
+      `${renderGroupLabel(group)} ${
         group.isLandmark ? "restera visible" : "ne sera plus visible"
       } quand le groupe est fermé`,
       "success",
