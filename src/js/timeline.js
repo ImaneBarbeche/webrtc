@@ -544,10 +544,10 @@ document.addEventListener(
           // Déclencher manuellement la mise à jour de la synthèse
           // (normalement géré par l'événement timechange, mais on le force ici)
           timeline.emit("timechange", { id: customTimeId, time: yearStart });
-           timeline.setCustomTimeTitle(
-             new Date(snappedTime).getFullYear(),
-             "custom-bar"
-          )
+          timeline.setCustomTimeTitle(
+            new Date(snappedTime).getFullYear(),
+            "custom-bar"
+          );
 
           return; // Sortir pour ne pas traiter d'autres clics
         }
@@ -654,7 +654,7 @@ document.addEventListener(
         timeline.setCustomTimeTitle(
           new Date(snappedTime).getFullYear(),
           "custom-bar"
-        )
+        );
 
         // Réinitialiser le style des items uniquement si nécessaire
         items.forEach((item) => {
@@ -804,8 +804,7 @@ document.addEventListener(
         const age = birthYear ? selectedYear - birthYear : "";
         document.getElementById("year").innerHTML = `
   <div>${selectedYear}</div>
-  ${age !== "" ? `<div>${age} ans</div>` : ""}
-`;
+  ${age !== "" ? `<div>${age} ans</div>` : ""}`;
       });
     });
   },
