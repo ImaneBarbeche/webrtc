@@ -273,7 +273,13 @@ export const surveyMachine = createMachine(
       askCountry: {
         on: {
           ANSWER_COUNTRY: {
-            actions: ["addCountry"],
+            actions: [
+              "addCountry",
+              {
+                type: "addCalendarEpisode",
+                params: { start: "timeline_init" },
+              },
+            ],
             target: "askAlwaysLivedInCountry",
           },
         },
@@ -677,31 +683,58 @@ export const surveyMachine = createMachine(
 
           // Déterminer le contenu de l'épisode
           let content;
-          if (event.type == "ANSWER_BIRTH_COMMUNE") {
-            content = event.commune[0];
-          } else if (event.commune) {
-            content = event.commune;
-          } else if (event.statut_res) {
-            content = event.statut_res;
-          } else if (event.type === "YES" && context.group === 12) {
-            // Pour "même logement", utiliser un libellé descriptif
+          // 1. Si on est dans le flow étranger avec lieux multiples
+          if (
+            context.country &&
+            context.places &&
+            context.places.length > 0 &&
+            typeof context.currentPlaceIndex === "number"
+          ) {
+            content = context.places[context.currentPlaceIndex];
+          }
+          // 2. Si on est dans le flow étranger avec pays unique
+          else if (
+            context.country &&
+            (!context.places || context.places.length === 0)
+          ) {
+            content = context.country;
+          }
+          // 3. Si on est dans le flow France classique (commune)
+          else if (
+            context.communes &&
+            context.communes.length > 0 &&
+            typeof context.currentCommuneIndex === "number"
+          ) {
+            content = context.communes[context.currentCommuneIndex];
+          }
+          // 4. Cas logement unique
+          else if (event.type === "YES" && context.group === 12) {
             content = "Logement unique";
-          } else if (
+          }
+          // 5. Cas logements multiples
+          else if (
             context.group === 12 &&
             context.logements &&
             context.logements.length > 0
           ) {
-            // Pour un logement spécifique, utiliser le nom du logement
             content = context.logements[context.currentLogementIndex];
-          } else {
-            // Utiliser la commune courante du contexte
-            content = context.communes[context.currentCommuneIndex];
           }
-
+          // 6. Cas statut résidence
+          else if (event.statut_res) {
+            content = event.statut_res;
+          }
+          // 7. Cas commune naissance
+          else if (event.type == "ANSWER_BIRTH_COMMUNE" && event.commune) {
+            content = event.commune[0];
+          }
+          // 8. Fallback
+          else {
+            content = "Lieu inconnu";
+          }
           let truc = ajouterEpisode(
             content,
-            startDate || defaultStart,
-            endDate || defaultEnd,
+            startDate || defaultStart || new Date(),
+            endDate || defaultEnd || new Date(),
             context.group
           );
           return truc;
@@ -859,7 +892,6 @@ export const surveyMachine = createMachine(
                     new Date(date) < new Date(`${event.birthdate - 1}-01-01`) ||
                     new Date(date) > new Date()
                   ) {
-                    // console.log(new Date(date) + "is smaller or bigger")
                   } else {
                     return (
                       "<b>" +
@@ -957,26 +989,32 @@ export const surveyMachine = createMachine(
       }),
     },
     guards: {
+      hasMorePlacesToPlace: (context) => {
+        return (context.currentPlaceIndex || 0) < (context.places?.length || 0);
+      },
       hasMoreCommunesToPlace: (context) => {
         // Pour le placement initial des communes sur la timeline
         // On vérifie si l'index actuel est encore dans le tableau
-        const result =
-          context.context.currentCommuneIndex < context.context.communes.length;
+        const result = context.currentCommuneIndex < context.communes.length;
         return result;
       },
       moreCommunesToProcess: (context) => {
         // Pour le traitement des logements
         // On vient de terminer la commune à currentCommuneIndex
         // On vérifie s'il reste des communes NON encore traitées
+        if (!Array.isArray(context.communes)) {
+          return false;
+        }
         const result =
-          context.context.currentCommuneIndex + 1 <
-          context.context.communes.length;
+          context.currentCommuneIndex + 1 < context.communes.length;
         return result;
       },
       moreLogementsToProcess: (context) => {
+        if (!Array.isArray(context.logements)) {
+          return false;
+        }
         const result =
-          context.context.currentLogementIndex <
-          context.context.logements.length - 1;
+          context.currentLogementIndex < context.logements.length - 1;
         return result;
       },
     },

@@ -434,7 +434,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           eventKey = "alwaysLivedInCountry";
           break;
         case "askMultiplePlaces":
-          questionText = `Pouvez-vous citer les lieux dans lesquels vous avez vécu dans ${state.context.country || 'ce pays'} ?`;
+          questionText = `Pouvez-vous citer les lieux dans lesquels vous avez vécu ?`;
           responseType = "inputlist";
           eventType = "ANSWER_MULTIPLE_PLACES";
           eventKey = "places";
