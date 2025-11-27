@@ -156,12 +156,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Fonction pour afficher les réponses précédentes
   function displayPreviousAnswers() {
-    // Vider l'ancien historique s'il existe
-    const oldHistory = container.querySelector(".previous-answers-section");
-    if (oldHistory) container.removeChild(oldHistory);
-
-    const oldSeparator = container.querySelector(".questions-separator");
-    if (oldSeparator) container.removeChild(oldSeparator);
     const answeredQuestions = loadAnsweredQuestions();
 
     if (answeredQuestions.length === 0) return; // Rien à afficher
@@ -184,10 +178,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         null,
         2
       );
-      let answerKey = null;
       if (typeof item.answer === "object") {
-        answerKey = Object.keys(item.answer).find((k) => k !== "type");
-        answerText = item.answer[answerKey] || JSON.stringify(item.answer);
+        // Extraire la valeur réelle de la réponse
+        const key = Object.keys(item.answer).find((k) => k !== "type");
+        answerText = item.answer[key] || JSON.stringify(item.answer);
       }
 
       // Formater comme un tableau
@@ -195,132 +189,15 @@ document.addEventListener("DOMContentLoaded", async () => {
         answerText = answerText.join(", ");
       }
 
-      // Construction des éléments
-      const questionP = document.createElement("p");
-      questionP.className = "question-text";
-      questionP.innerHTML = `<strong>Q${index + 1}:</strong> ${question}`;
-
-      const answerP = document.createElement("p");
-      answerP.className = "answer-content";
-      answerP.innerHTML = `<strong>${answerText}</strong>`;
-
-      // Ajout du bouton édition avec icône Lucide
-      const editBtn = document.createElement("button");
-      editBtn.className = "edit-answer-btn";
-      editBtn.title = "Éditer la réponse";
-      editBtn.style.background = "none";
-      editBtn.style.border = "none";
-      editBtn.style.cursor = "pointer";
-      editBtn.style.verticalAlign = "middle";
-      editBtn.style.marginLeft = "8px";
-      editBtn.innerHTML = '<i data-lucide="pencil"></i>';
-      answerP.appendChild(editBtn);
-
-      if (window.lucide && typeof window.lucide.createIcons === "function") {
-        window.lucide.createIcons();
-      }
-
-      // Edition inline au clic sur le crayon
-      editBtn.addEventListener("click", () => {
-        const originalHTML = answerP.innerHTML;
-        const input = document.createElement("input");
-        input.type = "text";
-        input.value = answerText;
-        input.style.marginRight = "8px";
-        input.style.width = "60%";
-        input.autofocus = true;
-
-        const validateBtn = document.createElement("button");
-        validateBtn.textContent = "Valider";
-        validateBtn.className = "validate-edit-btn";
-        validateBtn.style.marginRight = "4px";
-
-        const cancelBtn = document.createElement("button");
-        cancelBtn.textContent = "Annuler";
-        cancelBtn.className = "cancel-edit-btn";
-
-        answerP.innerHTML = "";
-        answerP.appendChild(input);
-        answerP.appendChild(validateBtn);
-        answerP.appendChild(cancelBtn);
-
-        validateBtn.addEventListener("click", (e) => {
-          e.preventDefault();
-          let key = answerKey;
-          let value = input.value;
-          let updateEpisode = false;
-          if (!key) {
-            if (item.answer.hasOwnProperty("commune")) key = "commune";
-            else if (item.answer.hasOwnProperty("start")) {
-              key = "start";
-              updateEpisode = true;
-            } else if (item.answer.hasOwnProperty("end")) {
-              key = "end";
-              updateEpisode = true;
-            } else if (item.answer.hasOwnProperty("statut_res")) {
-              key = "statut_res";
-              updateEpisode = true;
-            } else if (item.answer.hasOwnProperty("birthYear"))
-              key = "birthYear";
-          }
-          const updateEvent = {
-            type: "UPDATE_ANSWER",
-            key: key,
-            value: value,
-            updateEpisode: updateEpisode,
-          };
-          surveyService.send(updateEvent);
-
-          // Mise à jour du calendrier si naissance modifiée
-          if (
-            key === "birthYear" &&
-            window.timeline &&
-            typeof window.timeline.setOptions === "function"
-          ) {
-            window.timeline.setOptions({
-              min: new Date(`${value}-01-01`),
-              start: new Date(`${value}-01-01`),
-            });
-          }
-          // Redessiner la timeline après toute modification
-          if (window.timeline) {
-            try {
-              window.timeline.redraw();
-              window.timeline.fit();
-            } catch (e) {
-              console.warn("Timeline redraw/fit failed", e);
-            }
-          }
-          // Mise à jour inline sans reload
-          answerP.innerHTML = `<strong>${value}</strong>`;
-          if (
-            window.lucide &&
-            typeof window.lucide.createIcons === "function"
-          ) {
-            window.lucide.createIcons();
-          }
-        });
-
-        cancelBtn.addEventListener("click", () => {
-          answerP.innerHTML = originalHTML;
-          if (
-            window.lucide &&
-            typeof window.lucide.createIcons === "function"
-          ) {
-            window.lucide.createIcons();
-          }
-        });
-      });
-
-      // Afficher l'heure
-      const timeSmall = document.createElement("small");
-      timeSmall.textContent = new Date(item.timestamp).toLocaleTimeString(
-        "fr-FR"
-      );
-
-      answerDiv.appendChild(questionP);
-      answerDiv.appendChild(answerP);
-      answerDiv.appendChild(timeSmall);
+      answerDiv.innerHTML = `
+                <p class="question-text"><strong>Q${
+                  index + 1
+                }:</strong> ${question}</p>
+                <p class="answer-content"><strong>${answerText}</strong></p>
+                <small>${new Date(item.timestamp).toLocaleTimeString(
+                  "fr-FR"
+                )}</small>
+            `;
 
       previousAnswersDiv.appendChild(answerDiv);
     });
@@ -332,10 +209,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Insérer au début du conteneur
     container.insertBefore(separator, container.firstChild);
     container.insertBefore(previousAnswersDiv, container.firstChild);
-    // Transformer les balises Lucide en SVG
-    if (window.lucide && typeof window.lucide.createIcons === "function") {
-      window.lucide.createIcons();
-    }
   }
 
   // Tracker le dernier état pour éviter les re-renders inutiles
@@ -495,14 +368,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     // IMPORTANT: capturer l'état courant AVANT d'envoyer l'événement
     // car l'envoi provoque une transition et la snapshot après envoi
     // correspondra à l'état suivant (d'où un mauvais mapping dans l'historique).
-    const currentStateBefore = surveyService.getSnapshot().value;
+    const currentStateBefore = surveyService.getSnapshot().value;setTimeout
     surveyService.send(eventData);
 
     // Sauvegarder la réponse dans l'historique en l'associant
     // à l'état courant AVANT la transition (question posée)
     saveAnsweredQuestion(currentStateBefore, eventData);
-  // Réafficher l’historique immédiatement
-  displayPreviousAnswers();
     if (syncEnabled && window.webrtcSync) {
       window.webrtcSync.sendEvent(eventData);
     } else {
