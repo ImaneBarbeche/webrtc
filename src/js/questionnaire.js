@@ -216,13 +216,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // S'abonner aux changements d'état
   surveyService.subscribe((state) => {
-    // Ne re-render que si l'état a vraiment changé (pas juste le contexte)
-    if (lastRenderedState !== state.value) {
-      lastRenderedState = state.value;
       renderQuestion(state); // Mise à jour à chaque transition
-    } else {
-      console.log("Contexte mis à jour, mais état inchangé - pas de re-render");
-    }
   });
 
   // IMPORTANT : Attendre le prochain tick pour que l'état soit restauré
@@ -368,7 +362,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     // IMPORTANT: capturer l'état courant AVANT d'envoyer l'événement
     // car l'envoi provoque une transition et la snapshot après envoi
     // correspondra à l'état suivant (d'où un mauvais mapping dans l'historique).
-    const currentStateBefore = surveyService.getSnapshot().value;setTimeout
+    const currentStateBefore = surveyService.getSnapshot().value;
+    setTimeout;
     surveyService.send(eventData);
 
     // Sauvegarder la réponse dans l'historique en l'associant
@@ -382,7 +377,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   function renderQuestion(state) {
-    //container.innerHTML = ""; // Efface la question précédente
+    // container.innerHTML = ""; // Efface la question précédente
     let questionText = "";
     let responseType = "input";
     let choices = [];
@@ -390,6 +385,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     let eventKey = "commune";
 
     const questionDiv = document.createElement("div");
+    questionDiv.classList.add("question");
+    questionDiv.dataset.state = state.value; // ← identifiant unique
 
     switch (state.value) {
       case "askBirthYear":
@@ -461,7 +458,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         questionText = `Avez-vous toujours vécu dans le même logement à ${currentCommune} ?`;
         responseType = "choice";
         choices = ["Yes", "No"];
-        eventKey = "response"; // ← Changer la clé pour YES/NO
+        eventKey = "alwaysLivedInCommune"; // stable domain key
         break;
 
       case "askMultipleHousings":
@@ -530,56 +527,139 @@ document.addEventListener("DOMContentLoaded", async () => {
       const input = document.createElement("input");
       input.type = "text";
       input.placeholder = "Votre réponse";
+
+      if (state.context[eventKey]) {
+        input.value = state.context[eventKey];
+        input.disabled = true;
+      }
+
+      const editBtn = document.createElement("button");
+      editBtn.innerHTML = "✏️";
+      editBtn.style.display = "none"; // caché tant que pas de réponse
+
+      editBtn.addEventListener("click", () => {
+        input.disabled = false;
+        input.focus();
+        input.addEventListener("keypress", (event) => {
+          if (event.key === "Enter" && input.value.trim() !== "") {
+            const updateEvent = {
+              type: "UPDATE_ANSWER",
+              key: eventKey,
+              value: input.value,
+              updateEpisode: ["start", "end", "statut_res"].includes(eventKey),
+            };
+            surveyService.send(updateEvent);
+
+            if (eventKey === "birthdate" || eventKey === "birthYear") {
+              if (window.timeline) {
+                window.timeline.setOptions({
+                  min: new Date(`${input.value}-01-01`),
+                  start: new Date(`${input.value}-01-01`),
+                });
+                window.timeline.redraw();
+                window.timeline.fit();
+              }
+            }
+            input.disabled = true;
+          }
+        });
+      });
+
       input.addEventListener("keypress", (event) => {
         if (event.key === "Enter" && input.value.trim() !== "" && eventType) {
           let eventData = { type: eventType };
           eventData[eventKey] = input.value;
-          // Si c'est la question de naissance, mettre à jour la timeline immédiatement
           if (eventType === "ANSWER_BIRTH_YEAR") {
             setBirthYear(input.value);
           }
-          sendEvent(eventData); // Utiliser sendEvent au lieu de surveyService.send
-          // Désactiver les inputs et boutons de cette question pour éviter les doubles soumissions
+          sendEvent(eventData);
+          input.disabled = true;
+          editBtn.style.display = "inline-block"; // afficher le bouton après validation
+
           try {
             if (isHost) {
               const controls = questionDiv.querySelectorAll(
                 "input, button, textarea, select"
               );
-              controls.forEach((c) => (c.disabled = true));
-              // (global buttons left enabled) only per-question controls are disabled
+              controls.forEach((c) => {
+                if (c !== editBtn) c.disabled = true; // ne pas désactiver le bouton ✏️
+              });
             }
           } catch (e) {
             console.warn("Impossible de désactiver les contrôles", e);
           }
         }
       });
+
       questionDiv.appendChild(input);
+      questionDiv.appendChild(editBtn);
     }
 
     // Gestion des boutons choix ("Oui", "Non")
     else if (responseType === "choice") {
+      // conteneur pour afficher la réponse actuelle
+      const answerSpan = document.createElement("span");
+      // pr-remplir avec la valeur du contexte si elle existe
+      if (state.context[eventKey]) {
+        answerSpan.textContent = `Réponse actuelle : ${state.context[eventKey]}`;
+      }
+      // tableau pour stocker les boutons Yes/No
+      const choicesButtons = [];
+      // boutons yes/no
       choices.forEach((choice) => {
         const button = document.createElement("button");
         button.innerText = choice;
-        button.addEventListener("click", (event) => {
+
+        button.addEventListener("click", () => {
           let eventData = { type: choice.toUpperCase() };
           eventData[eventKey] = choice;
-          sendEvent(eventData); // Utiliser sendEvent au lieu de surveyService.send
-          // Désactiver les contrôles de cette question pour éviter double envoi
-          try {
-            if (isHost) {
-              const controls = questionDiv.querySelectorAll(
-                "input, button, textarea, select"
-              );
-              controls.forEach((c) => (c.disabled = true));
-              // (global buttons left enabled) only per-question controls are disabled
-            }
-          } catch (e) {
-            console.warn("Impossible de désactiver les contrôles", e);
-          }
+          sendEvent(eventData);
+          // mettre à jour l'affichage
+          answerSpan.textContent = `Réponse actuelle : ${choice}`;
+
+          // Désactiver les boutons après validation
+          choicesButtons.forEach((btn) => (btn.disabled = true));
+
+          // Afficher le bouton d’édition
+          editBtn.style.display = "inline-block";
         });
         questionDiv.appendChild(button);
+        choicesButtons.push(button);
       });
+      // Bouton édition
+      const editBtn = document.createElement("button");
+      editBtn.innerHTML = "✏️";
+      editBtn.style.display = "none"; // caché tant qu’aucune réponse
+
+      editBtn.addEventListener("click", () => {
+        // Réactiver les boutons Yes/No pour permettre un nouveau choix
+        choicesButtons.forEach((btn) => (btn.disabled = false));
+        // appuyer pour UPDATE_ANSWER quand on arrive au delà de cet etat
+        choicesButtons.forEach((btn) => {
+          const choice = btn.innerText;
+          btn.onclick = () => {
+            const currentState = surveyService.getSnapshot().value;
+            if (currentState === "askSameHousingInCommune") {
+              // Nous somme au même etat -> transition avec YES/NO
+              sendEvent({ type: choice.toUpperCase() });
+            } else {
+              // apres cet etat -> on met seulement le contexte à jour
+              const updateEvent = {
+                type: "UPDATE_ANSWER",
+                key: eventKey, // "alwaysLivedInCommune"
+                value: choice,
+                updateEpisode: false,
+              };
+              surveyService.send(updateEvent);
+            }
+            answerSpan.textContent = `Réponse actuelle : ${choice}`;
+            choicesButtons.forEach((b) => (b.disabled = true));
+          };
+        });
+      });
+
+      questionDiv.appendChild(answerSpan);
+      questionDiv.appendChild(editBtn);
     }
 
     // Gestion des réponses avec un input et une liste

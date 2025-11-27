@@ -269,6 +269,7 @@ export const surveyMachine = createMachine({
       on: {
         YES: {
           actions: [
+            assign({ alwaysLivedInCommune: () => "Yes" }),   // ← record answer
             {
               type: 'modifyCalendarEpisode', params: {end: 'timeline_end'}
             },
@@ -276,8 +277,11 @@ export const surveyMachine = createMachine({
           ],
           target: 'askSameHousingInCommune'
         },
-        NO: 'askMultipleCommunes'
+        NO: {
+          actions: [assign({ alwaysLivedInCommune: () => "No" })], // ← record answer
+          target: 'askMultipleCommunes'
       }
+    }
     },
 
     askMultipleCommunes: {
