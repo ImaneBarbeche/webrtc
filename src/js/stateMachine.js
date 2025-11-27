@@ -287,7 +287,13 @@ export const surveyMachine = createMachine(
       askAlwaysLivedInCountry: {
         on: {
           YES: {
-            actions: [assign({ alwaysLivedInCountry: () => "Yes" })],
+            actions: [
+              assign({ alwaysLivedInCountry: () => "Yes" }),
+              {
+                type: "modifyCalendarEpisode",
+                params: { end: "timeline_end" },
+              },
+            ],
             target: "askSameHousingInCountry",
           },
           NO: {
@@ -323,6 +329,9 @@ export const surveyMachine = createMachine(
         always: [
           {
             guard: "hasMorePlacesToPlace",
+            actions: [
+              assign({ group: () => 13 }), // ← forcer le groupe à 13 pour les lieux/pays
+            ],
             target: "askPlaceArrivalYear",
           },
           {
@@ -419,6 +428,7 @@ export const surveyMachine = createMachine(
         always: [
           {
             guard: "hasMoreCommunesToPlace",
+            actions: [assign({ group: () => 13 })], // rester en groupe commune
             target: "askCommuneArrivalYear",
           },
           {
@@ -562,15 +572,14 @@ export const surveyMachine = createMachine(
         };
       }),
       addMultiplePlaces: assign({
-        places: ({ context, event }) => {
-          // event.places doit être un tableau des pays ou lieux
-          return [...(context.places || []), ...event.places];
-        },
+        places: ({ context, event }) => [
+          ...(context.places || []),
+          ...event.places,
+        ],
+        currentPlaceIndex: () => 0, // toujours commencer au premier lieu
       }),
       addCommune: assign({
-        communes: ({ context, event }) => {
-          return [...context.communes, event.commune];
-        },
+        communes: ({ context, event }) => [...context.communes, event.commune],
       }),
 
       addDepartement: assign({
@@ -580,13 +589,11 @@ export const surveyMachine = createMachine(
       }),
 
       addMultipleCommunes: assign({
-        communes: ({ context, event }) => {
-          return [...context.communes, ...event.communes];
-        },
-        currentCommuneIndex: ({ context }) => {
-          // Positionner l'index sur la première nouvelle commune ajoutée
-          return context.communes.length;
-        },
+        communes: ({ context, event }) => [
+          ...context.communes,
+          ...(event.communes || []),
+        ],
+        currentCommuneIndex: () => 0, // commencer à la première commune
       }),
 
       addMultipleHousings: assign({
@@ -995,6 +1002,9 @@ export const surveyMachine = createMachine(
       hasMoreCommunesToPlace: (context) => {
         // Pour le placement initial des communes sur la timeline
         // On vérifie si l'index actuel est encore dans le tableau
+        if (!Array.isArray(context.communes)) {
+          return false;
+        }
         const result = context.currentCommuneIndex < context.communes.length;
         return result;
       },
