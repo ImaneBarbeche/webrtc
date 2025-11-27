@@ -91,6 +91,7 @@ const groups = new vis.DataSet(groupsData);
 const summaryContainer = document.getElementById("bricks");
 const viewSummaryBtn = document.getElementById("view-summary");
 const closeSummaryBtn = document.getElementById("close-summary");
+const toggleChaptersBtn = document.getElementById("toggle-chapters");
 const zoomInBtns = document.querySelectorAll("#zoom-in");
 const zoomOutBtns = document.querySelectorAll("#zoom-out");
 const moveBackwardsBtns = document.querySelectorAll("#move-backwards");
@@ -133,7 +134,7 @@ const options = {
   stack: true,
   end: new Date(`${new Date().getFullYear()}-12-31`),
   verticalScroll: true,
-  height: "80vh",
+  height: "85vh",
   zoomable: true,
   zoomFriction: 40,
   // timeAxis: {scale: 'year', step: 5},
@@ -319,7 +320,7 @@ const options = {
       iconHtml += '<i data-lucide="pin" class="lucide landmark-pin"></i> ';
     }
     // Texte du groupe
-    wrapper.innerHTML = iconHtml + (group.contentText || "");
+    wrapper.innerHTML = iconHtml + (`<span class="trajectory-title">${group.contentText}</span>` || "");
     return wrapper;
   },
 };
@@ -545,7 +546,7 @@ document.addEventListener(
           // (normalement géré par l'événement timechange, mais on le force ici)
           timeline.emit("timechange", { id: customTimeId, time: yearStart });
            timeline.setCustomTimeTitle(
-             new Date(snappedTime).getFullYear(),
+             new Date(yearStart).getFullYear(),
              "custom-bar"
           )
 
@@ -633,6 +634,18 @@ document.addEventListener(
         }
       });
 
+      
+    let chapterTitles = document.querySelectorAll(".trajectory-title")
+
+    toggleChaptersBtn.addEventListener("click", () => {
+      // console.log(chapterTitles)
+        chapterTitles?.forEach((chapter) => {
+          chapter.classList.toggle('closed')
+          // console.log(chapter)
+        })
+        timeline.redraw();
+    })
+
       timeline.on("timechanged", function (event) {
         isCustomBarMoving = false;
       });
@@ -644,8 +657,15 @@ document.addEventListener(
         `${timeline.options.end.getFullYear() - 10}-01-01`,
         "custom-bar"
       );
+
+      let timechangeDebounce = null;
       timeline.on("timechange", function (event) {
         isCustomBarMoving = true;
+
+        if(timechangeDebounce) {
+          clearTimeout(timechangeDebounce)
+        }
+
         var selectedTime = event.time.getTime();
         var snappedTime = Math.round(selectedTime / stepSize) * stepSize;
 
@@ -655,6 +675,8 @@ document.addEventListener(
           new Date(snappedTime).getFullYear(),
           "custom-bar"
         )
+
+        timechangeDebounce = setTimeout(() => {
 
         // Réinitialiser le style des items uniquement si nécessaire
         items.forEach((item) => {
@@ -671,6 +693,7 @@ document.addEventListener(
 
           const alreadyHighlighted = item.className.includes("highlight");
           if (isInRange) {
+              console.log("moved")
             if (!alreadyHighlighted) {
               item.className += " highlight";
               items.update(item);
@@ -803,17 +826,21 @@ document.addEventListener(
         const birthYear = getBirthYear();
         const age = birthYear ? selectedYear - birthYear : "";
         document.getElementById("year").innerHTML = `
-  <div>${selectedYear}</div>
-  ${age !== "" ? `<div>${age} ans</div>` : ""}
-`;
-      });
+        <div>${selectedYear}</div>
+        ${age !== "" ? `<div>${age} ans</div>` : ""}
+      `;
+      }, 20);
     });
+    }, 100)
+
   },
   100
 ); // Fin du setTimeout
 // Fin du DOMContentLoaded pour la timeline
 
 setupSummaryHandlers({ summaryContainer, viewSummaryBtn, closeSummaryBtn });
+
+
 // fonction utilitaire pour gérer les icones et les landmarks icons
 function renderGroupLabel(group) {
   if (!group) return "";

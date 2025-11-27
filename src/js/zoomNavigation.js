@@ -1,5 +1,5 @@
 // Zoom and navigation logic for timeline
-export function setupZoomNavigation({ timeline, zoomInBtns, zoomOutBtns, moveBackwardsBtns, moveForwardsBtns }) {
+export function setupZoomNavigation({ timeline, zoomInBtns, zoomOutBtns, moveBackwardsBtns, moveForwardsBtns}) {
   zoomInBtns.forEach((btn) => {
     btn.addEventListener("click", () => {
       timeline.zoomIn(0.5);
