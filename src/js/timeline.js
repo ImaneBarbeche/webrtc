@@ -544,6 +544,10 @@ document.addEventListener(
           // Déclencher manuellement la mise à jour de la synthèse
           // (normalement géré par l'événement timechange, mais on le force ici)
           timeline.emit("timechange", { id: customTimeId, time: yearStart });
+           timeline.setCustomTimeTitle(
+             new Date(snappedTime).getFullYear(),
+             "custom-bar"
+          )
 
           return; // Sortir pour ne pas traiter d'autres clics
         }
@@ -647,6 +651,10 @@ document.addEventListener(
 
         // Déplacer la barre à la position ajustée
         timeline.setCustomTime(new Date(snappedTime), customTimeId);
+        timeline.setCustomTimeTitle(
+          new Date(snappedTime).getFullYear(),
+          "custom-bar"
+        )
 
         // Réinitialiser le style des items uniquement si nécessaire
         items.forEach((item) => {

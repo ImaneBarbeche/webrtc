@@ -691,7 +691,7 @@ export const surveyMachine = createMachine({
               case 'year':
                 const age = new Date(date).getFullYear() - 4 - new Date(window.timeline?.options?.start || new Date()).getFullYear()
                 if(new Date(date) < new Date(`${event.birthdate - 1}-01-01` ) || new Date(date) > new Date()) {
-                  console.log(new Date(date) + "is smaller or bigger")
+                  // console.log(new Date(date) + "is smaller or bigger")
                 }
                 else {
                   return '<b>'+new Date(date).getFullYear() + '</b></br><span class="year-age">'+ age + ` ${age != 0 && age != 1 ? 'ans' : 'an'}</span>`
