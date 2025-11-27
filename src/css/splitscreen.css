@@ -44,17 +44,34 @@
     display: none;
 }
 
-.custom-bar{
+.custom-bar, .birth-year-bar {
     background-color: var(--primary-dark);
     width: 0.15rem !important;
     border-radius: 2rem;
     cursor: col-resize !important;
     position: relative;
+    top: 2.8rem !important;
+    transition: left 0.2s ease-out, transform 0.2s ease;
+    /* transition-delay: 0.1s; */
+    z-index: 2;
+
+        &:hover {
+            transform: scale(1.01);
+        }
+
+
+
+    div {
+        width: 3rem !important;
+        transform: translateX(-.75rem) !important;
+     
+
+    }
 
     /* bullet */
     &::after {
         content: "";
-        width: 1rem;
+        width: 1.25rem;
         aspect-ratio: 1 / 1;
         display: block;
         position: absolute;
@@ -64,9 +81,61 @@
         transform: translateX(50%);
         background-color: inherit;
         pointer-events: none;
-        box-shadow: 0rem 0.15rem var(--primary-beige);
-
+        box-shadow: 0rem 0.25rem var(--primary-beige);
     }
+
+    /* year */
+    &::before {
+        content: attr(title);
+        opacity: 0;
+        background-color: var(--primary-beige);
+        font-weight: 600;
+        padding-block: 0.5rem;
+        padding-inline: 1rem;
+        border-radius: 1rem;
+        position: absolute;
+        top: -3.4rem;
+        right: 50%;
+        transform: translateX(50%);
+        pointer-events: none;
+        mask-image: linear-gradient( to left, transparent 0.5%, black 20%, black 80%, transparent 100% );
+        transition: opacity 0.3s ease-out;
+    }
+
+    &:hover {
+        /* background-color: blue; */
+        /* opacity: 0.1; */
+        /* background-color: transparent; */
+        /* opacity: 80%; */
+        /* backdrop-filter: blur(2rem); */
+
+        &::before {
+            opacity: 1;
+            
+        }
+    }
+}
+
+.birth-year-bar {
+    background-color: transparent;
+    pointer-events: none;
+    transition: unset;
+    z-index: 1;
+
+    &::after {
+        /* display: none; */
+    }
+
+    &::before {
+        opacity: 1;
+        top: -3.6rem;
+        padding-inline: 4rem;
+    }
+}
+
+.vis-time-axis {
+    /* hiding the default lines */
+    background-color: var(--primary-beige);
 }
 
 /* .card { */
@@ -491,6 +560,24 @@
     /* mask-mode: luminance; */
     mask-composite: intersect;
     -webkit-mask-composite: destination-in;
+}
+
+.vis-text.vis-minor {
+    position: absolute;
+    top: -2.2rem;
+    font-weight: 300;
+    color: var(--primary-dark);
+    cursor: pointer;
+
+    b {
+        font-weight: 600;
+    }
+
+    .year-age {
+        opacity: 0.5;
+        font-weight: 100;
+        font-size: 0.9rem;
+    }
 }
 
 /* Responsive - Mobile */

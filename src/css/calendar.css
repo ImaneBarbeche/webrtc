@@ -8,9 +8,10 @@
    ======================================== */
 
 .vis-timeline {
-  /* background-color: var(--primary-beige); */
-  border: none;
-  border-radius: 2rem;
+    /* background-color: var(--primary-beige); */
+    border: none;
+    /* border-radius: 2rem; */
+    
 }
 
 /* Styles pour les groupes landmarks */
@@ -192,16 +193,18 @@
   --bar-width: 0.5rem;
   --bar-color: red;
 
-  opacity: 0;
-  position: relative;
-  margin-left: calc(var(--bar-width) * 5);
-  padding-block: 1.875rem;
-  transition: opacity 0.3s ease-in-out;
+    opacity: 0;
+    position: relative;
+    margin-left: calc(var(--bar-width) * 5);
+    padding-block: 1.875rem;
+    /* TODO: Fix transition bug */
+    /* transition: opacity 0.3s ease-in-out; */
+    /* transition-delay: 0.25s; */
 
-  &.visible {
-    opacity: 1;
-    transition: opacity 0.3s ease-in-out;
-  }
+        &.visible {
+            opacity: 1;
+            /* transition: opacity 0.3s ease-in-out; */
+        }
 
   &.vert {
     --bar-color: #eabca5;
