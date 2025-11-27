@@ -216,7 +216,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // S'abonner aux changements d'état
   surveyService.subscribe((state) => {
-      renderQuestion(state); // Mise à jour à chaque transition
+    renderQuestion(state); // Mise à jour à chaque transition
   });
 
   // IMPORTANT : Attendre le prochain tick pour que l'état soit restauré
@@ -397,10 +397,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         break;
 
       case "birthPlaceIntro":
-        questionText =
-          "Où habitaient vos parents à votre naissance ? Dans quelle commune et département (France) ou pays (étranger) ?";
-        responseType = "info"; // Nouveau type pour afficher un texte + bouton suivant
-        eventType = "NEXT";
+        questionText = "Où habitaient vos parents à votre naissance ?";
+        responseType = "choice";
+        choices = ["France", "Etranger"];
         break;
 
       case "askCurrentCommune":
@@ -416,6 +415,49 @@ document.addEventListener("DOMContentLoaded", async () => {
         eventType = "ANSWER_DEPARTEMENT";
         eventKey = "departement";
         break;
+
+      case "askCountry":
+        questionText = "Dans quel pays ?";
+        responseType = "input";
+        eventType = "ANSWER_COUNTRY";
+        eventKey = "country";
+        break;
+        case "askAlwaysLivedInCountry":
+          questionText = `Avez-vous toujours vécu en ${state.context.country || 'ce pays'} ?`;
+          responseType = "choice";
+          choices = ["Yes", "No"];
+          break;
+        case "askSameHousingInCountry":
+          questionText = `Avez-vous toujours vécu dans le même logement en ${state.context.country || 'ce pays'} ?`;
+          responseType = "choice";
+          choices = ["Yes", "No"];
+          eventKey = "alwaysLivedInCountry";
+          break;
+        case "askMultiplePlaces":
+          questionText = `Pouvez-vous citer les lieux dans lesquels vous avez vécu dans ${state.context.country || 'ce pays'} ?`;
+          responseType = "inputlist";
+          eventType = "ANSWER_MULTIPLE_PLACES";
+          eventKey = "places";
+          break;
+        case "askPlaceArrivalYear":
+          questionText = `En quelle année êtes-vous arrivé(e) à ${state.context.places[state.context.currentPlaceIndex] || 'ce lieu'} ?`;
+          responseType = "input";
+          eventType = "ANSWER_PLACE_ARRIVAL";
+          eventKey = "start";
+          break;
+        case "askPlaceDepartureYear":
+          questionText = `En quelle année avez-vous quitté ${state.context.places[state.context.currentPlaceIndex] || 'ce lieu'} ?`;
+          responseType = "input";
+          eventType = "ANSWER_PLACE_DEPARTURE";
+          eventKey = "end";
+          break;
+        case "askSameHousingInPlace":
+          const currentPlace = state.context.places[state.context.currentPlaceIndex] || 'ce lieu';
+          questionText = `Avez-vous toujours vécu dans le même logement à ${currentPlace} ?`;
+          responseType = "choice";
+          choices = ["Yes", "No"];
+          eventKey = "alwaysLivedInPlace";
+          break;
 
       case "askAlwaysLivedInCommune":
         questionText = `Avez-vous toujours vécu à ${
@@ -462,15 +504,20 @@ document.addEventListener("DOMContentLoaded", async () => {
         break;
 
       case "askMultipleHousings":
-        // currentCommuneIndex pointe sur la commune qu'on est en train de traiter
-        const communeForHousings =
-          state.context.communes[state.context.currentCommuneIndex] ||
-          "cette commune";
-        questionText = `Nous allons faire la liste des logements successifs que vous avez occupés dans ${communeForHousings} depuis votre arrivée.`;
-        responseType = "inputlist";
-        eventType = "ANSWER_MULTIPLE_HOUSINGS";
-        eventKey = "logements";
-        break;
+          // Déterminer le contexte : commune, pays ou lieu
+          let locationLabel = "cette commune";
+          if (state.context.country && state.context.currentPlaceIndex === undefined) {
+            locationLabel = state.context.country;
+          } else if (state.context.places && typeof state.context.currentPlaceIndex === "number") {
+            locationLabel = state.context.places[state.context.currentPlaceIndex] || state.context.country || "ce lieu";
+          } else if (state.context.communes && typeof state.context.currentCommuneIndex === "number") {
+            locationLabel = state.context.communes[state.context.currentCommuneIndex] || "cette commune";
+          }
+          questionText = `Nous allons faire la liste des logements successifs que vous avez occupés en ${locationLabel} depuis votre arrivée.`;
+          responseType = "inputlist";
+          eventType = "ANSWER_MULTIPLE_HOUSINGS";
+          eventKey = "logements";
+          break;
 
       case "askHousingArrivalAge":
         questionText = `À quel âge ou en quelle année avez-vous emménagé dans le logement ${
@@ -611,16 +658,18 @@ document.addEventListener("DOMContentLoaded", async () => {
         button.innerText = choice;
 
         button.addEventListener("click", () => {
-          let eventData = { type: choice.toUpperCase() };
-          eventData[eventKey] = choice;
+          let eventData;
+          if (state.value === "birthPlaceIntro") {
+            // On envoie un événement spécifique selon le choix
+            eventData = { type: choice === "France" ? "FRANCE" : "ETRANGER" };
+          } else {
+            // Cas classique pour les autres questions à choix
+            eventData = { type: choice.toUpperCase() };
+            eventData[eventKey] = choice;
+          }
           sendEvent(eventData);
-          // mettre à jour l'affichage
           answerSpan.textContent = `Réponse actuelle : ${choice}`;
-
-          // Désactiver les boutons après validation
           choicesButtons.forEach((btn) => (btn.disabled = true));
-
-          // Afficher le bouton d’édition
           editBtn.style.display = "inline-block";
         });
         questionDiv.appendChild(button);
@@ -666,7 +715,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     else if (responseType === "inputlist") {
       const input = document.createElement("input");
       input.type = "text";
-      input.placeholder = "Commune/Département ou pays";
+      input.placeholder = "Votre réponse";
 
       const responseList = document.createElement("ul");
       responseList.id = `ulgroup_${state.context.group}`;
