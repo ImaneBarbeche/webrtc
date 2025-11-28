@@ -43,7 +43,7 @@ const groupsData = [
     className: "line_11",
   },
   { id: 12, contentText: "Logement", dependsOn: 13, className: "line_12" },
-  { id: 13, contentText: "Commune", keyof: 1, className: "line_13" },
+  { id: 13, contentText: "Commune", nestedInGroup: 1, className: "line_13" },
 
   // SCOLAIRE
   {
@@ -60,7 +60,7 @@ const groupsData = [
     className: "line_21",
   },
   { id: 22, contentText: "Formations", dependsOn: 23, className: "line_22" },
-  { id: 23, contentText: "Diplômes", keyof: 2, className: "line_23" },
+  { id: 23, contentText: "Diplômes", nestedInGroup: 2, className: "line_23" },
 
   // PROFESSIONNELLE
   {
@@ -70,7 +70,7 @@ const groupsData = [
     showNested: false,
     className: "rouge",
   },
-  { id: 31, contentText: "Postes", keyof: 3, className: "line_31" },
+  { id: 31, contentText: "Postes", nestedInGroup: 3, className: "line_31" },
   { id: 32, contentText: "Contrats", dependsOn: 31, className: "line_32" },
 ];
 
@@ -205,9 +205,10 @@ const options = {
       if (value) {
         item.content = value;
         item.start = new Date(`${item.start.getFullYear()}-01-01`); // remise à l'echelle année
-        item.end = new Date(item.start).setFullYear(
-          item.start.getFullYear() + 1
-        ); //1 année
+        // garder `item.end` comme Date (setFullYear retourne un timestamp)
+        let endDate = new Date(item.start);
+        endDate.setFullYear(endDate.getFullYear() + 1);
+        item.end = endDate; // 1 année
 
         if (String(item.group).startsWith(1)) item.className = "green";
         else if (String(item.group).startsWith(2)) item.className = "blue";
@@ -330,8 +331,6 @@ restoreGroups(groups);
 restoreOptions(options);
 
 // Persister automatiquement les items dès qu'ils changent (utile si la timeline
-// n'est pas initialisée sur la page où les items sont ajoutés — ex: questionnaire)
-
 try {
   if (items && typeof items.on === "function") {
     items.on("add", function () {
@@ -592,7 +591,7 @@ document.addEventListener(
                   landmarkItems = items.get({
                     filter: (item) =>
                       item.group === properties.group &&
-                      item._originalGroup === landmarkId,
+                      item.__originalGroup === landmarkId,
                   });
                 }
 
