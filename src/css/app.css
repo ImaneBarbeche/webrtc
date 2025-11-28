@@ -27,6 +27,10 @@
     /* --primary-grey: rgb(201, 135, 135); */
 }
 
+* {
+    user-select: none;
+}
+
 body {
     background-color: var(--primary-beige);
     /* for the summary modal */
