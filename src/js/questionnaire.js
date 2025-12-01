@@ -397,9 +397,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         break;
 
       case "birthPlaceIntro":
-        questionText = "Où habitaient vos parents à votre naissance ?";
-        responseType = "choice";
-        choices = ["France", "Etranger"];
+        questionText =
+          "Où habitaient vos parents à votre naissance ? Dans quelle commune et département (France) ou pays (étranger) ?";
+        responseType = "info"; // Nouveau type pour afficher un texte + bouton suivant
+        eventType = "NEXT";
         break;
 
       case "askCurrentCommune":
@@ -415,49 +416,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         eventType = "ANSWER_DEPARTEMENT";
         eventKey = "departement";
         break;
-
-      case "askCountry":
-        questionText = "Dans quel pays ?";
-        responseType = "input";
-        eventType = "ANSWER_COUNTRY";
-        eventKey = "country";
-        break;
-        case "askAlwaysLivedInCountry":
-          questionText = `Avez-vous toujours vécu en ${state.context.country || 'ce pays'} ?`;
-          responseType = "choice";
-          choices = ["Yes", "No"];
-          break;
-        case "askSameHousingInCountry":
-          questionText = `Avez-vous toujours vécu dans le même logement en ${state.context.country || 'ce pays'} ?`;
-          responseType = "choice";
-          choices = ["Yes", "No"];
-          eventKey = "alwaysLivedInCountry";
-          break;
-        case "askMultiplePlaces":
-          questionText = `Pouvez-vous citer les lieux dans lesquels vous avez vécu ?`;
-          responseType = "inputlist";
-          eventType = "ANSWER_MULTIPLE_PLACES";
-          eventKey = "places";
-          break;
-        case "askPlaceArrivalYear":
-          questionText = `En quelle année êtes-vous arrivé(e) à ${state.context.places[state.context.currentPlaceIndex] || 'ce lieu'} ?`;
-          responseType = "input";
-          eventType = "ANSWER_PLACE_ARRIVAL";
-          eventKey = "start";
-          break;
-        case "askPlaceDepartureYear":
-          questionText = `En quelle année avez-vous quitté ${state.context.places[state.context.currentPlaceIndex] || 'ce lieu'} ?`;
-          responseType = "input";
-          eventType = "ANSWER_PLACE_DEPARTURE";
-          eventKey = "end";
-          break;
-        case "askSameHousingInPlace":
-          const currentPlace = state.context.places[state.context.currentPlaceIndex] || 'ce lieu';
-          questionText = `Avez-vous toujours vécu dans le même logement à ${currentPlace} ?`;
-          responseType = "choice";
-          choices = ["Yes", "No"];
-          eventKey = "alwaysLivedInPlace";
-          break;
 
       case "askAlwaysLivedInCommune":
         questionText = `Avez-vous toujours vécu à ${
@@ -500,24 +458,19 @@ document.addEventListener("DOMContentLoaded", async () => {
         questionText = `Avez-vous toujours vécu dans le même logement à ${currentCommune} ?`;
         responseType = "choice";
         choices = ["Yes", "No"];
-        eventKey = "alwaysLivedInCommune"; // stable domain key
+        eventKey = "response"; // ← Changer la clé pour YES/NO
         break;
 
       case "askMultipleHousings":
-          // Déterminer le contexte : commune, pays ou lieu
-          let locationLabel = "cette commune";
-          if (state.context.country && state.context.currentPlaceIndex === undefined) {
-            locationLabel = state.context.country;
-          } else if (state.context.places && typeof state.context.currentPlaceIndex === "number") {
-            locationLabel = state.context.places[state.context.currentPlaceIndex] || state.context.country || "ce lieu";
-          } else if (state.context.communes && typeof state.context.currentCommuneIndex === "number") {
-            locationLabel = state.context.communes[state.context.currentCommuneIndex] || "cette commune";
-          }
-          questionText = `Nous allons faire la liste des logements successifs que vous avez occupés en ${locationLabel} depuis votre arrivée.`;
-          responseType = "inputlist";
-          eventType = "ANSWER_MULTIPLE_HOUSINGS";
-          eventKey = "logements";
-          break;
+        // currentCommuneIndex pointe sur la commune qu'on est en train de traiter
+        const communeForHousings =
+          state.context.communes[state.context.currentCommuneIndex] ||
+          "cette commune";
+        questionText = `Nous allons faire la liste des logements successifs que vous avez occupés dans ${communeForHousings} depuis votre arrivée.`;
+        responseType = "inputlist";
+        eventType = "ANSWER_MULTIPLE_HOUSINGS";
+        eventKey = "logements";
+        break;
 
       case "askHousingArrivalAge":
         questionText = `À quel âge ou en quelle année avez-vous emménagé dans le logement ${
