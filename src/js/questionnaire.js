@@ -377,7 +377,32 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   function renderQuestion(state) {
-    // container.innerHTML = ""; // Efface la question précédente
+    // Vérifier si une question avec le même état existe déjà
+    const existingQuestion = container.querySelector(`[data-state="${state.value}"]`);
+    
+    // Si la question existe déjà, mettre à jour uniquement le texte (pour refléter les modifications de commune)
+    if (existingQuestion) {
+      // Mettre à jour le texte de la question si elle contient une référence à une commune
+      const questionP = existingQuestion.querySelector("p");
+      if (questionP && state.context.communes) {
+        const currentCommune = state.context.communes[state.context.currentCommuneIndex] || "cette commune";
+        
+        // Mettre à jour le texte selon le type de question
+        if (state.value === "askAlwaysLivedInCommune") {
+          questionP.textContent = `Avez-vous toujours vécu à ${currentCommune} ?`;
+        } else if (state.value === "askSameHousingInCommune") {
+          questionP.textContent = `Avez-vous toujours vécu dans le même logement à ${currentCommune} ?`;
+        } else if (state.value === "askMultipleHousings") {
+          questionP.textContent = `Nous allons faire la liste des logements successifs que vous avez occupés dans ${currentCommune} depuis votre arrivée.`;
+        } else if (state.value === "askCommuneArrivalYear") {
+          questionP.textContent = `En quelle année êtes-vous arrivé à ${currentCommune} ?`;
+        } else if (state.value === "askCommuneDepartureYear") {
+          questionP.textContent = `En quelle année avez-vous quitté ${currentCommune} ?`;
+        }
+      }
+      return; // Ne pas créer de nouvelle question
+    }
+    
     let questionText = "";
     let responseType = "input";
     let choices = [];
@@ -423,6 +448,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         } ?`;
         responseType = "choice";
         choices = ["Yes", "No"];
+        eventKey = "alwaysLivedInCommune"; // ← Clé spécifique pour ne pas confondre avec 'commune'
         break;
 
       case "askMultipleCommunes":
@@ -641,18 +667,42 @@ document.addEventListener("DOMContentLoaded", async () => {
           const choice = btn.innerText;
           btn.onclick = () => {
             const currentState = surveyService.getSnapshot().value;
-            if (currentState === "askSameHousingInCommune") {
-              // Nous somme au même etat -> transition avec YES/NO
+            const questionState = state.value; // L'état de CETTE question (pas l'état actuel)
+            
+            // Si on est encore sur la même question, envoyer une transition normale
+            if (currentState === questionState) {
               sendEvent({ type: choice.toUpperCase() });
             } else {
-              // apres cet etat -> on met seulement le contexte à jour
+              // On est au-delà de cette question -> UPDATE_ANSWER sans modifier l'épisode
+              // Les réponses Yes/No ne doivent JAMAIS modifier le contenu de l'épisode (qui contient le nom de la commune)
               const updateEvent = {
                 type: "UPDATE_ANSWER",
-                key: eventKey, // "alwaysLivedInCommune"
+                key: eventKey,
                 value: choice,
-                updateEpisode: false,
+                updateEpisode: false, // Ne pas modifier l'épisode de la timeline
               };
               surveyService.send(updateEvent);
+              
+              // Supprimer toutes les questions qui viennent APRÈS cette question
+              const allQuestions = container.querySelectorAll('.question[data-state]');
+              let foundCurrentQuestion = false;
+              allQuestions.forEach((q) => {
+                if (q.dataset.state === questionState) {
+                  foundCurrentQuestion = true;
+                } else if (foundCurrentQuestion) {
+                  // Supprimer les questions après celle qu'on modifie
+                  q.remove();
+                }
+              });
+              
+              // Afficher un message indiquant que le questionnaire doit reprendre depuis cette question
+              // Pour simplifier, on force une transition vers l'état approprié
+              if (questionState === "askAlwaysLivedInCommune") {
+                // Envoyer la transition pour aller au bon état
+                surveyService.send({ type: choice.toUpperCase() });
+              } else if (questionState === "askSameHousingInCommune") {
+                surveyService.send({ type: choice.toUpperCase() });
+              }
             }
             answerSpan.textContent = `Réponse actuelle : ${choice}`;
             choicesButtons.forEach((b) => (b.disabled = true));

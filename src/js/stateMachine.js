@@ -212,11 +212,23 @@ export const surveyMachine = createMachine({
           }
         } else if (event.key === 'commune') {
           // Pour les communes, modifier l'épisode même si updateEpisode est false
-          const allItems = items.get();
-          const communeEpisodes = allItems.filter(item => item.group === 13);
-          if (communeEpisodes.length > 0) {
-            const lastCommuneEpisode = communeEpisodes[communeEpisodes.length - 1];
-            modifierEpisode(lastCommuneEpisode.id, {content: event.value});
+          // IMPORTANT: Ne pas modifier si la valeur est Yes/No (ce n'est pas un nom de commune)
+          if (event.value && event.value !== 'Yes' && event.value !== 'No') {
+            const allItems = items.get();
+            const communeEpisodes = allItems.filter(item => item.group === 13);
+            if (communeEpisodes.length > 0) {
+              const lastCommuneEpisode = communeEpisodes[communeEpisodes.length - 1];
+              modifierEpisode(lastCommuneEpisode.id, {content: event.value});
+            }
+          }
+          
+          // IMPORTANT: Mettre aussi à jour le tableau communes[] pour que les questions suivantes utilisent la nouvelle valeur
+          if (context.communes && context.communes.length > 0) {
+            // Mettre à jour la commune à l'index courant (ou la première si index = 0)
+            const indexToUpdate = context.currentCommuneIndex || 0;
+            const newCommunes = [...context.communes];
+            newCommunes[indexToUpdate] = event.value;
+            updates.communes = newCommunes;
           }
         }
         
