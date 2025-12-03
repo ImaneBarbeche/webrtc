@@ -1,92 +1,28 @@
-import { exportTimelineData } from "./importExportUtils.js";
-import { importTimelineData } from "./importExportUtils.js";
+import { initTimeline } from "./timelineInit.js";
+import { exportTimelineData, importTimelineData } from "./importExportUtils.js";
 import { activateInitialLandmarks } from "./landmarkUtils.js";
 import * as utils from "./utils.js";
 import { test_items } from "./dataset.js";
-import { setBirthYear, getBirthYear } from "./birthYear.js";
+import { setBirthYear } from "./birthYear.js";
 import { toggleLandmark } from "./landmarkUtils.js";
-import {
-  restoreItems,
-  restoreGroups,
-  restoreOptions,
-  persistItems,
-  persistGroups,
-  persistOptions,
-} from "./timelineStorage.js";
-import { setupLongPressHandlers } from "./landmarkUtils.js";
 import { handleDragStart, handleDragEnd } from "./dragHandlers.js";
-import { toggleSummary, setupSummaryHandlers } from "./summaryUtils.js";
+import { setupSummaryHandlers } from "./summaryUtils.js";
 import { setupZoomNavigation } from "./zoomNavigation.js";
-import { openEpisodeEditModal } from "./episodeEdit.js";
-
-/**
- *****************************************************************************************************
- * timeline.js gère l'initialisation, le rendu graphique et les interactions possibles du calendrier *
- *****************************************************************************************************
- */
-
-// Données des groupes
-
-const groupsData = [
-  // MIGRATOIRE
-  {
-    id: 1,
-    contentText: "Migratoire", // texte brut
-    nestedGroups: [11, 12, 13],
-    showNested: true,
-    className: "vert",
-  },
-  {
-    id: 11,
-    contentText: "Statut résidentiel",
-    dependsOn: 12,
-    className: "line_11",
-  },
-  { id: 12, contentText: "Logement", dependsOn: 13, className: "line_12" },
-  { id: 13, contentText: "Commune", keyof: 1, className: "line_13" },
-
-  // SCOLAIRE
-  {
-    id: 2,
-    contentText: "Scolaire",
-    nestedGroups: [21, 22, 23],
-    showNested: false,
-    className: "bleu",
-  },
-  {
-    id: 21,
-    contentText: "Établissements",
-    dependsOn: 23,
-    className: "line_21",
-  },
-  { id: 22, contentText: "Formations", dependsOn: 23, className: "line_22" },
-  { id: 23, contentText: "Diplômes", keyof: 2, className: "line_23" },
-
-  // PROFESSIONNELLE
-  {
-    id: 3,
-    contentText: "Professionnelle",
-    nestedGroups: [31, 32],
-    showNested: false,
-    className: "rouge",
-  },
-  { id: 31, contentText: "Postes", keyof: 3, className: "line_31" },
-  { id: 32, contentText: "Contrats", dependsOn: 31, className: "line_32" },
-];
+import { groupsData } from "./timelineData.js";
+import { setupInteractions } from "./timelineInteractions.js";
+import { setupVerticalBar } from "./verticalBar.js";
+import { scheduleRedraw } from "./timelineUtils.js";
 
 // ===============================
-// VARIABLES GLOBALES ET CONSTANTES
+// VARIABLES GLOBALES
 // ===============================
-let longPressTarget = undefined;
-let stepSize = 1000 * 60 * 60 * 24; // 1 jour en millisecondes
 let timeline;
-let isCustomBarMoving = false;
-let isEditingEpisode = false;
 const items = new vis.DataSet();
 const groups = new vis.DataSet(groupsData);
+const stepSize = 1000 * 60 * 60 * 24; // 1 jour en ms
 
 // ===============================
-// CONSTANTES ET SÉLECTIONS DOM
+// DOM
 // ===============================
 const summaryContainer = document.getElementById("bricks");
 const viewSummaryBtn = document.getElementById("view-summary");
@@ -97,12 +33,11 @@ const zoomOutBtns = document.querySelectorAll("#zoom-out");
 const moveBackwardsBtns = document.querySelectorAll("#move-backwards");
 const moveForwardsBtns = document.querySelectorAll("#move-forwards");
 
-// Bouton 'Load' pour importer les items de test
-document.getElementById("load").addEventListener("click", function () {
+// Boutons Load / Export
+document.getElementById("load").addEventListener("click", () => {
   importTimelineData(items, test_items, utils);
 });
-// Bouton 'Export' pour exporter les items de la timeline
-document.getElementById("export").addEventListener("click", async function () {
+document.getElementById("export").addEventListener("click", async () => {
   await exportTimelineData(items);
 });
 // Appeler setupZoomNavigation APRÈS l'initialisation de timeline
@@ -210,27 +145,59 @@ const options = {
           item.start.getFullYear() + 1
         ); //1 année
 
-        if (String(item.group).startsWith(1)) item.className = "green";
-        else if (String(item.group).startsWith(2)) item.className = "blue";
-        else if (String(item.group).startsWith(3)) item.className = "red";
+// Création de la timeline
+document.addEventListener("DOMContentLoaded", () => {
+  timeline = initTimeline();
+  if (!timeline) return;
 
-        let retrieveUlGroup = document.getElementById(`ulgroup_${item.group}`);
-        if (retrieveUlGroup) {
-          let arr = Array.from(retrieveUlGroup.querySelectorAll("li")).find(
-            (e) => e.innerHTML == item.content
-          );
-          arr.style.textDecoration = "line-through";
-          arr.style.opacity = "0.2";
-        }
+  window.timeline = timeline;
 
-        callback(item); // Retourner l'item modifi
-      } else {
-        let retrieveUlGroup = document.getElementById(`ulgroup_${item.group}`);
-        if (retrieveUlGroup) {
-          let arr = Array.from(retrieveUlGroup.querySelectorAll("li")).find(
-            (e) => e.style.opacity == "0.2"
-          );
-          arr.style.opacity = "1";
+  if (window.lucide?.createIcons) window.lucide.createIcons();
+
+  // Fit/redraw sur ajout/update
+  items.on("add", () => {
+    try {
+      timeline.fit();
+    } catch {}
+    scheduleRedraw(timeline);
+  });
+
+  items.on("update", () => {
+    scheduleRedraw(timeline);
+  });
+
+  document.dispatchEvent(new CustomEvent("timelineReady"));
+
+  // Interactions et barre verticale
+  setupInteractions(timeline, utils);
+  setupVerticalBar(timeline, stepSize);
+  
+  // Résumé
+  setupSummaryHandlers({ summaryContainer, viewSummaryBtn, closeSummaryBtn });
+  
+  // Landmarks init
+  activateInitialLandmarks(groups);
+
+  // Initialisation de la date de naissance
+  try {
+    let birthYearStored = localStorage.getItem("birthYear");
+    if (!birthYearStored) {
+      const answeredRaw = localStorage.getItem("lifestories_answered_questions");
+      if (answeredRaw) {
+        try {
+          const answeredArr = JSON.parse(answeredRaw);
+          const found =
+            answeredArr.find(
+              (obj) =>
+                (obj.answer?.type === "ANSWER_BIRTH_YEAR" &&
+                  obj.answer.birthdate) ||
+                (obj.answer?.key === "birthYear" && obj.answer.value) ||
+                /^\d{4}$/.test(obj.answer?.value)
+            )?.answer?.birthdate ||
+            answeredArr.find((obj) => obj.answer?.value)?.answer?.value;
+          if (found) birthYearStored = found;
+        } catch (e) {
+          console.warn("Could not parse lifestories_answered_questions:", e);
         }
 
         callback(null); // Annuler si l'utilisateur n'a pas confirmé
@@ -401,82 +368,8 @@ try {
         console.warn("Could not parse lifestories_answered_questions:", e);
       }
     }
-  }
-  // Si une date de naissance est trouvée, on initialise l'affichage birthyear et le calcul de l'âge
-  if (birthYearStored) {
-    setBirthYear(birthYearStored);
-  }
-} catch (e) {}
-
-// Création de la timeline avec les données chargées - attendre que tout soit chargé
-document.addEventListener(
-  "DOMContentLoaded",
-  function () {
-    const container = document.getElementById("timeline");
-
-    // Attendre que les styles soient appliqués
-    setTimeout(() => {
-      timeline = new vis.Timeline(container, items, groups, options);
-      // Exporter la timeline globalement
-      window.timeline = timeline;
-
-      // Transformer les balises Lucide en SVG après le rendu initial
-      if (window.lucide && typeof window.lucide.createIcons === "function") {
-        window.lucide.createIcons();
-      }
-
-      // Si des items sont ajoutés après l'initialisation (ex: via WebRTC),
-      // s'assurer que la timeline s'ajuste automatiquement pour les afficher.
-      try {
-        items.on &&
-          items.on("add", function (added) {
-            try {
-              timeline.fit();
-            } catch (e) {}
-            // Redraw utile après ajout d'item pour corriger certains bugs d'affichage
-            setTimeout(() => {
-              try {
-                timeline.redraw();
-                // Transformer les balises Lucide en SVG après chaque redraw
-                if (
-                  window.lucide &&
-                  typeof window.lucide.createIcons === "function"
-                ) {
-                  window.lucide.createIcons();
-                }
-              } catch (e) {}
-            }, 0);
-          });
-        items.on &&
-          items.on("update", function (updated) {
-            // Redraw utile après modification d'un item (ex: édition via modal)
-            setTimeout(() => {
-              try {
-                timeline.redraw();
-                // Transformer les balises Lucide en SVG après chaque redraw
-                if (
-                  window.lucide &&
-                  typeof window.lucide.createIcons === "function"
-                ) {
-                  window.lucide.createIcons();
-                }
-              } catch (e) {}
-            }, 0);
-          });
-      } catch (e) {
-        console.warn("[LifeStories] cannot attach items listeners", e);
-      }
-
-      // Émettre un événement personnalisé pour signaler que la timeline est prête
-      document.dispatchEvent(new CustomEvent("timelineReady"));
-
-      // Sauvegarder automatiquement à chaque changement
-      timeline.on("changed", () => {
-        localStorage.setItem("lifestories_items", JSON.stringify(items.get()));
-        localStorage.setItem(
-          "lifestories_groups",
-          JSON.stringify(groups.get())
-        );
+    if (birthYearStored) setBirthYear(birthYearStored);
+  } catch (e) {}
 
         // Sauvegarder aussi les options importantes de la timeline
         const currentOptions = {
@@ -890,9 +783,7 @@ function renderGroupLabel(group) {
     iconHtml += '<i data-lucide="pin" class="lucide landmark-pin"></i> ';
   }
 
-  return iconHtml + (group.contentText || "");
-}
-// Exposer timeline et les datasets pour les autres fichiers
+// Exports
 export {
   timeline,
   items,
@@ -900,5 +791,5 @@ export {
   handleDragStart,
   handleDragEnd,
   toggleLandmark,
-  renderGroupLabel,
+  stepSize,
 };

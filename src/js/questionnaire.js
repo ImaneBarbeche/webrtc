@@ -156,12 +156,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Fonction pour afficher les réponses précédentes
   function displayPreviousAnswers() {
-    // Vider l'ancien historique s'il existe
-    const oldHistory = container.querySelector(".previous-answers-section");
-    if (oldHistory) container.removeChild(oldHistory);
-
-    const oldSeparator = container.querySelector(".questions-separator");
-    if (oldSeparator) container.removeChild(oldSeparator);
     const answeredQuestions = loadAnsweredQuestions();
 
     if (answeredQuestions.length === 0) return; // Rien à afficher
@@ -184,10 +178,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         null,
         2
       );
-      let answerKey = null;
       if (typeof item.answer === "object") {
-        answerKey = Object.keys(item.answer).find((k) => k !== "type");
-        answerText = item.answer[answerKey] || JSON.stringify(item.answer);
+        // Extraire la valeur réelle de la réponse
+        const key = Object.keys(item.answer).find((k) => k !== "type");
+        answerText = item.answer[key] || JSON.stringify(item.answer);
       }
 
       // Formater comme un tableau
@@ -195,132 +189,15 @@ document.addEventListener("DOMContentLoaded", async () => {
         answerText = answerText.join(", ");
       }
 
-      // Construction des éléments
-      const questionP = document.createElement("p");
-      questionP.className = "question-text";
-      questionP.innerHTML = `<strong>Q${index + 1}:</strong> ${question}`;
-
-      const answerP = document.createElement("p");
-      answerP.className = "answer-content";
-      answerP.innerHTML = `<strong>${answerText}</strong>`;
-
-      // Ajout du bouton édition avec icône Lucide
-      const editBtn = document.createElement("button");
-      editBtn.className = "edit-answer-btn";
-      editBtn.title = "Éditer la réponse";
-      editBtn.style.background = "none";
-      editBtn.style.border = "none";
-      editBtn.style.cursor = "pointer";
-      editBtn.style.verticalAlign = "middle";
-      editBtn.style.marginLeft = "8px";
-      editBtn.innerHTML = '<i data-lucide="pencil"></i>';
-      answerP.appendChild(editBtn);
-
-      if (window.lucide && typeof window.lucide.createIcons === "function") {
-        window.lucide.createIcons();
-      }
-
-      // Edition inline au clic sur le crayon
-      editBtn.addEventListener("click", () => {
-        const originalHTML = answerP.innerHTML;
-        const input = document.createElement("input");
-        input.type = "text";
-        input.value = answerText;
-        input.style.marginRight = "8px";
-        input.style.width = "60%";
-        input.autofocus = true;
-
-        const validateBtn = document.createElement("button");
-        validateBtn.textContent = "Valider";
-        validateBtn.className = "validate-edit-btn";
-        validateBtn.style.marginRight = "4px";
-
-        const cancelBtn = document.createElement("button");
-        cancelBtn.textContent = "Annuler";
-        cancelBtn.className = "cancel-edit-btn";
-
-        answerP.innerHTML = "";
-        answerP.appendChild(input);
-        answerP.appendChild(validateBtn);
-        answerP.appendChild(cancelBtn);
-
-        validateBtn.addEventListener("click", (e) => {
-          e.preventDefault();
-          let key = answerKey;
-          let value = input.value;
-          let updateEpisode = false;
-          if (!key) {
-            if (item.answer.hasOwnProperty("commune")) key = "commune";
-            else if (item.answer.hasOwnProperty("start")) {
-              key = "start";
-              updateEpisode = true;
-            } else if (item.answer.hasOwnProperty("end")) {
-              key = "end";
-              updateEpisode = true;
-            } else if (item.answer.hasOwnProperty("statut_res")) {
-              key = "statut_res";
-              updateEpisode = true;
-            } else if (item.answer.hasOwnProperty("birthYear"))
-              key = "birthYear";
-          }
-          const updateEvent = {
-            type: "UPDATE_ANSWER",
-            key: key,
-            value: value,
-            updateEpisode: updateEpisode,
-          };
-          surveyService.send(updateEvent);
-
-          // Mise à jour du calendrier si naissance modifiée
-          if (
-            key === "birthYear" &&
-            window.timeline &&
-            typeof window.timeline.setOptions === "function"
-          ) {
-            window.timeline.setOptions({
-              min: new Date(`${value}-01-01`),
-              start: new Date(`${value}-01-01`),
-            });
-          }
-          // Redessiner la timeline après toute modification
-          if (window.timeline) {
-            try {
-              window.timeline.redraw();
-              window.timeline.fit();
-            } catch (e) {
-              console.warn("Timeline redraw/fit failed", e);
-            }
-          }
-          // Mise à jour inline sans reload
-          answerP.innerHTML = `<strong>${value}</strong>`;
-          if (
-            window.lucide &&
-            typeof window.lucide.createIcons === "function"
-          ) {
-            window.lucide.createIcons();
-          }
-        });
-
-        cancelBtn.addEventListener("click", () => {
-          answerP.innerHTML = originalHTML;
-          if (
-            window.lucide &&
-            typeof window.lucide.createIcons === "function"
-          ) {
-            window.lucide.createIcons();
-          }
-        });
-      });
-
-      // Afficher l'heure
-      const timeSmall = document.createElement("small");
-      timeSmall.textContent = new Date(item.timestamp).toLocaleTimeString(
-        "fr-FR"
-      );
-
-      answerDiv.appendChild(questionP);
-      answerDiv.appendChild(answerP);
-      answerDiv.appendChild(timeSmall);
+      answerDiv.innerHTML = `
+                <p class="question-text"><strong>Q${
+                  index + 1
+                }:</strong> ${question}</p>
+                <p class="answer-content"><strong>${answerText}</strong></p>
+                <small>${new Date(item.timestamp).toLocaleTimeString(
+                  "fr-FR"
+                )}</small>
+            `;
 
       previousAnswersDiv.appendChild(answerDiv);
     });
@@ -332,10 +209,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Insérer au début du conteneur
     container.insertBefore(separator, container.firstChild);
     container.insertBefore(previousAnswersDiv, container.firstChild);
-    // Transformer les balises Lucide en SVG
-    if (window.lucide && typeof window.lucide.createIcons === "function") {
-      window.lucide.createIcons();
-    }
   }
 
   // Tracker le dernier état pour éviter les re-renders inutiles
@@ -343,13 +216,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // S'abonner aux changements d'état
   surveyService.subscribe((state) => {
-    // Ne re-render que si l'état a vraiment changé (pas juste le contexte)
-    if (lastRenderedState !== state.value) {
-      lastRenderedState = state.value;
-      renderQuestion(state); // Mise à jour à chaque transition
-    } else {
-      console.log("Contexte mis à jour, mais état inchangé - pas de re-render");
-    }
+    renderQuestion(state); // Mise à jour à chaque transition
   });
 
   // IMPORTANT : Attendre le prochain tick pour que l'état soit restauré
@@ -496,13 +363,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     // car l'envoi provoque une transition et la snapshot après envoi
     // correspondra à l'état suivant (d'où un mauvais mapping dans l'historique).
     const currentStateBefore = surveyService.getSnapshot().value;
+    setTimeout;
     surveyService.send(eventData);
 
     // Sauvegarder la réponse dans l'historique en l'associant
     // à l'état courant AVANT la transition (question posée)
     saveAnsweredQuestion(currentStateBefore, eventData);
-  // Réafficher l’historique immédiatement
-  displayPreviousAnswers();
     if (syncEnabled && window.webrtcSync) {
       window.webrtcSync.sendEvent(eventData);
     } else {
@@ -511,7 +377,32 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   function renderQuestion(state) {
-    //container.innerHTML = ""; // Efface la question précédente
+    // Vérifier si une question avec le même état existe déjà
+    const existingQuestion = container.querySelector(`[data-state="${state.value}"]`);
+    
+    // Si la question existe déjà, mettre à jour uniquement le texte (pour refléter les modifications de commune)
+    if (existingQuestion) {
+      // Mettre à jour le texte de la question si elle contient une référence à une commune
+      const questionP = existingQuestion.querySelector("p");
+      if (questionP && state.context.communes) {
+        const currentCommune = state.context.communes[state.context.currentCommuneIndex] || "cette commune";
+        
+        // Mettre à jour le texte selon le type de question
+        if (state.value === "askAlwaysLivedInCommune") {
+          questionP.textContent = `Avez-vous toujours vécu à ${currentCommune} ?`;
+        } else if (state.value === "askSameHousingInCommune") {
+          questionP.textContent = `Avez-vous toujours vécu dans le même logement à ${currentCommune} ?`;
+        } else if (state.value === "askMultipleHousings") {
+          questionP.textContent = `Nous allons faire la liste des logements successifs que vous avez occupés dans ${currentCommune} depuis votre arrivée.`;
+        } else if (state.value === "askCommuneArrivalYear") {
+          questionP.textContent = `En quelle année êtes-vous arrivé à ${currentCommune} ?`;
+        } else if (state.value === "askCommuneDepartureYear") {
+          questionP.textContent = `En quelle année avez-vous quitté ${currentCommune} ?`;
+        }
+      }
+      return; // Ne pas créer de nouvelle question
+    }
+    
     let questionText = "";
     let responseType = "input";
     let choices = [];
@@ -519,6 +410,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     let eventKey = "commune";
 
     const questionDiv = document.createElement("div");
+    questionDiv.classList.add("question");
+    questionDiv.dataset.state = state.value; // ← identifiant unique
 
     switch (state.value) {
       case "askBirthYear":
@@ -555,6 +448,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         } ?`;
         responseType = "choice";
         choices = ["Yes", "No"];
+        eventKey = "alwaysLivedInCommune"; // ← Clé spécifique pour ne pas confondre avec 'commune'
         break;
 
       case "askMultipleCommunes":
@@ -659,63 +553,172 @@ document.addEventListener("DOMContentLoaded", async () => {
       const input = document.createElement("input");
       input.type = "text";
       input.placeholder = "Votre réponse";
+
+      if (state.context[eventKey]) {
+        input.value = state.context[eventKey];
+        input.disabled = true;
+      }
+
+      const editBtn = document.createElement("button");
+      editBtn.innerHTML = "✏️";
+      editBtn.style.display = "none"; // caché tant que pas de réponse
+
+      editBtn.addEventListener("click", () => {
+        input.disabled = false;
+        input.focus();
+        input.addEventListener("keypress", (event) => {
+          if (event.key === "Enter" && input.value.trim() !== "") {
+            const updateEvent = {
+              type: "UPDATE_ANSWER",
+              key: eventKey,
+              value: input.value,
+              updateEpisode: ["start", "end", "statut_res"].includes(eventKey),
+            };
+            surveyService.send(updateEvent);
+
+            if (eventKey === "birthdate" || eventKey === "birthYear") {
+              if (window.timeline) {
+                window.timeline.setOptions({
+                  min: new Date(`${input.value}-01-01`),
+                  start: new Date(`${input.value}-01-01`),
+                });
+                window.timeline.redraw();
+                window.timeline.fit();
+              }
+            }
+            input.disabled = true;
+          }
+        });
+      });
+
       input.addEventListener("keypress", (event) => {
         if (event.key === "Enter" && input.value.trim() !== "" && eventType) {
           let eventData = { type: eventType };
           eventData[eventKey] = input.value;
-          // Si c'est la question de naissance, mettre à jour la timeline immédiatement
           if (eventType === "ANSWER_BIRTH_YEAR") {
             setBirthYear(input.value);
           }
-          sendEvent(eventData); // Utiliser sendEvent au lieu de surveyService.send
-          // Désactiver les inputs et boutons de cette question pour éviter les doubles soumissions
+          sendEvent(eventData);
+          input.disabled = true;
+          editBtn.style.display = "inline-block"; // afficher le bouton après validation
+
           try {
             if (isHost) {
               const controls = questionDiv.querySelectorAll(
                 "input, button, textarea, select"
               );
-              controls.forEach((c) => (c.disabled = true));
-              // (global buttons left enabled) only per-question controls are disabled
+              controls.forEach((c) => {
+                if (c !== editBtn) c.disabled = true; // ne pas désactiver le bouton ✏️
+              });
             }
           } catch (e) {
             console.warn("Impossible de désactiver les contrôles", e);
           }
         }
       });
+
       questionDiv.appendChild(input);
+      questionDiv.appendChild(editBtn);
     }
 
     // Gestion des boutons choix ("Oui", "Non")
     else if (responseType === "choice") {
+      // conteneur pour afficher la réponse actuelle
+      const answerSpan = document.createElement("span");
+      // pr-remplir avec la valeur du contexte si elle existe
+      if (state.context[eventKey]) {
+        answerSpan.textContent = `Réponse actuelle : ${state.context[eventKey]}`;
+      }
+      // tableau pour stocker les boutons Yes/No
+      const choicesButtons = [];
+      // boutons yes/no
       choices.forEach((choice) => {
         const button = document.createElement("button");
         button.innerText = choice;
-        button.addEventListener("click", (event) => {
-          let eventData = { type: choice.toUpperCase() };
-          eventData[eventKey] = choice;
-          sendEvent(eventData); // Utiliser sendEvent au lieu de surveyService.send
-          // Désactiver les contrôles de cette question pour éviter double envoi
-          try {
-            if (isHost) {
-              const controls = questionDiv.querySelectorAll(
-                "input, button, textarea, select"
-              );
-              controls.forEach((c) => (c.disabled = true));
-              // (global buttons left enabled) only per-question controls are disabled
-            }
-          } catch (e) {
-            console.warn("Impossible de désactiver les contrôles", e);
+
+        button.addEventListener("click", () => {
+          let eventData;
+          if (state.value === "birthPlaceIntro") {
+            // On envoie un événement spécifique selon le choix
+            eventData = { type: choice === "France" ? "FRANCE" : "ETRANGER" };
+          } else {
+            // Cas classique pour les autres questions à choix
+            eventData = { type: choice.toUpperCase() };
+            eventData[eventKey] = choice;
           }
+          sendEvent(eventData);
+          answerSpan.textContent = `Réponse actuelle : ${choice}`;
+          choicesButtons.forEach((btn) => (btn.disabled = true));
+          editBtn.style.display = "inline-block";
         });
         questionDiv.appendChild(button);
+        choicesButtons.push(button);
       });
+      // Bouton édition
+      const editBtn = document.createElement("button");
+      editBtn.innerHTML = "✏️";
+      editBtn.style.display = "none"; // caché tant qu’aucune réponse
+
+      editBtn.addEventListener("click", () => {
+        // Réactiver les boutons Yes/No pour permettre un nouveau choix
+        choicesButtons.forEach((btn) => (btn.disabled = false));
+        // appuyer pour UPDATE_ANSWER quand on arrive au delà de cet etat
+        choicesButtons.forEach((btn) => {
+          const choice = btn.innerText;
+          btn.onclick = () => {
+            const currentState = surveyService.getSnapshot().value;
+            const questionState = state.value; // L'état de CETTE question (pas l'état actuel)
+            
+            // Si on est encore sur la même question, envoyer une transition normale
+            if (currentState === questionState) {
+              sendEvent({ type: choice.toUpperCase() });
+            } else {
+              // On est au-delà de cette question -> UPDATE_ANSWER sans modifier l'épisode
+              // Les réponses Yes/No ne doivent JAMAIS modifier le contenu de l'épisode (qui contient le nom de la commune)
+              const updateEvent = {
+                type: "UPDATE_ANSWER",
+                key: eventKey,
+                value: choice,
+                updateEpisode: false, // Ne pas modifier l'épisode de la timeline
+              };
+              surveyService.send(updateEvent);
+              
+              // Supprimer toutes les questions qui viennent APRÈS cette question
+              const allQuestions = container.querySelectorAll('.question[data-state]');
+              let foundCurrentQuestion = false;
+              allQuestions.forEach((q) => {
+                if (q.dataset.state === questionState) {
+                  foundCurrentQuestion = true;
+                } else if (foundCurrentQuestion) {
+                  // Supprimer les questions après celle qu'on modifie
+                  q.remove();
+                }
+              });
+              
+              // Afficher un message indiquant que le questionnaire doit reprendre depuis cette question
+              // Pour simplifier, on force une transition vers l'état approprié
+              if (questionState === "askAlwaysLivedInCommune") {
+                // Envoyer la transition pour aller au bon état
+                surveyService.send({ type: choice.toUpperCase() });
+              } else if (questionState === "askSameHousingInCommune") {
+                surveyService.send({ type: choice.toUpperCase() });
+              }
+            }
+            answerSpan.textContent = `Réponse actuelle : ${choice}`;
+            choicesButtons.forEach((b) => (b.disabled = true));
+          };
+        });
+      });
+
+      questionDiv.appendChild(answerSpan);
+      questionDiv.appendChild(editBtn);
     }
 
     // Gestion des réponses avec un input et une liste
     else if (responseType === "inputlist") {
       const input = document.createElement("input");
       input.type = "text";
-      input.placeholder = "Commune/Département ou pays";
+      input.placeholder = "Votre réponse";
 
       const responseList = document.createElement("ul");
       responseList.id = `ulgroup_${state.context.group}`;

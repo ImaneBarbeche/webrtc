@@ -60,13 +60,19 @@ export function modifierEpisode(id, modifications){
     // Si on modifie seulement date de début et que la nv date de début est après la date de fin, on met 1 an
     if((modifications.start && !modifications.end) && modifications.start >= itemtomodify.end){
         let newDate = new Date(modifications.start)
-        modifications.end = newDate.setFullYear(newDate.getFullYear() + 1);
+        // setFullYear retourne un timestamp (number) — garder un Date
+        let endDate = new Date(newDate);
+        endDate.setFullYear(endDate.getFullYear() + 1);
+        modifications.end = endDate;
     }
 
     // Si on modifie seulement date de fin et que la nv date de fin est avant la date de debut, on met 1 an PASTESTER
     if((modifications.end && !modifications.start) && modifications.end <= itemtomodify.start){
         let newDate = new Date(modifications.end)
-        modifications.start = newDate.setFullYear(newDate.getFullYear() + 1);
+        // setFullYear retourne un timestamp (number) — garder un Date
+        let startDate = new Date(newDate);
+        startDate.setFullYear(startDate.getFullYear() + 1);
+        modifications.start = startDate;
     }
     
     Object.assign(itemtomodify, modifications);

@@ -29,7 +29,6 @@ export async function exportTimelineData(items) {
         encoding: 'utf8'
       });
       alert(`Fichier sauvegardé avec succès dans Documents : ${filename}`);
-      console.log('Fichier sauvegardé:', result.uri);
     } else {
       const blob = new Blob([jsonString], { type: "application/json" });
       const url = URL.createObjectURL(blob);
