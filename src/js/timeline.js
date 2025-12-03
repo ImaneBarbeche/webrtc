@@ -312,9 +312,24 @@ const options = {
     const wrapper = document.createElement("span");
     // Icône principale pour les groupes racine
     let iconHtml = "";
-    if (group.id === 1) iconHtml = '<i data-lucide="house"></i> ';
+    if (group.id === 1) iconHtml = '<i data-lucide="map-pin-house"></i> ';
     if (group.id === 2) iconHtml = '<i data-lucide="school"></i> ';
     if (group.id === 3) iconHtml = '<i data-lucide="briefcase"></i> ';
+
+      // Icons for nested groups (Migratoire)
+    if (group.id === 11) iconHtml = '<i data-lucide="key-round"></i> '; // Statut résidentiel
+    if (group.id === 12) iconHtml = '<i data-lucide="house"></i> '; // Logement
+    if (group.id === 13) iconHtml = '<i data-lucide="map-pinned"></i> '; // Commune
+    
+    // Icons for nested groups (Scolaire)
+    if (group.id === 21) iconHtml = '<i data-lucide="building-2"></i> '; // Établissements
+    if (group.id === 22) iconHtml = '<i data-lucide="book-marked"></i> '; // Formations
+    if (group.id === 23) iconHtml = '<i data-lucide="graduation-cap"></i> '; // Diplômes
+    
+    // Icons for nested groups (Professionnelle)
+    if (group.id === 31) iconHtml = '<i data-lucide="contact-round"></i> '; // Postes
+    if (group.id === 32) iconHtml = '<i data-lucide="file-text"></i> '; // Contrats
+
     // Icône Landmark si activé
     if (group.isLandmark) {
       iconHtml += '<i data-lucide="pin" class="lucide landmark-pin"></i> ';
@@ -634,17 +649,38 @@ document.addEventListener(
         }
       });
 
-      
-    let chapterTitles = document.querySelectorAll(".trajectory-title")
+    let chaptersHidden = false;
+
+    function applyChapterVisibility() {
+      const chapterTitles = document.querySelectorAll(".trajectory-title");
+      chapterTitles.forEach((chapter) => {
+        if (chaptersHidden) {
+          chapter.classList.add('closed');
+        } else {
+          chapter.classList.remove('closed');
+        }
+      });
+    }
 
     toggleChaptersBtn.addEventListener("click", () => {
-      // console.log(chapterTitles)
-        chapterTitles?.forEach((chapter) => {
-          chapter.classList.toggle('closed')
-          // console.log(chapter)
-        })
-        timeline.redraw();
-    })
+      chaptersHidden = !chaptersHidden;
+      applyChapterVisibility();
+
+      // waiting for the transition to finish
+      setTimeout(() => {
+        timeline.redraw()
+      }, 400)
+    });
+
+    // Watch for timeline DOM changes and reapply state
+    const observer = new MutationObserver(() => {
+      applyChapterVisibility();
+    });
+
+    observer.observe(document.getElementById("timeline"), {
+      childList: true,
+      subtree: true
+    });
 
       timeline.on("timechanged", function (event) {
         isCustomBarMoving = false;
