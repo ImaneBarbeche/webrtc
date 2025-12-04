@@ -85,15 +85,32 @@ export function groupTemplate(group) {
   const wrapper = document.createElement("span");
   let iconHtml = "";
 
-  if (group.id === 1) iconHtml = '<span class="icon-wrapper"><i data-lucide="house"></i></span> ';
-  if (group.id === 2) iconHtml = '<span class="icon-wrapper"><i data-lucide="school"></i></span> ';
-  if (group.id === 3) iconHtml = '<span class="icon-wrapper"><i data-lucide="briefcase"></i></span> ';
+  // Icônes pour groupes racine
+  if (group.id === 1) iconHtml = '<i data-lucide="map-pin-house"></i> ';
+  if (group.id === 2) iconHtml = '<i data-lucide="school"></i> ';
+  if (group.id === 3) iconHtml = '<i data-lucide="briefcase"></i> ';
 
+  // Icônes pour nested groups (Migratoire)
+  if (group.id === 11) iconHtml = '<i data-lucide="key-round"></i> '; // Statut résidentiel
+  if (group.id === 12) iconHtml = '<i data-lucide="house"></i> '; // Logement
+  if (group.id === 13) iconHtml = '<i data-lucide="map-pinned"></i> '; // Commune
+
+  // Icônes pour nested groups (Scolaire)
+  if (group.id === 21) iconHtml = '<i data-lucide="building-2"></i> '; // Établissements
+  if (group.id === 22) iconHtml = '<i data-lucide="book-marked"></i> '; // Formations
+  if (group.id === 23) iconHtml = '<i data-lucide="graduation-cap"></i> '; // Diplômes
+
+  // Icônes pour nested groups (Professionnelle)
+  if (group.id === 31) iconHtml = '<i data-lucide="contact-round"></i> '; // Postes
+  if (group.id === 32) iconHtml = '<i data-lucide="file-text"></i> '; // Contrats
+
+  // Icône Landmark si activé
   if (group.isLandmark) {
-    iconHtml += '<span class="icon-wrapper"><i data-lucide="pin" class="lucide landmark-pin"></i></span> ';
+    iconHtml += '<i data-lucide="pin" class="lucide landmark-pin"></i> ';
   }
 
-  wrapper.innerHTML = iconHtml + (group.contentText || "");
+  // Texte du groupe avec classe trajectory-title
+  wrapper.innerHTML = iconHtml + `<span class="trajectory-title">${group.contentText || ""}</span>`;
   return wrapper;
 }
 

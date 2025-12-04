@@ -3,10 +3,23 @@
 export function renderGroupLabel(group) {
   if (!group) return "";
 
+  // Icônes pour tous les groupes
   const icons = {
-    1: "house",
+    // Groupes racine
+    1: "map-pin-house",
     2: "school",
     3: "briefcase",
+    // Nested groups (Migratoire)
+    11: "key-round",      // Statut résidentiel
+    12: "house",          // Logement
+    13: "map-pinned",     // Commune
+    // Nested groups (Scolaire)
+    21: "building-2",     // Établissements
+    22: "book-marked",    // Formations
+    23: "graduation-cap", // Diplômes
+    // Nested groups (Professionnelle)
+    31: "contact-round",  // Postes
+    32: "file-text",      // Contrats
   };
 
   let iconHtml = icons[group.id] ? `<i data-lucide="${icons[group.id]}"></i> ` : "";
