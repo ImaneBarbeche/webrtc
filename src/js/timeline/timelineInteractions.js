@@ -98,22 +98,26 @@ export function setupInteractions(timeline, utils) {
           updatedGroup.landmarkChildren.forEach((landmarkId) => {
             let landmarkItems;
             if (isClosed) {
+              // Groupe fermé : récupérer les items du sous-groupe landmark
               landmarkItems = items.get({
                 filter: (item) => item.group === landmarkId,
               });
             } else {
+              // Groupe ouvert : récupérer les items déplacés vers le parent
               landmarkItems = items.get({
                 filter: (item) =>
                   item.group === properties.group &&
-                  item.__originalGroup === landmarkId,
+                  item._originalGroup === landmarkId,
               });
             }
 
             landmarkItems.forEach((item) => {
               if (isClosed) {
+                // Fermeture : déplacer vers le groupe parent
                 item._originalGroup = item.group;
                 item.group = properties.group;
               } else if (item._originalGroup) {
+                // Ouverture : restaurer le groupe d'origine
                 item.group = item._originalGroup;
                 delete item._originalGroup;
               }

@@ -30,6 +30,7 @@ export const options = {
   zoomFriction: 40,
   showMinorLabels: true,
   showMajorLabels: true,
+  groupOrder: "order", // Tri des groupes par propriété order
   xss: {
     filterOptions: {
       allowList: {

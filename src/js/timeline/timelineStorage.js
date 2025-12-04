@@ -22,10 +22,13 @@ export function restoreGroups(groups) {
       parsedGroups.forEach((savedGroup) => {
         const existingGroup = groups.get(savedGroup.id);
         if (existingGroup) {
+          // Restaurer uniquement les propriétés dynamiques, 
+          // les propriétés structurelles (nestedInGroup, order) viennent de timelineData.js
           groups.update({
             id: savedGroup.id,
             showNested: savedGroup.showNested,
-            landmark: savedGroup.landmark,
+            isLandmark: savedGroup.isLandmark,
+            landmarkChildren: savedGroup.landmarkChildren,
           });
         }
       });

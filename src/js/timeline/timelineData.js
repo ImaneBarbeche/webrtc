@@ -8,15 +8,18 @@ export const groupsData = [
     nestedGroups: [11, 12, 13],
     showNested: true,
     className: "vert",
+    order: 1,
   },
   {
     id: 11,
     contentText: "Statut résidentiel",
+    nestedInGroup: 1,
     dependsOn: 12,
     className: "line_11",
+    order: 1,
   },
-  { id: 12, contentText: "Logement", dependsOn: 13, className: "line_12" },
-  { id: 13, contentText: "Commune", nestedInGroup: 1, className: "line_13" },
+  { id: 12, contentText: "Logement", nestedInGroup: 1, dependsOn: 13, className: "line_12", order: 2 },
+  { id: 13, contentText: "Commune", nestedInGroup: 1, className: "line_13", order: 3 },
 
   // SCOLAIRE
   {
@@ -25,15 +28,18 @@ export const groupsData = [
     nestedGroups: [21, 22, 23],
     showNested: false,
     className: "bleu",
+    order: 2,
   },
   {
     id: 21,
     contentText: "Établissements",
+    nestedInGroup: 2,
     dependsOn: 23,
     className: "line_21",
+    order: 1,
   },
-  { id: 22, contentText: "Formations", dependsOn: 23, className: "line_22" },
-  { id: 23, contentText: "Diplômes", nestedInGroup: 2, className: "line_23" },
+  { id: 22, contentText: "Formations", nestedInGroup: 2, dependsOn: 23, className: "line_22", order: 2 },
+  { id: 23, contentText: "Diplômes", nestedInGroup: 2, className: "line_23", order: 3 },
 
   // PROFESSIONNELLE
   {
@@ -42,7 +48,8 @@ export const groupsData = [
     nestedGroups: [31, 32],
     showNested: false,
     className: "rouge",
+    order: 3,
   },
-  { id: 31, contentText: "Postes", nestedInGroup: 3, className: "line_31" },
-  { id: 32, contentText: "Contrats", dependsOn: 31, className: "line_32" },
+  { id: 31, contentText: "Postes", nestedInGroup: 3, className: "line_31", order: 1 },
+  { id: 32, contentText: "Contrats", nestedInGroup: 3, dependsOn: 31, className: "line_32", order: 2 },
 ];
