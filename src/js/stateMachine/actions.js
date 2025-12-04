@@ -6,7 +6,7 @@
 */
 
 import { ajouterEpisode, modifierEpisode } from "../episodes.js";
-import { timeline, groups, items } from "../timeline.js";
+import { timeline, groups, items } from "../timeline/timeline.js";
 
 const { assign } = window.XState;
 

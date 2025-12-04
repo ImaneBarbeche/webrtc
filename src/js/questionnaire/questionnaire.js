@@ -1,4 +1,4 @@
-import { items } from "../timeline.js";
+import { items } from "../timeline/timeline.js";
 import {
   surveyService,
   initializeSurveyService,

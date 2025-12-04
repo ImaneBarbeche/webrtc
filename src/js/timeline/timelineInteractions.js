@@ -1,6 +1,6 @@
 // timelineInteractions.js
 import { items, groups } from "./timeline.js";
-import { openEpisodeEditModal } from "./episodeEdit.js";
+import { openEpisodeEditModal } from "../episodes/episodeEdit.js";
 import { setupLongPressHandlers } from "./landmarkUtils.js";
 import { timelineState } from "./timelineState.js";
 

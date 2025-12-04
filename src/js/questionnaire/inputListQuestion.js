@@ -1,6 +1,6 @@
 // Fonction pour créer les questions avec input et liste (ex: communes, logements)
 
-import { handleDragStart, handleDragEnd, items } from "../timeline.js";
+import { handleDragStart, handleDragEnd, items } from "../timeline/timeline.js";
 import { surveyService, navigateToState } from "../stateMachine/stateMachine.js";
 
 /**

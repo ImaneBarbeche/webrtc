@@ -1,7 +1,7 @@
 import { items, groups } from "./timeline.js";
 import { options } from "./timelineConfig.js";
 import { restoreItems, restoreGroups, restoreOptions } from "./timelineStorage.js";
-import { attachPersistenceListeners } from "./timelinePersistence.js";
+import { attachPersistenceListeners } from "../timelinePersistence.js";
 
 export function initTimeline() {
   // Restaurer depuis localStorage

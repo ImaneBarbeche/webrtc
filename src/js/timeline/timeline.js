@@ -1,8 +1,8 @@
 import { initTimeline } from "./timelineInit.js";
 import { exportTimelineData, importTimelineData } from "./importExportUtils.js";
 import { activateInitialLandmarks } from "./landmarkUtils.js";
-import * as utils from "./utils.js";
-import { test_items } from "./dataset.js";
+import * as utils from "../utils.js";
+import { test_items } from "../dataset.js";
 import { setBirthYear } from "./birthYear.js";
 import { toggleLandmark } from "./landmarkUtils.js";
 import { handleDragStart, handleDragEnd } from "./dragHandlers.js";

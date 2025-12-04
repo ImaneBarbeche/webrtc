@@ -3,7 +3,7 @@
  * Permet la communication entre deux tablettes (enquêteur/enquêté)
  */
 
-import { items } from "../timeline.js";
+import { items } from "../timeline/timeline.js";
 import { surveyService } from "../stateMachine/stateMachine.js";
 import { setSyncConfig } from "./eventHandlers.js";
 

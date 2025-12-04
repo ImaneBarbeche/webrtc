@@ -1,7 +1,7 @@
 // XState est chargé via UMD en tant que variable globale window.XState
 const { createMachine, interpret, assign } = window.XState;
 import { modifierEpisode } from "../episodes.js";
-import { timeline, items } from "../timeline.js";
+import { timeline, items } from "../timeline/timeline.js";
 import { 
   loadSavedContext, 
   saveContext, 

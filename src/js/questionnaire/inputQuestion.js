@@ -1,7 +1,7 @@
 // Fonction pour créer les questions avec un input simple (ex: commune, année, statut)
 
 import { surveyService } from "../stateMachine/stateMachine.js";
-import { setBirthYear } from "../birthYear.js";
+import { setBirthYear } from "../timeline/birthYear.js";
 
 /**
  * Crée un champ input simple avec gestion de l'édition

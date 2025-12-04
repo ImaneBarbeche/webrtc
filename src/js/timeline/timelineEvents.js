@@ -1,5 +1,5 @@
 // timelineEvents.js
-import * as utils from "./utils.js";
+import * as utils from "../utils.js";
 
 export function onAdd(item, callback, isEditingEpisode) {
   if (isEditingEpisode) {
