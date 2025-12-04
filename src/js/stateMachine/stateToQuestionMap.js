@@ -14,6 +14,7 @@ export const stateToQuestionMap = {
   'askCurrentCommune': 'Dans quelle commune (ville) ?',
   'askDepartementOrPays': 'Dans quel département (France) ou pays (étranger) ?',
   'askAlwaysLivedInCommune': 'Avez-vous toujours vécu dans cette commune ?',
+  'askBirthCommuneDepartureYear': 'En quelle année avez-vous quitté cette commune ?',
   'askMultipleCommunes': 'Pouvez-vous citer les communes dans lesquelles vous avez vécu ?',
   'askCommuneArrivalYear': 'En quelle année êtes-vous arrivé ?',
   'askCommuneDepartureYear': 'En quelle année avez-vous quitté cette commune ?',

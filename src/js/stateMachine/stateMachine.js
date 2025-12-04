@@ -183,7 +183,17 @@ export const surveyMachine = createMachine({
           ],
           target: 'askSameHousingInCommune'
         },
-        NO: 'askMultipleCommunes'
+        NO: 'askBirthCommuneDepartureYear'
+      }
+    },
+
+    // Nouvelle question: demander quand l'utilisateur a quitté sa commune de naissance
+    askBirthCommuneDepartureYear: {
+      on: {
+        ANSWER_BIRTH_COMMUNE_DEPARTURE: {
+          actions: ['modifyCalendarEpisode'],
+          target: 'askMultipleCommunes'
+        }
       }
     },
 
@@ -217,7 +227,7 @@ export const surveyMachine = createMachine({
     askCommuneArrivalYear: {
       on: {
         ANSWER_COMMUNE_ARRIVAL: {
-          actions: ['closePreviousCommuneEpisode', 'addCalendarEpisode'],
+          actions: ['addCalendarEpisode'],
           target: 'askCommuneDepartureYear'
         }
       }

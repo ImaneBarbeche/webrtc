@@ -53,6 +53,15 @@ export function getQuestionConfig(state) {
       break;
     }
 
+    case "askBirthCommuneDepartureYear": {
+      const commune = state.context.communes?.[0] || "cette commune";
+      questionText = `En quelle année avez-vous quitté ${commune} ?`;
+      responseType = "input";
+      eventType = "ANSWER_BIRTH_COMMUNE_DEPARTURE";
+      eventKey = "end";
+      break;
+    }
+
     case "askMultipleCommunes":
       questionText = "Pouvez-vous citer les communes dans lesquelles vous avez vécu ?";
       responseType = "inputlist";
@@ -158,6 +167,11 @@ export function updateQuestionText(questionP, state) {
     case "askAlwaysLivedInCommune":
       questionP.textContent = `Avez-vous toujours vécu à ${commune} ?`;
       break;
+    case "askBirthCommuneDepartureYear": {
+      const birthCommune = state.context.communes?.[0] || "cette commune";
+      questionP.textContent = `En quelle année avez-vous quitté ${birthCommune} ?`;
+      break;
+    }
     case "askSameHousingInCommune":
       questionP.textContent = `Avez-vous toujours vécu dans le même logement à ${commune} ?`;
       break;

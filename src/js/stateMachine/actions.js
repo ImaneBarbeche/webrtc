@@ -159,26 +159,31 @@ function parseAgeOrYear(value, birthYear) {
 /**
  * Ajoute un épisode au calendrier
  * Gère la logique complexe des dates de début/fin selon le groupe et le contexte
+ * IMPORTANT: La date fournie par l'utilisateur (event.start) a priorité sur les valeurs par défaut
  */
 export const addCalendarEpisode = assign({
   lastEpisode: ({context, event}, params) => {
-    let defaultStart = context.lastEpisode?.end;
+    let defaultStart = null;
     let defaultEnd = 0;
+    let startDate = null;
     let endDate = 0;
-    let startDate = 0;
     
-    // Gestion du paramètre timeline_init
-    if (params?.start === "timeline_init") {
-      startDate = window.timeline?.options?.start || new Date();
-      defaultEnd = window.timeline?.options?.end || new Date();
-    }
-    
-    // Parser la date de début depuis l'événement
+    // 1. Parser la date de début depuis l'événement (PRIORITAIRE)
     if (event.start) {
-      startDate = parseAgeOrYear(event.start, context.birthYear) || startDate;
+      startDate = parseAgeOrYear(event.start, context.birthYear);
     }
     
-    // Vérifier les dépendances de groupe
+    // 2. Gestion du paramètre timeline_init (pour la commune de naissance)
+    if (params?.start === "timeline_init") {
+      if (!startDate) {
+        startDate = window.timeline?.options?.start || new Date();
+      }
+      // Pour la commune de naissance, la fin sera demandée séparément
+      // On met une date par défaut d'1 an après le début
+      defaultEnd = 0; // sera calculé dans ajouterEpisode (+1 an)
+    }
+    
+    // 3. Vérifier les dépendances de groupe (pour les sous-éléments comme logements)
     const currentGroup = groups.get(context.group);
     
     if (currentGroup && currentGroup.dependsOn) {
@@ -188,13 +193,13 @@ export const addCalendarEpisode = assign({
         let parentItem = filteritems[context.currentCommuneIndex];
         
         if (parentItem) {
-          defaultStart = parentItem.start;
+          if (!startDate) defaultStart = parentItem.start;
           defaultEnd = parentItem.end;
         }
       }
       // Si lastEpisode est du groupe parent, l'utiliser directement
       else if (context.lastEpisode && context.lastEpisode.group === currentGroup.dependsOn) {
-        defaultStart = context.lastEpisode.start;
+        if (!startDate) defaultStart = context.lastEpisode.start;
         defaultEnd = context.lastEpisode.end;
       } else {
         // Chercher le parent approprié - prendre le dernier item du groupe parent
@@ -202,13 +207,13 @@ export const addCalendarEpisode = assign({
         let parentItem = filteritems.length > 0 ? filteritems[filteritems.length - 1] : null;
         
         if (parentItem) {
-          defaultStart = parentItem.start;
+          if (!startDate) defaultStart = parentItem.start;
           defaultEnd = parentItem.end;
         }
       }
     }
     
-    // Déterminer le contenu de l'épisode
+    // 4. Déterminer le contenu de l'épisode
     let content;
     if (event.type === "ANSWER_BIRTH_COMMUNE") {
       content = event.commune[0];
@@ -224,7 +229,17 @@ export const addCalendarEpisode = assign({
       content = context.communes[context.currentCommuneIndex];
     }
     
-    return ajouterEpisode(content, startDate || defaultStart, endDate || defaultEnd, context.group);
+    // Utiliser startDate (de l'événement) en priorité, sinon defaultStart
+    let finalStart = startDate || defaultStart;
+    const finalEnd = endDate || defaultEnd;
+    
+    // Fallback: si toujours pas de date de début, utiliser la date actuelle
+    if (!finalStart) {
+      console.warn('addCalendarEpisode: pas de date de début, utilisation de la date actuelle');
+      finalStart = new Date();
+    }
+    
+    return ajouterEpisode(content, finalStart, finalEnd, context.group);
   }
 });
 
@@ -277,8 +292,16 @@ export const modifyCalendarEpisode = assign({
 
 /**
  * Ferme l'épisode de la commune précédente à la date d'arrivée dans la nouvelle
+ * NOTE: Ne modifie pas la commune de naissance (index 0) car sa date de fin
+ * a déjà été définie dans askBirthCommuneDepartureYear
  */
 export const closePreviousCommuneEpisode = ({context, event}) => {
+  // Ne pas modifier la commune de naissance (première commune, index 0)
+  // car sa date de fin a déjà été demandée séparément
+  if (context.currentCommuneIndex <= 1) {
+    return;
+  }
+  
   const allItems = items.get();
   const communeEpisodes = allItems.filter(i => i.group === 13);
   
