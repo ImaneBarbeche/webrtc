@@ -1,4 +1,4 @@
-import { persistItems, persistGroups, persistOptions } from "./timelineStorage.js";
+import { persistItems, persistGroups, persistOptions } from "../timeline/timelineStorage.js";
 
 let _persistenceAttached = false;
 

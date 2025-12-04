@@ -1,5 +1,5 @@
-import state from "./state.js";
-import { timeline, items, groups } from "./timeline.js";
+import state from "../state.js";
+import { timeline, items, groups } from "../timeline/timeline.js";
 
 /**
  ************************************************************************
