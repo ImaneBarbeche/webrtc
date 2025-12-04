@@ -2,7 +2,7 @@
  * Affichage de l'historique des réponses du questionnaire
  */
 
-import { loadAnsweredQuestions, getQuestionFromState } from "../stateMachine.js";
+import { loadAnsweredQuestions, getQuestionFromState } from "../stateMachine/stateMachine.js";
 
 /**
  * Affiche les réponses précédentes dans le conteneur

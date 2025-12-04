@@ -3,7 +3,7 @@
  * Gère l'envoi des événements à la machine d'état et la synchronisation WebRTC
  */
 
-import { surveyService, saveAnsweredQuestion } from "../stateMachine.js";
+import { surveyService, saveAnsweredQuestion } from "../stateMachine/stateMachine.js";
 
 // Variables de synchronisation (seront initialisées depuis questionnaire.js)
 let syncEnabled = false;

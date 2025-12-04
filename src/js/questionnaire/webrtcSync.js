@@ -4,7 +4,7 @@
  */
 
 import { items } from "../timeline.js";
-import { surveyService } from "../stateMachine.js";
+import { surveyService } from "../stateMachine/stateMachine.js";
 import { setSyncConfig } from "./eventHandlers.js";
 
 // Variable locale pour tracker si WebRTC est déjà activé
@@ -27,7 +27,7 @@ export function handleRemoteMessage(message) {
     // On pourrait recréer le service ou envoyer des événements pour arriver au bon état
   } else if (message.type === "RESET_ALL_DATA") {
     // L'enquêteur a demandé une réinitialisation complète
-    import("../stateMachine.js").then((module) => {
+    import("../stateMachine/stateMachine.js").then((module) => {
       module.resetAllData();
     });
   }

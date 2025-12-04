@@ -1,17 +1,19 @@
-import { items } from "../timeline.js";
+import { items, handleDragStart, handleDragEnd } from "./timeline.js";
+import { setBirthYear } from "./birthYear.js";
 import {
   surveyService,
   initializeSurveyService,
   setRenderCallback,
-} from "../stateMachine/stateMachine.js";
-import { renderYesNoQuestion } from "./choicesQuestions.js";
-import { renderInputListQuestion } from "./inputListQuestion.js";
-import { renderInputQuestion } from "./inputQuestion.js";
-import { getQuestionConfig, updateQuestionText } from "./questionConfig.js";
-import { sendEvent, getIsHost } from "./eventHandlers.js";
-import { enableWebRTCSync, processPendingItems } from "./webrtcSync.js";
-import { displayPreviousAnswers } from "./historyDisplay.js";
-import { initResetHandler } from "./resetHandler.js";
+  navigateToState,
+} from "./stateMachine/stateMachine.js";
+import { renderYesNoQuestion } from "./questionnaire/choicesQuestions.js";
+import { renderInputListQuestion } from "./questionnaire/inputListQuestion.js";
+import { renderInputQuestion } from "./questionnaire/inputQuestion.js";
+import { getQuestionConfig, updateQuestionText } from "./questionnaire/questionConfig.js";
+import { sendEvent, getIsHost } from "./questionnaire/eventHandlers.js";
+import { enableWebRTCSync, processPendingItems } from "./questionnaire/webrtcSync.js";
+import { displayPreviousAnswers } from "./questionnaire/historyDisplay.js";
+import { initResetHandler } from "./questionnaire/resetHandler.js";
 /**
  ************************************************************************************************************
  * questionnaire.js gère l'affichage des questions et transition vers les états suivant                     *
@@ -21,6 +23,7 @@ import { initResetHandler } from "./resetHandler.js";
 
 document.addEventListener("DOMContentLoaded", async () => {
   const container = document.getElementById("questions");
+  let isInitialized = false;
 
   // Essayer d'activer WebRTC au chargement
   enableWebRTCSync();
@@ -32,6 +35,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Initialisation de la machine à états avec restauration si nécessaire
   initializeSurveyService();
+
+  // Tracker le dernier état pour éviter les re-renders inutiles
+  let lastRenderedState = null;
 
   // S'abonner aux changements d'état
   surveyService.subscribe((state) => {

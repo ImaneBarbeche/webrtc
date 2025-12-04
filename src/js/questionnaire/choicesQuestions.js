@@ -1,6 +1,6 @@
 // Fonction pour créer les questions Yes/No et gérer leur modification
 
-import { surveyService, navigateToState } from "../stateMachine.js";
+import { surveyService, navigateToState } from "../stateMachine/stateMachine.js";
 
 export function renderYesNoQuestion(questionDiv, state, eventKey, choices = ["Yes", "No"]) {
   const questionState = state.value; // Capturer l'état au moment du rendu

@@ -38,7 +38,7 @@ function handleReset() {
   }
 
   // Réinitialiser localement
-  import("../stateMachine.js").then((module) => {
+  import("../stateMachine/stateMachine.js").then((module) => {
     module.resetAllData();
   });
 }

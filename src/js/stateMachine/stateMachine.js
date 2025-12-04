@@ -1,34 +1,31 @@
 // XState est chargé via UMD en tant que variable globale window.XState
 const { createMachine, interpret, assign } = window.XState;
-import { ajouterEpisode, modifierEpisode } from "./episodes.js"
-import { timeline, groups, items } from "./timeline.js";
+import { modifierEpisode } from "../episodes.js";
+import { timeline, items } from "../timeline.js";
 import { 
   loadSavedContext, 
   saveContext, 
   saveAnsweredQuestion, 
   loadAnsweredQuestions, 
   resetAllData 
-} from "./stateMachine/persistence.js";
+} from "./persistence.js";
 import { 
   stateToQuestionMap, 
   getQuestionFromState 
-} from "./stateMachine/stateToQuestionMap.js";
+} from "./stateToQuestionMap.js";
 import {
   defaultContext,
   getLastEpisodeFromTimeline,
   initializeContext
-} from "./stateMachine/context.js";
-import { guards } from "./stateMachine/guards.js";
+} from "./context.js";
+import { guards } from "./guards.js";
+import { actions } from "./actions.js";
 /*
 ********************************************************************************
 * stateMachine.js décrit la machine à état                                     *
 * (ensemble d'états et de transitions qui décrit le comportement d'un systeme) *
 ********************************************************************************
 */
-
-// Réexporter les fonctions pour les autres modules
-export { saveAnsweredQuestion, loadAnsweredQuestions, resetAllData, stateToQuestionMap, getQuestionFromState };
-
 // Initialiser le contexte (charge depuis localStorage si disponible)
 const { initialContext, initialState, savedContext, savedState } = initializeContext();
 
@@ -339,333 +336,7 @@ export const surveyMachine = createMachine({
     }
   }
 }, {
-  actions: {
-    saveBirthYear: assign({
-      birthYear: ({context, event}) => parseInt(event.birthdate)
-    }),
-
-    saveBirthPlace: assign({
-      birthPlace: ({context, event}) => event.birthPlace
-    }),
-
-    addCommune: assign({
-      communes: ({context, event}) => {
-        return [...context.communes, event.commune];
-      }
-    }),
-
-    addDepartement: assign({
-      departements: ({context, event}) => {
-        return [...context.departements, event.departement];
-      }
-    }),
-
-    addMultipleCommunes: assign({
-      communes: ({context, event}) => {
-        const newCommunes = [...context.communes, ...event.communes];
-        return newCommunes;
-      },
-      currentCommuneIndex: ({context}) => {
-        // Positionner l'index sur la première nouvelle commune ajoutée
-        const newIndex = context.communes.length;
-        return newIndex;
-      }
-    }),
-
-    addMultipleHousings: assign({
-      logements: ({context, event}) => {
-        // Pour la commune courante, stocker la liste des logements
-        return event.logements || [];
-      }
-    }),
-
-    resetLogement: assign({
-      currentLogementIndex: () => 0
-    }),
-
-    nextLogement: assign({
-      currentLogementIndex: ({context}) => context.currentLogementIndex + 1
-    }),
-
-    // Ajoute l'épisode au calendrier et change le contexte lastEpisode, si un parametre start est spécifié alors le privilégier, sinon utiliser context.lastEpisode.end
-    addCalendarEpisode: assign ({
-      lastEpisode: ({context, event}, params) => {
-        let defaultStart = context.lastEpisode?.end;
-        let defaultEnd = 0;
-        let endDate = 0;
-        let startDate = 0;
-        
-        if(params?.start == "timeline_init"){
-          startDate = window.timeline?.options?.start || new Date();
-          // Pour la commune de naissance, mettre la fin à la fin de la timeline par défaut
-          defaultEnd = window.timeline?.options?.end || new Date();
-        }
-        
-        // Si l'événement contient "start", c'est une année d'arrivée ou un âge
-        if(event.start){
-          // Parser la valeur pour extraire le nombre (gère "12 ans", "12", "2010", etc.)
-          let value = event.start.toString().trim();
-          // Extraire le premier nombre de la chaîne
-          let match = value.match(/\d+/);
-          if (match) {
-            let num = parseInt(match[0]);
-            
-            // Déterminer si c'est un âge ou une année
-            // Si < 200, on considère que c'est un âge, sinon c'est une année
-            if (num < 200) {
-              // C'est un âge, convertir en année
-              let year = context.birthYear + num;
-              startDate = new Date(`${year}-01-01`);
-            } else {
-              // C'est une année directement
-              startDate = new Date(`${num}-01-01`);
-            }
-          }
-        }
-        
-        // Vérifier si le groupe existe et a des dépendances
-        const currentGroup = groups.get(context.group);
-        
-        if(currentGroup && currentGroup.dependsOn){
-          // Pour les logements (groupe 12), toujours utiliser currentCommuneIndex pour trouver la bonne commune
-          if (context.group === 12 && currentGroup.dependsOn === 13) {
-            let filteritems = (items.get()).filter(i => i.group == currentGroup.dependsOn);
-            let parentItem = filteritems[context.currentCommuneIndex];
-            
-            if (parentItem) {
-              defaultStart = parentItem.start;
-              defaultEnd = parentItem.end;
-            }
-          }
-          // Si lastEpisode est du groupe parent, l'utiliser directement (pour les autres groupes)
-          else if (context.lastEpisode && context.lastEpisode.group === currentGroup.dependsOn) {
-            defaultStart = context.lastEpisode.start;
-            defaultEnd = context.lastEpisode.end;
-          } else {
-            // Chercher le parent approprié - prendre le dernier item du groupe parent
-            let filteritems = (items.get()).filter(i => i.group == currentGroup.dependsOn)
-            
-            let parentItem = filteritems.length > 0 ? filteritems[filteritems.length - 1] : null;
-            
-            if (parentItem) {
-              defaultStart = parentItem.start
-              defaultEnd = parentItem.end
-            }
-          }
-        }
-        
-        // Déterminer le contenu de l'épisode
-        let content;
-        if (event.type == "ANSWER_BIRTH_COMMUNE") {
-          content = event.commune[0];
-        } else if (event.commune) {
-          content = event.commune;
-        } else if (event.statut_res) {
-          content = event.statut_res;
-        } else if (event.type === "YES" && context.group === 12) {
-          // Pour "même logement", utiliser un libellé descriptif
-          content = "Logement unique";
-        } else if (context.group === 12 && context.logements && context.logements.length > 0) {
-          // Pour un logement spécifique, utiliser le nom du logement
-          content = context.logements[context.currentLogementIndex];
-        } else {
-          // Utiliser la commune courante du contexte
-          content = context.communes[context.currentCommuneIndex];
-        }
-        
-        let truc = ajouterEpisode(content, startDate || defaultStart, endDate || defaultEnd, context.group);
-        return truc
-      }
-    }),
-
-    modifyCalendarEpisode: assign ({
-      lastEpisode: ({context, event}, params) => {
-        // Vérifier que lastEpisode existe avant de l'utiliser
-        if (!context.lastEpisode || !context.lastEpisode.id) {
-          console.warn('lastEpisode est null dans modifyCalendarEpisode');
-          return null;
-        }
-        
-        if(params){
-          // Normaliser des tokens spéciaux (ex: 'timeline_end', 'timeline_init')
-          const normalized = Object.assign({}, params);
-          try {
-            if (normalized.end === 'timeline_end') {
-              normalized.end = (window.timeline && window.timeline.options && window.timeline.options.end) ? window.timeline.options.end : new Date();
-            }
-            if (normalized.start === 'timeline_init') {
-              normalized.start = (window.timeline && window.timeline.options && window.timeline.options.start) ? window.timeline.options.start : new Date();
-            }
-          } catch (e) {
-            console.warn('Erreur lors de la normalisation des params de modifyCalendarEpisode', e, params);
-          }
-
-          return modifierEpisode(context.lastEpisode.id, normalized);
-        }
-        
-        // Parser les modifications pour convertir âge→année si nécessaire
-        const { type, ...modifs } = event;
-        
-        // Si on a un 'end' qui est une chaîne (âge ou année), le parser
-        if (modifs.end && typeof modifs.end === 'string') {
-          let value = modifs.end.toString().trim();
-          let match = value.match(/\d+/);
-          if (match) {
-            let num = parseInt(match[0]);
-            
-            if (num < 200) {
-              // C'est un âge, convertir en année
-              let year = context.birthYear + num;
-              modifs.end = new Date(`${year}-01-01`);
-            } else {
-              // C'est une année directement
-              modifs.end = new Date(`${num}-01-01`);
-            }
-          }
-        }
-        
-        // Même chose pour 'start' si présent
-        if (modifs.start && typeof modifs.start === 'string') {
-          let value = modifs.start.toString().trim();
-          let match = value.match(/\d+/);
-          if (match) {
-            let num = parseInt(match[0]);
-            
-            if (num < 200) {
-              let year = context.birthYear + num;
-              modifs.start = new Date(`${year}-01-01`);
-            } else {
-              modifs.start = new Date(`${num}-01-01`);
-            }
-          }
-        }
-        
-        // Vérifier que lastEpisode existe avant de l'utiliser
-        if (!context.lastEpisode || !context.lastEpisode.id) {
-          console.warn('lastEpisode est null, impossible de modifier l\'épisode');
-          return null;
-        }
-        
-        return modifierEpisode(context.lastEpisode.id, modifs);
-        
-      }
-    }),
-
-    closePreviousCommuneEpisode: ({context, event}) => {
-      // Fermer l'épisode de la commune précédente à la date d'arrivée dans la nouvelle
-      const allItems = items.get();
-      // Trouver tous les épisodes de communes (group 13)
-      const communeEpisodes = allItems.filter(i => i.group === 13);
-      
-      // Prendre le dernier épisode créé (le plus récent dans le tableau)
-      if (communeEpisodes.length > 0 && event.start) {
-        const lastCommuneEpisode = communeEpisodes[communeEpisodes.length - 1];
-        const arrivalDate = new Date(`${event.start}-01-01`);
-        modifierEpisode(lastCommuneEpisode.id, { end: arrivalDate });
-      }
-    },
-
-    extendPreviousCalendarEpisode:({context, event}) => {
-      
-      const { type, ...modifs } = event;
-      if (modifs.hasOwnProperty('start')) {
-        modifs.end = modifs.start;
-        delete modifs.start;
-      }
-      let previousEp =(items.get())[context.currentCommuneIndex-1]
-      let truc = modifierEpisode(previousEp.id,modifs)
-      return truc
-    },
-
-    setupCalendar: ({context, event}) => {
-      timeline.setOptions({min: new Date(`${event.birthdate}-01-01`), start: new Date(`${event.birthdate}-01-01`)})
-      timeline.setOptions({
-        format:{
-          minorLabels: function(date, scale, step) {
-            // Tu peux ici modifier le format comme tu veux
-            switch (scale) {
-              case 'millisecond':
-                return vis.moment(date).format('SSS');
-              case 'second':
-                return vis.moment(date).format('s');
-              case 'minute':
-                return vis.moment(date).format('HH:mm');
-              case 'hour':
-                return vis.moment(date).format('HH:mm');
-              case 'weekday':
-                return vis.moment(date).format('ddd D');
-              case 'day':
-                return vis.moment(date).format('D');
-              case 'week':
-                return vis.moment(date).format('w');
-              case 'month':
-                return vis.moment(date).format('MMM');
-              case 'year':
-                const age = new Date(date).getFullYear() - new Date(window.timeline?.options?.start || new Date()).getFullYear()
-                return '<b>'+new Date(date).getFullYear() + '</b></br><b>'+ age + `</b> ${age != 0 && age != 1 ? 'ans' : 'an'}`
-                
-              default:
-                return '';
-            }
-          }
-        }
-        
-      });
-    },
-
-    splitHousingEpisode: assign({
-      lastEpisode: ({context, event}) => {
-        // Récupérer l'épisode à split
-        const episodeToSplit = context.lastEpisode;
-        const splitYear = parseInt(event.split);
-        
-        // Calculer les dates
-        const startDate = new Date(episodeToSplit.start);
-        const endDate = new Date(episodeToSplit.end);
-        const splitDate = new Date(splitYear, 0, 1); // 1er janvier de l'année de déménagement
-        
-        // Modifier l'épisode existant (premier logement)
-        modifierEpisode(episodeToSplit.id, {
-          end: splitDate
-        });
-        
-        // Ajouter le second logement
-        const secondEpisode = ajouterEpisode(
-          episodeToSplit.content,
-          splitDate,
-          endDate,
-          episodeToSplit.group
-        );
-        
-        return secondEpisode;
-      }
-    }),
-
-    nextCommune: assign({
-      currentCommuneIndex: ({context, event}) => {
-        const newIndex = context.currentCommuneIndex + 1;
-        return newIndex;
-      }
-    }),
-
-    resetCommune: assign({
-      currentCommuneIndex: ({context, event}) => {
-        return 0
-      }
-    }),
-
-    nextGroup: assign({ //A Modifier, marche que pour 14,13,12,11
-      group: ({context, event}) => {
-        return context.group -1
-      }
-    }),
-
-    previousGroup: assign({
-      group: ({context, event}) => {
-        return context.group +1
-      }
-    })
-  },
+  actions,
   guards
 });
 
@@ -821,3 +492,6 @@ export function navigateToState(targetState, contextUpdates = {}, clearQuestions
 
 // Exporter pour que questionnaire.js puisse l'utiliser
 export { savedContext, savedState };
+
+// Réexporter les fonctions pour les autres modules
+export { saveAnsweredQuestion, loadAnsweredQuestions, resetAllData, stateToQuestionMap, getQuestionFromState };
