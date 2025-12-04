@@ -71,9 +71,7 @@ export function setupInteractions(timeline, utils) {
       });
       timeline.setCustomTimeTitle(yearStart.getFullYear(), "custom-bar");
 
-      // Mettre à jour synthèse et âge aussi au clic
-      renderSummary(yearStart.getTime());
-      renderYearAndAge(yearStart.getTime());
+      // La synthèse et l'âge sont mis à jour automatiquement via l'événement timechange dans verticalBar.js
 
       return;
     }
