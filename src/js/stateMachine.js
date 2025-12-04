@@ -1,6 +1,5 @@
 // XState est chargé via UMD en tant que variable globale window.XState
 const { createMachine, interpret, assign } = window.XState;
-
 import { ajouterEpisode, modifierEpisode } from "./episodes.js"
 import { timeline, groups, items } from "./timeline.js";
 /*
@@ -787,7 +786,16 @@ export const surveyMachine = createMachine({
 });
 
 // Créer le service et le configurer avec les données sauvegardées
-export const surveyService = interpret(surveyMachine);
+// Utiliser let pour pouvoir réassigner lors de la navigation
+export let surveyService = interpret(surveyMachine);
+
+// Callback pour re-rendre les questions après navigation
+let renderCallback = null;
+
+// Fonction pour définir le callback de rendu (appelée depuis questionnaire.js)
+export function setRenderCallback(callback) {
+  renderCallback = callback;
+}
 
 // Fonction pour initialiser le service avec l'état sauvegardé
 export function initializeSurveyService() {
@@ -861,6 +869,71 @@ export function restoreFromRemoteState(remoteState) {
     
   } catch (error) {
     console.error('❌ Erreur lors de la synchronisation distante:', error);
+  }
+}
+
+/**
+ * Naviguer vers un état spécifique en recréant la machine
+ * @param {string} targetState - L'état cible
+ * @param {object} contextUpdates - Mises à jour du contexte
+ * @param {function} clearQuestionsCallback - Callback pour vider les questions du DOM
+ */
+export function navigateToState(targetState, contextUpdates = {}, clearQuestionsCallback = null) {
+  try {
+    // Récupérer le contexte actuel
+    const currentSnapshot = surveyService.getSnapshot();
+    const currentContext = currentSnapshot.context;
+    
+    // Fusionner les mises à jour avec le contexte actuel
+    const newContext = {
+      ...currentContext,
+      ...contextUpdates,
+      lastEpisode: getLastEpisodeFromTimeline()
+    };
+    
+    // Sauvegarder dans localStorage
+    saveContext(newContext, targetState);
+    
+    // Arrêter l'ancien service
+    surveyService.stop();
+    
+    // Créer une nouvelle machine avec le nouvel état initial
+    const newMachine = createMachine({
+      ...surveyMachine.config,
+      initial: targetState,
+      context: newContext
+    }, surveyMachine.implementations);
+    
+    // Créer un nouveau service
+    surveyService = interpret(newMachine);
+    
+    // Réabonner pour sauvegarder après chaque transition
+    surveyService.subscribe((state) => {
+      saveContext(state.context, state.value);
+      // Appeler le callback de rendu si défini
+      if (renderCallback) {
+        renderCallback(state);
+      }
+    });
+    
+    // Vider les questions du DOM si callback fourni
+    if (clearQuestionsCallback) {
+      clearQuestionsCallback();
+    }
+    
+    // Démarrer le nouveau service
+    surveyService.start();
+    
+    // Rendre la question initiale
+    if (renderCallback) {
+      const newState = surveyService.getSnapshot();
+      renderCallback(newState);
+    }
+    
+    console.log(`✅ Navigation vers l'état: ${targetState}`);
+    
+  } catch (error) {
+    console.error('❌ Erreur lors de la navigation:', error);
   }
 }
 
