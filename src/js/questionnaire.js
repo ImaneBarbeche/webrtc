@@ -63,9 +63,32 @@ document.addEventListener("DOMContentLoaded", async () => {
   }, 0);
 
   function renderQuestion(state) {
-    // Vérifier si une question avec le même état existe déjà
+    // Ignorer les états transitionnels (sans question à afficher)
+    const transitionalStates = ['placeNextCommuneOnTimeline', 'checkMoreHousings'];
+    if (transitionalStates.includes(state.value)) {
+      return;
+    }
+
+    // Pour les questions qui dépendent de l'index (commune ou logement), créer un identifiant unique
+    const statesThatDependOnIndex = [
+      'askCommuneArrivalYear', 
+      'askCommuneDepartureYear',
+      'askSameHousingInCommune',
+      'askHousingArrivalAge',
+      'askHousingDepartureAge',
+      'askHousingOccupationStatusEntry',
+      'askHousingOccupationStatusExit'
+    ];
+    
+    let questionId = state.value;
+    if (statesThatDependOnIndex.includes(state.value)) {
+      // Ajouter l'index de la commune/logement pour rendre l'ID unique
+      questionId = `${state.value}_c${state.context.currentCommuneIndex}_l${state.context.currentLogementIndex}`;
+    }
+
+    // Vérifier si une question avec le même identifiant existe déjà
     const existingQuestion = container.querySelector(
-      `[data-state="${state.value}"]`
+      `[data-question-id="${questionId}"]`
     );
 
     // Si la question existe déjà, mettre à jour uniquement le texte (pour refléter les modifications de commune)
@@ -80,9 +103,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Obtenir la configuration de la question
     const { questionText, responseType, choices, eventType, eventKey } = getQuestionConfig(state);
 
+    // Ne pas créer de question pour les états sans interface
+    if (responseType === "none") {
+      return;
+    }
+
     const questionDiv = document.createElement("div");
     questionDiv.classList.add("question");
     questionDiv.dataset.state = state.value;
+    questionDiv.dataset.questionId = questionId; // Nouvel attribut pour l'identifiant unique
     questionDiv.innerHTML += `<p>${questionText}</p>`;
 
     // Gestion du type INFO (texte informatif + bouton suivant)

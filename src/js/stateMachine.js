@@ -229,6 +229,37 @@ export const surveyMachine = createMachine({
             newCommunes[indexToUpdate] = event.value;
             updates.communes = newCommunes;
           }
+        } else if (event.key === 'communes') {
+          // Modification de la liste complète des communes
+          // Nettoyer les épisodes orphelins sur la timeline (groupe 13)
+          const allItems = items.get();
+          const communeEpisodes = allItems.filter(item => item.group === 13);
+          const newCommunes = event.value || [];
+          
+          // Supprimer les épisodes qui ne correspondent plus à aucune commune
+          // On garde le premier épisode (commune de naissance) et on nettoie les autres
+          if (communeEpisodes.length > 1) {
+            // Garder seulement les épisodes dont le contenu est dans la nouvelle liste
+            // ou le premier épisode (commune de naissance)
+            const episodesToRemove = communeEpisodes.slice(1).filter(ep => {
+              return !newCommunes.includes(ep.content);
+            });
+            
+            episodesToRemove.forEach(ep => {
+              items.remove(ep.id);
+            });
+            
+            // Supprimer aussi les épisodes enfants (logements groupe 12, statuts groupe 11)
+            const childEpisodes = allItems.filter(item => item.group === 12 || item.group === 11);
+            childEpisodes.forEach(ep => {
+              items.remove(ep.id);
+            });
+          }
+          
+          // Réinitialiser l'index des communes pour recommencer
+          updates.currentCommuneIndex = 0;
+          updates.logements = [];
+          updates.currentLogementIndex = 0;
         }
         
         return updates;
@@ -463,11 +494,13 @@ export const surveyMachine = createMachine({
 
     addMultipleCommunes: assign({
       communes: ({context, event}) => {
-        return [...context.communes, ...event.communes];
+        const newCommunes = [...context.communes, ...event.communes];
+        return newCommunes;
       },
       currentCommuneIndex: ({context}) => {
         // Positionner l'index sur la première nouvelle commune ajoutée
-        return context.communes.length;
+        const newIndex = context.communes.length;
+        return newIndex;
       }
     }),
 
@@ -742,7 +775,8 @@ export const surveyMachine = createMachine({
 
     nextCommune: assign({
       currentCommuneIndex: ({context, event}) => {
-        return context.currentCommuneIndex + 1
+        const newIndex = context.currentCommuneIndex + 1;
+        return newIndex;
       }
     }),
 
@@ -929,9 +963,7 @@ export function navigateToState(targetState, contextUpdates = {}, clearQuestions
       const newState = surveyService.getSnapshot();
       renderCallback(newState);
     }
-    
-    console.log(`✅ Navigation vers l'état: ${targetState}`);
-    
+        
   } catch (error) {
     console.error('❌ Erreur lors de la navigation:', error);
   }

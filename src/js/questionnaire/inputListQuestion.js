@@ -1,7 +1,7 @@
 // Fonction pour créer les questions avec input et liste (ex: communes, logements)
 
-import { handleDragStart, handleDragEnd } from "../timeline.js";
-import { surveyService } from "../stateMachine.js";
+import { handleDragStart, handleDragEnd, items } from "../timeline.js";
+import { surveyService, navigateToState } from "../stateMachine.js";
 
 /**
  * Crée un champ input avec une liste dynamique où l'utilisateur peut ajouter des éléments
@@ -25,6 +25,7 @@ export function renderInputListQuestion(questionDiv, state, eventType, eventKey,
   editBtn.innerHTML = '<i data-lucide="pencil"></i>';
   editBtn.className = "edit-btn";
   editBtn.style.display = "none";
+  editBtn.dataset.editing = "false"; // Initialiser explicitement
 
   // Ajouter un élément à la liste quand on appuie sur Entrée
   input.addEventListener("keypress", (event) => {
@@ -65,7 +66,54 @@ export function renderInputListQuestion(questionDiv, state, eventType, eventKey,
       // Terminer l'édition - sauvegarder les modifications
       const listItems = getListItems(responseList);
       
-      // Mettre à jour le contexte via UPDATE_ANSWER
+      // Si c'est une liste de communes, nettoyer et redémarrer le flux
+      if (eventKey === "communes") {
+        // Supprimer les questions suivantes dans le DOM
+        cleanupFollowingQuestions(questionDiv);
+        
+        // Nettoyer aussi l'historique des réponses dans localStorage
+        cleanupAnsweredQuestionsAfterCommunes();
+        
+        // Nettoyer les épisodes de la timeline (garder le premier = commune de naissance)
+        const allItems = items.get();
+        const communeEpisodes = allItems.filter(item => item.group === 13);
+        // Supprimer toutes les communes sauf la première (naissance)
+        if (communeEpisodes.length > 1) {
+          communeEpisodes.slice(1).forEach(ep => items.remove(ep.id));
+        }
+        // Supprimer tous les logements et statuts
+        allItems.filter(item => item.group === 12 || item.group === 11)
+          .forEach(ep => items.remove(ep.id));
+        
+        // Préserver la commune de naissance (première commune du contexte)
+        const currentContext = surveyService.getSnapshot().context;
+        const birthCommune = currentContext.communes[0]; // Lyon
+        const allCommunes = [birthCommune, ...listItems]; // [Lyon, Londres, Nantes]
+        
+        
+        // Naviguer vers l'état de placement des communes avec le nouveau contexte
+        // IMPORTANT: Commencer à l'index 1 pour sauter la commune de naissance (pas de dates à demander)
+        navigateToState("placeNextCommuneOnTimeline", {
+          communes: allCommunes,
+          currentCommuneIndex: 1, // Commencer à la première commune APRÈS la naissance
+          logements: [],
+          currentLogementIndex: 0,
+          group: 13
+        });
+        
+        // Désactiver les contrôles
+        setEditMode(responseList, input, nextQBtn, false);
+        editBtn.innerHTML = '<i data-lucide="pencil"></i>';
+        editBtn.dataset.editing = "false";
+        
+        // Transformer les icônes Lucide
+        if (window.lucide && typeof window.lucide.createIcons === "function") {
+          window.lucide.createIcons();
+        }
+        return;
+      }
+      
+      // Pour les autres listes (logements), juste mettre à jour le contexte
       surveyService.send({
         type: "UPDATE_ANSWER",
         key: eventKey,
@@ -218,5 +266,62 @@ function disableQuestionControls(questionDiv, editBtn) {
     });
   } catch (e) {
     console.warn("Impossible de désactiver les contrôles", e);
+  }
+}
+
+/**
+ * Supprime toutes les questions qui suivent celle-ci dans le DOM
+ * Utilisé quand on modifie une liste (communes, logements) pour éviter les incohérences
+ * @param {HTMLElement} currentQuestionDiv - La question actuelle
+ */
+function cleanupFollowingQuestions(currentQuestionDiv) {
+  const container = currentQuestionDiv.parentElement;
+  if (!container) return;
+
+  let foundCurrent = false;
+  const questionsToRemove = [];
+
+  // Parcourir toutes les questions et marquer celles à supprimer
+  container.querySelectorAll('.question[data-state]').forEach((q) => {
+    if (q === currentQuestionDiv) {
+      foundCurrent = true;
+    } else if (foundCurrent) {
+      questionsToRemove.push(q);
+    }
+  });
+
+  // Supprimer les questions marquées
+  questionsToRemove.forEach((q) => q.remove());
+}
+
+/**
+ * Nettoie l'historique des réponses dans localStorage après la question des communes multiples
+ * Cela évite que displayPreviousAnswers réaffiche des questions obsolètes
+ */
+function cleanupAnsweredQuestionsAfterCommunes() {
+  try {
+    const answeredRaw = localStorage.getItem('lifestories_answered_questions');
+    if (!answeredRaw) return;
+    
+    const answered = JSON.parse(answeredRaw);
+    
+    // États à conserver (avant et incluant askMultipleCommunes)
+    const statesToKeep = [
+      'askBirthYear',
+      'birthPlaceIntro', 
+      'askCurrentCommune',
+      'askDepartementOrPays',
+      'askAlwaysLivedInCommune',
+      'askMultipleCommunes'
+    ];
+    
+    // Filtrer pour ne garder que les réponses avant/incluant les communes multiples
+    const filteredAnswers = answered.filter(item => 
+      statesToKeep.includes(item.state)
+    );
+    
+    localStorage.setItem('lifestories_answered_questions', JSON.stringify(filteredAnswers));
+  } catch (e) {
+    console.warn('Erreur lors du nettoyage de l\'historique:', e);
   }
 }
