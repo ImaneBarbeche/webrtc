@@ -50,7 +50,7 @@
     border-radius: 2rem;
     cursor: col-resize !important;
     position: relative;
-    top: 2.8rem !important;
+    top: 3rem !important;
     transition: left 0.2s ease-out, transform 0.2s ease;
     /* transition-delay: 0.1s; */
     z-index: 2;
@@ -206,6 +206,8 @@
 
 .vis-panel.vis-left.vis-vertical-scroll {
     mask-image: linear-gradient( to top, transparent 0.5%, black 2%, black 98%, transparent 100% );
+    /* hiding the built-in scrollbar */
+    scrollbar-color: transparent transparent;
 }
 
 .vis-label.vis-group-level-0 {
@@ -264,11 +266,13 @@
 }
 
 .vis-label.vis-nesting-group.expanded::before {
-    content: ''
+    content: '';
+    display: none !important;
 }
 
 .vis-label.vis-nesting-group.collapsed::before {
-    content: ''
+    content: '';
+    display: none !important;
 }
 
 
@@ -292,6 +296,27 @@
 .vis-labelset .vis-label .vis-inner {
     padding: 1rem;
     /* border-radius: 0rem !important; */
+    
+    .trajectory-title {
+        color: var(--primary-dark);
+        display: inline-block;
+        /* visibility: visible; */
+        opacity: 1;
+        max-width: 10rem;
+        margin-left: 0.5rem;
+        white-space: nowrap;
+        transition: max-width 0.3s ease-in-out, opacity 0.2s ease-in-out, margin-left 0.2s ease-in-out;
+        
+
+        &.closed {
+            max-width: 0;
+            /* visibility: hidden; */
+            opacity: 0;
+            pointer-events: none;
+            /* transition: max-width 0.4s ease-in, opacity 0.4s ease-in, margin-left 0.4s ease-in; */
+        }
+    }
+    
 }
 
 .vis-label.vis-nested-group.vis-group-level-unknown-but-gte1 {
@@ -324,12 +349,41 @@
 
 .vis-ltr .vis-label.vis-nested-group .vis-inner {
     padding-left: 0rem;
-    list-style-type: disc;
+    /* background-color: red; */
+    /* list-style-type: disc;
     display: list-item;
-    list-style-position: inside;
+    list-style-position: inside; */
 
     &::marker {
         content: "\00a0\00a0\00a0\00a0 "; /* espace insécable pour garder l'alignement sans bullet */
+    }
+
+    i, svg:not(.landmark-pin) {
+        display: none;
+    }
+
+    &:has(.trajectory-title.closed) {
+        i, svg {
+        display: unset;
+        }
+    }
+
+    span:first-of-type {
+        margin-top: 0.75rem;
+    }
+
+    .trajectory-title {
+        margin-left: 2.1rem;
+
+        &.closed {
+            margin-left: 0;
+        }
+    }
+
+    &:has(.landmark-pin) {
+        .trajectory-title {
+            margin-left: 0.6rem;
+        }
     }
 }
 
@@ -564,7 +618,7 @@
 
 .vis-text.vis-minor {
     position: absolute;
-    top: -2.2rem;
+    top: -2rem;
     font-weight: 300;
     color: var(--primary-dark);
     cursor: pointer;
