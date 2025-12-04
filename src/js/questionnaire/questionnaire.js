@@ -97,16 +97,20 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Obtenir la configuration de la question
     const { questionText, responseType, choices, eventType, eventKey } = getQuestionConfig(state);
 
-    // Ne pas créer de question pour les états sans interface
-    if (responseType === "none") {
-      return;
-    }
-
+    // Créer l'élément de question
     const questionDiv = document.createElement("div");
     questionDiv.classList.add("question");
     questionDiv.dataset.state = state.value;
-    questionDiv.dataset.questionId = questionId; // Nouvel attribut pour l'identifiant unique
+    questionDiv.dataset.questionId = questionId;
     questionDiv.innerHTML += `<p>${questionText}</p>`;
+
+    // État final (surveyComplete) : afficher le message de remerciement
+    if (responseType === "none") {
+      questionDiv.classList.add("survey-complete");
+      container.appendChild(questionDiv);
+      scrollToBottom(container);
+      return;
+    }
 
     // Gestion du type INFO (texte informatif + bouton suivant)
     if (responseType === "info") {
