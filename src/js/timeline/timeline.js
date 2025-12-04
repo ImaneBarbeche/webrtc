@@ -12,6 +12,7 @@ import { groupsData } from "./timelineData.js";
 import { setupInteractions } from "./timelineInteractions.js";
 import { setupVerticalBar } from "./verticalBar.js";
 import { scheduleRedraw } from "./timelineUtils.js";
+import { detectAndShowOverlaps, initOverlapDetection } from "./overlapDetection.js";
 
 // ===============================
 // VARIABLES GLOBALES
@@ -47,18 +48,68 @@ document.addEventListener("DOMContentLoaded", () => {
 
   window.timeline = timeline;
 
+  // Initialiser le module de détection des chevauchements
+  initOverlapDetection(items, groups);
+
   if (window.lucide?.createIcons) window.lucide.createIcons();
 
-  // Fit/redraw sur ajout/update
-  items.on("add", () => {
-    try {
-      timeline.fit();
-    } catch {}
+  // Flag pour éviter les appels récursifs lors de l'ajout de marqueurs de chevauchement
+  let isDetectingOverlaps = false;
+
+  // Fit/redraw sur ajout/update + détection des chevauchements
+  items.on("add", (event, properties) => {
+    // Ignorer les marqueurs de chevauchement pour éviter la boucle infinie
+    const addedItems = properties?.items || [];
+    const isOverlapMarker = addedItems.some(id => id.toString().startsWith("__overlap_"));
+    
+    if (!isOverlapMarker) {
+      try {
+        timeline.fit();
+      } catch {}
+    }
+    
     scheduleRedraw(timeline);
+    
+    // Détecter les chevauchements (sauf si c'est un marqueur ou si déjà en cours)
+    if (!isOverlapMarker && !isDetectingOverlaps) {
+      isDetectingOverlaps = true;
+      setTimeout(() => {
+        detectAndShowOverlaps();
+        isDetectingOverlaps = false;
+      }, 100);
+    }
   });
 
-  items.on("update", () => {
+  items.on("update", (event, properties) => {
+    // Ignorer les marqueurs de chevauchement
+    const updatedItems = properties?.items || [];
+    const isOverlapMarker = updatedItems.some(id => id.toString().startsWith("__overlap_"));
+    
     scheduleRedraw(timeline);
+    
+    // Détecter les chevauchements après modification
+    if (!isOverlapMarker && !isDetectingOverlaps) {
+      isDetectingOverlaps = true;
+      setTimeout(() => {
+        detectAndShowOverlaps();
+        isDetectingOverlaps = false;
+      }, 100);
+    }
+  });
+
+  items.on("remove", (event, properties) => {
+    // Ignorer les marqueurs de chevauchement
+    const removedItems = properties?.items || [];
+    const isOverlapMarker = removedItems.some(id => id.toString().startsWith("__overlap_"));
+    
+    // Détecter les chevauchements après suppression
+    if (!isOverlapMarker && !isDetectingOverlaps) {
+      isDetectingOverlaps = true;
+      setTimeout(() => {
+        detectAndShowOverlaps();
+        isDetectingOverlaps = false;
+      }, 100);
+    }
   });
 
   document.dispatchEvent(new CustomEvent("timelineReady"));

@@ -22,7 +22,7 @@ export const options = {
   orientation: "top",
   margin: { item: { vertical: 30, horizontal: 0 } },
   align: "center",
-  stack: true,
+  stack: false,
   end: new Date(`${new Date().getFullYear()}-12-31`),
   verticalScroll: true,
   height: "80vh",
