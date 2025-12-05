@@ -180,6 +180,11 @@ export const addCalendarEpisode = assign({
       }
       // Pour la commune de naissance, la fin sera demandée séparément
       // On met une date par défaut d'1 an après le début
+        if (context.birthYear) {
+          startDate = new Date(`${context.birthYear}-01-01`);
+        } else {
+          startDate = new Date();
+        }
       defaultEnd = 0; // sera calculé dans ajouterEpisode (+1 an)
     }
     
