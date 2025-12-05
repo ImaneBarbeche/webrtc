@@ -1,11 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { House, NotebookText, CalendarRange, Columns2, PanelLeft, PanelRight } from 'lucide-react';
+import { ManualEpisodeModal } from './ManualEpisodeModal.jsx';
 
 
 function Sidebar() {
   const [isOpen, setIsOpen] = useState(true);
   const [currentView, setCurrentView] = useState('questionnaire'); // 'dashboard', 'questionnaire', 'calendar', 'split'
   const splitInstanceRef = useRef(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
 
   // Gérer la classe sur le body quand l'état open/closed change
   useEffect(() => {
@@ -172,8 +175,23 @@ function Sidebar() {
             {isOpen && <span className="nav-text">Split View</span>}
           </button>
         </nav>
+        {/* Nouveau bouton */}
+        <button 
+          className="nav-button"
+          onClick={() => setIsModalOpen(true)}
+          title="Ajouter un épisode"
+        >
+          <span className="nav-icon">+</span>
+          {isOpen && <span className="nav-text">Ajouter épisode</span>}
+        </button>
       </div>
-    </div>
+      
+      {/* Le modal */}
+      <ManualEpisodeModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+      />
+      </div>
   );
 }
 
