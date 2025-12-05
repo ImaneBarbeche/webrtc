@@ -14,22 +14,28 @@ export function setupVerticalBar(timeline, stepSize) {
   );
   timelineState.customTimeId = customTimeId;
 
+  let timechangeDebounce = null;
   // Pendant le drag : barre + highlight fluide + synthèse
-timeline.on("timechange", (event) => {
-  timelineState.isCustomBarMoving = true;
-  const snappedTime = Math.round(event.time.getTime() / stepSize) * stepSize;
-  const snappedDate = new Date(snappedTime);
+  timeline.on("timechange", (event) => {
+    timelineState.isCustomBarMoving = true;
 
-  timeline.setCustomTime(snappedDate, timelineState.customTimeId);
-  timeline.setCustomTimeTitle(snappedDate.getFullYear(), "custom-bar");
+    if (timechangeDebounce) {
+      clearTimeout(timechangeDebounce);
+    }
 
-  highlightItems(snappedTime);
+    const snappedTime = Math.round(event.time.getTime() / stepSize) * stepSize;
+    const snappedDate = new Date(snappedTime);
 
-  // Synthèse en temps réel
-  renderSummary(snappedTime);
-  renderYearAndAge(snappedTime);
-});
+    timeline.setCustomTime(snappedDate, timelineState.customTimeId);
+    timeline.setCustomTimeTitle(snappedDate.getFullYear(), "custom-bar");
 
+    timechangeDebounce = setTimeout(() => {
+      highlightItems(snappedTime);
+      // Synthèse en temps réel
+      renderSummary(snappedTime);
+      renderYearAndAge(snappedTime);
+    }, 20);
+  });
 
   // Réinitialiser l'était après le drag
   timeline.on("timechanged", () => {
@@ -100,7 +106,9 @@ function renderSummary(snappedTime) {
     Object.keys(themeData).forEach((themeId) => {
       const theme = themeData[themeId];
       if (theme.items.length > 0) {
-        html += `<div class='theme-section ${theme.className}' data-year="${selectedYear}">
+        html += `<div class='theme-section ${
+          theme.className
+        }' data-year="${selectedYear}">
                    <h3>${renderGroupLabel(groups.get(Number(themeId)))}</h3>
                    <div class="card-wrapper">`;
 
@@ -123,10 +131,10 @@ function renderSummary(snappedTime) {
       moreInfos.querySelectorAll(".theme-section").forEach((section) => {
         section.classList.add("visible");
       });
-         // Ajout ici pour transformer les icônes
-    if (window.lucide && typeof window.lucide.createIcons === "function") {
-      window.lucide.createIcons();
-    }
+      // Ajout ici pour transformer les icônes
+      if (window.lucide && typeof window.lucide.createIcons === "function") {
+        window.lucide.createIcons();
+      }
     });
   }
 }
