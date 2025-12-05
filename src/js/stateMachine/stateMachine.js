@@ -1,6 +1,6 @@
 // XState est chargé via UMD en tant que variable globale window.XState
 const { createMachine, interpret, assign } = window.XState;
-import { modifierEpisode } from "../episodes/episodes.js";
+import { modifierEpisode, ajouterEpisode } from "../episodes/episodes.js";
 import { timeline, items } from "../timeline/timeline.js";
 import { 
   loadSavedContext, 
@@ -137,7 +137,7 @@ export const surveyMachine = createMachine({
           return ajouterEpisode(content, start, end, group);
         }
       })
-    }
+    },
   },
   states: {
     askBirthYear: {
