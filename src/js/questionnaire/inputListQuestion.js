@@ -114,7 +114,7 @@ export function renderInputListQuestion(questionDiv, state, eventType, eventKey,
       }
       
       // Pour les autres listes (logements), juste mettre à jour le contexte
-      surveyService.send({
+      sendEvent({
         type: "UPDATE_ANSWER",
         key: eventKey,
         value: listItems,

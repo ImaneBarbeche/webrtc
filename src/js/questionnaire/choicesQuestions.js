@@ -1,6 +1,7 @@
 // Fonction pour créer les questions Yes/No et gérer leur modification
 
 import { surveyService, navigateToState } from "../stateMachine/stateMachine.js";
+import { sendEvent } from "./eventHandlers.js";
 
 export function renderYesNoQuestion(questionDiv, state, eventKey, choices = ["Yes", "No"]) {
   const questionState = state.value; // Capturer l'état au moment du rendu
@@ -15,8 +16,8 @@ export function renderYesNoQuestion(questionDiv, state, eventKey, choices = ["Ye
     const button = document.createElement("button");
     button.innerText = choice;
     button.addEventListener("click", () => {
-      // On envoie simplement l’événement à la machine
-      surveyService.send({ type: choice.toUpperCase() });
+      // Utiliser sendEvent pour synchroniser via WebRTC
+      sendEvent({ type: choice.toUpperCase() });
       answerSpan.textContent = `Réponse actuelle : ${choice}`;
       choicesButtons.forEach((btn) => (btn.disabled = true));
       editBtn.style.display = "inline-block";
@@ -36,7 +37,7 @@ export function renderYesNoQuestion(questionDiv, state, eventKey, choices = ["Ye
         
         // Si on est encore sur la même question, envoyer une transition normale
         if (currentState === questionState) {
-          surveyService.send({ type: choice.toUpperCase() });
+          sendEvent({ type: choice.toUpperCase() });
           answerSpan.textContent = `Réponse actuelle : ${choice}`;
           choicesButtons.forEach((b) => (b.disabled = true));
           return;
@@ -92,9 +93,9 @@ export function renderYesNoQuestion(questionDiv, state, eventKey, choices = ["Ye
         // 4. Naviguer vers l'état cible (recrée la machine)
         navigateToState(questionState, contextUpdates);
         
-        // 5. Après un court délai, envoyer la nouvelle réponse
+        // 5. Après un court délai, envoyer la nouvelle réponse via WebRTC
         setTimeout(() => {
-          surveyService.send({ type: choice.toUpperCase() });
+          sendEvent({ type: choice.toUpperCase() });
         }, 100);
       };
     });
