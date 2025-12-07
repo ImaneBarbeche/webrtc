@@ -399,4 +399,7 @@ button:hover {
   background-color: rgba(150, 150, 150, 0.2);
   border-left: 3px dashed #999;
   border-right: 3px dashed #999;
+  /* height: 30px !important;
+  top: 55% !important;
+  transform: translateY(-50%) !important; */
 }

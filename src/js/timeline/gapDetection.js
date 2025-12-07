@@ -1,22 +1,38 @@
 export function detectGaps(episodes) {
   const gaps = [];
 
-  episodes.sort((a, b) => a.start - b.start);
+  // Regrouper les épisodes par groupe
+  const groupedEpisodes = {};
+  
+  episodes.forEach(episode => {
+    const groupId = episode.group;
+    if (!groupedEpisodes[groupId]) {
+      groupedEpisodes[groupId] = [];
+    }
+    groupedEpisodes[groupId].push(episode);
+  });
 
-  // boucler à partir de 1
+  // Pour chaque groupe, détecter les gaps
+  for (const groupId in groupedEpisodes) {
+    const groupEpisodes = groupedEpisodes[groupId];
+    
+    // Trier par date de début
+    groupEpisodes.sort((a, b) => a.start - b.start);
 
-  for (let i = 1; i < episodes.length; i++) {
-    const actuel = episodes[i];
-    const precedent = episodes[i - 1];
+    // Boucler et détecter les gaps
+    for (let i = 1; i < groupEpisodes.length; i++) {
+      const actuel = groupEpisodes[i];
+      const precedent = groupEpisodes[i - 1];
 
-    if (actuel.start > precedent.end) {
-      const gap = {
-        start: precedent.end, // le trou commence où l'épisode précédent finit
-        end: actuel.start, // le trou finit où l'épisode actuel commence
-        duration: actuel.start - precedent.end, // la durée du trou
-      };
-
-      gaps.push(gap);
+      if (actuel.start > precedent.end) {
+        const gap = {
+          start: precedent.end,
+          end: actuel.start,
+          duration: actuel.start - precedent.end,
+          group: groupId,  // Le gap appartient à ce groupe
+        };
+        gaps.push(gap);
+      }
     }
   }
 
@@ -31,6 +47,7 @@ export function createGapItems(gaps) {
       end: gap.end, // La fin du gap
       type: "background", // Le type spécial pour les fonds
       className: "timeline-gap",
+      group: gap.group,
       content: "", // Optionnel
     };
   });
@@ -59,5 +76,20 @@ export function updateGapsInTimeline(items) {
   const gapItems = createGapItems(gaps);
   // 5. Les ajouter à la timeline
   items.add(gapItems);
+  notifyNewGap();
   isUpdating = false;
+}
+
+function notifyNewGap(gap) {
+    // Utilise SweetAlert2 en mode "toast"
+    Swal.fire({
+        toast: true,
+        position: 'top-end',      // En haut à droite
+        icon: 'warning',
+        title: 'Période non renseignée',
+        text: `${gap.group} : ${gap.start} → ${gap.end}`,
+        showConfirmButton: false,
+        timer: 5000,              // Disparaît après 5 sec
+        timerProgressBar: true,
+    });
 }
