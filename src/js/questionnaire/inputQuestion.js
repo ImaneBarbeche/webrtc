@@ -106,6 +106,12 @@ function handleEditUpdate(input, eventKey) {
       window.timeline.setCustomTime(birthDate, "custom-bar");
       window.timeline.setCustomTimeTitle(birthYear, "custom-bar");
 
+      window.timeline.setCustomTime(
+        new Date(`${birthYear}-01-01`),
+        "birth-year-bar"
+      );
+      window.timeline.setCustomTimeTitle(birthYear, "birth-year-bar");
+
       window.timeline.setOptions({
         min: new Date(birthYear - 4, 0, 1),
         start: new Date(birthYear - 4, 0, 1),
