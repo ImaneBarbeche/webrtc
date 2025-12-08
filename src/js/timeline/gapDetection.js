@@ -3,9 +3,10 @@ export function detectGaps(episodes) {
 
   // Regrouper les épisodes par groupe
   const groupedEpisodes = {};
-  
-  episodes.forEach(episode => {
-    const groupId = episode.group;
+
+  episodes.forEach((episode) => {
+    const groupId = episode.group; // récupère les groupes depuis les épisodes
+    
     if (!groupedEpisodes[groupId]) {
       groupedEpisodes[groupId] = [];
     }
@@ -15,7 +16,7 @@ export function detectGaps(episodes) {
   // Pour chaque groupe, détecter les gaps
   for (const groupId in groupedEpisodes) {
     const groupEpisodes = groupedEpisodes[groupId];
-    
+
     // Trier par date de début
     groupEpisodes.sort((a, b) => a.start - b.start);
 
@@ -29,7 +30,7 @@ export function detectGaps(episodes) {
           start: precedent.end,
           end: actuel.start,
           duration: actuel.start - precedent.end,
-          group: groupId,  // Le gap appartient à ce groupe
+          group: groupId, // Le gap appartient à ce groupe
         };
         gaps.push(gap);
       }
@@ -53,43 +54,69 @@ export function createGapItems(gaps) {
   });
 }
 
-let isUpdating = false; // Flag pour éviter la boucle
+let isUpdating = false;
+let previousGapKeys = []; // ← AJOUTE ÇA
 
-export function updateGapsInTimeline(items) {
-  // Éviter la boucle infinie
+export function updateGapsInTimeline(items, groups) {
   if (isUpdating) return;
   isUpdating = true;
-  // récupérer tous les items
+
   const allItems = items.get();
 
-  // Trouver et supprimer les anciens gaps
+  // Supprimer les anciens gaps visuels
   const ancientGaps = allItems.filter((item) => item.id.startsWith("gap-"));
   const idsASupprimer = ancientGaps.map((gap) => gap.id);
   items.remove(idsASupprimer);
 
-  // 2. Récupérer les épisodes (sans les gaps)
+  // Récupérer les épisodes
   const episodes = allItems.filter((item) => !item.id.startsWith("gap-"));
 
-  // 3. Détecter les nouveaux gaps
+  // Détecter les gaps
   const gaps = detectGaps(episodes);
-  // 4. Créer les gap items
+
+  // Créer les clés des gaps actuels
+  const currentGapKeys = gaps.map(
+    (gap) => `${gap.group}-${gap.start}-${gap.end}`
+  );
+
+  // Notifier seulement les NOUVEAUX gaps
+  gaps.forEach((gap) => {
+    const key = `${gap.group}-${gap.start}-${gap.end}`;
+    if (!previousGapKeys.includes(key)) {
+      notifyNewGap(gap, groups);
+    }
+  });
+
+  // Sauvegarder pour la prochaine fois
+  previousGapKeys = currentGapKeys;
+
+  // Ajouter les gaps visuels
   const gapItems = createGapItems(gaps);
-  // 5. Les ajouter à la timeline
   items.add(gapItems);
-  notifyNewGap();
+
   isUpdating = false;
 }
 
-function notifyNewGap(gap) {
-    // Utilise SweetAlert2 en mode "toast"
-    Swal.fire({
-        toast: true,
-        position: 'top-end',      // En haut à droite
-        icon: 'warning',
-        title: 'Période non renseignée',
-        text: `${gap.group} : ${gap.start} → ${gap.end}`,
-        showConfirmButton: false,
-        timer: 5000,              // Disparaît après 5 sec
-        timerProgressBar: true,
-    });
+function notifyNewGap(gap, groups) {
+
+const allGroups = groups.get();
+
+  // Trouver le groupe par son ID
+  let groupInfo = allGroups.find(g => String(g.id) === String(gap.group));
+  if (!groupInfo) {
+    groupInfo = allGroups.find(g => g.nestedGroups && g.nestedGroups.includes(Number(gap.group)));
+  }
+
+  const groupName = groupInfo ? groupInfo.contentText : gap.group;
+
+  Swal.fire({
+    toast: true,
+    position: "top-end", // En haut à droite
+    icon: "warning",
+    title: "Période non renseignée",
+    text: `${groupName} : ${gap.start} → ${gap.end}`,
+    showConfirmButton: false,
+    timer: 5000, // Disparaît après 5 sec
+    timerProgressBar: true,
+  });
 }

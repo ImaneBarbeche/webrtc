@@ -53,9 +53,9 @@ export function initTimeline() {
   items.add(gapItems);
 
   // Après la création de la timeline, ajoute les écouteurs :
-  items.on("add", () => updateGapsInTimeline(items));
-  items.on("update", () => updateGapsInTimeline(items));
-  items.on("remove", () => updateGapsInTimeline(items));
+  items.on("add", () => updateGapsInTimeline(items, groups));
+  items.on("update", () => updateGapsInTimeline(items, groups));
+  items.on("remove", () => updateGapsInTimeline(items, groups));
 
   // Retourner l'instance pour l'utiliser ailleurs
   return timeline;
