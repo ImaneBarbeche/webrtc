@@ -70,7 +70,8 @@ export const surveyMachine = createMachine({
           if (episodeToUpdate) {
             const modifs = {};
             modifs[event.key] = event.value;
-            modifierEpisode(episodeToUpdate.id, modifs);
+            // Ne pas synchroniser via WebRTC ici car l'événement UPDATE_ANSWER est déjà synchronisé
+            modifierEpisode(episodeToUpdate.id, modifs, false);
           } else {
             console.warn('Aucun épisode trouvé pour la modification');
           }
@@ -82,7 +83,8 @@ export const surveyMachine = createMachine({
             const communeEpisodes = allItems.filter(item => item.group === 13);
             if (communeEpisodes.length > 0) {
               const lastCommuneEpisode = communeEpisodes[communeEpisodes.length - 1];
-              modifierEpisode(lastCommuneEpisode.id, {content: event.value});
+              // Ne pas synchroniser via WebRTC ici car l'événement UPDATE_ANSWER est déjà synchronisé
+              modifierEpisode(lastCommuneEpisode.id, {content: event.value}, false);
             }
           }
           

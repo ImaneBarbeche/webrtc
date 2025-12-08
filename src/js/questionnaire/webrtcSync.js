@@ -21,6 +21,9 @@ export function handleRemoteMessage(message) {
   } else if (message.type === "LOAD_ITEMS") {
     // L'enquêteur a envoyé un lot d'items à charger dans la timeline
     handleLoadItems(message.items);
+  } else if (message.type === "UPDATE_ITEMS") {
+    // L'enquêteur a modifié un ou plusieurs items (épisodes) sur la timeline
+    handleUpdateItems(message.items);
   } else if (message.type === "SURVEY_STATE") {
     // Synchroniser l'état complet (utile pour rattrapage)
     // Note: XState v5 n'a pas de méthode simple pour forcer un état
@@ -30,6 +33,52 @@ export function handleRemoteMessage(message) {
     import("../stateMachine/stateMachine.js").then((module) => {
       module.resetAllData();
     });
+  }
+}
+
+/**
+ * Gère la mise à jour des items modifiés reçus via WebRTC
+ * @param {Array} updatedItems - Les items à mettre à jour
+ */
+function handleUpdateItems(updatedItems) {
+  try {
+    if (!updatedItems || !Array.isArray(updatedItems)) {
+      return;
+    }
+
+    // Convertir les dates ISO en objets Date si nécessaire
+    const parsed = updatedItems.map((i) => ({
+      ...i,
+      start: i.start ? new Date(i.start) : undefined,
+      end: i.end ? new Date(i.end) : undefined,
+    }));
+
+    // Mettre à jour les items existants
+    parsed.forEach((updatedItem) => {
+      try {
+        const existingItem = items.get(updatedItem.id);
+        if (existingItem) {
+          // L'item existe, le mettre à jour
+          items.update(updatedItem);
+        } else {
+          // L'item n'existe pas, l'ajouter
+          items.add(updatedItem);
+        }
+      } catch (e) {
+        console.warn("Erreur lors de la mise à jour d'un item", e, updatedItem);
+      }
+    });
+
+    // Redessiner la timeline si disponible
+    if (window.timeline && typeof window.timeline.redraw === "function") {
+      try {
+        window.timeline.redraw();
+      } catch (e) {
+        console.warn("Erreur lors du redraw de la timeline", e);
+      }
+    }
+  } catch (e) {
+    console.error("Erreur lors de la mise à jour des items distants", e);
   }
 }
 

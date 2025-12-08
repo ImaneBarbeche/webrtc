@@ -29,6 +29,21 @@ export function setupInteractions(timeline, utils) {
           items.update(updatedItem);
           setTimeout(() => timeline.redraw(), 0);
           timelineState.isEditingEpisode = false;
+          
+          // Synchroniser via WebRTC si activé (uniquement pour l'enquêteur)
+          if (window.webrtcSync && window.webrtcSync.isActive()) {
+            const role = window.webrtcSync.getRole();
+            if (role === "host") {
+              try {
+                window.webrtcSync.sendMessage({
+                  type: "UPDATE_ITEMS",
+                  items: [updatedItem]
+                });
+              } catch (e) {
+                console.warn("Erreur lors de la synchronisation de la modification d'épisode", e);
+              }
+            }
+          }
         });
         longPressTargetItem = null;
         longPressStartPos = null;

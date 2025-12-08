@@ -48,7 +48,7 @@ export function ajouterEpisode(text, start, end, group){
 *
 */
 
-export function modifierEpisode(id, modifications){
+export function modifierEpisode(id, modifications, syncViaWebRTC = false){
     let itemtomodify = items.get(id)
     const convertYearToDate = year => year && /^\d{4}$/.test(year) ? new Date(`${year}-01-01`) : year; //TODO, faire la vérif de si c'est pas une année
     
@@ -77,6 +77,19 @@ export function modifierEpisode(id, modifications){
     
     Object.assign(itemtomodify, modifications);
     timeline.itemsData.update(itemtomodify)
+    
+    // Synchroniser via WebRTC si explicitement demandé (pour modifications directes depuis l'UI)
+    if (syncViaWebRTC && window.webrtcSync && window.webrtcSync.isActive()) {
+        try {
+            window.webrtcSync.sendMessage({
+                type: "UPDATE_ITEMS",
+                items: [itemtomodify]
+            });
+        } catch (e) {
+            console.warn("Erreur lors de la synchronisation de la modification d'épisode", e);
+        }
+    }
+    
     /*if(state.lastEpisode.end < itemtomodify.end)
         state.lastEpisode = itemtomodify*/ //decommenter pour extend
     return itemtomodify;
