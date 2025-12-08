@@ -2,6 +2,7 @@
 
 import { surveyService } from "../stateMachine/stateMachine.js";
 import { setBirthYear } from "../timeline/birthYear.js";
+import { sendEvent } from "./eventHandlers.js";
 
 /**
  * Crée un champ input simple avec gestion de l'édition
@@ -93,7 +94,7 @@ function handleEditUpdate(input, eventKey) {
     value: input.value,
     updateEpisode: ["start", "end", "statut_res"].includes(eventKey),
   };
-  surveyService.send(updateEvent);
+  sendEvent(updateEvent);
 
   // Cas spécial pour l'année de naissance - mettre à jour la timeline
   if (eventKey === "birthdate" || eventKey === "birthYear") {
@@ -133,7 +134,40 @@ function handleEditUpdate(input, eventKey) {
 
               return label;
             }
-            return vis.moment(date).format(scale);
+            // Map vis-timeline scale names to moment format tokens
+            // Avoid passing the raw `scale` string to moment.format
+            let fmt;
+            switch (scale) {
+              case "millisecond":
+                fmt = "SSS";
+                break;
+              case "second":
+                fmt = "s";
+                break;
+              case "minute":
+              case "hour":
+                fmt = "HH:mm";
+                break;
+              case "weekday":
+                fmt = "ddd D";
+                break;
+              case "day":
+                fmt = "D";
+                break;
+              case "week":
+                fmt = "w";
+                break;
+              case "month":
+                fmt = "MMM";
+                break;
+              case "year":
+                fmt = "YYYY";
+                break;
+              default:
+                fmt = "D";
+            }
+
+            return vis.moment(date).format(fmt);
           },
         },
       });
