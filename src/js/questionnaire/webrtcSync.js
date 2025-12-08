@@ -43,16 +43,44 @@ export function handleRemoteMessage(message) {
               if (scale === "year") {
                 const currentYear = new Date(date).getFullYear();
                 const age = currentYear - birthYear;
-
                 let label = `<b>${currentYear}</b>`;
                 if (currentYear >= birthYear && currentYear <= nowYear) {
-                  label += `<br><span class="year-age">${age} ${
-                    age > 1 ? "ans" : "an"
-                  }</span>`;
+                  label += `<br><span class="year-age">${age} ${age > 1 ? "ans" : "an"}</span>`;
                 }
                 return label;
               }
-              return vis.moment(date).format(scale);
+              // Map vis-timeline scale names to moment format tokens
+              let fmt;
+              switch (scale) {
+                case "millisecond":
+                  fmt = "SSS";
+                  break;
+                case "second":
+                  fmt = "s";
+                  break;
+                case "minute":
+                case "hour":
+                  fmt = "HH:mm";
+                  break;
+                case "weekday":
+                  fmt = "ddd D";
+                  break;
+                case "day":
+                  fmt = "D";
+                  break;
+                case "week":
+                  fmt = "w";
+                  break;
+                case "month":
+                  fmt = "MMM";
+                  break;
+                case "year":
+                  fmt = "YYYY";
+                  break;
+                default:
+                  fmt = "D";
+              }
+              return vis.moment(date).format(fmt);
             },
           },
         });
