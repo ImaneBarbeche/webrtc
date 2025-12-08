@@ -7,6 +7,7 @@ import { items } from "../timeline/timeline.js";
 import { surveyService } from "../stateMachine/stateMachine.js";
 import { setSyncConfig } from "./eventHandlers.js";
 import { setupCalendar } from "../stateMachine/actions.js";
+import { setBirthYear } from "../timeline/birthYear.js";
 
 // Variable locale pour tracker si WebRTC est déjà activé
 let webrtcActivated = false;
@@ -27,6 +28,9 @@ export function handleRemoteMessage(message) {
     ) {
       const birthYear = Number(message.event.value);
       if (!isNaN(birthYear) && window.timeline) {
+        // Mettre à jour l'affichage fixe
+        setBirthYear(birthYear);
+
         const birthDate = new Date(birthYear, 0, 1);
         const nowYear = new Date().getFullYear();
 

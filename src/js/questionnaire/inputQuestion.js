@@ -59,7 +59,6 @@ export function renderInputQuestion(
       const eventData = { type: eventType };
       eventData[eventKey] = input.value;
 
-
       // Cas spécial pour l'année de naissance :
       // Ne pas appeler setBirthYear ici !
       // La mise à jour doit passer par la machine d'état pour être synchronisée.
@@ -101,6 +100,9 @@ function handleEditUpdate(input, eventKey) {
 
   // Cas spécial pour l'année de naissance - mettre à jour la timeline
   if (eventKey === "birthdate" || eventKey === "birthYear") {
+    // Mettre à jour l'affichage fixe
+    setBirthYear(input.value);
+
     if (window.timeline) {
       const birthYear = Number(input.value);
       const nowYear = new Date().getFullYear();
