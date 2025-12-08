@@ -7,6 +7,7 @@
 
 import { ajouterEpisode, modifierEpisode } from "../episodes/episodes.js";
 import { timeline, groups, items } from "../timeline/timeline.js";
+import { setBirthYear } from "../timeline/birthYear.js";
 
 const { assign } = window.XState;
 
@@ -15,10 +16,15 @@ const { assign } = window.XState;
 // =============================================================================
 
 /**
- * Sauvegarde l'année de naissance
+ * Sauvegarde l'année de naissance et met à jour l'affichage de l'âge sur la timeline
  */
 export const saveBirthYear = assign({
-  birthYear: ({context, event}) => parseInt(event.birthdate)
+  birthYear: ({context, event}) => {
+    const year = parseInt(event.birthdate);
+    // Mettre à jour l'année de naissance pour l'affichage de l'âge côté timeline
+    setBirthYear(year);
+    return year;
+  }
 });
 
 /**
