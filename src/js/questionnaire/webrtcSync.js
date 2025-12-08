@@ -6,6 +6,7 @@
 import { items } from "../timeline/timeline.js";
 import { surveyService } from "../stateMachine/stateMachine.js";
 import { setSyncConfig } from "./eventHandlers.js";
+import { setupCalendar } from "../stateMachine/actions.js";
 
 // Variable locale pour tracker si WebRTC est déjà activé
 let webrtcActivated = false;
@@ -18,18 +19,58 @@ export function handleRemoteMessage(message) {
   if (message.type === "SURVEY_EVENT") {
     // Appliquer l'événement reçu à notre machine à états
     surveyService.send(message.event);
+
+    // Cas spécial : mise à jour de la date de naissance
+    if (
+      message.event.type === "UPDATE_ANSWER" &&
+      (message.event.key === "birthdate" || message.event.key === "birthYear")
+    ) {
+      const birthYear = Number(message.event.value);
+      if (!isNaN(birthYear) && window.timeline) {
+        const birthDate = new Date(birthYear, 0, 1);
+        const nowYear = new Date().getFullYear();
+
+        // Mettre à jour les options de la timeline
+        window.timeline.setOptions({
+          min: new Date(birthYear - 4, 0, 1),
+          start: new Date(birthYear - 4, 0, 1),
+          format: {
+            minorLabels: function (date, scale, step) {
+              if (scale === "year") {
+                const currentYear = new Date(date).getFullYear();
+                const age = currentYear - birthYear;
+
+                let label = `<b>${currentYear}</b>`;
+                if (currentYear >= birthYear && currentYear <= nowYear) {
+                  label += `<br><span class="year-age">${age} ${
+                    age > 1 ? "ans" : "an"
+                  }</span>`;
+                }
+                return label;
+              }
+              return vis.moment(date).format(scale);
+            },
+          },
+        });
+
+        // Mettre à jour la barre existante au lieu de la recréer
+        window.timeline.setCustomTime(birthDate, "birth-year-bar");
+        window.timeline.setCustomTimeTitle(birthYear, "birth-year-bar");
+
+        window.timeline.setCustomTime(birthDate, "custom-bar");
+        window.timeline.setCustomTimeTitle(birthYear, "custom-bar");
+
+        window.timeline.redraw();
+        window.timeline.fit();
+      }
+    }
   } else if (message.type === "LOAD_ITEMS") {
-    // L'enquêteur a envoyé un lot d'items à charger dans la timeline
     handleLoadItems(message.items);
   } else if (message.type === "UPDATE_ITEMS") {
-    // L'enquêteur a modifié un ou plusieurs items (épisodes) sur la timeline
     handleUpdateItems(message.items);
   } else if (message.type === "SURVEY_STATE") {
-    // Synchroniser l'état complet (utile pour rattrapage)
-    // Note: XState v5 n'a pas de méthode simple pour forcer un état
-    // On pourrait recréer le service ou envoyer des événements pour arriver au bon état
+    // TODO: synchroniser l'état complet si nécessaire
   } else if (message.type === "RESET_ALL_DATA") {
-    // L'enquêteur a demandé une réinitialisation complète
     import("../stateMachine/stateMachine.js").then((module) => {
       module.resetAllData();
     });

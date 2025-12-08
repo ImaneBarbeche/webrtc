@@ -3,6 +3,8 @@
 import { surveyService } from "../stateMachine/stateMachine.js";
 import { setBirthYear } from "../timeline/birthYear.js";
 import { sendEvent } from "./eventHandlers.js";
+import { sendEvent as originalSendEvent } from "./eventHandlers.js";
+import * as eventHandlers from "./eventHandlers.js";
 
 /**
  * Crée un champ input simple avec gestion de l'édition
@@ -57,10 +59,11 @@ export function renderInputQuestion(
       const eventData = { type: eventType };
       eventData[eventKey] = input.value;
 
-      // Cas spécial pour l'année de naissance
-      if (eventType === "ANSWER_BIRTH_YEAR") {
-        setBirthYear(input.value);
-      }
+
+      // Cas spécial pour l'année de naissance :
+      // Ne pas appeler setBirthYear ici !
+      // La mise à jour doit passer par la machine d'état pour être synchronisée.
+      // (Voir action saveBirthYear dans actions.js)
 
       sendEvent(eventData);
       input.disabled = true;
