@@ -12,7 +12,14 @@ import { setBirthYear } from "../timeline/birthYear.js";
  * @param {function} sendEvent - Fonction pour envoyer l'événement à la machine
  * @param {boolean} isHost - Si l'utilisateur est l'hôte (pour désactiver les contrôles)
  */
-export function renderInputQuestion(questionDiv, state, eventType, eventKey, sendEvent, isHost = true) {
+export function renderInputQuestion(
+  questionDiv,
+  state,
+  eventType,
+  eventKey,
+  sendEvent,
+  isHost = true
+) {
   const input = document.createElement("input");
   input.type = "text";
   input.placeholder = "Votre réponse";
@@ -32,7 +39,7 @@ export function renderInputQuestion(questionDiv, state, eventType, eventKey, sen
   editBtn.addEventListener("click", () => {
     input.disabled = false;
     input.focus();
-    
+
     // Listener pour valider la modification avec Entrée
     input.addEventListener("keypress", (event) => {
       if (event.key === "Enter" && input.value.trim() !== "") {
@@ -48,12 +55,12 @@ export function renderInputQuestion(questionDiv, state, eventType, eventKey, sen
       // Créer et envoyer l'événement
       const eventData = { type: eventType };
       eventData[eventKey] = input.value;
-      
+
       // Cas spécial pour l'année de naissance
       if (eventType === "ANSWER_BIRTH_YEAR") {
         setBirthYear(input.value);
       }
-      
+
       sendEvent(eventData);
       input.disabled = true;
       editBtn.style.display = "inline-block"; // afficher le bouton après validation
@@ -91,10 +98,41 @@ function handleEditUpdate(input, eventKey) {
   // Cas spécial pour l'année de naissance - mettre à jour la timeline
   if (eventKey === "birthdate" || eventKey === "birthYear") {
     if (window.timeline) {
+      const birthYear = Number(input.value);
+      const nowYear = new Date().getFullYear();
+      const birthDate = new Date(birthYear, 0, 1);
+
+      // Mettre à jour la barre verticale noire
+      window.timeline.setCustomTime(birthDate, "custom-bar");
+      window.timeline.setCustomTimeTitle(birthYear, "custom-bar");
+
       window.timeline.setOptions({
-        min: new Date(`${input.value}-01-01`),
-        start: new Date(`${input.value}-01-01`),
+        min: new Date(birthYear - 4, 0, 1),
+        start: new Date(birthYear - 4, 0, 1),
+        format: {
+          minorLabels: function (date, scale, step) {
+            if (scale === "year") {
+              const currentYear = new Date(date).getFullYear();
+              const age = currentYear - birthYear;
+
+              // Toujours afficher l'année
+              let label = `<b>${currentYear}</b>`;
+
+              // Ajouter l'âge seulement si cohérent
+              if (currentYear >= birthYear && currentYear <= nowYear) {
+                label += `<br><span class="year-age">${age} ${
+                  age > 1 ? "ans" : "an"
+                }</span>`;
+              }
+
+              return label;
+            }
+            return vis.moment(date).format(scale);
+          },
+        },
       });
+
+      // Forcer un redraw pour appliquer la nouvelle logique
       window.timeline.redraw();
       window.timeline.fit();
     }
@@ -108,7 +146,9 @@ function handleEditUpdate(input, eventKey) {
  */
 function disableQuestionControls(questionDiv, editBtn) {
   try {
-    const controls = questionDiv.querySelectorAll("input, button, textarea, select");
+    const controls = questionDiv.querySelectorAll(
+      "input, button, textarea, select"
+    );
     controls.forEach((c) => {
       if (c !== editBtn) c.disabled = true; // ne pas désactiver le bouton ✏️
     });
