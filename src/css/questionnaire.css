@@ -254,16 +254,77 @@
   margin: 20px 0;
 }
 
-/* .episode-edit-modal {
+/* Fond semi-transparent */
+.gap-modal-overlay {
   position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
   background: rgba(0,0,0,0.5);
-  display: flex; align-items: center; justify-content: center;
-  z-index: 9999;
+  display: flex; 
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
 }
-.episode-edit-modal .modal-content {
+
+/* Contenu de la modale */
+.gap-modal-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.gap-modal-content {
   background: #fff;
+  border-radius: 10px;
   padding: 2em;
-  border-radius: 8px;
-  min-width: 300px;
-} */
+  max-width: 600px;
+  width: 90%;
+  box-shadow: 0 6px 30px rgba(0,0,0,0.3);
+  position: relative;
+  font-family: sans-serif;
+}
+
+.gap-modal-close {
+  position: absolute;
+  top: 12px; right: 16px;
+  background: #eee;
+  border: none;
+  padding: 0.4em 0.9em;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.gap-modal-content h3 {
+  margin-top: 0;
+  font-size: 1.4em;
+  color: #333;
+}
+
+.gap-list {
+  list-style: none;
+  padding: 0;
+  margin-top: 1em;
+}
+
+.gap-list li {
+  padding: 0.6em 0.8em;
+  margin-bottom: 0.5em;
+  background: #f9f9f9;
+  border-left: 4px solid #ffa726;
+  border-radius: 6px;
+  font-size: 0.95em;
+  display: flex;
+  align-items: center;
+  gap: 0.6em;
+}
+
+.gap-list li::before {
+  content: "⚠️";
+  font-size: 1.1em;
+}

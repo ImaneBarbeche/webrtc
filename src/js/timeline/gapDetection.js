@@ -1,3 +1,5 @@
+import { items } from "./timeline.js";
+
 export function detectGaps(episodes) {
   const gaps = [];
 
@@ -69,7 +71,14 @@ export function updateGapsInTimeline(items, groups) {
   items.remove(idsASupprimer);
 
   // Récupérer les épisodes
-  const episodes = allItems.filter((item) => !item.id.startsWith("gap-"));
+  const episodes = allItems.filter(
+    (item) =>
+      !item.id.startsWith("gap-") &&
+      item.start &&
+      item.end &&
+      item.group &&
+      item.type === "range"
+  );
 
   // Détecter les gaps
   const gaps = detectGaps(episodes);
@@ -127,3 +136,12 @@ function notifyNewGap(gap, groups) {
   });
 }
 
+// Helpers pour questionnaire.js
+export function getGapList() {
+  const episodes = items.get().filter(i => i.type === "range");
+  return detectGaps(episodes);
+}
+
+export function getGapCount() {
+  return getGapList().length;
+}

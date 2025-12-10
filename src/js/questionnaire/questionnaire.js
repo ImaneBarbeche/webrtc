@@ -12,16 +12,72 @@ import { sendEvent, getIsHost } from "./eventHandlers.js";
 import { enableWebRTCSync, processPendingItems } from "./webrtcSync.js";
 import { displayPreviousAnswers } from "./historyDisplay.js";
 import { initResetHandler } from "./resetHandler.js";
-
+import { getGapCount, getGapList } from "../timeline/gapDetection.js";
+import { groupsData } from "../timeline/timelineData.js";
 /**
  ************************************************************************************************************
  * questionnaire.js gère l'affichage des questions et transition vers les états suivant                     *
  * Chaque question a un type d'evenement, correspondant à un état ou une transition dans la machine à états *
  ************************************************************************************************************
  */
+function getGroupName(groupId) {
+  // Cherche le groupe par son id
+  const groupInfo = groupsData.find((g) => g.id === Number(groupId));
+  return groupInfo ? groupInfo.contentText : groupId;
+}
 
 document.addEventListener("DOMContentLoaded", async () => {
   const container = document.getElementById("questions");
+
+  const gapBtn = document.createElement("button");
+  gapBtn.id = "gap-counter-btn";
+  gapBtn.innerText = `Périodes manquantes : ${getGapCount()}`;
+  container.appendChild(gapBtn);
+
+  gapBtn.addEventListener("click", () => {
+    const gaps = getGapList();
+
+    const overlay = document.createElement("div");
+    overlay.className = "gap-modal-overlay";
+
+    const modal = document.createElement("div");
+    modal.className = "gap-modal-content";
+
+    const closeBtn = document.createElement("button");
+    closeBtn.className = "gap-modal-close";
+    closeBtn.innerText = "Fermer";
+    closeBtn.addEventListener("click", () => overlay.remove());
+
+    const gapHtml =
+      gaps.length === 0
+        ? "<p>Aucune période manquante détectée.</p>"
+        : `<ul class="gap-list">
+          ${gaps
+            .map(
+              (gap) => `
+            <li>
+              <strong>${getGroupName(gap.group)}</strong> : 
+              ${new Date(gap.start).getFullYear()} → ${new Date(
+                gap.end
+              ).getFullYear()}
+            </li>
+          `
+            )
+            .join("")}
+        </ul>`;
+
+    modal.innerHTML = `<h3>Périodes manquantes</h3>${gapHtml}`;
+    modal.appendChild(closeBtn);
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+  });
+
+  const updateGapCounter = () => {
+    gapBtn.innerText = `Périodes manquantes : ${getGapCount()}`;
+  };
+  items.on("add", updateGapCounter);
+  items.on("update", updateGapCounter);
+  items.on("remove", updateGapCounter);
 
   // Essayer d'activer WebRTC au chargement
   enableWebRTCSync();
