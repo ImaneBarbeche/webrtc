@@ -72,15 +72,26 @@ export function saveAnsweredQuestion(state, eventData) {
     const answeredQuestions = JSON.parse(
       localStorage.getItem(STORAGE_KEYS.ANSWERED_QUESTIONS) || '[]'
     );
-    
-    // Ajouter la nouvelle réponse
-    answeredQuestions.push({
-      state: state,
+
+    const newEntry = {
+      state,
       answer: eventData,
       timestamp: new Date().toISOString()
-    });
-    
-    // Sauvegarder
+    };
+
+    // Vérifier si une réponse existe déjà pour cette question
+    const existingIndex = answeredQuestions.findIndex(
+      q => q.state === state || q.answer?.key === eventData.key
+    );
+
+    if (existingIndex >= 0) {
+      // Remplacer l'ancienne réponse
+      answeredQuestions[existingIndex] = newEntry;
+    } else {
+      // Ajouter une nouvelle entrée
+      answeredQuestions.push(newEntry);
+    }
+
     localStorage.setItem(
       STORAGE_KEYS.ANSWERED_QUESTIONS,
       JSON.stringify(answeredQuestions)
@@ -89,6 +100,7 @@ export function saveAnsweredQuestion(state, eventData) {
     console.error('❌ Erreur lors de la sauvegarde de la réponse:', e);
   }
 }
+
 
 /**
  * Charge l'historique des réponses depuis localStorage

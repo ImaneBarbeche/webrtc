@@ -1,10 +1,8 @@
 // Fonction pour créer les questions avec un input simple (ex: commune, année, statut)
 
-import { surveyService } from "../stateMachine/stateMachine.js";
 import { setBirthYear } from "../timeline/birthYear.js";
 import { sendEvent } from "./eventHandlers.js";
-import { sendEvent as originalSendEvent } from "./eventHandlers.js";
-import * as eventHandlers from "./eventHandlers.js";
+import { saveAnsweredQuestion } from "../stateMachine/persistence.js";
 
 /**
  * Crée un champ input simple avec gestion de l'édition
@@ -97,6 +95,8 @@ function handleEditUpdate(input, eventKey) {
     updateEpisode: ["start", "end", "statut_res"].includes(eventKey),
   };
   sendEvent(updateEvent);
+  // Sauvegarder la réponse modifiée
+  saveAnsweredQuestion(eventKey, updateEvent);
 
   // Cas spécial pour l'année de naissance - mettre à jour la timeline
   if (eventKey === "birthdate" || eventKey === "birthYear") {

@@ -12,6 +12,7 @@ import { sendEvent, getIsHost } from "./eventHandlers.js";
 import { enableWebRTCSync, processPendingItems } from "./webrtcSync.js";
 import { displayPreviousAnswers } from "./historyDisplay.js";
 import { initResetHandler } from "./resetHandler.js";
+import { getGapCount, getGapList } from "../timeline/gapDetection.js";
 /**
  ************************************************************************************************************
  * questionnaire.js gère l'affichage des questions et transition vers les états suivant                     *
@@ -21,6 +22,28 @@ import { initResetHandler } from "./resetHandler.js";
 
 document.addEventListener("DOMContentLoaded", async () => {
   const container = document.getElementById("questions");
+  const gapBtn = document.createElement("button");
+  gapBtn.id = "gap-counter-btn";
+  gapBtn.textContent = `Périodes manquantes : ${getGapCount()}`;
+  gapBtn.style.margin = "1em";
+  gapBtn.onclick = function () {
+    const gaps = getGapList();
+    if (gaps.length === 0) {
+      alert("Aucune période manquante détectée !");
+      return;
+    }
+    alert(
+      gaps.map(gap =>
+        `Groupe : ${gap.group} | ${new Date(gap.start).getFullYear()} → ${new Date(gap.end).getFullYear()}`
+      ).join('\n')
+    );
+  };
+  // Ajoute le bouton en haut du questionnaire
+  container.parentNode.insertBefore(gapBtn, container);
+
+  function updateGapCounter() {
+    gapBtn.textContent = `Périodes manquantes : ${getGapCount()}`;
+  }
 
   // Essayer d'activer WebRTC au chargement
   enableWebRTCSync();
@@ -65,7 +88,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // Pour les questions qui dépendent de l'index (commune ou logement), créer un identifiant unique
     const statesThatDependOnIndex = [
-      'askCommuneArrivalYear', 
+      'askCommuneArrivalYear',
       'askCommuneDepartureYear',
       'askSameHousingInCommune',
       'askHousingArrivalAge',
@@ -73,7 +96,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       'askHousingOccupationStatusEntry',
       'askHousingOccupationStatusExit'
     ];
-    
+
     let questionId = state.value;
     if (statesThatDependOnIndex.includes(state.value)) {
       // Ajouter l'index de la commune/logement pour rendre l'ID unique
@@ -145,6 +168,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     container.appendChild(questionDiv);
+
+    // Met à jour le compteur de gaps
+    updateGapCounter();
   }
 
   // Initialiser le gestionnaire du bouton reset

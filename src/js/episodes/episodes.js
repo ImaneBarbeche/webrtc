@@ -76,7 +76,7 @@ export function modifierEpisode(id, modifications, syncViaWebRTC = false){
     }
     
     Object.assign(itemtomodify, modifications);
-    timeline.itemsData.update(itemtomodify)
+    items.update(itemtomodify)
     
     // Synchroniser via WebRTC si explicitement demandé (pour modifications directes depuis l'UI)
     if (syncViaWebRTC && window.webrtcSync && window.webrtcSync.isActive()) {
@@ -103,7 +103,7 @@ export function modifierEpisode(id, modifications, syncViaWebRTC = false){
 function rechercherEpisode(groupId, dateRecherchee) {
     
     const date = new Date(dateRecherchee);
-    const episodes = timeline.itemsData.get();
+    const episodes = items.get();
     const episodesCorrespondants = episodes.filter(item => {
         return item.group === groupId && new Date(item.start) <= date && new Date(item.end) >= date;
     });

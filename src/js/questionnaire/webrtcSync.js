@@ -6,8 +6,8 @@
 import { items } from "../timeline/timeline.js";
 import { surveyService } from "../stateMachine/stateMachine.js";
 import { setSyncConfig } from "./eventHandlers.js";
-import { setupCalendar } from "../stateMachine/actions.js";
 import { setBirthYear } from "../timeline/birthYear.js";
+import { saveAnsweredQuestion } from "../stateMachine/persistence.js";
 
 // Variable locale pour tracker si WebRTC est déjà activé
 let webrtcActivated = false;
@@ -20,6 +20,13 @@ export function handleRemoteMessage(message) {
   if (message.type === "SURVEY_EVENT") {
     // Appliquer l'événement reçu à notre machine à états
     surveyService.send(message.event);
+    // sauvegarder la réponse modifiée
+    if (message.event.type === "UPDATE_ANSWER" && message.event.key) {
+      saveAnsweredQuestion(message.event.key, {
+        key: message.event.key,
+        value: message.event.value,
+      });
+    }
 
     // Cas spécial : mise à jour de la date de naissance
     if (
@@ -45,7 +52,9 @@ export function handleRemoteMessage(message) {
                 const age = currentYear - birthYear;
                 let label = `<b>${currentYear}</b>`;
                 if (currentYear >= birthYear && currentYear <= nowYear) {
-                  label += `<br><span class="year-age">${age} ${age > 1 ? "ans" : "an"}</span>`;
+                  label += `<br><span class="year-age">${age} ${
+                    age > 1 ? "ans" : "an"
+                  }</span>`;
                 }
                 return label;
               }

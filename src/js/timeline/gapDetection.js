@@ -1,3 +1,5 @@
+let lastGaps = [];
+
 export function detectGaps(episodes) {
   const gaps = [];
 
@@ -6,7 +8,7 @@ export function detectGaps(episodes) {
 
   episodes.forEach((episode) => {
     const groupId = episode.group; // récupère les groupes depuis les épisodes
-    
+
     if (!groupedEpisodes[groupId]) {
       groupedEpisodes[groupId] = [];
     }
@@ -73,6 +75,7 @@ export function updateGapsInTimeline(items, groups) {
 
   // Détecter les gaps
   const gaps = detectGaps(episodes);
+  lastGaps = gaps; // Stocke la liste des gaps à chaque update
 
   // Créer les clés des gaps actuels
   const currentGapKeys = gaps.map(
@@ -98,25 +101,38 @@ export function updateGapsInTimeline(items, groups) {
 }
 
 function notifyNewGap(gap, groups) {
-
-const allGroups = groups.get();
+  const allGroups = groups.get();
 
   // Trouver le groupe par son ID
-  let groupInfo = allGroups.find(g => String(g.id) === String(gap.group));
+  let groupInfo = allGroups.find((g) => String(g.id) === String(gap.group));
   if (!groupInfo) {
-    groupInfo = allGroups.find(g => g.nestedGroups && g.nestedGroups.includes(Number(gap.group)));
+    groupInfo = allGroups.find(
+      (g) => g.nestedGroups && g.nestedGroups.includes(Number(gap.group))
+    );
   }
 
   const groupName = groupInfo ? groupInfo.contentText : gap.group;
 
+  // Extraire l'année (si gap.start et gap.end sont des dates, sinon adapte)
+  const startYear = new Date(gap.start).getFullYear();
+  const endYear = new Date(gap.end).getFullYear();
+
   Swal.fire({
     toast: true,
-    position: "top-end", // En haut à droite
+    position: "top-end",
     icon: "warning",
     title: "Période non renseignée",
-    text: `${groupName} : ${gap.start} → ${gap.end}`,
+    html: `<b>Pour ${groupName} : ${startYear} → ${endYear}</b><br>
+         <span>Veuillez renseigner cette période pour une meilleure précision des données.</span>`,
     showConfirmButton: false,
-    timer: 5000, // Disparaît après 5 sec
+    timer: 7000,
     timerProgressBar: true,
   });
+}
+
+export function getGapCount() {
+  return previousGapKeys.length;
+}
+export function getGapList() {
+  return lastGaps;
 }
