@@ -1,5 +1,3 @@
-let lastGaps = [];
-
 export function detectGaps(episodes) {
   const gaps = [];
 
@@ -57,7 +55,7 @@ export function createGapItems(gaps) {
 }
 
 let isUpdating = false;
-let previousGapKeys = []; // ← AJOUTE ÇA
+let previousGapKeys = []; // Clés des gaps précédents pour comparaison
 
 export function updateGapsInTimeline(items, groups) {
   if (isUpdating) return;
@@ -75,7 +73,6 @@ export function updateGapsInTimeline(items, groups) {
 
   // Détecter les gaps
   const gaps = detectGaps(episodes);
-  lastGaps = gaps; // Stocke la liste des gaps à chaque update
 
   // Créer les clés des gaps actuels
   const currentGapKeys = gaps.map(
@@ -130,9 +127,3 @@ function notifyNewGap(gap, groups) {
   });
 }
 
-export function getGapCount() {
-  return previousGapKeys.length;
-}
-export function getGapList() {
-  return lastGaps;
-}

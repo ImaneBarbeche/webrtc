@@ -120,8 +120,6 @@ function extractEventKeyValue(eventData) {
  * @param {boolean} allowAdvance - Si true, permet de passer à la question suivante
  */
 export function sendEvent(eventData, allowAdvance = true) {
-    // DEBUG: log every event sent (host, sync, etc)
-    console.log("[DEBUG] sendEvent called", eventData, { allowAdvance, syncEnabled, isHost, windowWebrtc: !!window.webrtcSync });
   // Vérifier si on est hôte
   if (!isHost) {
     console.warn("VIEWER ne peut pas envoyer d'événements");

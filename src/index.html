@@ -2,7 +2,10 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover"
+    />
     <title>LifeStories - Connexion Collaborative</title>
     <link rel="icon" type="image/x-icon" href="favicon.ico" />
 
@@ -35,7 +38,7 @@
 
   <body>
     <div id="homepage-root"></div>
-    <div id="dashboard-root" style="display:none"></div>
+    <div id="dashboard-root" style="display: none"></div>
     <div class="onboarding-container" style="display: none">
       <header>
         <img src="./assets/imgs/logo.png" alt="Logo LifeStories" />
@@ -212,27 +215,52 @@
       <!-- Bouton mode développeur sur la vue standard -->
       <button
         id="devmode-toggle-standard"
-        style="position: fixed; top: 16px; right: 16px; z-index: 1000; background: #fff; border: 1px solid #ccc; border-radius: 4px; padding: 4px 10px; font-size: 14px; cursor: pointer; display: none; align-items: center;"
+        style="
+          position: fixed;
+          top: 16px;
+          right: 16px;
+          z-index: 1000;
+          background: #fff;
+          border: 1px solid #ccc;
+          border-radius: 4px;
+          padding: 4px 10px;
+          font-size: 14px;
+          cursor: pointer;
+          display: none;
+          align-items: center;
+        "
         title="Basculer le mode développeur"
       >
-        <span style="margin-right: 6px;">🛠️</span>
+        <span style="margin-right: 6px">🛠️</span>
         Mode standard
       </button>
 
       <div class="split">
         <!-- Left side-->
-          <div id="questionnaire">
+        <div id="questionnaire">
+          <div id="react-gap-list"></div> <!-- React component mount point -->
           <div class="questionnaire-header">
-            <h2 style="margin: 0;"><i data-lucide="house"></i> Migratoire</h2>
+            <h2 style="margin: 0"><i data-lucide="house"></i> Migratoire</h2>
           </div>
           <div id="questions"></div>
           <!-- Footer actions: kept at the end of the questionnaire -->
-          <div class="questionnaire-footer" style="margin-top:12px; display:flex; gap:8px; align-items:center; justify-content:flex-end;">
+          <div
+            class="questionnaire-footer"
+            style="
+              margin-top: 12px;
+              display: flex;
+              gap: 8px;
+              align-items: center;
+              justify-content: flex-end;
+            "
+          >
             <div id="questionnaire-actions">
               <button id="export">Export</button>
               <button id="load">Load</button>
             </div>
-            <button id="resetButton" title="Réinitialiser le questionnaire">🗑️</button>
+            <button id="resetButton" title="Réinitialiser le questionnaire">
+              🗑️
+            </button>
           </div>
         </div>
 
@@ -248,18 +276,23 @@
                 <h2>Synthèse</h2>
                 <p id="year"></p>
               </header>
-              <button id="close-summary" class="invisible-button"><i data-lucide="x"></i></button>
+              <button id="close-summary" class="invisible-button">
+                <i data-lucide="x"></i>
+              </button>
             </div>
-            <div id="moreInfos" class="stat-wrapper">
-            </div>
+            <div id="moreInfos" class="stat-wrapper"></div>
             <div class="btn-wrapper">
               <div class="btn-group">
-                <button id="move-backwards"><i data-lucide="chevron-left"></i></button>
-                <button id="move-forwards"><i data-lucide="chevron-right"></i></button>
+                <button id="move-backwards">
+                  <i data-lucide="chevron-left"></i>
+                </button>
+                <button id="move-forwards">
+                  <i data-lucide="chevron-right"></i>
+                </button>
               </div>
               <div class="btn-group">
-                <button id="zoom-out" ><i data-lucide="zoom-out"></i></button>
-                <button id="zoom-in" ><i data-lucide="zoom-in"></i></button>
+                <button id="zoom-out"><i data-lucide="zoom-out"></i></button>
+                <button id="zoom-in"><i data-lucide="zoom-in"></i></button>
               </div>
             </div>
           </section>
@@ -267,15 +300,29 @@
             <h2><i data-lucide="house"></i> 1. Migratoire</h2>
             <div class="btn-wrapper">
               <div class="btn-group">
-                <button id="move-backwards"><i data-lucide="chevron-left"></i></button>
-                <button id="move-forwards"><i data-lucide="chevron-right"></i></button>
+                <button id="move-backwards">
+                  <i data-lucide="chevron-left"></i>
+                </button>
+                <button id="move-forwards">
+                  <i data-lucide="chevron-right"></i>
+                </button>
               </div>
               <div class="btn-group">
-                <button id="zoom-out" ><i data-lucide="zoom-out"></i></button>
-                <button id="zoom-in" ><i data-lucide="zoom-in"></i></button>
+                <button id="zoom-out"><i data-lucide="zoom-out"></i></button>
+                <button id="zoom-in"><i data-lucide="zoom-in"></i></button>
               </div>
-              <button id="toggle-chapters" class="secondary-button button-with-icon"><i data-lucide="swatch-book"></i></button>
-              <button id="view-summary" class="secondary-button button-with-icon"><i data-lucide="square-chart-gantt"></i> view summary</button>
+              <button
+                id="toggle-chapters"
+                class="secondary-button button-with-icon"
+              >
+                <i data-lucide="swatch-book"></i>
+              </button>
+              <button
+                id="view-summary"
+                class="secondary-button button-with-icon"
+              >
+                <i data-lucide="square-chart-gantt"></i> view summary
+              </button>
             </div>
           </section>
           <div id="map"></div>
@@ -284,15 +331,28 @@
     </div>
 
     <!-- filter test -->
-    <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
-      <filter id="lensFilter" x="0%" y="0%" width="100%" height="100%" filterUnits="objectBoundingBox">
+    <svg xmlns="http://www.w3.org/2000/svg" style="display: none">
+      <filter
+        id="lensFilter"
+        x="0%"
+        y="0%"
+        width="100%"
+        height="100%"
+        filterUnits="objectBoundingBox"
+      >
         <feComponentTransfer in="SourceAlpha" result="alpha">
           <feFuncA type="identity" />
         </feComponentTransfer>
 
         <feGaussianBlur in="alpha" stdDeviation="50" result="blur" />
 
-        <feDisplacementMap in="SourceGraphic" in2="blur" scale="50" xChannelSelector="A" yChannelSelector="A" />
+        <feDisplacementMap
+          in="SourceGraphic"
+          in2="blur"
+          scale="50"
+          xChannelSelector="A"
+          yChannelSelector="A"
+        />
       </filter>
     </svg>
 
@@ -308,7 +368,7 @@
     <script src="libs/leaflet/leaflet.js"></script>
     <script src="libs/split.js/split.min.js"></script>
     <script src="libs/lucide/lucide.js"></script>
-
+  
     <!-- XState UMD - doit être chargé avant les modules -->
     <script src="libs/xstate/xstate.js"></script>
     <!-- Scripts LifeStories (modules) -->
@@ -320,13 +380,13 @@
 
     <script>
       // Afficher le bouton mode développeur sur la vue standard si devMode est actif
-      document.addEventListener('DOMContentLoaded', function() {
-        if (localStorage.getItem('devMode') === 'true') {
-          const btn = document.getElementById('devmode-toggle-standard');
-          if (btn) btn.style.display = 'flex';
+      document.addEventListener("DOMContentLoaded", function () {
+        if (localStorage.getItem("devMode") === "true") {
+          const btn = document.getElementById("devmode-toggle-standard");
+          if (btn) btn.style.display = "flex";
           if (btn) {
-            btn.onclick = function() {
-              localStorage.setItem('devMode', 'false');
+            btn.onclick = function () {
+              localStorage.setItem("devMode", "false");
               window.location.reload();
             };
           }
@@ -339,15 +399,17 @@
           // Vérifier si on est en mode viewer
           const isViewer =
             sessionStorage.getItem("webrtc_isOfferor") === "false";
-          const isInterviewer = sessionStorage.getItem("webrtc_isOfferor") === "true";
+          const isInterviewer =
+            sessionStorage.getItem("webrtc_isOfferor") === "true";
 
           // Vue enquêteur : masquer le calendrier et la synthèse, afficher uniquement le questionnaire
           if (isInterviewer) {
             // Ajouter une classe au body pour permettre le CSS de la sidebar
-            document.body.classList.add('interviewer-mode');
-            
+            document.body.classList.add("interviewer-mode");
+
             const trajectoriesSection = document.getElementById("trajectories");
-            const questionnaireSection = document.getElementById("questionnaire");
+            const questionnaireSection =
+              document.getElementById("questionnaire");
             if (trajectoriesSection) {
               trajectoriesSection.style.display = "none";
             }
@@ -359,7 +421,8 @@
 
           // Vue enquêté : masquer le questionnaire, afficher uniquement le calendrier
           if (isViewer) {
-            const questionnaireSection = document.getElementById("questionnaire");
+            const questionnaireSection =
+              document.getElementById("questionnaire");
             const trajectoriesSection = document.getElementById("trajectories");
             if (questionnaireSection) {
               questionnaireSection.style.display = "none";

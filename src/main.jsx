@@ -6,6 +6,11 @@ import './components/homepage-bridge.jsx';
 import './components/sidebar-bridge.jsx';
 import './components/dashboard-bridge.jsx';
 
+import React from "react";
+import ReactDOM from "react-dom/client";
+import GapListModal from "./components/GapListModal.jsx";
+import { items } from "./js/timeline/timeline.js";
+
 // Switch d'affichage selon le mode développeur
 function showStandardView() {
 	// Masquer l'onboarding et la homepage
@@ -38,3 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
+const episodes = items.get(); // Récupérer tous les items (épisodes et gaps)
+const container = document.getElementById("react-gap-list");
+const root = ReactDOM.createRoot(container);
+root.render(<GapListModal episodes={episodes} />);

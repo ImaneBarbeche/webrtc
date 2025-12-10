@@ -781,9 +781,7 @@ header h1 {
 #connectionDetails.hidden,
 #responseSection.hidden,
 #progressBar.hidden,
-#connectedActions.hidden,
-#debugPanel.hidden,
-#debugLog.hidden {
+#connectedActions.hidden {
   display: none;
 }
 
@@ -793,13 +791,8 @@ header h1 {
 }
 
 #responseSection.visible,
-#progressBar.visible,
-#debugPanel.visible {
+#progressBar.visible {
   display: flex;
-}
-
-#debugLog.visible {
-  display: block;
 }
 
 #confirm-button {

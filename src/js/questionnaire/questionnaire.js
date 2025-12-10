@@ -12,7 +12,7 @@ import { sendEvent, getIsHost } from "./eventHandlers.js";
 import { enableWebRTCSync, processPendingItems } from "./webrtcSync.js";
 import { displayPreviousAnswers } from "./historyDisplay.js";
 import { initResetHandler } from "./resetHandler.js";
-import { getGapCount, getGapList } from "../timeline/gapDetection.js";
+
 /**
  ************************************************************************************************************
  * questionnaire.js gère l'affichage des questions et transition vers les états suivant                     *
@@ -22,28 +22,6 @@ import { getGapCount, getGapList } from "../timeline/gapDetection.js";
 
 document.addEventListener("DOMContentLoaded", async () => {
   const container = document.getElementById("questions");
-  const gapBtn = document.createElement("button");
-  gapBtn.id = "gap-counter-btn";
-  gapBtn.textContent = `Périodes manquantes : ${getGapCount()}`;
-  gapBtn.style.margin = "1em";
-  gapBtn.onclick = function () {
-    const gaps = getGapList();
-    if (gaps.length === 0) {
-      alert("Aucune période manquante détectée !");
-      return;
-    }
-    alert(
-      gaps.map(gap =>
-        `Groupe : ${gap.group} | ${new Date(gap.start).getFullYear()} → ${new Date(gap.end).getFullYear()}`
-      ).join('\n')
-    );
-  };
-  // Ajoute le bouton en haut du questionnaire
-  container.parentNode.insertBefore(gapBtn, container);
-
-  function updateGapCounter() {
-    gapBtn.textContent = `Périodes manquantes : ${getGapCount()}`;
-  }
 
   // Essayer d'activer WebRTC au chargement
   enableWebRTCSync();
@@ -81,20 +59,23 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   function renderQuestion(state) {
     // Ignorer les états transitionnels (sans question à afficher)
-    const transitionalStates = ['placeNextCommuneOnTimeline', 'checkMoreHousings'];
+    const transitionalStates = [
+      "placeNextCommuneOnTimeline",
+      "checkMoreHousings",
+    ];
     if (transitionalStates.includes(state.value)) {
       return;
     }
 
     // Pour les questions qui dépendent de l'index (commune ou logement), créer un identifiant unique
     const statesThatDependOnIndex = [
-      'askCommuneArrivalYear',
-      'askCommuneDepartureYear',
-      'askSameHousingInCommune',
-      'askHousingArrivalAge',
-      'askHousingDepartureAge',
-      'askHousingOccupationStatusEntry',
-      'askHousingOccupationStatusExit'
+      "askCommuneArrivalYear",
+      "askCommuneDepartureYear",
+      "askSameHousingInCommune",
+      "askHousingArrivalAge",
+      "askHousingDepartureAge",
+      "askHousingOccupationStatusEntry",
+      "askHousingOccupationStatusExit",
     ];
 
     let questionId = state.value;
@@ -118,7 +99,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     // Obtenir la configuration de la question
-    const { questionText, responseType, choices, eventType, eventKey } = getQuestionConfig(state);
+    const { questionText, responseType, choices, eventType, eventKey } =
+      getQuestionConfig(state);
 
     // Créer l'élément de question
     const questionDiv = document.createElement("div");
@@ -147,7 +129,14 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // Gestion des réponses INPUT (ex: une commune, une année)
     else if (responseType === "input") {
-      renderInputQuestion(questionDiv, state, eventType, eventKey, sendEvent, getIsHost());
+      renderInputQuestion(
+        questionDiv,
+        state,
+        eventType,
+        eventKey,
+        sendEvent,
+        getIsHost()
+      );
     }
 
     // Gestion des boutons choix ("Oui", "Non")
@@ -168,9 +157,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     container.appendChild(questionDiv);
-
-    // Met à jour le compteur de gaps
-    updateGapCounter();
   }
 
   // Initialiser le gestionnaire du bouton reset
