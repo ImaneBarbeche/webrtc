@@ -8,10 +8,29 @@ import { timelineState } from "./timelineState.js";
  * Initialise la barre verticale custom et la logique de highlight/synthèse
  */
 export function setupVerticalBar(timeline, stepSize) {
-  const customTimeId = timeline.addCustomTime(
-    `${timeline.options.end.getFullYear() - 10}-01-01`,
-    "custom-bar"
-  );
+  // Remove any existing custom time bar with id "custom-bar" before adding
+  try {
+    timeline.removeCustomTime("custom-bar");
+  } catch (e) {
+    // Ignore if it doesn't exist
+  }
+  let customTimeId;
+  try {
+    customTimeId = timeline.addCustomTime(
+      `${timeline.options.end.getFullYear() - 10}-01-01`,
+      "custom-bar"
+    );
+  } catch (e) {
+    if (e.message && e.message.includes("duplicate id")) {
+      timeline.setCustomTime(
+        `${timeline.options.end.getFullYear() - 10}-01-01`,
+        "custom-bar"
+      );
+      customTimeId = "custom-bar";
+    } else {
+      throw e;
+    }
+  }
   timelineState.customTimeId = customTimeId;
 
   let timechangeDebounce = null;
