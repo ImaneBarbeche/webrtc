@@ -50,11 +50,40 @@ export function ajouterEpisode(text, start, end, group){
 
 export function modifierEpisode(id, modifications, syncViaWebRTC = false){
     let itemtomodify = items.get(id)
-    const convertYearToDate = year => year && /^\d{4}$/.test(year) ? new Date(`${year}-01-01`) : year; //TODO, faire la vérif de si c'est pas une année
-    
+    const convertYearToDate = (year) => {
+        if (year === null || year === undefined) return year;
+        // If already a Date, keep it
+        if (year instanceof Date) return year;
+        // If number like 1980
+        if (typeof year === 'number' && /^\d{4}$/.test(String(year))) {
+            return new Date(`${String(year)}-01-01`);
+        }
+        // If string: YYYY, YYYY-MM, YYYY-MM-DD, or ISO
+        if (typeof year === 'string') {
+            if (/^\d{4}$/.test(year)) return new Date(`${year}-01-01`);
+            if (/^\d{4}-\d{2}$/.test(year)) return new Date(`${year}-01-01`);
+            if (/^\d{4}-\d{2}-\d{2}/.test(year)) return new Date(year.split('T')[0]);
+            // Fallback: try Date parse
+            const d = new Date(year);
+            if (!Number.isNaN(d.getTime())) return d;
+            return year; // leave as-is (caller will handle)
+        }
+        return year;
+    };
+
     // Appliquer la conversion sur 'start' et 'end'
     if (modifications.start) modifications.start = convertYearToDate(modifications.start);
     if (modifications.end) modifications.end = convertYearToDate(modifications.end);
+
+    // Si une conversion a produit une Date invalide, retirer la modification pour éviter NaN
+    if (modifications.start instanceof Date && Number.isNaN(modifications.start.getTime())) {
+        console.warn('modifierEpisode: start conversion produced invalid Date, ignoring start', modifications.start);
+        delete modifications.start;
+    }
+    if (modifications.end instanceof Date && Number.isNaN(modifications.end.getTime())) {
+        console.warn('modifierEpisode: end conversion produced invalid Date, ignoring end', modifications.end);
+        delete modifications.end;
+    }
     
     
     // Si on modifie seulement date de début et que la nv date de début est après la date de fin, on met 1 an

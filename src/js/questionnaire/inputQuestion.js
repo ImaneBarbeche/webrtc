@@ -4,6 +4,55 @@ import { setBirthYear } from "../timeline/birthYear.js";
 import { sendEvent } from "./eventHandlers.js";
 import { saveAnsweredQuestion } from "../stateMachine/persistence.js";
 
+// Helper global: extraire l'année depuis différentes formes de chaîne de date
+function extractYearFromDateString(val) {
+  if (!val) return null;
+  if (typeof val !== 'string') return null;
+  val = val.trim();
+  // Format DD/MM/YYYY or DD-MM-YYYY
+  let m = val.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+  if (m) return parseInt(m[3], 10);
+  // Format YYYY-MM-DD
+  m = val.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (m) return parseInt(m[1], 10);
+  // Format YYYY-MM
+  m = val.match(/^(\d{4})-(\d{2})$/);
+  if (m) return parseInt(m[1], 10);
+  // ISO or other parsable by Date
+  const d = new Date(val);
+  if (!Number.isNaN(d.getTime())) return d.getFullYear();
+  return null;
+}
+
+// Helper: construire une valeur YYYY-MM pour un input[type=month] à partir d'une valeur stockée
+function buildMonthValueFromStored(stored) {
+  if (!stored) return "";
+  try {
+    if (typeof stored === 'string') {
+      // ISO full
+      if (/^\d{4}-\d{2}-\d{2}/.test(stored)) {
+        return stored.split('T')[0].slice(0, 7); // YYYY-MM
+      }
+      // Already YYYY-MM
+      if (/^\d{4}-\d{2}$/.test(stored)) return stored;
+      // Year only
+      if (/^\d{4}$/.test(stored)) return `${stored}-01`;
+      // Other parseable
+      const d = new Date(stored);
+      if (!Number.isNaN(d.getTime())) {
+        const yyyy = d.getFullYear();
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        return `${yyyy}-${mm}`;
+      }
+    } else if (typeof stored === 'number') {
+      return `${String(stored)}-01`;
+    }
+  } catch (e) {
+    return "";
+  }
+  return "";
+}
+
 /**
  * Crée un champ input simple avec gestion de l'édition
  * @param {HTMLElement} questionDiv - Le conteneur de la question
@@ -22,12 +71,36 @@ export function renderInputQuestion(
   isHost = true
 ) {
   const input = document.createElement("input");
-  input.type = "text";
-  input.placeholder = "Votre réponse";
+
+  // Déterminer si la question porte sur un temps (années, mois, jour, heure)
+  const qText = questionDiv.querySelector("p")?.textContent || "";
+  const isTimeQuestion = /ann(e|ée)|année|âge|age|date|jour|naiss|né|née|heure|h:/i.test(qText);
+
+  if (isTimeQuestion) {
+    // Utiliser un month picker natif (YYYY-MM) — affichage MM-YYYY souhaité côté UI
+    input.type = "month";
+    input.placeholder = "MM-YYYY";
+  } else {
+    input.type = "text";
+    input.placeholder = "Votre réponse";
+  }
+
+  // (uses top-level extractYearFromDateString)
 
   // Si une valeur existe déjà dans le contexte, la pré-remplir et désactiver
   if (state.context[eventKey]) {
-    input.value = state.context[eventKey];
+    const stored = state.context[eventKey];
+    try {
+      if (input.type === "month") {
+        // Construire YYYY-MM pour préremplir le month input
+        const mval = buildMonthValueFromStored(stored);
+        input.value = mval;
+      } else {
+        input.value = stored;
+      }
+    } catch (e) {
+      input.value = state.context[eventKey];
+    }
     input.disabled = true;
   }
 
@@ -42,36 +115,76 @@ export function renderInputQuestion(
     input.focus();
 
     // Listener pour valider la modification avec Entrée
-    input.addEventListener("keypress", (event) => {
-      if (event.key === "Enter" && input.value.trim() !== "") {
+    function onEditKey(event) {
+      if (event.key === "Enter" && String(input.value).trim() !== "") {
         handleEditUpdate(input, eventKey);
         input.disabled = true;
-      }
-    });
-  });
-
-  // Listener pour la première réponse
-  input.addEventListener("keypress", (event) => {
-    if (event.key === "Enter" && input.value.trim() !== "" && eventType) {
-      // Créer et envoyer l'événement
-      const eventData = { type: eventType };
-      eventData[eventKey] = input.value;
-
-      // Cas spécial pour l'année de naissance :
-      // Ne pas appeler setBirthYear ici !
-      // La mise à jour doit passer par la machine d'état pour être synchronisée.
-      // (Voir action saveBirthYear dans actions.js)
-
-      sendEvent(eventData);
-      input.disabled = true;
-      editBtn.style.display = "inline-block"; // afficher le bouton après validation
-
-      // Désactiver les contrôles pour éviter le double envoi
-      if (isHost) {
-        disableQuestionControls(questionDiv, editBtn);
+        cleanupEditListeners();
       }
     }
+
+    function onEditChange() {
+      // picker updates on change (month/date) — apply edit immediately
+      if (String(input.value).trim() !== "") {
+        handleEditUpdate(input, eventKey);
+        input.disabled = true;
+        cleanupEditListeners();
+      }
+    }
+
+    function cleanupEditListeners() {
+      input.removeEventListener("keypress", onEditKey);
+      input.removeEventListener("change", onEditChange);
+    }
+
+    input.addEventListener("keypress", onEditKey);
+    input.addEventListener("change", onEditChange);
   });
+
+  // Listener pour la première réponse (Entrée) et pour les changements (date picker)
+  function submitAnswer(value) {
+    if (!eventType) return;
+    const eventData = { type: eventType };
+    // Normaliser les dates sélectionnées : envoyer uniquement l'année pour préserver la logique existante
+    if (input.type === "month") {
+      // value is YYYY-MM -> keep raw month value for history and send year for timeline compatibility
+      const rawMonth = String(value);
+      const y = extractYearFromDateString(rawMonth);
+      eventData[eventKey] = y === null ? rawMonth : y;
+      // keep the month string as well for record (won't break existing handlers)
+      eventData[`${eventKey}_month`] = rawMonth;
+    } else {
+      eventData[eventKey] = value;
+    }
+    sendEvent(eventData);
+    input.disabled = true;
+    editBtn.style.display = "inline-block";
+    if (isHost) disableQuestionControls(questionDiv, editBtn);
+  }
+
+  input.addEventListener("keypress", (event) => {
+    if (event.key === "Enter" && String(input.value).trim() !== "") {
+      let val = input.value;
+      if (input.type === "number") val = Number(val);
+      if (input.type === "month") {
+        const y = extractYearFromDateString(String(val));
+        val = y === null ? val : y;
+      }
+      submitAnswer(val);
+    }
+  });
+  // Pour les inputs de type month, envoyer aussi lors du changement (sélection)
+  if (input.type === "month") {
+    input.addEventListener("change", () => {
+      if (input.value) {
+        const raw = String(input.value); // YYYY-MM
+        const y = extractYearFromDateString(raw);
+        const out = y === null ? raw : y;
+        // submitAnswer attend l'année ou la valeur brute; submitAnswer ajoutera aussi _month
+        submitAnswer(out);
+      }
+    });
+  }
 
   questionDiv.appendChild(input);
   questionDiv.appendChild(editBtn);
@@ -88,10 +201,32 @@ export function renderInputQuestion(
  * @param {string} eventKey - La clé pour les données
  */
 function handleEditUpdate(input, eventKey) {
+  // Normaliser la valeur pour les inputs `date` : envoyer l'année seulement
+  let outVal = input.value;
+  if (input.type === 'month') {
+    // input.value is YYYY-MM
+    const rawMonth = String(input.value);
+    const y = extractYearFromDateString(rawMonth);
+    // For episode updates (start/end) we must provide a full Date (avoid NaN in timeline)
+    if (["start","end","statut_res"].includes(eventKey)) {
+      // create first day of month Date
+      const parts = rawMonth.split('-');
+      const yyyy = parts[0];
+      const mm = parts[1] || '01';
+      const dateObj = new Date(`${yyyy}-${mm}-01`);
+      outVal = dateObj;
+    } else {
+      // default: send year number for compatibility, and keep month separately when needed
+      outVal = y === null ? rawMonth : y;
+    }
+    // expose raw month if useful
+    // (we'll attach _month when building updateEvent below if needed)
+  }
+
   const updateEvent = {
     type: "UPDATE_ANSWER",
     key: eventKey,
-    value: input.value,
+    value: outVal,
     updateEpisode: ["start", "end", "statut_res"].includes(eventKey),
   };
   sendEvent(updateEvent);
@@ -100,11 +235,11 @@ function handleEditUpdate(input, eventKey) {
 
   // Cas spécial pour l'année de naissance - mettre à jour la timeline
   if (eventKey === "birthdate" || eventKey === "birthYear") {
-    // Mettre à jour l'affichage fixe
-    setBirthYear(input.value);
+    // Mettre à jour l'affichage fixe (utiliser la valeur normalisée)
+    setBirthYear(outVal);
 
     if (window.timeline) {
-      const birthYear = Number(input.value);
+      const birthYear = Number(outVal);
       const nowYear = new Date().getFullYear();
       const birthDate = new Date(birthYear, 0, 1);
 
