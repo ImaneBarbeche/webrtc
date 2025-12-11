@@ -17,6 +17,24 @@ export function setupInteractions(timeline, utils) {
   // Gestion appui long sur items
   timeline.on("mouseDown", (properties) => {
     if (properties.what === "item" && properties.item) {
+      // Empêcher l'édition par appui long si l'utilisateur n'est pas l'hôte WebRTC
+      try {
+        if (
+          window.webrtcSync &&
+          typeof window.webrtcSync.isActive === "function" &&
+          window.webrtcSync.isActive() &&
+          typeof window.webrtcSync.getRole === "function"
+        ) {
+          const role = window.webrtcSync.getRole();
+          if (role !== "host") {
+            // Invité / enqueté : ne pas activer le long-press pour ouvrir le modal
+            return;
+          }
+        }
+      } catch (e) {
+        // En cas d'erreur, laisser le comportement par défaut (ne pas bloquer)
+        console.warn('Erreur vérification rôle WebRTC pour long-press', e);
+      }
       longPressTargetItem = properties.item;
       longPressStartPos = {
         x: properties.event.clientX,

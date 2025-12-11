@@ -27,6 +27,13 @@ export function initTimeline() {
   restoreGroups(groups);
   restoreOptions(options);
 
+  // Définir editable selon le rôle (enqueté = viewer) conservé en sessionStorage
+  try {
+    const isViewer = sessionStorage.getItem("webrtc_isOfferor") === "false";
+    // Si isViewer true -> utilisateur est enquêté -> désactiver édition
+    options.editable = !isViewer;
+  } catch (e) {}
+
   // Creer la timeline
   const container = document.getElementById("timeline");
   if (!container) {
@@ -36,6 +43,16 @@ export function initTimeline() {
 
   const timeline = new vis.Timeline(container, items, groups, options);
   _timelineInstance = timeline;
+
+  // S'assurer que lorsque LifeStories est affiché (après onboarding),
+  // l'option editable est mise à jour en fonction du rôle courant.
+  document.addEventListener("lifestoriesShown", () => {
+    try {
+      const isViewer = sessionStorage.getItem("webrtc_isOfferor") === "false";
+      timeline.setOptions({ editable: !isViewer });
+      try { timeline.redraw(); } catch (e) {}
+    } catch (e) {}
+  });
 
   // Attacher la persistance automatique
   attachPersistenceListeners(items, groups, timeline);
