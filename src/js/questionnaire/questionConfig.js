@@ -107,7 +107,9 @@ export function getQuestionConfig(state) {
 
     case "askHousingArrivalAge": {
       const logementNum = (state.context.currentLogementIndex || 0) + 1;
-      questionText = `À quel âge ou en quelle année avez-vous emménagé dans le logement ${logementNum} ?`;
+      const logementName = state.context.logements?.[state.context.currentLogementIndex];
+      const logementLabel = logementName ? `le logement « ${logementName} »` : `le logement ${logementNum}`;
+      questionText = `À quel âge ou en quelle année avez-vous emménagé dans ${logementLabel} ?`;
       responseType = "input";
       eventType = "ANSWER_HOUSING_ARRIVAL";
       eventKey = "start";
@@ -115,21 +117,27 @@ export function getQuestionConfig(state) {
     }
 
     case "askHousingDepartureAge":
-      questionText = "À quel âge ou en quelle année avez-vous quitté ce logement ?";
+      const logementNameDep = state.context.logements?.[state.context.currentLogementIndex];
+      const departLabel = logementNameDep ? `le logement « ${logementNameDep} »` : 'ce logement';
+      questionText = `À quel âge ou en quelle année avez-vous quitté ${departLabel} ?`;
       responseType = "input";
       eventType = "ANSWER_HOUSING_DEPARTURE";
       eventKey = "end";
       break;
 
     case "askHousingOccupationStatusEntry":
-      questionText = "Quel était votre statut d'occupation à l'arrivée dans le logement (début) ?";
+      const logementNameEntry = state.context.logements?.[state.context.currentLogementIndex];
+      const entryLabel = logementNameEntry ? `dans le logement « ${logementNameEntry} »` : 'dans ce logement';
+      questionText = `Quel était votre statut d'occupation à l'arrivée ${entryLabel} ?`;
       responseType = "input";
       eventType = "ANSWER_STATUS_ENTRY";
       eventKey = "statut_res";
       break;
 
     case "askHousingOccupationStatusExit":
-      questionText = "Quel était votre statut d'occupation au départ du logement / actuellement (fin) ?";
+      const logementNameExit = state.context.logements?.[state.context.currentLogementIndex];
+      const exitLabel = logementNameExit ? `du logement « ${logementNameExit} »` : 'du logement / actuellement';
+      questionText = `Quel était votre statut d'occupation au départ ${exitLabel} ?`;
       responseType = "input";
       eventType = "ANSWER_STATUS_EXIT";
       eventKey = "statut_res";
