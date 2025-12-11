@@ -5,6 +5,7 @@ import './components/webrtc-status-bridge.jsx';
 import './components/homepage-bridge.jsx';
 import './components/sidebar-bridge.jsx';
 import './components/dashboard-bridge.jsx';
+import './components/form-actions-bridge.jsx'
 
 // Switch d'affichage selon le mode développeur
 function showStandardView() {
@@ -16,6 +17,9 @@ function showStandardView() {
 	// Afficher la vue standard
 	const lifestories = document.getElementById('lifestoriesContainer');
 	if (lifestories) lifestories.style.display = 'block';
+	const formActions = document.getElementById('form-actions-root');
+	formActions? formActions.style.display = 'block' : '';
+
 }
 
 function showOnboardingView() {
@@ -26,6 +30,8 @@ function showOnboardingView() {
 	if (onboarding) onboarding.style.display = 'none';
 	const lifestories = document.getElementById('lifestoriesContainer');
 	if (lifestories) lifestories.style.display = 'none';
+	const formActions = document.getElementById('form-actions-root');
+	formActions? formActions.style.display = 'none' : '';
 }
 
 document.addEventListener('DOMContentLoaded', () => {
