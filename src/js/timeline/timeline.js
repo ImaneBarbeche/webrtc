@@ -66,7 +66,25 @@ document.addEventListener("DOMContentLoaded", () => {
     
     if (!isOverlapMarker) {
       try {
-        timeline.fit();
+        // Si un seul item est ajouté (cas d'ajout d'un épisode),
+        // centrer/scroller la timeline vers cet item plutôt que faire un fit global.
+        if (addedItems.length === 1) {
+          try {
+            // Essayer d'utiliser focus si disponible
+            if (typeof timeline.focus === 'function') {
+              timeline.focus(addedItems[0]);
+            } else {
+              // Fallback: déplacer vers la date de début de l'item
+              const newItem = items.get(addedItems[0]);
+              if (newItem && newItem.start) timeline.moveTo(newItem.start);
+            }
+          } catch {
+            try { timeline.fit(); } catch {}
+          }
+        } else {
+          // Pour les loads/imports multiples, conserver le comportement fit
+          timeline.fit();
+        }
       } catch {}
     }
     
