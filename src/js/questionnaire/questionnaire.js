@@ -28,11 +28,26 @@ function getGroupName(groupId) {
 
 document.addEventListener("DOMContentLoaded", async () => {
   const container = document.getElementById("questions");
+  const actionsContainer = document.getElementById("questionnaire-actions");
 
   const gapBtn = document.createElement("button");
   gapBtn.id = "gap-counter-btn";
-  gapBtn.innerText = `Périodes manquantes : ${getGapCount()}`;
-  container.appendChild(gapBtn);
+  const initialCount = getGapCount();
+  gapBtn.setAttribute("aria-label", `Périodes manquantes : ${initialCount}`);
+  gapBtn.title = `Périodes manquantes : ${initialCount}`;
+  gapBtn.innerHTML = `
+    <i data-lucide="triangle-alert" class="lucide gap-icon" aria-hidden="true"></i>
+    <span class="gap-badge">${initialCount}</span>
+  `;
+  // Place the gap button next to export/load when possible for consistent layout
+  if (actionsContainer) {
+    actionsContainer.appendChild(gapBtn);
+  } else {
+    container.appendChild(gapBtn);
+  }
+  if (window.lucide && typeof window.lucide.createIcons === "function") {
+    window.lucide.createIcons();
+  }
 
   gapBtn.addEventListener("click", () => {
     const gaps = getGapList();
@@ -73,7 +88,25 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
   const updateGapCounter = () => {
-    gapBtn.innerText = `Périodes manquantes : ${getGapCount()}`;
+    const n = getGapCount();
+    const badge = gapBtn.querySelector(".gap-badge");
+    if (badge) {
+      badge.textContent = String(n);
+      if (n > 0 && badge.animate) {
+        try {
+          badge.animate([
+            { transform: "scale(1.15)" },
+            { transform: "scale(1)" }
+          ], { duration: 220, easing: "ease-out" });
+        } catch (e) {
+          // animation not supported — ignore
+        }
+      }
+    }
+    const label = `Périodes manquantes : ${n}`;
+    gapBtn.setAttribute("aria-label", label);
+    gapBtn.title = label;
+    gapBtn.classList.toggle("has-gaps", n > 0);
   };
   items.on("add", updateGapCounter);
   items.on("update", updateGapCounter);

@@ -335,3 +335,73 @@
   background-size: contain;
   background-repeat: no-repeat;
 }
+
+/* Bouton compteur de gaps */
+#gap-counter-btn {
+  background-color: var(--primary-dark);
+  color: var(--primary-beige);
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 2rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.95rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  box-sizing: border-box;
+  max-width: 100%;
+  font-weight: 600;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#gap-counter-btn:hover {
+  background-color: var(--primary-beige);
+}
+
+@media (max-width: 600px) {
+  #gap-counter-btn {
+    display: block;
+    width: 100%;
+    padding: 0.5rem 1rem;
+    font-size: 0.95rem;
+  }
+}
+
+/* Lucide icon + badge (pastille jaune/orangé) */
+#gap-counter-btn {
+  position: relative;
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+}
+
+#gap-counter-btn .gap-icon {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  color: #ffb300; /* jaune/orangé */
+  display: inline-block;
+}
+
+#gap-counter-btn .gap-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: linear-gradient(180deg, #ffca28 0%, #ff9800 100%);
+  color: #111;
+  border-radius: 999px;
+  padding: 0.12rem 0.45rem;
+  font-weight: 700;
+  font-size: 0.75rem;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+  min-width: 18px;
+  text-align: center;
+  line-height: 1;
+}
+
+/* If there are no gaps, show a muted badge instead (optional) */
+#gap-counter-btn:not(.has-gaps) .gap-badge {
+  background: #e9ecef;
+  color: #6b6b6b;
+}
