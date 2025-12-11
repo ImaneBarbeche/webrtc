@@ -66,27 +66,64 @@ export function setupLongPressHandlers(timeline, groups, utils) {
 export function activateInitialLandmarks(groups) {
   const initialLandmarks = [13, 23, 31];
 
-  initialLandmarks.forEach((id) => {
-    const g = groups.get(id);
-    if (!g) return;
+  // Persistance: clé pour stocker un mapping parentId -> landmarkId
+  const LANDMARKS_STORAGE_KEY = "landmarksByParent";
 
-    // Activer le landmark sur le sous-groupe
-    g.isLandmark = true;
-    groups.update(g);
-
-    // Mettre à jour le parent
-    const parentId = g.nestedInGroup || null;
-    if (!parentId) return;
-
-    const parent = groups.get(parentId);
-    if (!parent) return;
-
-    parent.landmarkChildren = parent.landmarkChildren || [];
-    if (!parent.landmarkChildren.includes(id)) {
-      parent.landmarkChildren.push(id);
+  function loadLandmarksByParent() {
+    try {
+      const raw = localStorage.getItem(LANDMARKS_STORAGE_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      return null;
     }
-    groups.update(parent);
-  });
+  }
+
+  // Tenter de restaurer depuis le localStorage (un seul par parent)
+  const stored = loadLandmarksByParent();
+  if (stored && typeof stored === "object") {
+    Object.entries(stored).forEach(([parentIdStr, childId]) => {
+      const parentId = Number(parentIdStr);
+      const g = groups.get(childId);
+      if (!g) return;
+      if (g.nestedInGroup !== parentId) return;
+
+      // Activer le landmark sur le sous-groupe
+      g.isLandmark = true;
+      groups.update(g);
+
+      // Mettre à jour le parent
+      const parent = groups.get(parentId);
+      if (!parent) return;
+      parent.landmarkChildren = [childId];
+      groups.update(parent);
+    });
+  } else {
+    // S'assurer d'activer au plus un landmark par parent (prendre le premier trouvé)
+    const seenParents = new Set();
+    initialLandmarks.forEach((id) => {
+      const g = groups.get(id);
+      if (!g) return;
+      const parentId = g.nestedInGroup || null;
+      if (!parentId) return;
+      if (seenParents.has(parentId)) return; // déjà un activé pour ce parent
+
+      // Activer le landmark sur le sous-groupe
+      g.isLandmark = true;
+      groups.update(g);
+
+      // Mettre à jour le parent
+      const parent = groups.get(parentId);
+      if (!parent) return;
+
+      parent.landmarkChildren = parent.landmarkChildren || [];
+      if (!parent.landmarkChildren.includes(id)) {
+        parent.landmarkChildren.push(id);
+      }
+      groups.update(parent);
+
+      seenParents.add(parentId);
+    });
+  }
 
   // Sauvegarde initiale dans localStorage si aucune sauvegarde n’existe
   try {
@@ -100,6 +137,90 @@ export function activateInitialLandmarks(groups) {
   // Re-transformer les icônes Lucide
   if (window.lucide && typeof window.lucide.createIcons === "function") {
     window.lucide.createIcons();
+  }
+
+  // Écouteur pour synchroniser entre onglets (applique la map stockée)
+  try {
+    window.addEventListener("storage", (e) => {
+      if (e.key !== LANDMARKS_STORAGE_KEY) return;
+      let raw = null;
+      try {
+        raw = localStorage.getItem(LANDMARKS_STORAGE_KEY);
+        raw = raw ? JSON.parse(raw) : null;
+      } catch {
+        raw = null;
+      }
+      if (!raw) return;
+
+      Object.entries(raw).forEach(([pIdStr, childId]) => {
+        const pId = Number(pIdStr);
+        const g = groups.get(childId);
+        if (!g) return;
+        if (g.nestedInGroup !== pId) return;
+        deactivateSiblingLandmarks(groups, pId, childId);
+        g.isLandmark = true;
+        groups.update(g);
+        const parent = groups.get(pId);
+        if (parent) {
+          parent.landmarkChildren = [childId];
+          groups.update(parent);
+        }
+      });
+
+      if (window.lucide && typeof window.lucide.createIcons === "function") {
+        window.lucide.createIcons();
+      }
+    });
+  } catch {
+    // ignore si window/storage inaccessible
+  }
+}
+
+/**
+ * Désactive tous les landmarks frères (mêmes enfants du même parent), sauf `exceptId`.
+ */
+function deactivateSiblingLandmarks(groups, parentId, exceptId = null) {
+  if (!parentId) return;
+
+  const parent = groups.get(parentId);
+  const all = groups.get();
+  all.forEach((g) => {
+    if (g.nestedInGroup === parentId && g.id !== exceptId && g.isLandmark) {
+      g.isLandmark = false;
+      groups.update(g);
+    }
+  });
+
+  if (parent) {
+    parent.landmarkChildren = (parent.landmarkChildren || []).filter((id) => id === exceptId);
+    groups.update(parent);
+  }
+}
+
+// Helpers pour persister la map parent -> activeLandmark
+const LANDMARKS_STORAGE_KEY = "landmarksByParent";
+
+function saveLandmarksByParent(groups) {
+  try {
+    const map = {};
+    const all = groups.get();
+    all.forEach((g) => {
+      if (g.isLandmark && g.nestedInGroup) {
+        map[g.nestedInGroup] = g.id;
+      }
+    });
+    localStorage.setItem(LANDMARKS_STORAGE_KEY, JSON.stringify(map));
+  } catch {
+    // ignore storage errors
+  }
+}
+
+function loadLandmarksByParent() {
+  try {
+    const raw = localStorage.getItem(LANDMARKS_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
   }
 }
 
@@ -128,14 +249,18 @@ export function toggleLandmark(groupId, groups, utils) {
 
   // Basculer le statut landmark
   const isCurrentlyLandmark = Boolean(group.isLandmark);
+
+  // Si on active, désactiver les autres sous-groupes du même parent
+  if (!isCurrentlyLandmark) {
+    deactivateSiblingLandmarks(groups, parentId, groupId);
+  }
+
   group.isLandmark = !isCurrentlyLandmark;
 
-  // Maintenir la liste des enfants landmarks du parent
+  // Maintenir la liste des enfants landmarks du parent (un seul autorisé)
   parentGroup.landmarkChildren = parentGroup.landmarkChildren || [];
   if (group.isLandmark) {
-    if (!parentGroup.landmarkChildren.includes(groupId)) {
-      parentGroup.landmarkChildren.push(groupId);
-    }
+    parentGroup.landmarkChildren = [groupId];
   } else {
     parentGroup.landmarkChildren = parentGroup.landmarkChildren.filter((id) => id !== groupId);
   }
@@ -143,6 +268,13 @@ export function toggleLandmark(groupId, groups, utils) {
   // Mettre à jour les groupes
   groups.update(group);
   groups.update(parentGroup);
+
+  // Persister l'état des landmarks par parent
+  try {
+    saveLandmarksByParent(groups);
+  } catch {
+    // ignore
+  }
 
   // Re-transformer les icônes Lucide
   if (window.lucide && typeof window.lucide.createIcons === "function") {
