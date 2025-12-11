@@ -42,6 +42,22 @@ export function ajouterEpisode(text, start, end, group){
     
 }
 
+export function ajouterEvenement(text, icon, start, group){
+    let classColor = group.toString().startsWith('1') ? 'green' : (group.toString().startsWith('2') ? 'blue' : 'red')
+    let item = {
+        "id": new Date().toString(),
+        "type": "box",
+        "content": text,
+        "start": start,
+        "group": group,
+        "className":classColor,
+        "icon": icon
+    }
+    items.add(item)
+    return item
+    
+}
+
 /* Modifier fin d'un épisode 
 * Ajouter un épisode avec date de début = date de fin du précedent
 * 

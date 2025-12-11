@@ -3,7 +3,7 @@ import { X } from 'lucide-react';
 import { useState } from 'react';
 
 import { groupsData } from '../js/timeline/timelineData.js';
-import { ajouterEpisode } from '../js/episodes/episodes.js';
+import { ajouterEpisode, ajouterEvenement } from '../js/episodes/episodes.js';
 
   // Fonctions pour récupérer les données
 const getTrajectories = () => {
@@ -68,6 +68,11 @@ function AddEpisodeModal({onClose}) {
             // ajouterEpisode(text, start, end, group)
             ajouterEpisode(contentText,selectedStartDate, selectedEndDate, selectedAttributeId)
         }
+        else if(selectedType == 'event') {
+            // ajouterEvenement(text, icon, start, group){
+            ajouterEvenement(contentText, 'test', selectedEventDate, selectedAttributeId)
+
+        }
         document.getElementById('episode_modal').close();
 
 
@@ -88,7 +93,7 @@ function AddEpisodeModal({onClose}) {
             <form onSubmit={handleFormSubmit}>
                 <label>
                     <span>Content</span>
-                    <input type="text" name="" id="" onChange={(e) => setContentText(e.target.value)}/>
+                    <input type="text" name="" id="" onChange={(e) => setContentText(e.target.value)} required/>
                 </label>
                 <label>
                     <span>Episode</span>
