@@ -3,6 +3,7 @@ import { X } from 'lucide-react';
 import { useState } from 'react';
 
 import { groupsData } from '../js/timeline/timelineData.js';
+import { ajouterEpisode } from '../js/episodes/episodes.js';
 
   // Fonctions pour récupérer les données
 const getTrajectories = () => {
@@ -14,6 +15,16 @@ const getAttributes = (trajectoryId) => {
     if (!trajectory) return [];
     return groupsData.filter(group => trajectory.nestedGroups.includes(group.id));
 }
+
+const formatDate = (date) => {
+    if (!(date instanceof Date) || isNaN(date)) return '';
+    return date.toISOString().split('T')[0];
+};
+
+const handleDateChange = (setter) => (e) => {
+    // We parse the string value from the input and set the Date object in state
+    setter(new Date(e.target.value)); 
+};
   
 function AddEpisodeModal({onClose}) {
 
@@ -44,9 +55,28 @@ function AddEpisodeModal({onClose}) {
     const [selectedType, setSelectedType] = useState('episode')
 
 
+    const [contentText, setContentText] = useState('')
+
+    const [selectedStartDate, setSelectedStartDate] = useState(new Date())
+    const [selectedEndDate, setSelectedEndDate] = useState(new Date())
+    const [selectedEventDate, setSelectedEventDate] = useState(new Date())
+
+    const handleFormSubmit = ((e) => {
+        e.preventDefault()
+        if(selectedType == 'episode') {
+            console.log("test")
+            // ajouterEpisode(text, start, end, group)
+            ajouterEpisode(contentText,selectedStartDate, selectedEndDate, selectedAttributeId)
+        }
+        document.getElementById('episode_modal').close();
+
+
+    })
+
+
     return (
         <dialog  id="episode_modal">{selectedTrajectoryId}
-        {selectedAttributeId} {selectedType}
+        {selectedAttributeId} {selectedType} {contentText}
             <div className='title-row'>
                 <header>
                     <h3>Ajouter un element</h3>
@@ -55,10 +85,10 @@ function AddEpisodeModal({onClose}) {
                     <X />
                 </button>
             </div>
-            <form action="">
+            <form onSubmit={handleFormSubmit}>
                 <label>
                     <span>Content</span>
-                    <input type="text" name="" id="" />
+                    <input type="text" name="" id="" onChange={(e) => setContentText(e.target.value)}/>
                 </label>
                 <label>
                     <span>Episode</span>
@@ -112,11 +142,21 @@ function AddEpisodeModal({onClose}) {
                     <div>
                         <label>
                             <span>From</span>
-                            <input type="date" name="" id="" />
+                            <input 
+                                type="date" 
+                                name="dateFrom" 
+                                value={formatDate(selectedStartDate)}
+                                onChange={handleDateChange(setSelectedStartDate)}
+                            />
                         </label>
                         <label>
                             <span>To</span>
-                            <input type="date" name="" id="" />
+                            <input 
+                                type="date" 
+                                name="dateTo" 
+                                value={formatDate(selectedEndDate)}
+                                onChange={handleDateChange(setSelectedEndDate)}
+                            />
                         </label>
                     </div>
 
@@ -124,10 +164,21 @@ function AddEpisodeModal({onClose}) {
                     <div>
                         <label>
                             <span>Date</span>
-                            <input type="date" name="" id="" />
+                            <input 
+                                type="date" 
+                                name="eventDate" 
+                                value={formatDate(selectedEventDate)}
+                                onChange={handleDateChange(setSelectedEventDate)}
+                            />
                         </label>
                     </div>
                 )}
+                <button onClick={() => document.getElementById('episode_modal').close()}>
+                    Cancel
+                </button>
+                <button type='submit'>
+                    Ajouter
+                </button>
             </form>
         </dialog>
 
