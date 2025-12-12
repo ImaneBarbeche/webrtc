@@ -45,7 +45,9 @@
 }
 
 .custom-bar, .birth-year-bar {
-    background-color: var(--primary-dark);
+    /* background-color: var(--primary-dark); */
+    background-color: transparent;
+    background-image: linear-gradient(transparent 0% 3.5%, var(--primary-dark) 3%);
     width: 0.15rem !important;
     border-radius: 2rem;
     cursor: col-resize !important;
@@ -79,9 +81,9 @@
         top: 0;
         right: 50%;
         transform: translateX(50%);
-        background-color: inherit;
+        background-color: var(--primary-dark);
         pointer-events: none;
-        box-shadow: 0rem 0.25rem var(--primary-beige);
+        /* box-shadow: 0rem 0.25rem var(--primary-beige); */
     }
 
     /* year */
@@ -89,7 +91,7 @@
         content: attr(title);
         opacity: 0;
         background-color: var(--primary-beige);
-        font-weight: 600;
+        font-weight: 500;
         padding-block: 0.5rem;
         padding-inline: 1rem;
         border-radius: 1rem;
@@ -117,13 +119,14 @@
 }
 
 .birth-year-bar {
-    background-color: transparent;
+    background-image: unset;
     pointer-events: none;
     transition: unset;
     z-index: 1;
 
+    /* bullet */
     &::after {
-        /* display: none; */
+        display: none;
     }
 
     &::before {
@@ -648,13 +651,13 @@
     cursor: pointer;
 
     b {
-        font-weight: 600;
+        font-weight: 500;
     }
 
     .year-age {
         opacity: 0.5;
         font-weight: 100;
-        font-size: 0.9rem;
+        font-size: 0.8rem;
     }
 }
 
