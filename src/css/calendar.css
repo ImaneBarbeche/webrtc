@@ -159,8 +159,8 @@
     /* drag handle */
     .handle {
       width: 12rem;
-      height: 2rem;
-      background-color: var(--muted-beige);
+      height: 4rem;
+      background-color: red;
       border-radius: 2rem;
       top: -1rem;
       position: relative;

@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
         initialTopOffsetPx = remToPx(initialTopOffsetRem); 
 
         // ⭐️ IMPORTANT: Enable transitions AFTER drag ends, disable during drag
-        drawer.style.transition = 'none'; 
+        // drawer.style.transition = 'none'; 
         
         handle.setPointerCapture(e.pointerId);
     });
