@@ -276,3 +276,18 @@ h2, h3, h4 {
 .birth-year-btn:hover {
   background-color: #eee;
 }
+
+/* Ensure global dev-mode toggle lucide icon is white and sized */
+#devmode-toggle-global {
+    color: #ffffff;
+}
+
+#devmode-toggle-global i[data-lucide],
+#devmode-toggle-global svg {
+    stroke: currentColor !important;
+    fill: none !important;
+    color: inherit !important;
+    width: 20px;
+    height: 20px;
+    display: inline-block;
+}

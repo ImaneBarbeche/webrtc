@@ -37,6 +37,10 @@
   </head>
 
   <body>
+    <!-- Global dev-mode toggle (always present) -->
+    <button id="devmode-toggle-global" title="Basculer le mode développeur" style="position:fixed; top:8px; right:8px; z-index:2000; width:44px; height:44px; border-radius:8px; background:var(--primary-dark,#2b6cb0); color:#fff; border:none; display:flex; align-items:center; justify-content:center;">
+      <i data-lucide="code"></i>
+    </button>
     <div id="homepage-root"></div>
     <div id="dashboard-root" style="display: none"></div>
     <div class="onboarding-container" style="display: none">
@@ -212,28 +216,7 @@
         </div>
       </div>
 
-      <!-- Bouton mode développeur sur la vue standard -->
-      <button
-        id="devmode-toggle-standard"
-        style="
-          position: fixed;
-          top: 16px;
-          right: 16px;
-          z-index: 1000;
-          background: #fff;
-          border: 1px solid #ccc;
-          border-radius: 4px;
-          padding: 4px 10px;
-          font-size: 14px;
-          cursor: pointer;
-          display: none;
-          align-items: center;
-        "
-        title="Basculer le mode développeur"
-      >
-        <span style="margin-right: 6px">🛠️</span>
-        Mode standard
-      </button>
+      <!-- Dev-mode toggle handled by React (HomePage.jsx) -->
 
       <div class="split">
         <!-- Left side-->
@@ -382,19 +365,40 @@
     <script type="module" src="js/webrtc/webrtc-sync.js"></script>
 
     <script>
-      // Afficher le bouton mode développeur sur la vue standard si devMode est actif
-      document.addEventListener("DOMContentLoaded", function () {
-        if (localStorage.getItem("devMode") === "true") {
-          const btn = document.getElementById("devmode-toggle-standard");
-          if (btn) btn.style.display = "flex";
-          if (btn) {
-            btn.onclick = function () {
-              localStorage.setItem("devMode", "false");
-              window.location.reload();
-            };
+      // Global dev-mode toggle (fallback) - ensure it's clickable in any view
+      (function(){
+        const btn = document.getElementById('devmode-toggle-global');
+        if (!btn) return;
+        btn.addEventListener('click', function(){
+          const isDev = localStorage.getItem('devMode') === 'true';
+          localStorage.setItem('devMode', isDev ? 'false' : 'true');
+          window.location.reload();
+        });
+      })();
+      // Hide the global toggle if React renders its own `.devmode-toggle` button
+      (function(){
+        const globalBtn = document.getElementById('devmode-toggle-global');
+        if (!globalBtn) return;
+
+        function hideIfReactPresent() {
+          const reactBtn = document.querySelector('.devmode-toggle');
+          if (reactBtn) {
+            globalBtn.style.display = 'none';
+          } else {
+            globalBtn.style.display = '';
           }
         }
-      });
+
+        // Initial check
+        hideIfReactPresent();
+
+        // Observe DOM for added nodes (React mount may happen after load)
+        const obs = new MutationObserver(hideIfReactPresent);
+        obs.observe(document.body, { childList: true, subtree: true });
+        // Stop observing after some time to avoid long-lived observers
+        setTimeout(() => obs.disconnect(), 15000);
+      })();
+
       // Initialiser Split.js quand LifeStories est affiché
       document.addEventListener("lifestoriesShown", () => {
         // Petit délai pour que le DOM soit complètement rendu
