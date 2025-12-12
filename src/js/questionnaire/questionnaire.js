@@ -69,7 +69,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const gapHtml =
       gaps.length === 0
-        ? "<p>Aucune période manquante détectée.</p>"
+        ? `<div class="gap-modal-empty">Aucune période manquante détectée.</div>`
         : `<ul class="gap-list">
           ${gaps
             .map(
@@ -87,7 +87,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const overlapHtml =
       overlaps.length === 0
-        ? "<p>Aucun chevauchement détecté.</p>"
+        ? `<div class="gap-modal-empty">Aucun chevauchement détecté.</div>`
         : `<ul class="overlap-list">
           ${overlaps
             .map((ov) => `
@@ -100,10 +100,39 @@ document.addEventListener("DOMContentLoaded", async () => {
             .join("")}
         </ul>`;
 
-    modal.innerHTML = `<h3>Périodes manquantes</h3>${gapHtml}<hr/><h3 class="overlap-title">Chevauchements</h3>${overlapHtml}`;
+    // Build structured modal with two sections for responsiveness
+    modal.innerHTML = `<h3>Vérifications</h3>`;
+    const sections = document.createElement("div");
+    sections.className = "gap-modal-sections";
+
+    const gapsSection = document.createElement("div");
+    gapsSection.className = "gap-modal-section";
+    gapsSection.innerHTML = `
+      <div class="section-title">
+        <i data-lucide="triangle-alert" class="lucide gap-icon" aria-hidden="true"></i>
+        <span>Périodes manquantes (${gaps.length})</span>
+      </div>
+      ${gapHtml}
+    `;
+
+    const overlapsSection = document.createElement("div");
+    overlapsSection.className = "gap-modal-section";
+    overlapsSection.innerHTML = `
+      <div class="section-title">
+        <i data-lucide="slash" class="lucide overlap-icon" aria-hidden="true" style="color:#d32f2f"></i>
+        <span>Chevauchements (${overlaps.length})</span>
+      </div>
+      ${overlapHtml}
+    `;
+
+    sections.appendChild(gapsSection);
+    sections.appendChild(overlapsSection);
+
+    modal.appendChild(sections);
     modal.appendChild(closeBtn);
     overlay.appendChild(modal);
     document.body.appendChild(overlay);
+    if (window.lucide && typeof window.lucide.createIcons === "function") window.lucide.createIcons();
   });
 
   const updateGapCounter = () => {

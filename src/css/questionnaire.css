@@ -167,6 +167,21 @@
   background-color: #000000;
 }
 
+/* Lucide icons color for dark buttons (use currentColor for stroke) */
+#export,
+#load {
+  color: #ffffff; /* sets currentColor for injected SVG strokes */
+}
+
+#export svg,
+#load svg,
+#export i[data-lucide],
+#load i[data-lucide] {
+  color: inherit;
+  stroke: currentColor !important;
+  fill: none !important;
+}
+
 /* Helper: group buttons and allow wrapping instead of overlapping */
 .btn-row,
 .question .btn-row {
@@ -174,6 +189,40 @@
   gap: 8px;
   flex-wrap: wrap;
   align-items: center;
+}
+
+/* Align footer buttons: ensure consistent height, spacing and vertical alignment */
+#questionnaire-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+#questionnaire-actions button,
+#questionnaire .questionnaire-footer > button,
+#questionnaire-actions button,
+#resetButton,
+#export,
+#load {
+  height: 36px;
+  padding: 0 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  line-height: 1;
+  font-size: 0.95rem;
+}
+
+/* ensure lucide icons inside buttons are vertically aligned and sized */
+#questionnaire-actions i[data-lucide],
+#questionnaire-actions svg,
+#questionnaire button i[data-lucide],
+#questionnaire button svg {
+  width: 18px;
+  height: 18px;
+  display: inline-block;
+  vertical-align: middle;
 }
 
 /* Responsive: stack buttons on small screens */
