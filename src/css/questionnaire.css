@@ -600,3 +600,49 @@
   outline: none !important;
 } 
 
+/* Birth year button: primary cake icon with year badge */
+/* More specific selector to override .birth-year-btn from app.css */
+#birth-year.birth-year-btn,
+#birth-year {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 6px !important;
+  background: var(--primary-dark);
+  color: #ffffff !important;
+  cursor: pointer;
+}
+
+/* Target both injected <svg> and <i class="lucide"> placeholders */
+#birth-year .lucide,
+#birth-year svg {
+  width: 28px !important;
+  height: 28px !important;
+  stroke: currentColor !important;
+  fill: none !important;
+  color: inherit !important;
+}
+
+.birth-year-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: linear-gradient(180deg,#ffd54f,#ffb300);
+  color: #111;
+  font-weight: 700;
+  font-size: 0.72rem;
+  padding: 2px 6px;
+  border-radius: 999px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+  line-height: 1;
+  min-width: 26px;
+  text-align: center;
+}
+
+@media (max-width: 480px) {
+  #birth-year { width: 36px; height: 36px; }
+  .birth-year-badge { font-size: 0.65rem; min-width: 22px; padding: 2px 4px; }
+}
+

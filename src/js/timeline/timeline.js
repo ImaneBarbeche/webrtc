@@ -3,7 +3,7 @@ import { exportTimelineData, importTimelineData } from "./importExportUtils.js";
 import { activateInitialLandmarks } from "./landmarkUtils.js";
 import * as utils from "../utils.js";
 import { test_items } from "../dataset.js";
-import { setBirthYear } from "./birthYear.js";
+import { setBirthYear, setupBirthYearButton } from "./birthYear.js";
 import { toggleLandmark } from "./landmarkUtils.js";
 import { handleDragStart, handleDragEnd } from "./dragHandlers.js";
 import { setupSummaryHandlers } from "./summaryUtils.js";
@@ -173,6 +173,8 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
     if (birthYearStored) setBirthYear(birthYearStored);
+    // Ensure the birth-year button has its click listener after reload
+    try { setupBirthYearButton(); } catch (e) { /* ignore */ }
   } catch (e) {}
 
   setupZoomNavigation({
