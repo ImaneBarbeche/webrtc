@@ -56,6 +56,7 @@ function AddEpisodeModal({onClose}) {
 
 
     const [contentText, setContentText] = useState('')
+    const [iconText, setIconText] = useState('')
 
     const [selectedStartDate, setSelectedStartDate] = useState(new Date())
     const [selectedEndDate, setSelectedEndDate] = useState(new Date())
@@ -70,7 +71,8 @@ function AddEpisodeModal({onClose}) {
         }
         else if(selectedType == 'event') {
             // ajouterEvenement(text, icon, start, group){
-            ajouterEvenement(contentText, 'test', selectedEventDate, selectedAttributeId)
+            
+            ajouterEvenement(contentText, iconText.toLowerCase().trim(), selectedEventDate, selectedAttributeId)
 
         }
         document.getElementById('episode_modal').close();
@@ -93,7 +95,7 @@ function AddEpisodeModal({onClose}) {
             <form onSubmit={handleFormSubmit}>
                 <label>
                     <span>Content</span>
-                    <input type="text" name="" id="" onChange={(e) => setContentText(e.target.value)} required/>
+                    <input type="text" onChange={(e) => setContentText(e.target.value)} required/>
                 </label>
                 <label>
                     <span>Episode</span>
@@ -167,6 +169,10 @@ function AddEpisodeModal({onClose}) {
 
                 ) : (
                     <div>
+                        <label>
+                            <span>Icon</span>
+                            <input type="text" name="iconText" value={iconText} onChange={(e) => setIconText(e.target.value)} required/>
+                        </label>
                         <label>
                             <span>Date</span>
                             <input 
