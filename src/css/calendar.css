@@ -368,6 +368,13 @@ button:hover {
       padding: 0.7rem;
     }
   }
+
+/* TODO: create a proper primary button component */
+  &.primary {
+    background-color: var(--primary-dark);
+    box-shadow: unset;
+    color: var(--primary-beige)
+  }
 }
 
 .btn-group {

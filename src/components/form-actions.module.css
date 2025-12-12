@@ -27,9 +27,90 @@
             transition: all 0.3s ease;
         }
 
+        .close {
+            margin-left: auto;
+        }
+
         form {
             display: flex;
             flex-direction: column;
+            
+            input, select {
+                background-color: transparent;
+                border: none;
+                appearance: none;
+                padding: 0.5rem 1rem;
+                font-family: inherit;
+            }
+
+            label:has(input[type="radio"]) {
+                margin-block: 1rem;
+                display: block;
+
+                span {
+                    background-color: transparent;
+                    padding: 0.5rem 1rem;
+                    border-radius: .5rem;
+                    /* border: 2px solid blue; */
+                    
+                }
+
+                &:has(input[type="radio"]:checked) {
+                    span {
+                        background-color: var(--primary-light);
+
+                    }
+                }
+
+            }
+
+            .centered {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+
+                label {
+                    width: 100%;
+
+                    input {
+                        width: 100%;
+                    }
+                }
+            }
+
+            .main-input {
+                font-size: 1.17rem;
+                font-family: 'Raleway', serif;
+                border-bottom: 0.1rem solid color-mix(in srgb, var(--primary-beige), var(--primary-dark) 30%);
+                padding-left: 0;
+
+                &:focus-visible {
+                    outline: none;
+                }
+
+                &::placeholder {
+                    color: inherit;
+                }
+            }
+/* 
+            .secondary-button {
+                background-color: red;
+            } */
+
+
+            .btn-container {
+                display: flex;
+                gap: 1rem;
+                margin-top: 2rem;
+
+                button {
+                    flex-grow: 1;
+                }
+            }
+
+            .radio-container {
+                display: flex;
+            }
         }
     }
 

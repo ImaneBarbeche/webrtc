@@ -1,6 +1,8 @@
 import React from 'react';
 import { X } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import styles from './form-actions.module.css'
+
 
 import { groupsData } from '../js/timeline/timelineData.js';
 import { ajouterEpisode, ajouterEvenement } from '../js/episodes/episodes.js';
@@ -27,6 +29,18 @@ const handleDateChange = (setter) => (e) => {
 };
   
 function AddEpisodeModal({onClose}) {
+
+    const contentInputRef = useRef(null); 
+
+    useEffect(() => {
+        // if (contentInputRef.current) { 
+        //     const timer = setTimeout(() => {
+        //         contentInputRef.current.focus();
+        //     }, 50); 
+            
+        //     return () => clearTimeout(timer); 
+        // }
+    }); 
 
     const [trajectories, setTrajectories] = useState(getTrajectories())
     const [selectedTrajectoryId, setSelectedTrajectoryId] = useState(trajectories[0]?.id || '')
@@ -55,7 +69,7 @@ function AddEpisodeModal({onClose}) {
     const [selectedType, setSelectedType] = useState('episode')
 
 
-    const [contentText, setContentText] = useState('')
+    const [contentText, setContentText] = useState('Ajouter un titre')
     const [iconText, setIconText] = useState('')
 
     const [selectedStartDate, setSelectedStartDate] = useState(new Date())
@@ -82,37 +96,56 @@ function AddEpisodeModal({onClose}) {
 
 
     return (
-        <dialog  id="episode_modal">{selectedTrajectoryId}
-        {selectedAttributeId} {selectedType} {contentText}
-            <div className='title-row'>
+        <dialog  id="episode_modal">
+            
+        {/* {selectedTrajectoryId}
+        {selectedAttributeId} {selectedType} {contentText} */}
+            {/* <div className='title-row'>
                 <header>
                     <h3>Ajouter un element</h3>
                 </header>
                 <button className='invisible-button' onClick={() => document.getElementById('episode_modal').close()}>
                     <X />
                 </button>
+            </div> */}
+            <div className='title-row'>
+                <button 
+                className={styles['close']}
+                onClick={() => document.getElementById('episode_modal').close()}>
+                    <X />
+                </button>
             </div>
             <form onSubmit={handleFormSubmit}>
+                <div className={styles['centered']}>
+                    <label>
+                        <input type="text" 
+                        className={styles['main-input']}
+                        placeholder={contentText} 
+                        onChange={(e) => setContentText(e.target.value)} 
+                        required
+                        ref={contentInputRef}
+                        />
+                    </label>
+            </div>
+               
+                <div className={styles['radio-container']}>
+                    <label>
+                        <span>Episode</span>
+                        <input type="radio" name='type' id='episode'
+                        checked={selectedType === 'episode'}
+                        onChange={() => setSelectedType('episode')} />
+                    </label>
+                    <label>
+                        <span>Evenement</span>
+                        <input type="radio" name='type' id='event' 
+                        checked={selectedType === 'event'}
+                        onChange={() => setSelectedType('event')}/>
+                    </label>
+                </div>
                 <label>
-                    <span>Content</span>
-                    <input type="text" onChange={(e) => setContentText(e.target.value)} required/>
-                </label>
-                <label>
-                    <span>Episode</span>
-                    <input type="radio" name='type' id='episode'
-                     checked={selectedType === 'episode'}
-                     onChange={() => setSelectedType('episode')} />
-                </label>
-                <label>
-                    <span>Evenement</span>
-                    <input type="radio" name='type' id='event' 
-                    checked={selectedType === 'event'}
-                    onChange={() => setSelectedType('event')}/>
-                </label>
-                <label>
-                    <span>
+                    {/* <span>
                         Trajectoire
-                    </span>
+                    </span> */}
                     <select
                         value={selectedTrajectoryId} 
                         onChange={handleTrajectoryChange}
@@ -128,9 +161,9 @@ function AddEpisodeModal({onClose}) {
                     </select>
                 </label>
                 <label>
-                    <span>
+                    {/* <span>
                         Attribut
-                    </span>
+                    </span> */}
                     <select
                         value={selectedAttributeId} 
                         onChange={handleAttributeChange}
@@ -184,12 +217,14 @@ function AddEpisodeModal({onClose}) {
                         </label>
                     </div>
                 )}
-                <button onClick={() => document.getElementById('episode_modal').close()}>
-                    Cancel
-                </button>
-                <button type='submit'>
-                    Ajouter
-                </button>
+                <div className={styles['btn-container']}>
+                    <button className='secondary-button' onClick={() => document.getElementById('episode_modal').close()}>
+                        Cancel
+                    </button>
+                    <button type='submit' className='secondary-button primary'>
+                        Ajouter
+                    </button>
+                </div>
             </form>
         </dialog>
 
