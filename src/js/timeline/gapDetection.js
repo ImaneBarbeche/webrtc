@@ -1,6 +1,6 @@
 import { items } from "./timeline.js";
 
-export function detectGaps(episodes) {
+export function detectGaps(episodes, groups) {
   const gaps = [];
 
   // Regrouper les épisodes par groupe
@@ -17,6 +17,15 @@ export function detectGaps(episodes) {
 
   // Pour chaque groupe, détecter les gaps
   for (const groupId in groupedEpisodes) {
+    // Si un DataSet `groups` est fourni, n'analyser que les groupes
+    // explicitement autorisés via `showGaps: true`.
+    if (groups) {
+      const allGroups = groups.get();
+      const groupInfo = allGroups.find((g) => String(g.id) === String(groupId));
+      if (!groupInfo || groupInfo.showGaps !== true) {
+        continue; // skip this group
+      }
+    }
     const groupEpisodes = groupedEpisodes[groupId];
 
     // Trier par date de début
@@ -27,6 +36,7 @@ export function detectGaps(episodes) {
       const actuel = groupEpisodes[i];
       const precedent = groupEpisodes[i - 1];
 
+      if (!isValidDate(actuel.start) || !isValidDate(precedent.end)) continue;
       if (actuel.start > precedent.end) {
         const gap = {
           start: precedent.end,
@@ -34,6 +44,8 @@ export function detectGaps(episodes) {
           duration: actuel.start - precedent.end,
           group: groupId, // Le gap appartient à ce groupe
         };
+        if (gap.duration <= 0) continue;
+
         gaps.push(gap);
       }
     }
@@ -81,7 +93,7 @@ export function updateGapsInTimeline(items, groups) {
   );
 
   // Détecter les gaps
-  const gaps = detectGaps(episodes);
+  const gaps = detectGaps(episodes, groups);
 
   // Créer les clés des gaps actuels
   const currentGapKeys = gaps.map(
@@ -106,7 +118,12 @@ export function updateGapsInTimeline(items, groups) {
   isUpdating = false;
 }
 
+const notifiedGapKeys = new Set();
+
 function notifyNewGap(gap, groups) {
+  const key = `${gap.group}-${gap.start}-${gap.end}`;
+  if (notifiedGapKeys.has(key)) return; // déjà notifié
+  notifiedGapKeys.add(key);
   const allGroups = groups.get();
 
   // Trouver le groupe par son ID
@@ -138,10 +155,14 @@ function notifyNewGap(gap, groups) {
 
 // Helpers pour questionnaire.js
 export function getGapList() {
-  const episodes = items.get().filter(i => i.type === "range");
+  const episodes = items.get().filter((i) => i.type === "range");
   return detectGaps(episodes);
 }
 
 export function getGapCount() {
   return getGapList().length;
+}
+
+function isValidDate(value) {
+  return value instanceof Date && !isNaN(value);
 }

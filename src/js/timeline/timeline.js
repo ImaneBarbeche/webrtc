@@ -63,8 +63,10 @@ document.addEventListener("DOMContentLoaded", () => {
     // Ignorer les marqueurs de chevauchement pour eviter la boucle infinie
     const addedItems = properties?.items || [];
     const isOverlapMarker = addedItems.some(id => id.toString().startsWith("__overlap_"));
+    // Ignorer aussi les gaps visuels (créés automatiquement) pour éviter le fit
+    const isGapMarker = addedItems.some(id => id.toString().startsWith("gap-"));
     
-    if (!isOverlapMarker) {
+    if (!isOverlapMarker && !isGapMarker) {
       try {
         // Si un seul item est ajouté (cas d'ajout d'un épisode),
         // centrer/scroller la timeline vers cet item plutôt que faire un fit global.

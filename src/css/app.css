@@ -257,3 +257,22 @@ h2, h3, h4 {
         rgba(220, 53, 69, 0.35) 20px
     );
 }
+
+
+.birth-year-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 6px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #f9f9f9;
+  cursor: pointer;
+  font-size: 14px;
+    position: relative;
+  z-index: 10;
+}
+
+.birth-year-btn:hover {
+  background-color: #eee;
+}

@@ -37,7 +37,9 @@ export function detectAndShowOverlaps() {
     filter: (g) => g.nestedInGroup !== undefined
   });
 
-  subGroups.forEach((group) => {
+  // Ne traiter que les sous-groupes explicitement autorisés pour les overlaps
+  const allowed = subGroups.filter((g) => g.showOverlaps === true);
+  allowed.forEach((group) => {
     detectOverlapsInGroup(group.id);
   });
 }

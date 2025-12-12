@@ -24,6 +24,16 @@ export function initTimeline() {
 
   // Restaurer depuis localStorage
   restoreItems(items);
+  // Nettoyer les anciens gaps restaurés pour éviter les ids dupliqués
+  try {
+    const restoredGaps = items.get().filter((it) => String(it.id).startsWith("gap-"));
+    if (restoredGaps.length > 0) {
+      const idsToRemove = restoredGaps.map((g) => g.id);
+      items.remove(idsToRemove);
+    }
+  } catch (e) {
+    console.warn('Erreur lors du nettoyage des gaps restaurés', e);
+  }
   restoreGroups(groups);
   restoreOptions(options);
 
