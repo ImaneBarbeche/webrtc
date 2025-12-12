@@ -196,6 +196,106 @@ export function renderInputQuestion(
 }
 
 /**
+ * Rend deux champs de date côte à côte (arrivée / départ).
+ * leftConfig et rightConfig sont des objets { label, eventType, eventKey }
+ */
+export function renderPairedDateInputs(
+  questionDiv,
+  state,
+  leftConfig,
+  rightConfig,
+  sendEvent,
+  isHost = true
+) {
+  const pair = document.createElement('div');
+  pair.className = 'date-pair';
+  // marquer l'élément pour repérage ultérieur (commune/logement)
+  const cIdx = state.context.currentCommuneIndex || 0;
+  const lIdx = state.context.currentLogementIndex || 0;
+  pair.dataset.pairId = `${state.value.includes('Commune') ? 'pair_commune_c' + cIdx : 'pair_housing_c' + cIdx + '_l' + lIdx}`;
+
+  function makeField(cfg) {
+    const field = document.createElement('div');
+    field.className = 'date-field';
+
+    const lbl = document.createElement('label');
+    lbl.className = 'date-field-label';
+    lbl.innerText = cfg.label || '';
+
+    const input = document.createElement('input');
+    input.type = 'month';
+    input.placeholder = 'MM-YYYY';
+
+    // pré-remplir si valeur existante dans le contexte
+    if (state.context && state.context[cfg.eventKey]) {
+      const stored = state.context[cfg.eventKey];
+      try {
+        if (typeof stored === 'string') {
+          if (/^\d{4}-\d{2}/.test(stored)) input.value = stored.slice(0,7);
+          else if (/^\d{4}$/.test(stored)) input.value = `${stored}-01`;
+        } else if (typeof stored === 'number') {
+          input.value = `${String(stored)}-01`;
+        }
+      } catch (e) {}
+      input.disabled = true;
+    }
+
+    const edit = document.createElement('button');
+    edit.className = 'edit-btn';
+    edit.style.display = 'none';
+    edit.innerHTML = '<i data-lucide="pencil"></i>';
+
+    function submit(val) {
+      if (!cfg.eventType) return;
+      const ev = { type: cfg.eventType };
+      // normalize: send year number when possible, but keep month in _month
+      const raw = String(val);
+      const y = (new Date(raw + '-01')).getFullYear();
+      if (!Number.isNaN(y)) {
+        ev[cfg.eventKey] = y;
+        ev[`${cfg.eventKey}_month`] = raw;
+      } else {
+        ev[cfg.eventKey] = val;
+      }
+      sendEvent(ev);
+      input.disabled = true;
+      edit.style.display = 'inline-block';
+      // Désactiver uniquement les contrôles de CE champ (éviter de bloquer le champ frère)
+      if (isHost) {
+        try {
+          const controls = field.querySelectorAll('input,button,textarea,select');
+          controls.forEach(c => { if (c !== edit) c.disabled = true; });
+        } catch(e){}
+      }
+    }
+
+    input.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter' && input.value) {
+        submit(input.value);
+      }
+    });
+    input.addEventListener('change', () => {
+      if (input.value) submit(input.value);
+    });
+
+    field.appendChild(lbl);
+    field.appendChild(input);
+    field.appendChild(edit);
+    return field;
+  }
+
+  // Générer les deux champs
+  const leftField = makeField(leftConfig);
+  const rightField = makeField(rightConfig);
+
+  pair.appendChild(leftField);
+  pair.appendChild(rightField);
+  questionDiv.appendChild(pair);
+
+  if (window.lucide && typeof window.lucide.createIcons === 'function') window.lucide.createIcons();
+}
+
+/**
  * Gère la mise à jour d'une réponse existante
  * @param {HTMLInputElement} input - Le champ input
  * @param {string} eventKey - La clé pour les données

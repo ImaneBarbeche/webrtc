@@ -7,6 +7,7 @@ import {
 import { renderYesNoQuestion } from "./choicesQuestions.js";
 import { renderInputListQuestion } from "./inputListQuestion.js";
 import { renderInputQuestion } from "./inputQuestion.js";
+import { renderPairedDateInputs } from "./inputQuestion.js";
 import { getQuestionConfig, updateQuestionText } from "./questionConfig.js";
 import { sendEvent, getIsHost } from "./eventHandlers.js";
 import { enableWebRTCSync, processPendingItems } from "./webrtcSync.js";
@@ -249,6 +250,18 @@ document.addEventListener("DOMContentLoaded", async () => {
       return; // Ne pas créer de nouvelle question
     }
 
+    // Si on est dans l'état de départ mais un bloc pair a déjà été rendu, éviter la duplication
+    if (state.value === 'askCommuneDepartureYear') {
+      const pairId = `pair_commune_c${state.context.currentCommuneIndex || 0}`;
+      const existing = container.querySelector(`[data-pair-id="${pairId}"]`);
+      if (existing) return;
+    }
+    if (state.value === 'askHousingDepartureAge') {
+      const pairId = `pair_housing_c${state.context.currentCommuneIndex || 0}_l${state.context.currentLogementIndex || 0}`;
+      const existing = container.querySelector(`[data-pair-id="${pairId}"]`);
+      if (existing) return;
+    }
+
     // Obtenir la configuration de la question
     const { questionText, responseType, choices, eventType, eventKey } =
       getQuestionConfig(state);
@@ -280,14 +293,44 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // Gestion des réponses INPUT (ex: une commune, une année)
     else if (responseType === "input") {
-      renderInputQuestion(
-        questionDiv,
-        state,
-        eventType,
-        eventKey,
-        sendEvent,
-        getIsHost()
-      );
+      // Pour les paires arrivée/départ, afficher côte à côte
+      if (state.value === 'askCommuneArrivalYear') {
+        // Si un bloc pair existe déjà pour cette commune, ne rien faire
+        const pairId = `pair_commune_c${state.context.currentCommuneIndex || 0}`;
+        const existing = container.querySelector(`[data-pair-id="${pairId}"]`);
+        if (existing) return;
+
+        renderPairedDateInputs(
+          questionDiv,
+          state,
+          { label: 'Arrivée', eventType: 'ANSWER_COMMUNE_ARRIVAL', eventKey: 'start' },
+          { label: 'Départ', eventType: 'ANSWER_COMMUNE_DEPARTURE', eventKey: 'end' },
+          sendEvent,
+          getIsHost()
+        );
+      } else if (state.value === 'askHousingArrivalAge') {
+        const pairId = `pair_housing_c${state.context.currentCommuneIndex || 0}_l${state.context.currentLogementIndex || 0}`;
+        const existing = container.querySelector(`[data-pair-id="${pairId}"]`);
+        if (existing) return;
+
+        renderPairedDateInputs(
+          questionDiv,
+          state,
+          { label: 'Arrivée', eventType: 'ANSWER_HOUSING_ARRIVAL', eventKey: 'start' },
+          { label: 'Départ', eventType: 'ANSWER_HOUSING_DEPARTURE', eventKey: 'end' },
+          sendEvent,
+          getIsHost()
+        );
+      } else {
+        renderInputQuestion(
+          questionDiv,
+          state,
+          eventType,
+          eventKey,
+          sendEvent,
+          getIsHost()
+        );
+      }
     }
 
     // Gestion des boutons choix ("Oui", "Non")

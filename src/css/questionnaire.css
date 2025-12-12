@@ -30,6 +30,30 @@
   font-size: 0.8rem;
 }
 
+/* Champs de date côte à côte */
+.date-pair {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin-top: 8px;
+}
+.date-pair .date-field {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+}
+.date-field-label {
+  font-size: 0.85rem;
+  margin-bottom: 6px;
+  color: #333;
+}
+
+@media (max-width: 600px) {
+  .date-pair {
+    flex-direction: column;
+  }
+}
+
 .question input:focus-visible {
   outline: none;
 }
