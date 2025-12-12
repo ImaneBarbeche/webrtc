@@ -346,6 +346,14 @@
     --label-color: #a5beea;
 }
 
+.vis-ltr .vis-label .vis-inner:has(.trajectory-title.closed) {
+    /* background-color: blue; */
+    /* padding-right: 0.2rem; */
+    padding-right: 0;
+    /* padding-left: 0; */
+    width: fit-content;
+  display: inline-block;
+}
 
 .vis-ltr .vis-label.vis-nested-group .vis-inner {
     padding-left: 0rem;
@@ -363,13 +371,29 @@
     }
 
     &:has(.trajectory-title.closed) {
+        /* padding-right: 0;
+        background-color: red; */
+
         i, svg {
         display: unset;
+        }
+
+        svg {
+            stroke: var(--label-color);
+            filter: brightness(0.7) saturate(1.7);
+        }
+
+        svg.landmark-pin {
+            position: absolute;
+            top: -.5rem;
+            right: 0;
+            height: .8rem;
         }
     }
 
     span:first-of-type {
         margin-top: 0.75rem;
+        position: relative;  
     }
 
     .trajectory-title {
