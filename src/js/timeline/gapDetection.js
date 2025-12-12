@@ -28,8 +28,8 @@ export function detectGaps(episodes, groups) {
     }
     const groupEpisodes = groupedEpisodes[groupId];
 
-    // Trier par date de début
-    groupEpisodes.sort((a, b) => a.start - b.start);
+    // Trier par date de début (accepter string/number/Date)
+    groupEpisodes.sort((a, b) => new Date(a.start) - new Date(b.start));
 
     // Boucler et détecter les gaps
     for (let i = 1; i < groupEpisodes.length; i++) {
@@ -37,11 +37,13 @@ export function detectGaps(episodes, groups) {
       const precedent = groupEpisodes[i - 1];
 
       if (!isValidDate(actuel.start) || !isValidDate(precedent.end)) continue;
-      if (actuel.start > precedent.end) {
+      const startDate = new Date(actuel.start);
+      const endDate = new Date(precedent.end);
+      if (startDate > endDate) {
         const gap = {
-          start: precedent.end,
-          end: actuel.start,
-          duration: actuel.start - precedent.end,
+          start: endDate,
+          end: startDate,
+          duration: startDate - endDate,
           group: groupId, // Le gap appartient à ce groupe
         };
         if (gap.duration <= 0) continue;
@@ -58,8 +60,8 @@ export function createGapItems(gaps) {
   return gaps.map((gap, index) => {
     return {
       id: `gap-${index}-${gap.start}-${gap.end}`, // 'gap-0', 'gap-1..
-      start: gap.start, // Le début du gap
-      end: gap.end, // La fin du gap
+      start: new Date(gap.start), // Le début du gap
+      end: new Date(gap.end), // La fin du gap
       type: "background", // Le type spécial pour les fonds
       className: "timeline-gap",
       group: gap.group,
@@ -164,5 +166,6 @@ export function getGapCount() {
 }
 
 function isValidDate(value) {
-  return value instanceof Date && !isNaN(value);
+  const d = new Date(value);
+  return d instanceof Date && !isNaN(d);
 }
