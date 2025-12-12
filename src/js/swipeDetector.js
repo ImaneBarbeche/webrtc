@@ -7,31 +7,70 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    // --- SNAP POINTS (in REM) ---
-    // These define the discrete states the drawer can occupy
-    const SNAP_MIN_REM = 4.2; 
-    const SNAP_MAX_REM = 20.0; 
-    
-    // The point at which a drag must stop to snap down (e.g., 10rem from the top)
-    // If current position is less than this, snap UP. If more, snap DOWN.
+    // --- Configuration ---
+    const SNAP_MIN_REM = 3.2; 
+    const SNAP_MAX_REM = 25.0; 
     const SNAP_THRESHOLD_REM = 10.0; 
+    const MOMENTUM_MULTIPLIER = 50; 
 
-    // State variables
+    // --- State & Utilities ---
     let isDragging = false;
     let startY = 0;
     let initialTopOffsetPx = 0; 
-    let initialTopOffsetRem = 0; // Store the initial REM value
+    let lastMoveTime = 0;
+    let lastMoveY = 0;
+    let velocity = 0; 
 
     const rootFontSize = parseFloat(getComputedStyle(document.documentElement).fontSize);
-
     const pxToRem = (pxValue) => pxValue / rootFontSize;
     const remToPx = (remValue) => remValue * rootFontSize;
 
-    // ⭐️ New utility function to set the final snapped position
     const setTopOffset = (offsetValueRem) => {
-        // We no longer need to clamp here, as the snap points are the clamps
         drawer.style.setProperty('--top-offset', `${offsetValueRem}rem`);
     };
+
+    // Helper function to handle the snap logic (used by pointerup and pointercancel)
+    const handleSnap = (e) => {
+        if (!isDragging) return;
+        
+        isDragging = false;
+        
+        // 1. Get the current position
+        const style = getComputedStyle(drawer);
+        const currentOffsetRem = parseFloat(style.getPropertyValue('--top-offset').trim().replace('rem', ''));
+
+        // 2. Calculate projected position based on velocity (Momentum)
+        const momentumTravelPx = velocity * MOMENTUM_MULTIPLIER;
+        const momentumTravelRem = pxToRem(momentumTravelPx);
+        const projectedOffsetRem = currentOffsetRem + momentumTravelRem;
+
+        let finalSnapPoint;
+
+        // 3. Decide the snap point based on projected position
+        if (projectedOffsetRem < SNAP_THRESHOLD_REM) {
+            finalSnapPoint = SNAP_MIN_REM; // Snap fully UP
+        } else {
+            finalSnapPoint = SNAP_MAX_REM; // Snap fully DOWN
+        }
+
+        // 4. Ensure snap point is within limits
+        finalSnapPoint = Math.min(SNAP_MAX_REM, Math.max(SNAP_MIN_REM, finalSnapPoint));
+        
+        // ⭐️ FIX B: Use microtask (setTimeout 0) to ensure the transition starts successfully
+        setTimeout(() => {
+            // Apply the snap with a smooth transition
+            drawer.style.transition = 'opacity 0.3s ease, transform 0.3s ease, top 0.3s ease, height 0.3s ease'; 
+            setTopOffset(finalSnapPoint);
+            
+            // Clean up pointer capture
+            try {
+                handle.releasePointerCapture(e.pointerId);
+            } catch (error) {
+                // Ignore capture release errors
+            }
+        }, 0);
+    };
+
 
     // --- 1. pointerdown: Start the Drag ---
     handle.addEventListener('pointerdown', (e) => {
@@ -41,64 +80,47 @@ document.addEventListener('DOMContentLoaded', () => {
         const style = getComputedStyle(drawer);
         const currentOffsetRemString = style.getPropertyValue('--top-offset').trim().replace('rem', '');
         
-        initialTopOffsetRem = parseFloat(currentOffsetRemString);
-        initialTopOffsetPx = remToPx(initialTopOffsetRem); 
-
-        // ⭐️ IMPORTANT: Enable transitions AFTER drag ends, disable during drag
-        // drawer.style.transition = 'none'; 
+        initialTopOffsetPx = remToPx(parseFloat(currentOffsetRemString)); 
+        lastMoveY = e.clientY;
+        lastMoveTime = Date.now();
+        velocity = 0; 
         
+        drawer.style.transition = 'none'; 
         handle.setPointerCapture(e.pointerId);
     });
 
-    // --- 2. pointermove: Apply Movement (Smooth Drag) ---
+    // --- 2. pointermove: Apply Movement & Track Velocity ---
     document.addEventListener('pointermove', (e) => {
         if (!isDragging) return;
 
+        // ⭐️ IMPORTANT FIX: Prevent the browser from scrolling on mobile
+        e.preventDefault(); 
+
+        const currentTime = Date.now();
         const deltaY = e.clientY - startY; 
-        
-        // Swiping Down (deltaY is positive) increases the offset (moves the top edge down)
+        const deltaMove = e.clientY - lastMoveY;
+        const deltaTime = currentTime - lastMoveTime;
+
+        // Calculate velocity (pixels per millisecond)
+        if (deltaTime > 0) {
+            // Apply a small smoothing factor (e.g., 80% current velocity, 20% new velocity)
+            velocity = velocity * 0.8 + (deltaMove / deltaTime) * 0.2; 
+        }
+
         const newTopOffsetPx = initialTopOffsetPx + deltaY;
         const newTopOffsetRem = pxToRem(newTopOffsetPx);
         
-        // Clamp the drag movement so the user can't drag it infinitely
         const clampedNewTopOffsetRem = Math.min(SNAP_MAX_REM, Math.max(SNAP_MIN_REM, newTopOffsetRem));
 
-        drawer.style.setProperty('--top-offset', `${clampedNewTopOffsetRem}rem`);
+        setTopOffset(clampedNewTopOffsetRem);
+
+        lastMoveY = e.clientY;
+        lastMoveTime = currentTime;
     });
 
     // --- 3. pointerup: End Drag & SNAP Logic ---
-    document.addEventListener('pointerup', (e) => {
-        if (!isDragging) return;
-        
-        isDragging = false;
-        
-        // 1. Get the final position the user left the drawer at
-        const style = getComputedStyle(drawer);
-        const currentOffsetRemString = style.getPropertyValue('--top-offset').trim().replace('rem', '');
-        const currentOffsetRem = parseFloat(currentOffsetRemString);
+    document.addEventListener('pointerup', handleSnap);
 
-        let finalSnapPoint;
-
-        // 2. Decide the snap point based on the threshold
-        if (currentOffsetRem < SNAP_THRESHOLD_REM) {
-            // If the user stopped dragging high enough, snap to the fully open position (MIN offset)
-            finalSnapPoint = SNAP_MIN_REM;
-        } else {
-            // If the user stopped dragging low enough, snap to the fully closed/default position (MAX offset)
-            finalSnapPoint = SNAP_MAX_REM;
-        }
-        
-        // 3. Apply the snap with a transition for smooth animation
-        // ⭐️ Restore the CSS transition for the snap animation
-        drawer.style.transition = 'opacity 0.3s ease, transform 0.3s ease, top 0.3s ease, height 0.3s ease'; 
-
-        setTopOffset(finalSnapPoint);
-        
-        // Release the pointer capture
-        try {
-            handle.releasePointerCapture(e.pointerId);
-        } catch (error) {
-            // Ignore capture release errors
-        }
-    });
+    // ⭐️ FIX C: Handle pointercancel (for fast mobile flicks)
+    document.addEventListener('pointercancel', handleSnap);
 });

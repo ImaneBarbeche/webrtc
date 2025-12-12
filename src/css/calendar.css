@@ -158,6 +158,9 @@
 
     /* drag handle */
     .handle {
+      touch-action: none; 
+      -webkit-user-select: none; /* Prevent text selection during drag */
+      user-select: none;
       width: 12rem;
       height: 4rem;
       background-color: red;
