@@ -1,4 +1,4 @@
-import { items } from "./timeline.js";
+import { items, groups } from "./timeline.js";
 
 export function detectGaps(episodes, groups) {
   const gaps = [];
@@ -158,7 +158,7 @@ function notifyNewGap(gap, groups) {
 // Helpers pour questionnaire.js
 export function getGapList() {
   const episodes = items.get().filter((i) => i.type === "range");
-  return detectGaps(episodes);
+  return detectGaps(episodes, groups);
 }
 
 export function getGapCount() {

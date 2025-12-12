@@ -96,7 +96,7 @@
 }
 
 .question .delete-item-btn {
-    background-color: transparent;
+  background-color: transparent;
   color: var(--primary-beige);
   padding: 8px 12px;
   border: none;
@@ -257,10 +257,12 @@
 /* Fond semi-transparent */
 .gap-modal-overlay {
   position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background: rgba(0,0,0,0.5);
-  display: flex; 
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
@@ -269,9 +271,11 @@
 /* Contenu de la modale */
 .gap-modal-overlay {
   position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background: rgba(0,0,0,0.5);
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -284,14 +288,15 @@
   padding: 2em;
   max-width: 600px;
   width: 90%;
-  box-shadow: 0 6px 30px rgba(0,0,0,0.3);
+  box-shadow: 0 6px 30px rgba(0, 0, 0, 0.3);
   position: relative;
   font-family: sans-serif;
 }
 
 .gap-modal-close {
   position: absolute;
-  top: 12px; right: 16px;
+  top: 12px;
+  right: 16px;
   background: #eee;
   border: none;
   padding: 0.4em 0.9em;
@@ -304,6 +309,42 @@
   margin-top: 0;
   font-size: 1.4em;
   color: #333;
+}
+
+/* Modal sections layout: allow two columns on wide screens */
+.gap-modal-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+@media (min-width: 800px) {
+  .gap-modal-sections {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+  .gap-modal-sections > div {
+    flex: 1 1 50%;
+  }
+}
+
+.gap-modal-section {
+  background: transparent;
+}
+
+.gap-modal-section .section-title {
+  font-size: 1.05rem;
+  margin-bottom: 0.6rem;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.gap-modal-empty {
+  color: #666;
+  font-size: 0.95rem;
+  padding: 0.6rem 0.8rem;
 }
 
 .gap-list {
@@ -336,8 +377,47 @@
   background-repeat: no-repeat;
 }
 
-/* Bouton compteur de gaps */
+/* Overlap list styling */
+.overlap-list {
+  list-style: none;
+  padding: 0;
+  margin-top: 0.6em;
+}
+
+.overlap-list li {
+  padding: 0.6em 0.8em;
+  margin-bottom: 0.5em;
+  background: #fff6f6;
+  border-left: 4px solid #e57373;
+  border-radius: 6px;
+  font-size: 0.95em;
+  display: flex;
+  align-items: center;
+  gap: 0.6em;
+}
+
+.overlap-list li::before {
+  content: "";
+  display: inline-block;
+  width: 1.1em;
+  height: 1.1em;
+  margin-right: 0.6em;
+  flex-shrink: 0;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23d32f2f' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M12 9v4'/><path d='M12 17h.01'/><path d='M21.73 18 13.73 4a2 2 0 0 0-3.48 0L1.73 18A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3z'/></svg>");
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+/* small separator */
+.gap-modal-content hr {
+  border: none;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(0,0,0,0.06), rgba(0,0,0,0.12));
+  margin: 1rem 0;
+}
+
 #gap-counter-btn {
+  /* Match export/load button sizing and baseline */
   background-color: var(--primary-dark);
   color: var(--primary-beige);
   padding: 0.5rem 1rem;
@@ -354,10 +434,16 @@
   max-width: 100%;
   font-weight: 600;
   -webkit-tap-highlight-color: transparent;
+  position: relative;
+  vertical-align: middle;
+  line-height: 1;
+  height: 36px;
+  padding-left: 0.9rem;
+  padding-right: 0.9rem;
 }
 
 #gap-counter-btn:hover {
-  background-color: var(--primary-beige);
+  background-color: #000000;
 }
 
 @media (max-width: 600px) {
@@ -369,35 +455,59 @@
   }
 }
 
-/* Lucide icon + badge (pastille jaune/orangé) */
-#gap-counter-btn {
-  position: relative;
-  padding-left: 0.75rem;
-  padding-right: 0.75rem;
-}
-
 #gap-counter-btn .gap-icon {
   width: 18px;
   height: 18px;
   flex: 0 0 18px;
   color: #ffb300; /* jaune/orangé */
   display: inline-block;
+  vertical-align: middle;
 }
-
 #gap-counter-btn .gap-badge {
   position: absolute;
-  top: -6px;
-  right: -6px;
+  top: 4px;
+  right: -8px;
+  transform: translateY(-50%);
   background: linear-gradient(180deg, #ffca28 0%, #ff9800 100%);
   color: #111;
   border-radius: 999px;
-  padding: 0.12rem 0.45rem;
+  padding: 0.18rem 0.55rem; /* taller */
   font-weight: 700;
-  font-size: 0.75rem;
+  font-size: 0.82rem;
   box-shadow: 0 2px 6px rgba(0,0,0,0.12);
-  min-width: 18px;
+  min-width: 20px;
+  min-height: 20px;
   text-align: center;
   line-height: 1;
+}
+
+
+/* Red badge for overlaps */
+#gap-counter-btn .overlap-badge {
+  position: absolute;
+  top: 4px;
+  right: 28px; /* more separated from gap badge */
+  transform: translateY(-50%);
+  background: linear-gradient(180deg, #ff6b6b 0%, #d32f2f 100%);
+  color: #fff;
+  border-radius: 999px;
+  padding: 0.18rem 0.55rem; /* taller */
+  font-weight: 700;
+  font-size: 0.82rem;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+  min-width: 20px;
+  min-height: 20px;
+  text-align: center;
+  line-height: 1;
+}
+
+#gap-counter-btn:not(.has-overlaps) .overlap-badge {
+  background: #e9ecef;
+  color: #6b6b6b;
+}
+
+.overlap-title {
+  color: #bf2a2a;
 }
 
 /* If there are no gaps, show a muted badge instead (optional) */

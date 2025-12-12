@@ -70,8 +70,8 @@ export function initTimeline() {
   // 1. Récupérer les épisodes
   const episodes = items.get();
 
-  // 2. Détecter les gaps
-  const gaps = detectGaps(episodes);
+  // 2. Détecter les gaps (respecter les flags `showGaps` des groupes)
+  const gaps = detectGaps(episodes, groups);
 
   // 3. Créer les items visuels
   const gapItems = createGapItems(gaps);

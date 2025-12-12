@@ -13,6 +13,7 @@ import { enableWebRTCSync, processPendingItems } from "./webrtcSync.js";
 import { displayPreviousAnswers } from "./historyDisplay.js";
 import { initResetHandler } from "./resetHandler.js";
 import { getGapCount, getGapList } from "../timeline/gapDetection.js";
+import { getOverlaps } from "../timeline/overlapDetection.js";
 import { groupsData } from "../timeline/timelineData.js";
 /**
  ************************************************************************************************************
@@ -32,12 +33,14 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const gapBtn = document.createElement("button");
   gapBtn.id = "gap-counter-btn";
-  const initialCount = getGapCount();
-  gapBtn.setAttribute("aria-label", `Périodes manquantes : ${initialCount}`);
-  gapBtn.title = `Périodes manquantes : ${initialCount}`;
+  const initialGapCount = getGapCount();
+  const initialOverlapCount = (typeof getOverlaps === 'function') ? getOverlaps().length : 0;
+  gapBtn.setAttribute("aria-label", `Périodes manquantes : ${initialGapCount} — Chevauchements : ${initialOverlapCount}`);
+  gapBtn.title = `Périodes manquantes : ${initialGapCount} — Chevauchements : ${initialOverlapCount}`;
   gapBtn.innerHTML = `
     <i data-lucide="triangle-alert" class="lucide gap-icon" aria-hidden="true"></i>
-    <span class="gap-badge">${initialCount}</span>
+    <span class="gap-badge">${initialGapCount}</span>
+    <span class="overlap-badge">${initialOverlapCount}</span>
   `;
   // Place the gap button next to export/load when possible for consistent layout
   if (actionsContainer) {
@@ -51,6 +54,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   gapBtn.addEventListener("click", () => {
     const gaps = getGapList();
+    const overlaps = (typeof getOverlaps === 'function') ? getOverlaps() : [];
 
     const overlay = document.createElement("div");
     overlay.className = "gap-modal-overlay";
@@ -81,7 +85,22 @@ document.addEventListener("DOMContentLoaded", async () => {
             .join("")}
         </ul>`;
 
-    modal.innerHTML = `<h3>Périodes manquantes</h3>${gapHtml}`;
+    const overlapHtml =
+      overlaps.length === 0
+        ? "<p>Aucun chevauchement détecté.</p>"
+        : `<ul class="overlap-list">
+          ${overlaps
+            .map((ov) => `
+              <li>
+                <strong>${getGroupName(ov._originalGroup)}</strong> : ${new Date(
+                  ov.start
+                ).getFullYear()} → ${new Date(ov.end).getFullYear()}
+              </li>
+            `)
+            .join("")}
+        </ul>`;
+
+    modal.innerHTML = `<h3>Périodes manquantes</h3>${gapHtml}<hr/><h3 class="overlap-title">Chevauchements</h3>${overlapHtml}`;
     modal.appendChild(closeBtn);
     overlay.appendChild(modal);
     document.body.appendChild(overlay);
@@ -89,12 +108,14 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const updateGapCounter = () => {
     const n = getGapCount();
-    const badge = gapBtn.querySelector(".gap-badge");
-    if (badge) {
-      badge.textContent = String(n);
-      if (n > 0 && badge.animate) {
+    const m = (typeof getOverlaps === 'function') ? getOverlaps().length : 0;
+    const gapBadge = gapBtn.querySelector(".gap-badge");
+    const overlapBadge = gapBtn.querySelector(".overlap-badge");
+    if (gapBadge) {
+      gapBadge.textContent = String(n);
+      if (n > 0 && gapBadge.animate) {
         try {
-          badge.animate([
+          gapBadge.animate([
             { transform: "scale(1.15)" },
             { transform: "scale(1)" }
           ], { duration: 220, easing: "ease-out" });
@@ -103,10 +124,22 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
       }
     }
-    const label = `Périodes manquantes : ${n}`;
+    if (overlapBadge) {
+      overlapBadge.textContent = String(m);
+      if (m > 0 && overlapBadge.animate) {
+        try {
+          overlapBadge.animate([
+            { transform: "scale(1.15)" },
+            { transform: "scale(1)" }
+          ], { duration: 220, easing: "ease-out" });
+        } catch (e) {}
+      }
+    }
+    const label = `Périodes manquantes : ${n} — Chevauchements : ${m}`;
     gapBtn.setAttribute("aria-label", label);
     gapBtn.title = label;
     gapBtn.classList.toggle("has-gaps", n > 0);
+    gapBtn.classList.toggle("has-overlaps", m > 0);
   };
   items.on("add", updateGapCounter);
   items.on("update", updateGapCounter);

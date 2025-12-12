@@ -18,6 +18,8 @@ export function initOverlapDetection(items, groups) {
   _groups = groups;
 }
 
+const notifiedOverlapKeys = new Set();
+
 /**
  * Détecte les chevauchements d'épisodes dans un même groupe
  * et crée des items de background pour les signaler visuellement
@@ -103,6 +105,35 @@ function createOverlapMarker(groupId, start, end, item1Id, item2Id) {
   };
 
   _items.add(overlapItem);
+
+  // Notifier l'utilisateur pour les nouveaux chevauchements (une seule fois)
+  notifyNewOverlap(overlapItem);
+}
+
+function notifyNewOverlap(overlapItem) {
+  if (!overlapItem || !overlapItem._originalGroup) return;
+  const key = overlapItem.id;
+  if (notifiedOverlapKeys.has(key)) return;
+  notifiedOverlapKeys.add(key);
+
+  const allGroups = _groups ? _groups.get() : [];
+  const groupInfo = allGroups.find((g) => String(g.id) === String(overlapItem._originalGroup));
+  const groupName = groupInfo ? groupInfo.contentText : overlapItem._originalGroup;
+
+  const startYear = new Date(overlapItem.start).getFullYear();
+  const endYear = new Date(overlapItem.end).getFullYear();
+
+  Swal.fire({
+    toast: true,
+    position: "top-start",
+    icon: "error",
+    title: "Chevauchement détecté",
+    html: `<b>Pour ${groupName} : ${startYear} → ${endYear}</b><br>
+         <span>Veuillez notifier l'enquêté d'un chevauchement.</span>`,
+    showConfirmButton: false,
+    timer: 7000,
+    timerProgressBar: true,
+  });
 }
 
 /**
