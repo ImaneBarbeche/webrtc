@@ -86,14 +86,18 @@
 
 #bricks {
   /* display: none; */
+  --top-offset: 4.2rem;
+  /* used to hide the timeline nav btn shadows */
+  --bottom-offset: 0.2rem;
+
   visibility: hidden;
   opacity: 0;
   pointer-events: none;
-  height: calc(100% - 3.2rem);
+  height: calc(100% - var(--top-offset));
   /* height: 100%; */
   width: 100%;
   position: absolute;
-  top: 3.6rem;
+  top: calc(var(--top-offset) + var(--bottom-offset));
   right: 0;
   padding: 2.125rem;
   /* margin: 2.125rem; */
@@ -107,7 +111,7 @@
   /* backdrop-filter: saturate(1.9) url(#lensFilter); */
   z-index: 99;
   transform: translateY(2rem);
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  transition: opacity 0.3s ease, transform 0.3s ease, top 0.3s ease, height 0.3s ease;
   /* transition: opacity 0.3s ease, transform 0.3s ease, visibility 0s linear 0.3s; */
   /* background-color: red; */
   overflow-y: hidden !important;
@@ -137,15 +141,34 @@
     gap: unset;
 
     p {
-      font-size: 1.1rem;
+      font-size: 1.25rem;
       font-weight: 300;
       margin-top: 0.5rem;
 
       span {
         display: block;
+
+        &:nth-of-type(2) {
+          font-size: .95rem;
+          font-weight: 100;
+        }
       }
     }
   }
+
+    /* drag handle */
+    .handle {
+      touch-action: none; 
+      -webkit-user-select: none; /* Prevent text selection during drag */
+      user-select: none;
+      width: 12rem;
+      height: 4rem;
+      background-color: red;
+      border-radius: 2rem;
+      top: -1rem;
+      position: relative;
+      opacity: 0;
+    }
 }
 
 #bricks {
@@ -175,7 +198,9 @@
   justify-content: space-between;
   gap: 2rem;
   overflow-y: auto;
-  height: calc(100% - 3rem);
+  height: calc(100% - 4rem);
+  /* height: calc(100% - var(--bottom-offset)); */
+  /* height: calc(var(--top-offset) + 0.2rem); */
   padding-right: 0.5rem;
   scrollbar-color: var(--secondary-grey) transparent;
   scrollbar-width: thin;
@@ -244,6 +269,7 @@
 
     .lucide {
       vertical-align: bottom;
+      stroke-width: 1.25;
     }
   }
 }
@@ -262,6 +288,9 @@
   .card {
     /* flex-grow: 1; flex-shrink: 1; flex-basis: 0; */
 
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
     min-width: 10rem;
     min-height: 8rem;
     padding: 1rem;
@@ -277,7 +306,22 @@
     p {
       opacity: 80%;
       font-weight: 300;
+      width: fit-content;
+      margin-left: auto;
     }
+
+    svg {
+      vertical-align: text-bottom;
+      stroke-width: 1;
+      height: 1.25rem;
+
+      /* hiding the pin */
+      &.lucide-pin {
+        display: none;
+      }
+    }
+
+
   }
 }
 
@@ -321,10 +365,18 @@ button:hover {
 
   &:has(button) {
     padding: 0rem;
+    backdrop-filter: blur(1rem);
 
     button {
       padding: 0.7rem;
     }
+  }
+
+/* TODO: create a proper primary button component */
+  &.primary {
+    background-color: var(--primary-dark);
+    box-shadow: unset;
+    color: var(--primary-beige)
   }
 }
 

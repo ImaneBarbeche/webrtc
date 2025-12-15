@@ -220,33 +220,18 @@
 
       <div class="split">
         <!-- Left side-->
-        <div id="questionnaire">
+          <div id="questionnaire">
           <div class="questionnaire-header">
-            <h2 style="margin: 0"><i data-lucide="house"></i> Migratoire</h2>
+            <h2 style="margin: 0;"><i data-lucide="house"></i> Migratoire</h2>
           </div>
           <div id="questions"></div>
           <!-- Footer actions: kept at the end of the questionnaire -->
-          <div
-            class="questionnaire-footer"
-            style="
-              margin-top: 12px;
-              display: flex;
-              gap: 8px;
-              align-items: center;
-              justify-content: flex-end;
-            "
-          >
+          <div class="questionnaire-footer" style="margin-top:12px; display:flex; gap:8px; align-items:center; justify-content:flex-end;">
             <div id="questionnaire-actions">
-              <button id="export" title="Exporter">
-                <i data-lucide="upload"></i>
-              </button>
-              <button id="load" title="Charger">
-                <i data-lucide="download"></i>
-              </button>
+              <button id="export">Export</button>
+              <button id="load">Load</button>
             </div>
-            <button id="resetButton" title="Réinitialiser le questionnaire">
-              <i data-lucide="trash"></i>
-            </button>
+            <button id="resetButton" title="Réinitialiser le questionnaire">🗑️</button>
           </div>
         </div>
 
@@ -262,9 +247,7 @@
                 <h2>Synthèse</h2>
                 <p id="year"></p>
               </header>
-              <button id="close-summary" class="invisible-button">
-                <i data-lucide="x"></i>
-              </button>
+              <button id="close-summary" class="invisible-button"><i data-lucide="x"></i></button>
             </div>
             <div id="moreInfos" class="stat-wrapper"></div>
             <div class="btn-wrapper">
@@ -297,18 +280,8 @@
                 <button id="zoom-out"><i data-lucide="zoom-out"></i></button>
                 <button id="zoom-in"><i data-lucide="zoom-in"></i></button>
               </div>
-              <button
-                id="toggle-chapters"
-                class="secondary-button button-with-icon"
-              >
-                <i data-lucide="swatch-book"></i>
-              </button>
-              <button
-                id="view-summary"
-                class="secondary-button button-with-icon"
-              >
-                <i data-lucide="square-chart-gantt"></i> view summary
-              </button>
+              <button id="toggle-chapters" class="secondary-button button-with-icon"><i data-lucide="swatch-book"></i></button>
+              <button id="view-summary" class="secondary-button button-with-icon"><i data-lucide="square-chart-gantt"></i> view summary</button>
             </div>
           </section>
           <div id="map"></div>
@@ -363,6 +336,7 @@
     <script type="module" src="js/utils.js"></script>
     <script type="module" src="js/stateMachine/stateMachine.js"></script>
     <script type="module" src="js/webrtc/webrtc-sync.js"></script>
+    <script src="js/swipeDetector.js"></script>
 
     <script>
       // Global dev-mode toggle (fallback) - ensure it's clickable in any view

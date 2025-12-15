@@ -25,7 +25,7 @@ export const options = {
   stack: false,
   end: new Date(`${new Date().getFullYear()}-12-31`),
   verticalScroll: true,
-  height: "80vh",
+  height: "85vh",
   zoomable: true,
   zoomFriction: 40,
   showMinorLabels: true,
@@ -39,6 +39,7 @@ export const options = {
         b: [],
         br: [],
         div: ["class", "title"],
+        i: ['data-lucide'],
         img: ["src", "alt", "class", "width", "height"],
       },
     },
@@ -71,7 +72,10 @@ export const options = {
     if (item.type === "box" && item.category === "degree") {
       return `<img src="./assets/icon/degree.svg" alt="${item.content}" />`;
     }
-    return item.content;
+    if(item.type === "box" && item.category !== "degree") {
+      return `<i data-lucide="${item.icon}"></i>`
+    }
+    return item.content ;
   },
   // Brancher les callbacks importés
   onAdd: (item, cb) => onAdd(item, cb, timelineState.isEditingEpisode),
