@@ -99,7 +99,7 @@ export function renderInputQuestion(
     // Listener pour valider la modification avec Entrée
     function onEditKey(event) {
       if (event.key === "Enter" && String(input.value).trim() !== "") {
-        handleEditUpdate(input, eventKey);
+        handleEditUpdate(input, eventKey, state?.value);
         input.disabled = true;
         cleanupEditListeners();
       }
@@ -108,7 +108,7 @@ export function renderInputQuestion(
     function onEditChange() {
       // picker updates on change (month/date) — apply edit immediately
       if (String(input.value).trim() !== "") {
-        handleEditUpdate(input, eventKey);
+        handleEditUpdate(input, eventKey, state?.value);
         input.disabled = true;
         cleanupEditListeners();
       }
@@ -139,6 +139,7 @@ export function renderInputQuestion(
       eventData[eventKey] = value;
     }
     sendEvent(eventData);
+    saveAnsweredQuestion(state?.value, eventData);
     input.disabled = true;
     editBtn.style.display = "inline-block";
     if (isHost) disableQuestionControls(questionDiv, editBtn);
@@ -235,9 +236,8 @@ export function renderPairedDateInputs(
       }
       sendEvent(ev);
       input.disabled = true;
-       // Afficher le bouton d'édition global si les DEUX champs sont remplis
+      // Afficher le bouton d'édition global si les DEUX champs sont remplis
       checkAndShowEditButton();
-      
     }
 
     input.addEventListener("keypress", (e) => {
@@ -261,52 +261,52 @@ export function renderPairedDateInputs(
   pair.appendChild(leftField);
   pair.appendChild(rightField);
 
-// Vérifier si les deux champs sont remplis pour afficher l'édition
+  // Vérifier si les deux champs sont remplis pour afficher l'édition
   function checkAndShowEditButton() {
-    const leftInput = leftField.querySelector('input');
-    const rightInput = rightField.querySelector('input');
-    
+    const leftInput = leftField.querySelector("input");
+    const rightInput = rightField.querySelector("input");
+
     const bothFilled = leftInput.value && rightInput.value;
     const bothDisabled = leftInput.disabled && rightInput.disabled;
-    
+
     if (bothFilled && bothDisabled) {
-      globalEditBtn.style.display = 'inline-block';
+      globalEditBtn.style.display = "inline-block";
       if (isHost) {
         // Désactiver tous les autres contrôles de la question
         disableQuestionControls(questionDiv, globalEditBtn);
       }
     }
   }
-   // Gestion de l'édition globale
-  globalEditBtn.addEventListener('click', () => {
-    const isEditing = globalEditBtn.dataset.editing === 'true';
-    const leftInput = leftField.querySelector('input');
-    const rightInput = rightField.querySelector('input');
-    
+  // Gestion de l'édition globale
+  globalEditBtn.addEventListener("click", () => {
+    const isEditing = globalEditBtn.dataset.editing === "true";
+    const leftInput = leftField.querySelector("input");
+    const rightInput = rightField.querySelector("input");
+
     if (isEditing) {
       // Terminer l'édition - sauvegarder les modifications
       const leftVal = leftInput.value;
       const rightVal = rightInput.value;
-      
+
       if (leftVal) {
         handleEditUpdate(leftInput, leftConfig.eventKey);
       }
       if (rightVal) {
         handleEditUpdate(rightInput, rightConfig.eventKey);
       }
-      
+
       leftInput.disabled = true;
       rightInput.disabled = true;
       globalEditBtn.innerHTML = '<i data-lucide="pencil"></i>';
-      globalEditBtn.dataset.editing = 'false';
+      globalEditBtn.dataset.editing = "false";
     } else {
       // Activer l'édition
       leftInput.disabled = false;
       rightInput.disabled = false;
       leftInput.focus();
       globalEditBtn.innerHTML = '<i data-lucide="check"></i>';
-      globalEditBtn.dataset.editing = 'true';
-      
+      globalEditBtn.dataset.editing = "true";
+
       // Listener pour valider avec Enter
       function onEditKey(event) {
         if (event.key === "Enter") {
@@ -316,7 +316,7 @@ export function renderPairedDateInputs(
       leftInput.addEventListener("keypress", onEditKey, { once: true });
       rightInput.addEventListener("keypress", onEditKey, { once: true });
     }
-    
+
     if (window.lucide && typeof window.lucide.createIcons === "function") {
       window.lucide.createIcons();
     }
@@ -328,7 +328,8 @@ export function renderPairedDateInputs(
   // Vérifier au chargement si on doit afficher le bouton
   setTimeout(checkAndShowEditButton, 100);
 
-  if (window.lucide && typeof window.lucide.createIcons === 'function') window.lucide.createIcons();
+  if (window.lucide && typeof window.lucide.createIcons === "function")
+    window.lucide.createIcons();
 }
 /**
  * NOUVELLE FONCTION: Rend deux champs de texte côte à côte (ex: statuts résidentiels)
@@ -341,33 +342,32 @@ export function renderPairedTextInputs(
   sendEvent,
   isHost = true
 ) {
-  const pair = document.createElement('div');
-  pair.className = 'text-pair';
+  const pair = document.createElement("div");
+  pair.className = "text-pair";
   const cIdx = state.context.currentCommuneIndex || 0;
   const lIdx = state.context.currentLogementIndex || 0;
   pair.dataset.pairId = `pair_status_c${cIdx}_l${lIdx}`;
 
   // Bouton d'édition global
-  const globalEditBtn = document.createElement('button');
-  globalEditBtn.className = 'edit-btn pair-edit-btn';
+  const globalEditBtn = document.createElement("button");
+  globalEditBtn.className = "edit-btn pair-edit-btn";
   globalEditBtn.innerHTML = '<i data-lucide="pencil"></i>';
-  globalEditBtn.style.display = 'none';
-  globalEditBtn.dataset.editing = 'false';
+  globalEditBtn.style.display = "none";
+  globalEditBtn.dataset.editing = "false";
 
   function makeField(cfg) {
-    const field = document.createElement('div');
-    field.className = 'text-field';
+    const field = document.createElement("div");
+    field.className = "text-field";
 
-    const lbl = document.createElement('label');
-    lbl.className = 'text-field-label';
-    lbl.innerText = cfg.label || '';
+    const lbl = document.createElement("label");
+    lbl.className = "text-field-label";
+    lbl.innerText = cfg.label || "";
 
-    const input = document.createElement('input');
-    input.type = 'text';
-    input.placeholder = cfg.placeholder || 'Votre réponse';
+    const input = document.createElement("input");
+    input.type = "text";
+    input.placeholder = cfg.placeholder || "Votre réponse";
     input.dataset.eventKey = cfg.eventKey;
     input.dataset.eventType = cfg.eventType;
-
 
     function submit(val) {
       if (!cfg.eventType || !val.trim()) return;
@@ -378,8 +378,8 @@ export function renderPairedTextInputs(
       checkAndShowEditButton();
     }
 
-    input.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter' && input.value.trim()) {
+    input.addEventListener("keypress", (e) => {
+      if (e.key === "Enter" && input.value.trim()) {
         submit(input.value);
       }
     });
@@ -394,27 +394,27 @@ export function renderPairedTextInputs(
 
   pair.appendChild(leftField);
   pair.appendChild(rightField);
-  
+
   function checkAndShowEditButton() {
-    const leftInput = leftField.querySelector('input');
-    const rightInput = rightField.querySelector('input');
-    
+    const leftInput = leftField.querySelector("input");
+    const rightInput = rightField.querySelector("input");
+
     const bothFilled = leftInput.value && rightInput.value;
     const bothDisabled = leftInput.disabled && rightInput.disabled;
-    
+
     if (bothFilled && bothDisabled) {
-      globalEditBtn.style.display = 'inline-block';
+      globalEditBtn.style.display = "inline-block";
       if (isHost) {
         disableQuestionControls(questionDiv, globalEditBtn);
       }
     }
   }
 
-  globalEditBtn.addEventListener('click', () => {
-    const isEditing = globalEditBtn.dataset.editing === 'true';
-    const leftInput = leftField.querySelector('input');
-    const rightInput = rightField.querySelector('input');
-    
+  globalEditBtn.addEventListener("click", () => {
+    const isEditing = globalEditBtn.dataset.editing === "true";
+    const leftInput = leftField.querySelector("input");
+    const rightInput = rightField.querySelector("input");
+
     if (isEditing) {
       if (leftInput.value.trim()) {
         handleEditUpdate(leftInput, leftConfig.eventKey);
@@ -422,18 +422,18 @@ export function renderPairedTextInputs(
       if (rightInput.value.trim()) {
         handleEditUpdate(rightInput, rightConfig.eventKey);
       }
-      
+
       leftInput.disabled = true;
       rightInput.disabled = true;
       globalEditBtn.innerHTML = '<i data-lucide="pencil"></i>';
-      globalEditBtn.dataset.editing = 'false';
+      globalEditBtn.dataset.editing = "false";
     } else {
       leftInput.disabled = false;
       rightInput.disabled = false;
       leftInput.focus();
       globalEditBtn.innerHTML = '<i data-lucide="check"></i>';
-      globalEditBtn.dataset.editing = 'true';
-      
+      globalEditBtn.dataset.editing = "true";
+
       function onEditKey(event) {
         if (event.key === "Enter") {
           globalEditBtn.click();
@@ -442,7 +442,7 @@ export function renderPairedTextInputs(
       leftInput.addEventListener("keypress", onEditKey, { once: true });
       rightInput.addEventListener("keypress", onEditKey, { once: true });
     }
-    
+
     if (window.lucide && typeof window.lucide.createIcons === "function") {
       window.lucide.createIcons();
     }
@@ -453,18 +453,19 @@ export function renderPairedTextInputs(
 
   setTimeout(checkAndShowEditButton, 100);
 
-  if (window.lucide && typeof window.lucide.createIcons === 'function') window.lucide.createIcons();
+  if (window.lucide && typeof window.lucide.createIcons === "function")
+    window.lucide.createIcons();
 }
 
 /**
  * Gère la mise à jour d'une réponse existante
  */
-function handleEditUpdate(input, eventKey) {
+function handleEditUpdate(input, eventKey, stateId) {
   let outVal = input.value;
-  if (input.type === 'month') {
+  if (input.type === "month") {
     const rawMonth = String(input.value);
     const y = extractYearFromDateString(rawMonth);
-    if (["start","end","statut_res"].includes(eventKey)) {
+    if (["start", "end", "statut_res"].includes(eventKey)) {
     } else {
       outVal = y === null ? rawMonth : y;
     }
@@ -477,7 +478,7 @@ function handleEditUpdate(input, eventKey) {
     updateEpisode: ["start", "end", "statut_res"].includes(eventKey),
   };
   sendEvent(updateEvent);
-  saveAnsweredQuestion(eventKey, updateEvent);
+  saveAnsweredQuestion(stateId, updateEvent);
 
   // Cas spécial pour l'année de naissance
   if (eventKey === "birthdate" || eventKey === "birthYear") {
@@ -489,7 +490,10 @@ function handleEditUpdate(input, eventKey) {
 
       window.timeline.setCustomTime(birthDate, "custom-bar");
       window.timeline.setCustomTimeTitle(birthYear, "custom-bar");
-      window.timeline.setCustomTime(new Date(`${birthYear}-01-01`), "birth-year-bar");
+      window.timeline.setCustomTime(
+        new Date(`${birthYear}-01-01`),
+        "birth-year-bar"
+      );
       window.timeline.setCustomTimeTitle(birthYear, "birth-year-bar");
 
       window.timeline.setOptions({
@@ -502,22 +506,41 @@ function handleEditUpdate(input, eventKey) {
               const age = currentYear - birthYear;
               let label = `<b>${currentYear}</b>`;
               if (currentYear >= birthYear && currentYear <= nowYear) {
-                label += `<br><span class="year-age">${age} ${age > 1 ? "ans" : "an"}</span>`;
+                label += `<br><span class="year-age">${age} ${
+                  age > 1 ? "ans" : "an"
+                }</span>`;
               }
               return label;
             }
             let fmt;
             switch (scale) {
-              case "millisecond": fmt = "SSS"; break;
-              case "second": fmt = "s"; break;
+              case "millisecond":
+                fmt = "SSS";
+                break;
+              case "second":
+                fmt = "s";
+                break;
               case "minute":
-              case "hour": fmt = "HH:mm"; break;
-              case "weekday": fmt = "ddd D"; break;
-              case "day": fmt = "D"; break;
-              case "week": fmt = "w"; break;
-              case "month": fmt = "MMM"; break;
-              case "year": fmt = "YYYY"; break;
-              default: fmt = "D";
+              case "hour":
+                fmt = "HH:mm";
+                break;
+              case "weekday":
+                fmt = "ddd D";
+                break;
+              case "day":
+                fmt = "D";
+                break;
+              case "week":
+                fmt = "w";
+                break;
+              case "month":
+                fmt = "MMM";
+                break;
+              case "year":
+                fmt = "YYYY";
+                break;
+              default:
+                fmt = "D";
             }
             return vis.moment(date).format(fmt);
           },
@@ -528,26 +551,31 @@ function handleEditUpdate(input, eventKey) {
       window.timeline.fit();
     }
   }
-  
+
   // Après édition, envoyer l'événement de validation attendu si fourni (pour débloquer le flux bloc)
   if (input.dataset.eventType) {
     const eventType = input.dataset.eventType;
     const eventData = { type: eventType };
     // Pour les questions de temps, envoyer la valeur aussi
-    if (["start", "end", "statut_res", "birthdate", "birthYear"].includes(eventKey)) {
+    if (
+      ["start", "end", "statut_res", "birthdate", "birthYear"].includes(
+        eventKey
+      )
+    ) {
       eventData[eventKey] = outVal;
     }
     sendEvent(eventData);
   }
 }
 
-
 /**
  * Désactive tous les contrôles d'une question sauf le bouton d'édition
  */
 function disableQuestionControls(questionDiv, editBtn) {
   try {
-    const controls = questionDiv.querySelectorAll("input, button, textarea, select");
+    const controls = questionDiv.querySelectorAll(
+      "input, button, textarea, select"
+    );
     controls.forEach((c) => {
       if (c !== editBtn) c.disabled = true;
     });
