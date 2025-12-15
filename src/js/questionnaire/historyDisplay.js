@@ -9,8 +9,10 @@ import { loadAnsweredQuestions, getQuestionFromState } from "../stateMachine/sta
  * @param {HTMLElement} container - Le conteneur où afficher l'historique
  */
 export function displayPreviousAnswers(container) {
-  const answeredQuestions = loadAnsweredQuestions();
+  // Vider le conteneur avant d'ajouter l'historique
+  container.innerHTML = "";
 
+  const answeredQuestions = loadAnsweredQuestions();
   if (answeredQuestions.length === 0) return; // Rien à afficher
 
   // Créer un conteneur pour les réponses précédentes
@@ -42,8 +44,8 @@ export function displayPreviousAnswers(container) {
   separator.className = "questions-separator";
 
   // Insérer au début du conteneur
-  container.insertBefore(separator, container.firstChild);
-  container.insertBefore(previousAnswersDiv, container.firstChild);
+  container.appendChild(separator);
+  container.appendChild(previousAnswersDiv);
 }
 
 /**
