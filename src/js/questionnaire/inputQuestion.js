@@ -86,23 +86,6 @@ export function renderInputQuestion(
     input.placeholder = "Votre réponse";
   }
 
-  // Si une valeur existe déjà dans le contexte, la pré-remplir et désactiver
-  if (state.context[eventKey]) {
-    const stored = state.context[eventKey];
-    try {
-      if (input.type === "month") {
-        // Construire YYYY-MM pour préremplir le month input
-        const mval = buildMonthValueFromStored(stored);
-        input.value = mval;
-      } else {
-        input.value = stored;
-      }
-    } catch (e) {
-      input.value = state.context[eventKey];
-    }
-    input.disabled = true;
-  }
-
   const editBtn = document.createElement("button");
   editBtn.innerHTML = '<i data-lucide="pencil"></i>';
   editBtn.className = "edit-btn";
@@ -237,20 +220,6 @@ export function renderPairedDateInputs(
     input.placeholder = "MM-YYYY";
     input.dataset.eventKey = cfg.eventKey;
     input.dataset.eventType = cfg.eventType;
-
-    // pré-remplir si valeur existante dans le contexte
-    if (state.context && state.context[cfg.eventKey]) {
-      const stored = state.context[cfg.eventKey];
-      try {
-        if (typeof stored === "string") {
-          if (/^\d{4}-\d{2}/.test(stored)) input.value = stored.slice(0, 7);
-          else if (/^\d{4}$/.test(stored)) input.value = `${stored}-01`;
-        } else if (typeof stored === "number") {
-          input.value = `${String(stored)}-01`;
-        }
-      } catch (e) {}
-      input.disabled = true;
-    }
 
     function submit(val) {
       if (!cfg.eventType) return;
@@ -399,11 +368,6 @@ export function renderPairedTextInputs(
     input.dataset.eventKey = cfg.eventKey;
     input.dataset.eventType = cfg.eventType;
 
-    // Pré-remplir si valeur existante
-    if (state.context && state.context[cfg.eventKey]) {
-      input.value = state.context[cfg.eventKey];
-      input.disabled = true;
-    }
 
     function submit(val) {
       if (!cfg.eventType || !val.trim()) return;
@@ -501,11 +465,6 @@ function handleEditUpdate(input, eventKey) {
     const rawMonth = String(input.value);
     const y = extractYearFromDateString(rawMonth);
     if (["start","end","statut_res"].includes(eventKey)) {
-      const parts = rawMonth.split('-');
-      const yyyy = parts[0];
-      const mm = parts[1] || '01';
-      const dateObj = new Date(`${yyyy}-${mm}-01`);
-      outVal = dateObj;
     } else {
       outVal = y === null ? rawMonth : y;
     }
@@ -568,6 +527,17 @@ function handleEditUpdate(input, eventKey) {
       window.timeline.redraw();
       window.timeline.fit();
     }
+  }
+  
+  // Après édition, envoyer l'événement de validation attendu si fourni (pour débloquer le flux bloc)
+  if (input.dataset.eventType) {
+    const eventType = input.dataset.eventType;
+    const eventData = { type: eventType };
+    // Pour les questions de temps, envoyer la valeur aussi
+    if (["start", "end", "statut_res", "birthdate", "birthYear"].includes(eventKey)) {
+      eventData[eventKey] = outVal;
+    }
+    sendEvent(eventData);
   }
 }
 

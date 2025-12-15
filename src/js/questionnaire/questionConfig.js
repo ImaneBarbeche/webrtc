@@ -71,7 +71,7 @@ export function getQuestionConfig(state) {
 
     case "askCommuneArrivalYear": {
       const commune = state.context.communes?.[state.context.currentCommuneIndex] || "cette commune";
-      questionText = `En quelle année êtes-vous arrivé à ${commune} ?`;
+      questionText = `Donnez-nous les dates d'arrivée et de départ à ${commune}:`;
       responseType = "input";
       eventType = "ANSWER_COMMUNE_ARRIVAL";
       eventKey = "start";
@@ -109,7 +109,7 @@ export function getQuestionConfig(state) {
       const logementNum = (state.context.currentLogementIndex || 0) + 1;
       const logementName = state.context.logements?.[state.context.currentLogementIndex];
       const logementLabel = logementName ? `le logement « ${logementName} »` : `le logement ${logementNum}`;
-      questionText = `À quel âge ou en quelle année avez-vous emménagé dans ${logementLabel} ?`;
+      questionText = `Donnez-nous les dates d'arrivée et de départ (ou l'âge) dans ${logementLabel}:`;
       responseType = "input";
       eventType = "ANSWER_HOUSING_ARRIVAL";
       eventKey = "start";
@@ -128,7 +128,7 @@ export function getQuestionConfig(state) {
     case "askHousingOccupationStatusEntry":
       const logementNameEntry = state.context.logements?.[state.context.currentLogementIndex];
       const entryLabel = logementNameEntry ? `dans le logement « ${logementNameEntry} »` : 'dans ce logement';
-      questionText = `Quel était votre statut d'occupation à l'arrivée ${entryLabel} ?`;
+      questionText = `Donnez-nous vos statuts d'occupation ${entryLabel} :`;
       responseType = "input";
       eventType = "ANSWER_STATUS_ENTRY";
       eventKey = "statut_res";
