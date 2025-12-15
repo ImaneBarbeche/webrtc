@@ -109,6 +109,9 @@ export function handleRemoteMessage(message) {
     handleLoadItems(message.items);
   } else if (message.type === "UPDATE_ITEMS") {
     handleUpdateItems(message.items);
+  } else if (message.type === "ADD_ITEMS") {
+    // Ajout manuel d'épisodes/événements via la modale
+    handleUpdateItems(message.items);
   } else if (message.type === "SURVEY_STATE") {
     // TODO: synchroniser l'état complet si nécessaire
   } else if (message.type === "RESET_ALL_DATA") {

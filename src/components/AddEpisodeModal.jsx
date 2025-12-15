@@ -76,23 +76,35 @@ function AddEpisodeModal({onClose}) {
     const [selectedEndDate, setSelectedEndDate] = useState(new Date())
     const [selectedEventDate, setSelectedEventDate] = useState(new Date())
 
-    const handleFormSubmit = ((e) => {
-        e.preventDefault()
-        if(selectedType == 'episode') {
-            console.log("test")
-            // ajouterEpisode(text, start, end, group)
-            ajouterEpisode(contentText,selectedStartDate, selectedEndDate, selectedAttributeId)
-        }
-        else if(selectedType == 'event') {
-            // ajouterEvenement(text, icon, start, group){
-            
-            ajouterEvenement(contentText, iconText.toLowerCase().trim(), selectedEventDate, selectedAttributeId)
-
+    const handleFormSubmit = (e) => {
+        e.preventDefault();
+        if (selectedType === 'episode') {
+            const item = ajouterEpisode(contentText, selectedStartDate, selectedEndDate, selectedAttributeId);
+            if (window.webrtcSync && window.webrtcSync.isActive()) {
+                try {
+                    window.webrtcSync.sendMessage({
+                        type: "ADD_ITEMS",
+                        items: [item]
+                    });
+                } catch (e) {
+                    console.warn("Erreur lors de l'ajout de l'épisode", e);
+                }
+            }
+        } else if (selectedType === 'event') {
+            const item = ajouterEvenement(contentText, iconText.toLowerCase().trim(), selectedEventDate, selectedAttributeId);
+            if (window.webrtcSync && window.webrtcSync.isActive()) {
+                try {
+                    window.webrtcSync.sendMessage({
+                        type: "ADD_ITEMS",
+                        items: [item]
+                    });
+                } catch (e) {
+                    console.warn("Erreur lors de l'ajout de l'événement", e);
+                }
+            }
         }
         document.getElementById('episode_modal').close();
-
-
-    })
+    };
 
 
     return (
