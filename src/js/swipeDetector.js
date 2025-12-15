@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Configuration ---
     const SNAP_MIN_REM = 3.2; 
-    const SNAP_MAX_REM = 25.0; 
+    const SNAP_MAX_REM = 24.2; 
     const SNAP_THRESHOLD_REM = 10.0; 
     const MOMENTUM_MULTIPLIER = 50; 
 
