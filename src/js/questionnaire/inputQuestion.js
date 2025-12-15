@@ -71,7 +71,7 @@ export function renderInputQuestion(
   isHost = true
 ) {
   const input = document.createElement("input");
-
+  input.className = "question-input";
   // Déterminer si la question porte sur un temps (années, mois, jour, heure)
   const qText = questionDiv.querySelector("p")?.textContent || "";
   const isTimeQuestion = /ann(e|ée)|année|âge|age|date|jour|naiss|né|née|heure|h:/i.test(qText);

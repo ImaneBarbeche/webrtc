@@ -308,6 +308,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     container.appendChild(questionDiv);
+
+    const autoInput = questionDiv.querySelector("input, textarea, select");
+    if (autoInput) {
+      autoInput.focus();
+    }
   }
 
   // Initialiser le gestionnaire du bouton reset
