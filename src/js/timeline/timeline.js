@@ -74,27 +74,24 @@ document.addEventListener("DOMContentLoaded", () => {
     );
 
     if (!isOverlapMarker && !isGapMarker) {
-      try {
-        // Si un seul item est ajouté (cas d'ajout d'un épisode),
-        // centrer/scroller la timeline vers cet item plutôt que faire un fit global.
-        if (addedItems.length === 1) {
-          try {
-            // Essayer d'utiliser focus si disponible
-            if (typeof timeline.focus === 'function') {
-              timeline.focus(addedItems[0]);
-            } else {
-              // Fallback: déplacer vers la date de début de l'item
+      // Scroll automatique UNIQUEMENT si l'ajout est programmatique (pas via interaction utilisateur)
+      // On suppose ici que les ajouts manuels (clic, drag, etc.) ont event.trigger === 'manual' ou similaire
+      // Si ce n'est pas le cas, il faut adapter selon la structure de l'event/properties
+      const isManual = properties && properties.event && properties.event.trigger === 'manual';
+      if (!isManual) {
+        try {
+          if (addedItems.length === 1) {
+            try {
               const newItem = items.get(addedItems[0]);
               if (newItem && newItem.start) timeline.moveTo(newItem.start);
+            } catch {
+              try { timeline.fit(); } catch {}
             }
-          } catch {
-            try { timeline.fit(); } catch {}
+          } else {
+            timeline.fit();
           }
-        } else {
-          // Pour les loads/imports multiples, conserver le comportement fit
-          timeline.fit();
-        }
-      } catch {}
+        } catch {}
+      }
     }
 
     scheduleRedraw(timeline);
@@ -118,20 +115,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     scheduleRedraw(timeline);
     // Scroll à la vraie date de fin après update
-    if (!isOverlapMarker && updatedItems.length === 1) {
-      const updatedItem = items.get(updatedItems[0]);
-      setTimeout(() => {
-        if (
-          updatedItem &&
-          updatedItem.end &&
-          (!updatedItem.start || updatedItem.end !== updatedItem.start)
-        ) {
-          timeline.moveTo(updatedItem.end);
-        } else if (updatedItem && updatedItem.start) {
-          timeline.moveTo(updatedItem.start);
-        }
-      }, 50);
-    }
+    // Désactive le scroll automatique lors d'une update manuelle (drag, clic, etc.)
+    // Si besoin, ajouter une détection plus fine selon properties/event
+    // Ici, on ne scroll que lors d'une update programmée
+    // (sinon, commenter ou supprimer ce bloc pour désactiver tout scroll auto sur update)
 
     // Detecter les chevauchements apres modification
     if (!isOverlapMarker && !isDetectingOverlaps) {
