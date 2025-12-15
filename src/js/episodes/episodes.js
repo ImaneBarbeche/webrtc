@@ -104,6 +104,10 @@ export function modifierEpisode(id, modifications, syncViaWebRTC = false){
         modifications.start = startDate;
     }
     
+    // Si on modifie le statut résidentiel, mettre à jour aussi le champ content pour affichage timeline
+    if (modifications.statut_res) {
+        itemtomodify.content = modifications.statut_res;
+    }
     Object.assign(itemtomodify, modifications);
     items.update(itemtomodify)
     

@@ -361,28 +361,23 @@ document.addEventListener("DOMContentLoaded", async () => {
         );
       } // NOUVEAU: PAIRES DE STATUTS RÉSIDENTIELS
       else if (state.value === "askHousingOccupationStatusEntry") {
-        const pairId = `pair_status_c${
-          state.context.currentCommuneIndex || 0
-        }_l${state.context.currentLogementIndex || 0}`;
+        const pairId = `pair_status_c${state.context.currentCommuneIndex || 0}_l${state.context.currentLogementIndex || 0}`;
         const existing = container.querySelector(`[data-pair-id="${pairId}"]`);
         if (existing) return;
-        // Importer la nouvelle fonction
-        import("./inputQuestion.js").then((module) => {
-          const { renderPairedTextInputs } = module;
-          renderPairedTextInputs(
+        import("./renderPairedStatusDropdowns.js").then((module) => {
+          const { renderPairedStatusDropdowns } = module;
+          renderPairedStatusDropdowns(
             questionDiv,
             state,
             {
               label: "Statut à l'arrivée",
               eventType: "ANSWER_STATUS_ENTRY",
-              eventKey: "statut_res",
-              placeholder: "Ex: Locataire",
+              eventKey: "statut_res"
             },
             {
               label: "Statut au départ",
               eventType: "ANSWER_STATUS_EXIT",
-              eventKey: "statut_res",
-              placeholder: "Ex: Propriétaire",
+              eventKey: "statut_res"
             },
             sendEvent,
             getIsHost()
