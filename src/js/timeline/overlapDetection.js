@@ -94,13 +94,11 @@ function createOverlapMarker(groupId, start, end, item1Id, item2Id) {
     end: end,
     type: "background",
     className: "overlap-warning",
-    // Le background s'applique directement au sous-groupe concerné
     group: groupId,
-    // Métadonnées pour identifier les items concernés
     _isOverlapMarker: true,
     _overlappingItems: [item1Id, item2Id],
     _originalGroup: groupId,
-    content: "", // Pas de contenu textuel
+    content: "Chevauchement détecté entre deux épisodes.",
     title: `Incohérence : chevauchement entre épisodes du ${formatDate(start)} au ${formatDate(end)}`
   };
 

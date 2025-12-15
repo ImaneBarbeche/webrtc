@@ -59,13 +59,13 @@ export function detectGaps(episodes, groups) {
 export function createGapItems(gaps) {
   return gaps.map((gap, index) => {
     return {
-      id: `gap-${index}-${gap.start}-${gap.end}`, // 'gap-0', 'gap-1..
-      start: new Date(gap.start), // Le début du gap
-      end: new Date(gap.end), // La fin du gap
-      type: "background", // Le type spécial pour les fonds
+      id: `gap-${index}-${gap.start}-${gap.end}`,
+      start: new Date(gap.start),
+      end: new Date(gap.end),
+      type: "background",
       className: "timeline-gap",
       group: gap.group,
-      content: "", // Optionnel
+      content: "Aucune donnée pour cette période (période manquante).",
     };
   });
 }
