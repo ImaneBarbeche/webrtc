@@ -75,15 +75,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (!isOverlapMarker && !isGapMarker) {
       // Scroll automatique UNIQUEMENT si l'ajout est programmatique (pas via interaction utilisateur)
-      // On suppose ici que les ajouts manuels (clic, drag, etc.) ont event.trigger === 'manual' ou similaire
-      // Si ce n'est pas le cas, il faut adapter selon la structure de l'event/properties
       const isManual = properties && properties.event && properties.event.trigger === 'manual';
       if (!isManual) {
         try {
           if (addedItems.length === 1) {
             try {
               const newItem = items.get(addedItems[0]);
-              if (newItem && newItem.start) timeline.moveTo(newItem.start);
+              // Scroll à la fin si end existe et est différente de start, sinon au début
+              if (
+                newItem &&
+                newItem.end &&
+                (!newItem.start || newItem.end !== newItem.start)
+              ) {
+                timeline.moveTo(newItem.end);
+              } else if (newItem && newItem.start) {
+                timeline.moveTo(newItem.start);
+              }
             } catch {
               try { timeline.fit(); } catch {}
             }
@@ -119,6 +126,20 @@ document.addEventListener("DOMContentLoaded", () => {
     // Si besoin, ajouter une détection plus fine selon properties/event
     // Ici, on ne scroll que lors d'une update programmée
     // (sinon, commenter ou supprimer ce bloc pour désactiver tout scroll auto sur update)
+    // Scroll à la vraie date de fin après update (si end est bien défini et différente de start)
+    const isManualUpdate = properties && properties.event && properties.event.trigger === 'manual';
+    if (!isOverlapMarker && updatedItems.length === 1 && !isManualUpdate) {
+      const updatedItem = items.get(updatedItems[0]);
+      setTimeout(() => {
+        if (
+          updatedItem &&
+          updatedItem.end &&
+          (!updatedItem.start || updatedItem.end !== updatedItem.start)
+        ) {
+          timeline.moveTo(updatedItem.end);
+        }
+      }, 50);
+    }
 
     // Detecter les chevauchements apres modification
     if (!isOverlapMarker && !isDetectingOverlaps) {
