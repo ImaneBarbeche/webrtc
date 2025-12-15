@@ -12,7 +12,10 @@ import { groupsData } from "./timelineData.js";
 import { setupInteractions } from "./timelineInteractions.js";
 import { setupVerticalBar } from "./verticalBar.js";
 import { scheduleRedraw } from "./timelineUtils.js";
-import { detectAndShowOverlaps, initOverlapDetection } from "./overlapDetection.js";
+import {
+  detectAndShowOverlaps,
+  initOverlapDetection,
+} from "./overlapDetection.js";
 import { setupChapterToggle } from "./chapterToggle.js";
 
 // ===============================
@@ -62,10 +65,14 @@ document.addEventListener("DOMContentLoaded", () => {
   items.on("add", (event, properties) => {
     // Ignorer les marqueurs de chevauchement pour eviter la boucle infinie
     const addedItems = properties?.items || [];
-    const isOverlapMarker = addedItems.some(id => id.toString().startsWith("__overlap_"));
+    const isOverlapMarker = addedItems.some((id) =>
+      id.toString().startsWith("__overlap_")
+    );
     // Ignorer aussi les gaps visuels (créés automatiquement) pour éviter le fit
-    const isGapMarker = addedItems.some(id => id.toString().startsWith("gap-"));
-    
+    const isGapMarker = addedItems.some((id) =>
+      id.toString().startsWith("gap-")
+    );
+
     if (!isOverlapMarker && !isGapMarker) {
       try {
         // Si un seul item est ajouté (cas d'ajout d'un épisode),
@@ -89,9 +96,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       } catch {}
     }
-    
+
     scheduleRedraw(timeline);
-    
+
     // Detecter les chevauchements (sauf si c'est un marqueur ou si deja en cours)
     if (!isOverlapMarker && !isDetectingOverlaps) {
       isDetectingOverlaps = true;
@@ -105,10 +112,27 @@ document.addEventListener("DOMContentLoaded", () => {
   items.on("update", (event, properties) => {
     // Ignorer les marqueurs de chevauchement
     const updatedItems = properties?.items || [];
-    const isOverlapMarker = updatedItems.some(id => id.toString().startsWith("__overlap_"));
-    
+    const isOverlapMarker = updatedItems.some((id) =>
+      id.toString().startsWith("__overlap_")
+    );
+
     scheduleRedraw(timeline);
-    
+    // Scroll à la vraie date de fin après update
+    if (!isOverlapMarker && updatedItems.length === 1) {
+      const updatedItem = items.get(updatedItems[0]);
+      setTimeout(() => {
+        if (
+          updatedItem &&
+          updatedItem.end &&
+          (!updatedItem.start || updatedItem.end !== updatedItem.start)
+        ) {
+          timeline.moveTo(updatedItem.end);
+        } else if (updatedItem && updatedItem.start) {
+          timeline.moveTo(updatedItem.start);
+        }
+      }, 50);
+    }
+
     // Detecter les chevauchements apres modification
     if (!isOverlapMarker && !isDetectingOverlaps) {
       isDetectingOverlaps = true;
@@ -122,8 +146,10 @@ document.addEventListener("DOMContentLoaded", () => {
   items.on("remove", (event, properties) => {
     // Ignorer les marqueurs de chevauchement
     const removedItems = properties?.items || [];
-    const isOverlapMarker = removedItems.some(id => id.toString().startsWith("__overlap_"));
-    
+    const isOverlapMarker = removedItems.some((id) =>
+      id.toString().startsWith("__overlap_")
+    );
+
     // Detecter les chevauchements apres suppression
     if (!isOverlapMarker && !isDetectingOverlaps) {
       isDetectingOverlaps = true;
@@ -139,13 +165,13 @@ document.addEventListener("DOMContentLoaded", () => {
   // Interactions et barre verticale
   setupInteractions(timeline, utils);
   setupVerticalBar(timeline, stepSize);
-  
+
   // Resume
   setupSummaryHandlers({ summaryContainer, viewSummaryBtn, closeSummaryBtn });
-  
+
   // Toggle chapitres
   setupChapterToggle(toggleChaptersBtn, timeline);
-  
+
   // Landmarks init
   activateInitialLandmarks(groups);
 
@@ -153,7 +179,9 @@ document.addEventListener("DOMContentLoaded", () => {
   try {
     let birthYearStored = localStorage.getItem("birthYear");
     if (!birthYearStored) {
-      const answeredRaw = localStorage.getItem("lifestories_answered_questions");
+      const answeredRaw = localStorage.getItem(
+        "lifestories_answered_questions"
+      );
       if (answeredRaw) {
         try {
           const answeredArr = JSON.parse(answeredRaw);
@@ -174,7 +202,11 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     if (birthYearStored) setBirthYear(birthYearStored);
     // Ensure the birth-year button has its click listener after reload
-    try { setupBirthYearButton(); } catch (e) { /* ignore */ }
+    try {
+      setupBirthYearButton();
+    } catch (e) {
+      /* ignore */
+    }
   } catch (e) {}
 
   setupZoomNavigation({
