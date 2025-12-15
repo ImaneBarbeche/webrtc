@@ -132,14 +132,6 @@ export const surveyMachine = createMachine({
         return updates;
       })
     },
-    ADD_MANUAL_EPISODE: {
-      actions: assign({
-        lastEpisode: ({ context, event }) => {
-          const { content, start, end, group } = event;
-          return ajouterEpisode(content, start, end, group);
-        }
-      })
-    },
   },
   states: {
     askBirthYear: {

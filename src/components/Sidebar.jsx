@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { House, NotebookText, CalendarRange, Columns2, PanelLeft, PanelRight } from 'lucide-react';
-import { ManualEpisodeModal } from './ManualEpisodeModal.jsx';
 
 
 function Sidebar() {
@@ -109,7 +108,6 @@ function Sidebar() {
           }, 100);
         }
         break;
-        break;
     }
   };
 
@@ -175,22 +173,7 @@ function Sidebar() {
             {isOpen && <span className="nav-text">Split View</span>}
           </button>
         </nav>
-        {/* Nouveau bouton */}
-        <button 
-          className="nav-button"
-          onClick={() => setIsModalOpen(true)}
-          title="Ajouter un épisode"
-        >
-          <span className="nav-icon">+</span>
-          {isOpen && <span className="nav-text">Ajouter épisode</span>}
-        </button>
       </div>
-      
-      {/* Le modal */}
-      <ManualEpisodeModal 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
-      />
       </div>
   );
 }

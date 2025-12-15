@@ -277,10 +277,6 @@ h2, h3, h4 {
   background-color: #eee;
 }
 
-/* Ensure global dev-mode toggle lucide icon is white and sized */
-#devmode-toggle-global {
-    color: #ffffff;
-}
 
 #devmode-toggle-global i[data-lucide],
 #devmode-toggle-global svg {
@@ -290,4 +286,21 @@ h2, h3, h4 {
     width: 20px;
     height: 20px;
     display: inline-block;
+}
+
+
+#devmode-toggle-global {
+     position: fixed;
+        top: 8px;
+        right: 8px;
+        z-index: 2000;
+        width: 44px;
+        height: 44px;
+        border-radius: 8px;
+        background: var(--primary-dark);
+        color: #ffffff;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
 }

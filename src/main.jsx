@@ -31,7 +31,7 @@ function showOnboardingView() {
 	const lifestories = document.getElementById('lifestoriesContainer');
 	if (lifestories) lifestories.style.display = 'none';
 	const formActions = document.getElementById('form-actions-root');
-	formActions? formActions.style.display = 'none' : '';
+	formActions? formActions.style.display = 'block' : '';
 }
 
 document.addEventListener('DOMContentLoaded', () => {
