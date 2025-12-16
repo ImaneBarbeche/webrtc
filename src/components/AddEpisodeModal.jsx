@@ -8,6 +8,8 @@ import { ajouterEpisode, ajouterEvenement } from "../js/episodes/episodes.js";
 
 // Fonctions pour récupérer les données
 const getTrajectories = () => {
+  const test = groupsData.filter((group) => group.nestedGroups);
+  console.log(test);
   return groupsData.filter((group) => group.nestedGroups);
 };
 
@@ -164,58 +166,42 @@ function AddEpisodeModal({ onClose }) {
             />
           </label>
         </div>
-        {trajectories.map((trajectory) => (
-          <label key={trajectory.id}>
-            <span className="secondary-button">{trajectory.contentText}</span>
-            <input
-              type="radio"
-              name="trajectory"
-              value={trajectory.id}
-              checked={selectedTrajectoryId === trajectory.id}
-              onChange={() => handleTrajectoryChange(trajectory.id)}
-            />
-          </label>
-        ))}
-        {/* <label>
-          <select
-            value={selectedTrajectoryId}
-            onChange={handleTrajectoryChange}
-          >
-            {trajectories.map((trajectory) => (
-              <option value={trajectory.id} key={trajectory.id}>
-                {trajectory.contentText}
-              </option>
-            ))}
-          </select>
-        </label> */}
-        {attributes.map((attribute) => (
-          <label key={attribute.id}>
-            <span className="secondary-button">{attribute.contentText}</span>
-            <input
-              type="radio"
-              name="attribute"
-              value={attribute.id}
-              checked={selectedAttributeId === attribute.id}
-              onChange={() => handleAttributeChange(attribute.id)}
-            />
-          </label>
-        ))}
-        <label>
-          {/* <span>
-                        Attribut
-                    </span> */}
-          {/* <select
-            value={selectedAttributeId}
-            onChange={handleAttributeChange}
-            className="secondary-button"
-          >
-            {attributes.map((attribute) => (
-              <option value={attribute.id} key={attribute.id}>
-                {attribute.contentText}
-              </option>
-            ))}
-          </select> */}
-        </label>
+        <div className={styles["radio-container-main"]}>
+          {trajectories.map((trajectory) => (
+            <label
+              key={trajectory.id}
+              className={styles["radio-label"]}
+              data-color={trajectory.className}
+            >
+              <span>{trajectory.contentText}</span>
+              <input
+                type="radio"
+                name="trajectory"
+                value={trajectory.id}
+                checked={selectedTrajectoryId === trajectory.id}
+                onChange={() => handleTrajectoryChange(trajectory.id)}
+              />
+            </label>
+          ))}
+        </div>
+        <div className={styles["radio-container-main"]}>
+          {attributes.map((attribute) => (
+            <label
+              key={attribute.id}
+              className={styles["radio-label"]}
+              //   data-color={trajectory.className}
+            >
+              <span>{attribute.contentText}</span>
+              <input
+                type="radio"
+                name="attribute"
+                value={attribute.id}
+                checked={selectedAttributeId === attribute.id}
+                onChange={() => handleAttributeChange(attribute.id)}
+              />
+            </label>
+          ))}
+        </div>
         {selectedType === "episode" ? (
           <div>
             <label>
@@ -265,7 +251,7 @@ function AddEpisodeModal({ onClose }) {
         )}
         <div className={styles["btn-container"]}>
           <button
-            className="secondary-button"
+            className="secondary-button filled"
             onClick={() => document.getElementById("episode_modal").close()}
           >
             Cancel
