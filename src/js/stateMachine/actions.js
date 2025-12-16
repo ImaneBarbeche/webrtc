@@ -247,7 +247,7 @@ export const addCalendarEpisode = assign({
       content = event.commune;
     } else if (event.statut_res) {
       content = event.statut_res;
-    } else if (event.type === "OUI" && context.group === 12) {
+    } else if (event.type === "YES" && context.group === 12) {
       content = "Logement unique";
     } else if (
       context.group === 12 &&
