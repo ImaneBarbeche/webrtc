@@ -121,25 +121,6 @@ document.addEventListener("DOMContentLoaded", () => {
     );
 
     scheduleRedraw(timeline);
-    // Scroll à la vraie date de fin après update
-    // Désactive le scroll automatique lors d'une update manuelle (drag, clic, etc.)
-    // Si besoin, ajouter une détection plus fine selon properties/event
-    // Ici, on ne scroll que lors d'une update programmée
-    // (sinon, commenter ou supprimer ce bloc pour désactiver tout scroll auto sur update)
-    // Scroll à la vraie date de fin après update (si end est bien défini et différente de start)
-    const isManualUpdate = properties && properties.event && properties.event.trigger === 'manual';
-    if (!isOverlapMarker && updatedItems.length === 1 && !isManualUpdate) {
-      const updatedItem = items.get(updatedItems[0]);
-      setTimeout(() => {
-        if (
-          updatedItem &&
-          updatedItem.end &&
-          (!updatedItem.start || updatedItem.end !== updatedItem.start)
-        ) {
-          timeline.moveTo(updatedItem.end);
-        }
-      }, 50);
-    }
 
     // Detecter les chevauchements apres modification
     if (!isOverlapMarker && !isDetectingOverlaps) {
