@@ -601,7 +601,7 @@
 /* More specific selector to override .birth-year-btn from app.css */
 #birth-year.birth-year-btn,
 #birth-year {
-  position: relative;
+  /* position: relative;
   display: inline-grid;
   place-items: center;
   min-width: 44px;
@@ -610,7 +610,7 @@
   background: var(--primary-grey);
   color: #000000 !important;
   cursor: pointer;
-  border: none;
+  border: none; */
 }
 
 /* Target both injected <svg> and <i class="lucide"> placeholders */
@@ -625,12 +625,13 @@
 
 .birth-year-badge {
   position: absolute;
-  top: -6px;
-  right: -6px;
-  background: linear-gradient(180deg, #f8d8d4, #f0a599);
+  top: -0.5rem;
+  left: 1rem;
+  /* background: linear-gradient(180deg, #f8d8d4, #f0a599); */
+  background-color: var(--primary-light);
   color: var(--primary-dark);
-  font-weight: 700;
-  font-size: 0.72rem;
+  font-weight: 400;
+  font-size: 0.7rem;
   padding: 2px 6px;
   border-radius: 999px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
