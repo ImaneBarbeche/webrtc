@@ -137,13 +137,19 @@ export function sendEvent(eventData, allowAdvance = true) {
       updateEpisode: updateEpisode,
     };
 
+    // Propager un episodeId si fourni (utilisé pour cibler la modification)
+    if (eventData && eventData.episodeId) {
+      updateEvent.episodeId = eventData.episodeId;
+    }
+
     surveyService.send(updateEvent);
 
     if (syncEnabled && window.webrtcSync) {
       window.webrtcSync.sendEvent(updateEvent);
     }
 
-    return;
+    // Retourner l'événement envoyé pour usage éventuel
+    return updateEvent;
   }
 
   // Envoyer localement
@@ -153,12 +159,26 @@ export function sendEvent(eventData, allowAdvance = true) {
   const currentStateBefore = surveyService.getSnapshot().value;
   surveyService.send(eventData);
 
-  // Sauvegarder la réponse dans l'historique
-  saveAnsweredQuestion(currentStateBefore, eventData);
-  
-  if (syncEnabled && window.webrtcSync) {
-    window.webrtcSync.sendEvent(eventData);
-  } else {
-    console.warn("WebRTC non disponible pour envoi");
+  // Tenter de retourner l'épisode créé le plus récent (lastEpisode) pour que
+  // l'appelant puisse le référencer. Sauvegarder la réponse dans l'historique.
+  try {
+    const snapshot = surveyService.getSnapshot();
+    saveAnsweredQuestion(currentStateBefore, eventData);
+    if (snapshot && snapshot.context && snapshot.context.lastEpisode) {
+      // Envoyer l'événement via WebRTC aussi
+      if (syncEnabled && window.webrtcSync) {
+        window.webrtcSync.sendEvent(eventData);
+      } else {
+        console.warn("WebRTC non disponible pour envoi");
+      }
+      return snapshot.context.lastEpisode;
+    }
+  } catch (e) {
+    // en cas d'erreur, assurer la sauvegarde et l'envoi WebRTC
+    saveAnsweredQuestion(currentStateBefore, eventData);
+    if (syncEnabled && window.webrtcSync) {
+      window.webrtcSync.sendEvent(eventData);
+    }
+    console.warn('sendEvent: erreur lors du retour de lastEpisode', e);
   }
 }

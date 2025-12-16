@@ -63,8 +63,18 @@ export const surveyMachine = createMachine({
               episodeToUpdate = statusEpisodes[statusEpisodes.length - 1]; // Prendre le dernier
             }
           } else {
-            // Pour les autres, utiliser lastEpisode
-            episodeToUpdate = context.lastEpisode;
+            // Si l'événement fournit explicitement un episodeId, l'utiliser
+            if (event.episodeId) {
+              try {
+                const candidate = items.get(event.episodeId);
+                if (candidate) episodeToUpdate = candidate;
+              } catch (e) {
+                console.warn('UPDATE_ANSWER: episodeId fourni mais introuvable', event.episodeId);
+              }
+            }
+
+            // Pour les autres, utiliser lastEpisode comme fallback
+            if (!episodeToUpdate) episodeToUpdate = context.lastEpisode;
           }
           
           if (episodeToUpdate) {

@@ -295,7 +295,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (responseType === "none") {
       questionDiv.classList.add("survey-complete");
       container.appendChild(questionDiv);
-      scrollToBottom(container);
+      // scrollToBottom(container);
       return;
     }
 
@@ -337,28 +337,35 @@ document.addEventListener("DOMContentLoaded", async () => {
           getIsHost()
         );
       } else if (state.value === "askHousingArrivalAge") {
-        const pairId = `pair_housing_c${
-          state.context.currentCommuneIndex || 0
-        }_l${state.context.currentLogementIndex || 0}`;
+        const pairId = `pair_housing_c${state.context.currentCommuneIndex || 0}_l${state.context.currentLogementIndex || 0}`;
         const existing = container.querySelector(`[data-pair-id="${pairId}"]`);
         if (existing) return;
 
-        renderPairedDateInputs(
-          questionDiv,
-          state,
-          {
-            label: "Arrivée",
-            eventType: "ANSWER_HOUSING_ARRIVAL",
-            eventKey: "start",
-          },
-          {
-            label: "Départ",
-            eventType: "ANSWER_HOUSING_DEPARTURE",
-            eventKey: "end",
-          },
-          sendEvent,
-          getIsHost()
-        );
+        import("./renderPairedYearAgeInputs.js").then((module) => {
+          const { renderPairedYearAgeInputs } = module;
+          renderPairedYearAgeInputs(
+            questionDiv,
+            state,
+            {
+              yearLabel: "Année d'arrivée",
+              yearEventType: "ANSWER_HOUSING_ARRIVAL",
+              yearEventKey: "start",
+              ageLabel: "Âge à l'arrivée",
+              ageEventType: "ANSWER_HOUSING_ARRIVAL_AGE",
+              ageEventKey: "arrival_age"
+            },
+            {
+              yearLabel: "Année de départ",
+              yearEventType: "ANSWER_HOUSING_DEPARTURE",
+              yearEventKey: "end",
+              ageLabel: "Âge au départ",
+              ageEventType: "ANSWER_HOUSING_DEPARTURE_AGE",
+              ageEventKey: "departure_age"
+            },
+            sendEvent,
+            getIsHost()
+          );
+        });
       } // NOUVEAU: PAIRES DE STATUTS RÉSIDENTIELS
       else if (state.value === "askHousingOccupationStatusEntry") {
         const pairId = `pair_status_c${state.context.currentCommuneIndex || 0}_l${state.context.currentLogementIndex || 0}`;

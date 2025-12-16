@@ -60,8 +60,11 @@ export function modifierEpisode(id, modifications, syncViaWebRTC = false){
         }
         // If string: YYYY, YYYY-MM, YYYY-MM-DD, or ISO
         if (typeof year === 'string') {
+            // YYYY
             if (/^\d{4}$/.test(year)) return new Date(`${year}-01-01`);
-            if (/^\d{4}-\d{2}$/.test(year)) return new Date(`${year}-01-01`);
+            // YYYY-MM -> treat as first of month
+            if (/^\d{4}-\d{2}$/.test(year)) return new Date(`${year}-01`);
+            // YYYY-MM-DD or ISO full -> use the date portion
             if (/^\d{4}-\d{2}-\d{2}/.test(year)) return new Date(year.split('T')[0]);
             // Fallback: try Date parse
             const d = new Date(year);
