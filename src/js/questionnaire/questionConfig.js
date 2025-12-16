@@ -48,7 +48,7 @@ export function getQuestionConfig(state) {
       const commune = state.context.communes?.[state.context.currentCommuneIndex] || "cette commune";
       questionText = `Avez-vous toujours vécu à ${commune} ?`;
       responseType = "choice";
-      choices = ["Yes", "No"];
+      choices = ["Oui", "Non"];
       eventKey = "alwaysLivedInCommune";
       break;
     }
@@ -91,7 +91,7 @@ export function getQuestionConfig(state) {
       const commune = state.context.communes?.[state.context.currentCommuneIndex] || "cette commune";
       questionText = `Avez-vous toujours vécu dans le même logement à ${commune} ?`;
       responseType = "choice";
-      choices = ["Yes", "No"];
+      choices = ["Oui", "Non"];
       eventKey = "response";
       break;
     }

@@ -42,8 +42,8 @@ const eventToStateMap = {
   ANSWER_DEPARTEMENT: "askDepartementOrPays",
 
   // Commune
-  YES: null, // YES/NO peuvent venir de plusieurs états
-  NO: null,
+  OUI: null, // OUI/NON peuvent venir de plusieurs états
+  NON: null,
   ANSWER_MULTIPLE_COMMUNES: "askMultipleCommunes",
   ANSWER_COMMUNE_ARRIVAL_YEAR: "askCommuneArrivalYear",
   ANSWER_COMMUNE_DEPARTURE_YEAR: "askCommuneDepartureYear",

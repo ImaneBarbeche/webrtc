@@ -88,7 +88,7 @@ export const surveyMachine = createMachine({
         } else if (event.key === 'commune') {
           // Pour les communes, modifier l'épisode même si updateEpisode est false
           // IMPORTANT: Ne pas modifier si la valeur est Yes/No (ce n'est pas un nom de commune)
-          if (event.value && event.value !== 'Yes' && event.value !== 'No') {
+          if (event.value && event.value !== 'Oui' && event.value !== 'Non') {
             const allItems = items.get();
             const communeEpisodes = allItems.filter(item => item.group === 13);
             if (communeEpisodes.length > 0) {
@@ -194,7 +194,7 @@ export const surveyMachine = createMachine({
 
     askAlwaysLivedInCommune: {
       on: {
-        YES: {
+        OUI: {
           actions: [
             {
               type: 'modifyCalendarEpisode', params: {end: 'timeline_end'}
@@ -203,7 +203,7 @@ export const surveyMachine = createMachine({
           ],
           target: 'askSameHousingInCommune'
         },
-        NO: 'askBirthCommuneDepartureYear'
+        NON: 'askBirthCommuneDepartureYear'
       }
     },
 
@@ -266,7 +266,7 @@ export const surveyMachine = createMachine({
       entry: [
       ],
       on: {
-        YES: {
+        OUI: {
           actions: [
             assign({
               logements: ({context}) => {
@@ -278,7 +278,7 @@ export const surveyMachine = createMachine({
           ],
           target: 'askHousingOccupationStatusEntry'
         },
-        NO: 'askMultipleHousings'
+        NON: 'askMultipleHousings'
       }
     },
 
