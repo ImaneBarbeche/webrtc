@@ -4,46 +4,52 @@
  */
 /* @import url('https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,100..900;1,100..900&display=swap'); */
 
-
-
 @font-face {
-  font-family: 'Raleway';
+  font-family: "Raleway";
   /* src: url('/src/assets/fonts/Raleway-VariableFont_wght.ttf'); */
-  src: url('../assets/fonts/Raleway-VariableFont_wght.ttf')
+  src: url("../assets/fonts/Raleway-VariableFont_wght.ttf");
 }
 
 :root {
-    /* --primary-beige: #F6F1E8; */
-    --primary-beige: white;
-    --primary-beige: #FDFAF4;
-    --primary-dark: #2E2E2E;
-    --primary-light: white;
-    --primary-grey: #FAFAFA;
-    --primary-grey: #f2f2f2;
-    --primary-grey: color-mix(in srgb, var(--primary-light) 60%, transparent);
-    --secondary-grey: color-mix(in srgb, var(--primary-dark) 15%, transparent);
-    --muted-beige: color-mix(in srgb, var(--primary-beige) 60%, transparent);
-    /* --primary-grey: #f4e6da; */
-    /* --primary-grey: rgb(201, 135, 135); */
+  /* --primary-beige: #F6F1E8; */
+  --primary-beige: white;
+  --primary-beige: #fdfaf4;
+  --primary-dark: #2e2e2e;
+  --primary-light: white;
+  --primary-grey: #fafafa;
+  --primary-grey: #f2f2f2;
+  --primary-grey: color-mix(in srgb, var(--primary-light) 60%, transparent);
+  --secondary-grey: color-mix(in srgb, var(--primary-dark) 15%, transparent);
+  --muted-beige: color-mix(in srgb, var(--primary-beige) 60%, transparent);
+  /* --primary-grey: #f4e6da; */
+  /* --primary-grey: rgb(201, 135, 135); */
 }
 
 * {
-    user-select: none;
+  user-select: none;
 }
 
 body {
-    background-color: var(--primary-beige);
-    /* for the summary modal */
-    /* overflow-y: hidden; */
-    /* padding: 1rem; */
-    /* margin: 1rem; */
+  background-color: var(--primary-beige);
+  /* for the summary modal */
+  /* overflow-y: hidden; */
+  /* padding: 1rem; */
+  /* margin: 1rem; */
 }
 
-h2, h3, h4 {
-    font-family: 'Raleway', serif;
-    font-weight: 400;
-    /* font-size: 3rem; */
-    /* font-size: 2rem; */
+h2,
+h3,
+h4 {
+  font-family: "Raleway", serif;
+  font-weight: 400;
+  /* font-size: 3rem; */
+  /* font-size: 2rem; */
+}
+
+input,
+button,
+select {
+  -webkit-tap-highlight-color: transparent;
 }
 
 /* ========================================
@@ -52,30 +58,29 @@ h2, h3, h4 {
 
 /* Container onboarding (écran de connexion WebRTC) */
 .onboarding-container {
-    position: relative;
-    z-index: 1000;
+  position: relative;
+  z-index: 1000;
 }
-
 
 /* Masquer l'onboarding quand on passe à LifeStories */
 .onboarding-container.hidden {
-    display: none !important;
-    visibility: hidden !important;
-    opacity: 0 !important;
-    pointer-events: none !important;
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
 }
 
 /* Container LifeStories (questionnaire + calendrier) */
 .lifestories-container {
-    /* display: none;  */
-    position: relative;
-    width: 100%;
-    height: 100vh;
+  /* display: none;  */
+  position: relative;
+  width: 100%;
+  height: 100vh;
 }
 
 /* Afficher LifeStories quand actif */
 .lifestories-container.active {
-    display: block;
+  display: block;
 }
 
 /* ========================================
@@ -84,17 +89,17 @@ h2, h3, h4 {
 
 /* Mode viewer : masquer le questionnaire */
 .viewer-mode #questionnaire {
-    display: none !important;
+  display: none !important;
 }
 
 /* Ajuster la timeline en plein écran */
 .viewer-mode #trajectories {
-    width: 100% !important;
+  width: 100% !important;
 }
 
 /* Masquer le séparateur Split.js en mode viewer */
 .viewer-mode .gutter {
-    display: none !important;
+  display: none !important;
 }
 
 /* ========================================
@@ -102,130 +107,138 @@ h2, h3, h4 {
    ======================================== */
 
 #webrtc-status {
-    position: fixed;
-    top: 10px;
-    right: 10px;
-    padding: 8px 12px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: bold;
-    z-index: 1000;
-    display: flex;
-    align-items: center;
-    gap: 6px;
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  padding: 8px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: bold;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 #webrtc-status.connected {
-    background-color: #28a745;
-    color: white;
+  background-color: #28a745;
+  color: white;
 }
 
 #webrtc-status.disconnected {
-    background-color: #dc3545;
-    color: white;
+  background-color: #dc3545;
+  color: white;
 }
 
 #webrtc-status.standalone {
-    background-color: #6c757d;
-    color: white;
+  background-color: #6c757d;
+  color: white;
 }
 
-
 #webrtc-status .dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background-color: white;
-    animation: pulse 2s ease-in-out infinite;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: white;
+  animation: pulse 2s ease-in-out infinite;
 }
 
 @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.3; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
 }
 
 /* Reconnect container - Overlay */
 #reconnect-container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px); /* Pour Safari */
-    z-index: 2000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    animation: fadeIn 0.3s ease-in-out;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px); /* Pour Safari */
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.3s ease-in-out;
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 #reconnect-container.hidden {
-    display: none;
+  display: none;
 }
 
 /* Carte de reconnexion */
 #reconnect-container > div {
-    background: white;
-    padding: 50px 60px;
-    border-radius: 20px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    text-align: center;
-    max-width: 450px;
-    animation: slideUp 0.3s ease-out;
+  background: white;
+  padding: 50px 60px;
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  max-width: 450px;
+  animation: slideUp 0.3s ease-out;
 }
 
 @keyframes slideUp {
-    from {
-        transform: translateY(20px);
-        opacity: 0;
-    }
-    to {
-        transform: translateY(0);
-        opacity: 1;
-    }
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 #reconnect-container img {
-    width: 250px;
-    height: auto;
-    margin-bottom: 30px;
-    opacity: 0.9;
+  width: 250px;
+  height: auto;
+  margin-bottom: 30px;
+  opacity: 0.9;
 }
 
 #reconnect-container span {
-    display: block;
-    font-size: 14px;
-    color: #666;
-    margin-bottom: 30px;
-    line-height: 1.4;
-    font-weight: 400;
+  display: block;
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 30px;
+  line-height: 1.4;
+  font-weight: 400;
 }
 
 .reconnect-button {
-    background-color: var(--primary-dark);
-    color: white;
-    border: none;
-    padding: 12px 30px;
-    font-size: 14px;
-    font-weight: 500;
-    border-radius: 20px;
-    cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  background-color: var(--primary-dark);
+  color: white;
+  border: none;
+  padding: 12px 30px;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .reconnect-button:hover {
-    transform: translateY(-2px);
+  transform: translateY(-2px);
 }
 
 .reconnect-button:active {
-    transform: translateY(0);
+  transform: translateY(0);
 }
 
 /* ========================================
@@ -234,30 +247,29 @@ h2, h3, h4 {
 
 /* Background area pour signaler les incohérences (chevauchements d'épisodes) */
 .vis-item.vis-background.overlap-warning {
-    background-color: rgba(220, 53, 69, 0.25); /* Rouge semi-transparent */
-    background: repeating-linear-gradient(
-        45deg,
-        rgba(220, 53, 69, 0.15),
-        rgba(220, 53, 69, 0.15) 10px,
-        rgba(220, 53, 69, 0.25) 10px,
-        rgba(220, 53, 69, 0.25) 20px
-    );
-    border-left: 2px solid rgba(220, 53, 69, 0.6);
-    border-right: 2px solid rgba(220, 53, 69, 0.6);
-    z-index: 0 !important;
+  background-color: rgba(220, 53, 69, 0.25); /* Rouge semi-transparent */
+  background: repeating-linear-gradient(
+    45deg,
+    rgba(220, 53, 69, 0.15),
+    rgba(220, 53, 69, 0.15) 10px,
+    rgba(220, 53, 69, 0.25) 10px,
+    rgba(220, 53, 69, 0.25) 20px
+  );
+  border-left: 2px solid rgba(220, 53, 69, 0.6);
+  border-right: 2px solid rgba(220, 53, 69, 0.6);
+  z-index: 0 !important;
 }
 
 /* Tooltip au survol */
 .vis-item.vis-background.overlap-warning:hover {
-    background: repeating-linear-gradient(
-        45deg,
-        rgba(220, 53, 69, 0.25),
-        rgba(220, 53, 69, 0.25) 10px,
-        rgba(220, 53, 69, 0.35) 10px,
-        rgba(220, 53, 69, 0.35) 20px
-    );
+  background: repeating-linear-gradient(
+    45deg,
+    rgba(220, 53, 69, 0.25),
+    rgba(220, 53, 69, 0.25) 10px,
+    rgba(220, 53, 69, 0.35) 10px,
+    rgba(220, 53, 69, 0.35) 20px
+  );
 }
-
 
 .birth-year-btn {
   display: inline-flex;
@@ -269,7 +281,7 @@ h2, h3, h4 {
   background-color: #f9f9f9;
   cursor: pointer;
   font-size: 14px;
-    position: relative;
+  position: relative;
   z-index: 10;
 }
 
@@ -277,30 +289,28 @@ h2, h3, h4 {
   background-color: #eee;
 }
 
-
 #devmode-toggle-global i[data-lucide],
 #devmode-toggle-global svg {
-    stroke: currentColor !important;
-    fill: none !important;
-    color: inherit !important;
-    width: 20px;
-    height: 20px;
-    display: inline-block;
+  stroke: currentColor !important;
+  fill: none !important;
+  color: inherit !important;
+  width: 20px;
+  height: 20px;
+  display: inline-block;
 }
 
-
 #devmode-toggle-global {
-     position: fixed;
-        top: 8px;
-        right: 8px;
-        z-index: 2000;
-        width: 44px;
-        height: 44px;
-        border-radius: 8px;
-        background: var(--primary-dark);
-        color: #ffffff;
-        border: none;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+  position: fixed;
+  top: 8px;
+  right: 8px;
+  z-index: 2000;
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  background: var(--primary-dark);
+  color: #ffffff;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
