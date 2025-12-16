@@ -13,6 +13,8 @@ import { sendEvent, getIsHost } from "./eventHandlers.js";
 import { enableWebRTCSync, processPendingItems } from "./webrtcSync.js";
 import { displayPreviousAnswers } from "./historyDisplay.js";
 import { initResetHandler } from "./resetHandler.js";
+import { renderPairedYearAgeInputs } from "./renderPairedYearAgeInputs.js";
+import { renderPairedStatusDropdowns } from "./renderPairedStatusDropdowns.js";
 import { getGapCount, getGapList } from "../timeline/gapDetection.js";
 import { getOverlaps } from "../timeline/overlapDetection.js";
 import { groupsData } from "../timeline/timelineData.js";
@@ -341,55 +343,49 @@ document.addEventListener("DOMContentLoaded", async () => {
         const existing = container.querySelector(`[data-pair-id="${pairId}"]`);
         if (existing) return;
 
-        import("./renderPairedYearAgeInputs.js").then((module) => {
-          const { renderPairedYearAgeInputs } = module;
-          renderPairedYearAgeInputs(
-            questionDiv,
-            state,
-            {
-              yearLabel: "Année d'arrivée",
-              yearEventType: "ANSWER_HOUSING_ARRIVAL",
-              yearEventKey: "start",
-              ageLabel: "Âge à l'arrivée",
-              ageEventType: "ANSWER_HOUSING_ARRIVAL_AGE",
-              ageEventKey: "arrival_age"
-            },
-            {
-              yearLabel: "Année de départ",
-              yearEventType: "ANSWER_HOUSING_DEPARTURE",
-              yearEventKey: "end",
-              ageLabel: "Âge au départ",
-              ageEventType: "ANSWER_HOUSING_DEPARTURE_AGE",
-              ageEventKey: "departure_age"
-            },
-            sendEvent,
-            getIsHost()
-          );
-        });
+        renderPairedYearAgeInputs(
+          questionDiv,
+          state,
+          {
+            yearLabel: "Année d'arrivée",
+            yearEventType: "ANSWER_HOUSING_ARRIVAL",
+            yearEventKey: "start",
+            ageLabel: "Âge à l'arrivée",
+            ageEventType: "ANSWER_HOUSING_ARRIVAL_AGE",
+            ageEventKey: "arrival_age",
+          },
+          {
+            yearLabel: "Année de départ",
+            yearEventType: "ANSWER_HOUSING_DEPARTURE",
+            yearEventKey: "end",
+            ageLabel: "Âge au départ",
+            ageEventType: "ANSWER_HOUSING_DEPARTURE_AGE",
+            ageEventKey: "departure_age",
+          },
+          sendEvent,
+          getIsHost()
+        );
       } // NOUVEAU: PAIRES DE STATUTS RÉSIDENTIELS
       else if (state.value === "askHousingOccupationStatusEntry") {
         const pairId = `pair_status_c${state.context.currentCommuneIndex || 0}_l${state.context.currentLogementIndex || 0}`;
         const existing = container.querySelector(`[data-pair-id="${pairId}"]`);
         if (existing) return;
-        import("./renderPairedStatusDropdowns.js").then((module) => {
-          const { renderPairedStatusDropdowns } = module;
-          renderPairedStatusDropdowns(
-            questionDiv,
-            state,
-            {
-              label: "Statut à l'arrivée",
-              eventType: "ANSWER_STATUS_ENTRY",
-              eventKey: "statut_res"
-            },
-            {
-              label: "Statut au départ",
-              eventType: "ANSWER_STATUS_EXIT",
-              eventKey: "statut_res"
-            },
-            sendEvent,
-            getIsHost()
-          );
-        });
+        renderPairedStatusDropdowns(
+          questionDiv,
+          state,
+          {
+            label: "Statut à l'arrivée",
+            eventType: "ANSWER_STATUS_ENTRY",
+            eventKey: "statut_res",
+          },
+          {
+            label: "Statut au départ",
+            eventType: "ANSWER_STATUS_EXIT",
+            eventKey: "statut_res",
+          },
+          sendEvent,
+          getIsHost()
+        );
       } else {
         renderInputQuestion(
           questionDiv,
