@@ -4,6 +4,10 @@
   display: flex;
   gap: 10px;
   align-items: flex-end;
+  width: 100%;
+}
+.date-pair {
+  width: 100%;
 }
 
 .year-age-pair .year-field,
@@ -11,6 +15,23 @@
   flex: 1 1 0;
   display: flex;
   flex-direction: column;
+  width: 100%;
+}
+
+/* Ensure flex children can shrink and inputs take full width */
+.year-age-pair,
+.date-field,
+.year-age-pair .year-field,
+.year-age-pair .age-field {
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+.year-age-pair input[type="month"],
+.year-age-pair input[type="number"] {
+  display: block;
+  width: 100%;
+  min-width: 0;
 }
 
 .year-age-pair label {
@@ -51,4 +72,79 @@
     flex-direction: column;
     gap: 6px;
   }
+}
+
+/* Champs de date côte à côte */
+.date-pair {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin-top: 8px;
+}
+.date-pair .date-field {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+}
+.date-field-label {
+  font-size: 0.85rem;
+  margin-bottom: 6px;
+  color: #333;
+}
+
+@media (max-width: 600px) {
+  .date-pair {
+    flex-direction: column;
+  }
+}
+
+/* champs status résidentiel cote à cote */
+.text-pair {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin-top: 8px;
+}
+
+/* Strong overrides to ensure inputs fill columns and columns are equal */
+.date-pair {
+  display: flex;
+  gap: 12px;
+  align-items: stretch;
+  width: 100%;
+}
+
+.date-pair .date-field {
+  /* make each side take half the available width while allowing shrink/grow */
+  flex: 1 1 50%;
+  min-width: 0; /* critical to allow flex children to shrink on overflow */
+  box-sizing: border-box;
+}
+
+.year-age-pair {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+  width: 100%;
+}
+
+.year-age-pair .year-field,
+.year-age-pair .age-field {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.year-age-pair label {
+  display: block;
+}
+
+.year-age-pair input[type="month"],
+.year-age-pair input[type="number"] {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }

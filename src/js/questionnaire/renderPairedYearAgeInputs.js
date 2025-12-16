@@ -17,7 +17,6 @@ export function renderPairedYearAgeInputs(
   pair.style.display = 'flex';
   pair.style.flexDirection = 'column';
   pair.style.gap = '10px';
-  pair.style.width = '100%';
   // Prevent duplicate rendering elsewhere by setting a stable pair id
   try {
     const pairId = `pair_housing_c${(state && state.context && state.context.currentCommuneIndex) || 0}_l${(state && state.context && state.context.currentLogementIndex) || 0}`;
@@ -38,7 +37,6 @@ export function renderPairedYearAgeInputs(
     yearLabel.innerText = cfg.yearLabel || 'Année';
     const yearInput = document.createElement('input');
     yearInput.type = 'month';
-    yearInput.placeholder = 'MM-YYYY';
     yearInput.dataset.eventKey = cfg.yearEventKey;
     yearInput.dataset.eventType = cfg.yearEventType;
     yearInput.disabled = !isHost;
