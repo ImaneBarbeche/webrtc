@@ -433,12 +433,14 @@ button:hover {
   left: 2%;
   font-size: 0.8rem;
   font-weight: bold;
-  border-radius: 8px;
-  padding: 8px 16px;
-  margin-bottom: 12px;
+  /* max-width: 2rem; */
+  padding: .5rem;
+  /* border-radius: 8px; */
+  /* padding: 8px 16px; */
+  /* margin-bottom: 12px; */
   text-align: center;
   letter-spacing: 0.5px;
-  top: 1rem;
+  top: 0.5rem;
 }
 
 #birth-year i[data-lucide="cake"] {
