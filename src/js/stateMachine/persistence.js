@@ -79,9 +79,9 @@ export function saveAnsweredQuestion(state, eventData) {
       timestamp: new Date().toISOString()
     };
 
-    // Vérifier si une réponse existe déjà pour cette question
+    // Vérifier si une réponse existe déjà pour cette question (par state uniquement)
     const existingIndex = answeredQuestions.findIndex(
-      q => q.state === state || q.answer?.key === eventData.key
+      q => q.state === state
     );
 
     if (existingIndex >= 0) {

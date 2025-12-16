@@ -63,8 +63,18 @@ export const surveyMachine = createMachine({
               episodeToUpdate = statusEpisodes[statusEpisodes.length - 1]; // Prendre le dernier
             }
           } else {
-            // Pour les autres, utiliser lastEpisode
-            episodeToUpdate = context.lastEpisode;
+            // Si l'événement fournit explicitement un episodeId, l'utiliser
+            if (event.episodeId) {
+              try {
+                const candidate = items.get(event.episodeId);
+                if (candidate) episodeToUpdate = candidate;
+              } catch (e) {
+                console.warn('UPDATE_ANSWER: episodeId fourni mais introuvable', event.episodeId);
+              }
+            }
+
+            // Pour les autres, utiliser lastEpisode comme fallback
+            if (!episodeToUpdate) episodeToUpdate = context.lastEpisode;
           }
           
           if (episodeToUpdate) {
@@ -78,7 +88,7 @@ export const surveyMachine = createMachine({
         } else if (event.key === 'commune') {
           // Pour les communes, modifier l'épisode même si updateEpisode est false
           // IMPORTANT: Ne pas modifier si la valeur est Yes/No (ce n'est pas un nom de commune)
-          if (event.value && event.value !== 'Yes' && event.value !== 'No') {
+          if (event.value && event.value !== 'Oui' && event.value !== 'Non') {
             const allItems = items.get();
             const communeEpisodes = allItems.filter(item => item.group === 13);
             if (communeEpisodes.length > 0) {
@@ -176,7 +186,7 @@ export const surveyMachine = createMachine({
 
     askAlwaysLivedInCommune: {
       on: {
-        YES: {
+        OUI: {
           actions: [
             {
               type: 'modifyCalendarEpisode', params: {end: 'timeline_end'}
@@ -185,7 +195,7 @@ export const surveyMachine = createMachine({
           ],
           target: 'askSameHousingInCommune'
         },
-        NO: 'askBirthCommuneDepartureYear'
+        NON: 'askBirthCommuneDepartureYear'
       }
     },
 
@@ -248,7 +258,7 @@ export const surveyMachine = createMachine({
       entry: [
       ],
       on: {
-        YES: {
+        OUI: {
           actions: [
             assign({
               logements: ({context}) => {
@@ -260,7 +270,7 @@ export const surveyMachine = createMachine({
           ],
           target: 'askHousingOccupationStatusEntry'
         },
-        NO: 'askMultipleHousings'
+        NON: 'askMultipleHousings'
       }
     },
 

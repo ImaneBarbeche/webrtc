@@ -7,11 +7,14 @@ import {
 import { renderYesNoQuestion } from "./choicesQuestions.js";
 import { renderInputListQuestion } from "./inputListQuestion.js";
 import { renderInputQuestion } from "./inputQuestion.js";
+import { renderPairedDateInputs } from "./inputQuestion.js";
 import { getQuestionConfig, updateQuestionText } from "./questionConfig.js";
 import { sendEvent, getIsHost } from "./eventHandlers.js";
 import { enableWebRTCSync, processPendingItems } from "./webrtcSync.js";
 import { displayPreviousAnswers } from "./historyDisplay.js";
 import { initResetHandler } from "./resetHandler.js";
+import { renderPairedYearAgeInputs } from "./renderPairedYearAgeInputs.js";
+import { renderPairedStatusDropdowns } from "./renderPairedStatusDropdowns.js";
 import { getGapCount, getGapList } from "../timeline/gapDetection.js";
 import { getOverlaps } from "../timeline/overlapDetection.js";
 import { groupsData } from "../timeline/timelineData.js";
@@ -34,8 +37,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   const gapBtn = document.createElement("button");
   gapBtn.id = "gap-counter-btn";
   const initialGapCount = getGapCount();
-  const initialOverlapCount = (typeof getOverlaps === 'function') ? getOverlaps().length : 0;
-  gapBtn.setAttribute("aria-label", `Périodes manquantes : ${initialGapCount} — Chevauchements : ${initialOverlapCount}`);
+  const initialOverlapCount =
+    typeof getOverlaps === "function" ? getOverlaps().length : 0;
+  gapBtn.setAttribute(
+    "aria-label",
+    `Périodes manquantes : ${initialGapCount} — Chevauchements : ${initialOverlapCount}`
+  );
   gapBtn.title = `Périodes manquantes : ${initialGapCount} — Chevauchements : ${initialOverlapCount}`;
   gapBtn.innerHTML = `
     <i data-lucide="triangle-alert" class="lucide gap-icon" aria-hidden="true"></i>
@@ -54,7 +61,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   gapBtn.addEventListener("click", () => {
     const gaps = getGapList();
-    const overlaps = (typeof getOverlaps === 'function') ? getOverlaps() : [];
+    const overlaps = typeof getOverlaps === "function" ? getOverlaps() : [];
 
     const overlay = document.createElement("div");
     overlay.className = "gap-modal-overlay";
@@ -90,13 +97,17 @@ document.addEventListener("DOMContentLoaded", async () => {
         ? `<div class="gap-modal-empty">Aucun chevauchement détecté.</div>`
         : `<ul class="overlap-list">
           ${overlaps
-            .map((ov) => `
+            .map(
+              (ov) => `
               <li>
-                <strong>${getGroupName(ov._originalGroup)}</strong> : ${new Date(
-                  ov.start
-                ).getFullYear()} → ${new Date(ov.end).getFullYear()}
+                <strong>${getGroupName(
+                  ov._originalGroup
+                )}</strong> : ${new Date(ov.start).getFullYear()} → ${new Date(
+                ov.end
+              ).getFullYear()}
               </li>
-            `)
+            `
+            )
             .join("")}
         </ul>`;
 
@@ -132,22 +143,23 @@ document.addEventListener("DOMContentLoaded", async () => {
     modal.appendChild(closeBtn);
     overlay.appendChild(modal);
     document.body.appendChild(overlay);
-    if (window.lucide && typeof window.lucide.createIcons === "function") window.lucide.createIcons();
+    if (window.lucide && typeof window.lucide.createIcons === "function")
+      window.lucide.createIcons();
   });
 
   const updateGapCounter = () => {
     const n = getGapCount();
-    const m = (typeof getOverlaps === 'function') ? getOverlaps().length : 0;
+    const m = typeof getOverlaps === "function" ? getOverlaps().length : 0;
     const gapBadge = gapBtn.querySelector(".gap-badge");
     const overlapBadge = gapBtn.querySelector(".overlap-badge");
     if (gapBadge) {
       gapBadge.textContent = String(n);
       if (n > 0 && gapBadge.animate) {
         try {
-          gapBadge.animate([
-            { transform: "scale(1.15)" },
-            { transform: "scale(1)" }
-          ], { duration: 220, easing: "ease-out" });
+          gapBadge.animate(
+            [{ transform: "scale(1.15)" }, { transform: "scale(1)" }],
+            { duration: 220, easing: "ease-out" }
+          );
         } catch (e) {
           // animation not supported — ignore
         }
@@ -157,10 +169,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       overlapBadge.textContent = String(m);
       if (m > 0 && overlapBadge.animate) {
         try {
-          overlapBadge.animate([
-            { transform: "scale(1.15)" },
-            { transform: "scale(1)" }
-          ], { duration: 220, easing: "ease-out" });
+          overlapBadge.animate(
+            [{ transform: "scale(1.15)" }, { transform: "scale(1)" }],
+            { duration: 220, easing: "ease-out" }
+          );
         } catch (e) {}
       }
     }
@@ -249,6 +261,27 @@ document.addEventListener("DOMContentLoaded", async () => {
       return; // Ne pas créer de nouvelle question
     }
 
+    // Si on est dans l'état de départ mais un bloc pair a déjà été rendu, éviter la duplication
+    if (state.value === "askCommuneDepartureYear") {
+      const pairId = `pair_commune_c${state.context.currentCommuneIndex || 0}`;
+      const existing = container.querySelector(`[data-pair-id="${pairId}"]`);
+      if (existing) return;
+    }
+    if (state.value === "askHousingDepartureAge") {
+      const pairId = `pair_housing_c${
+        state.context.currentCommuneIndex || 0
+      }_l${state.context.currentLogementIndex || 0}`;
+      const existing = container.querySelector(`[data-pair-id="${pairId}"]`);
+      if (existing) return;
+    }
+    // Vérifier pour les paires de statuts résidentiels
+    if (state.value === "askHousingOccupationStatusExit") {
+      const pairId = `pair_status_c${state.context.currentCommuneIndex || 0}_l${
+        state.context.currentLogementIndex || 0
+      }`;
+      const existing = container.querySelector(`[data-pair-id="${pairId}"]`);
+      if (existing) return;
+    }
     // Obtenir la configuration de la question
     const { questionText, responseType, choices, eventType, eventKey } =
       getQuestionConfig(state);
@@ -264,7 +297,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (responseType === "none") {
       questionDiv.classList.add("survey-complete");
       container.appendChild(questionDiv);
-      scrollToBottom(container);
+      // scrollToBottom(container);
       return;
     }
 
@@ -280,14 +313,89 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // Gestion des réponses INPUT (ex: une commune, une année)
     else if (responseType === "input") {
-      renderInputQuestion(
-        questionDiv,
-        state,
-        eventType,
-        eventKey,
-        sendEvent,
-        getIsHost()
-      );
+      // Pour les paires arrivée/départ, afficher côte à côte
+      if (state.value === "askCommuneArrivalYear") {
+        // Si un bloc pair existe déjà pour cette commune, ne rien faire
+        const pairId = `pair_commune_c${
+          state.context.currentCommuneIndex || 0
+        }`;
+        const existing = container.querySelector(`[data-pair-id="${pairId}"]`);
+        if (existing) return;
+
+        renderPairedDateInputs(
+          questionDiv,
+          state,
+          {
+            label: "Arrivée",
+            eventType: "ANSWER_COMMUNE_ARRIVAL",
+            eventKey: "start",
+          },
+          {
+            label: "Départ",
+            eventType: "ANSWER_COMMUNE_DEPARTURE",
+            eventKey: "end",
+          },
+          sendEvent,
+          getIsHost()
+        );
+      } else if (state.value === "askHousingArrivalAge") {
+        const pairId = `pair_housing_c${state.context.currentCommuneIndex || 0}_l${state.context.currentLogementIndex || 0}`;
+        const existing = container.querySelector(`[data-pair-id="${pairId}"]`);
+        if (existing) return;
+
+        renderPairedYearAgeInputs(
+          questionDiv,
+          state,
+          {
+            yearLabel: "Année d'arrivée",
+            yearEventType: "ANSWER_HOUSING_ARRIVAL",
+            yearEventKey: "start",
+            ageLabel: "Âge à l'arrivée",
+            ageEventType: "ANSWER_HOUSING_ARRIVAL_AGE",
+            ageEventKey: "arrival_age",
+          },
+          {
+            yearLabel: "Année de départ",
+            yearEventType: "ANSWER_HOUSING_DEPARTURE",
+            yearEventKey: "end",
+            ageLabel: "Âge au départ",
+            ageEventType: "ANSWER_HOUSING_DEPARTURE_AGE",
+            ageEventKey: "departure_age",
+          },
+          sendEvent,
+          getIsHost()
+        );
+      } // NOUVEAU: PAIRES DE STATUTS RÉSIDENTIELS
+      else if (state.value === "askHousingOccupationStatusEntry") {
+        const pairId = `pair_status_c${state.context.currentCommuneIndex || 0}_l${state.context.currentLogementIndex || 0}`;
+        const existing = container.querySelector(`[data-pair-id="${pairId}"]`);
+        if (existing) return;
+        renderPairedStatusDropdowns(
+          questionDiv,
+          state,
+          {
+            label: "Statut à l'arrivée",
+            eventType: "ANSWER_STATUS_ENTRY",
+            eventKey: "statut_res",
+          },
+          {
+            label: "Statut au départ",
+            eventType: "ANSWER_STATUS_EXIT",
+            eventKey: "statut_res",
+          },
+          sendEvent,
+          getIsHost()
+        );
+      } else {
+        renderInputQuestion(
+          questionDiv,
+          state,
+          eventType,
+          eventKey,
+          sendEvent,
+          getIsHost()
+        );
+      }
     }
 
     // Gestion des boutons choix ("Oui", "Non")

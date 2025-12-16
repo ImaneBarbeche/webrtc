@@ -3,7 +3,7 @@
 import { surveyService, navigateToState } from "../stateMachine/stateMachine.js";
 import { sendEvent } from "./eventHandlers.js";
 
-export function renderYesNoQuestion(questionDiv, state, eventKey, choices = ["Yes", "No"]) {
+export function renderYesNoQuestion(questionDiv, state, eventKey, choices = ["Oui", "Non"]) {
   const questionState = state.value; // Capturer l'état au moment du rendu
   const choicesButtons = [];
   const answerSpan = document.createElement("span");

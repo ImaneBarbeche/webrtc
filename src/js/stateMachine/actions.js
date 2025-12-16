@@ -219,12 +219,18 @@ export const addCalendarEpisode = assign({
         if (!startDate) defaultStart = context.lastEpisode.start;
         defaultEnd = context.lastEpisode.end;
       } else {
-        // Chercher le parent approprié - prendre le dernier item du groupe parent
-        let filteritems = items
-          .get()
-          .filter((i) => i.group === currentGroup.dependsOn);
-        let parentItem =
-          filteritems.length > 0 ? filteritems[filteritems.length - 1] : null;
+        // Chercher le parent approprié - si possible prendre l'élément correspondant
+        // à l'index courant dépendant du groupe parent (commune vs logement)
+        let filteritems = items.get().filter(i => i.group === currentGroup.dependsOn);
+        let parentItem = null;
+        // Choisir l'index selon le groupe parent
+        let parentIndex = 0;
+        if (currentGroup.dependsOn === 13) parentIndex = context.currentCommuneIndex || 0;
+        else if (currentGroup.dependsOn === 12) parentIndex = context.currentLogementIndex || 0;
+        // Si l'index est dans les limites, prendre cet item
+        if (filteritems && filteritems.length > parentIndex) parentItem = filteritems[parentIndex];
+        // Sinon prendre le dernier disponible
+        if (!parentItem) parentItem = filteritems.length > 0 ? filteritems[filteritems.length - 1] : null;
 
         if (parentItem) {
           if (!startDate) defaultStart = parentItem.start;
@@ -241,7 +247,7 @@ export const addCalendarEpisode = assign({
       content = event.commune;
     } else if (event.statut_res) {
       content = event.statut_res;
-    } else if (event.type === "YES" && context.group === 12) {
+    } else if (event.type === "OUI" && context.group === 12) {
       content = "Logement unique";
     } else if (
       context.group === 12 &&
