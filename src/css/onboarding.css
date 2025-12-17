@@ -6,7 +6,7 @@
 }
 
 .manual-input textarea {
-  display: none;
+  /* display: none; */
   padding: 12px;
   border: 2px solid #e9ecef;
   border-radius: 8px;
@@ -17,7 +17,7 @@
 
 #connectionCode,
 #answerCode {
-  display: none;
+  /* display: none; */
   width: 100%;
   max-width: 500px;
   padding: 15px;
@@ -34,7 +34,7 @@
 .scan-btn,
 .copy-btn,
 .start-btn {
-  display: none;
+  /* display: none; */
   padding: 12px 24px;
   border: none;
   border-radius: 8px;
@@ -54,7 +54,7 @@
   padding: 25px;
   background: #f8f9fa;
   border-radius: 15px;
-  /* display: none; */
+  display: none;
 }
 
 /* LifeStories Onboarding Styles */

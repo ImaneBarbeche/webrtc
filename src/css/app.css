@@ -291,8 +291,6 @@ select {
 
 #devmode-toggle-global i[data-lucide],
 #devmode-toggle-global svg {
-  fill: none !important;
-  color: inherit !important;
   width: 20px;
   height: 20px;
   display: inline-block;
