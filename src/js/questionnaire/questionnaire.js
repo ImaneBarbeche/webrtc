@@ -252,11 +252,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     // Eviter le rendu doublé quand un bloc pair a déjà été inséré
-    if (state.value === "askCommuneArrivalYear" || state.value === "askCommuneDepartureYear") {
-      const pairId = `pair_commune_c${state.context.currentCommuneIndex || 0}`;
-      const existingPair = container.querySelector(`[data-pair-id="${pairId}"]`);
-      if (existingPair) return;
-    }
     if (state.value === "askHousingArrivalAge" || state.value === "askHousingDepartureAge") {
       const pairId = `pair_housing_c${state.context.currentCommuneIndex || 0}_l${state.context.currentLogementIndex || 0}`;
       const existingPair = container.querySelector(`[data-pair-id="${pairId}"]`);
@@ -299,26 +294,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // Gestion des réponses INPUT (ex: une commune, une année)
     else if (responseType === "input") {
-      // Special: make commune departure optional with a skip button
-      if (state.value === "askCommuneDepartureYear") {
-        renderInputQuestion(
-          questionDiv,
-          state,
-          eventType,
-          eventKey,
-          sendEvent,
-          getIsHost()
-        );
-        const skipBtn = document.createElement("button");
-        skipBtn.type = "button";
-        skipBtn.className = "skip-btn";
-        skipBtn.innerText = "Je ne sais pas / Ne s'applique pas";
-        skipBtn.addEventListener("click", () => {
-          // advance without providing an end value
-          sendEvent({ type: eventType });
-        });
-        questionDiv.appendChild(skipBtn);
-      }
       // Paires année+âge pour logement
       if (state.value === "askHousingArrivalAge") {
         const pairId = `pair_housing_c${state.context.currentCommuneIndex || 0}_l${state.context.currentLogementIndex || 0}`;
