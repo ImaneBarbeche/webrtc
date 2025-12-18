@@ -5,10 +5,6 @@
     appearance: none;
     border: none;
     padding: 2.125rem;
-    background-color: var(--muted-beige);
-    border-radius: 2.5rem;
-    box-shadow: 0 0.25rem 0.625rem var(--secondary-grey);
-    backdrop-filter: blur(10rem) saturate(2);
     position: absolute;
     top: 50%;
     left: 50%;

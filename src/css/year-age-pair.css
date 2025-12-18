@@ -41,7 +41,7 @@
   font-weight: 500;
 }
 
-.year-age-pair input[type="month"],
+/* .year-age-pair input[type="month"],
 .year-age-pair input[type="number"] {
   padding: 0.5rem;
   border: 1px solid #ddd;
@@ -53,13 +53,13 @@
   color: #222;
   transition: border-color 0.2s;
   outline: none;
-}
+} */
 
-.year-age-pair input[type="month"]:focus-visible,
+/* .year-age-pair input[type="month"]:focus-visible,
 .year-age-pair input[type="number"]:focus-visible {
   border-color: var(--primary-dark);
   box-shadow: 0 0 0 2px #eabca5;
-}
+} */
 
 .year-age-pair input:disabled {
   background-color: #e9ecef;

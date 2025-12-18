@@ -73,49 +73,57 @@ function AddEpisodeModal({ onClose }) {
     console.log(newId);
   };
 
-    const [selectedType, setSelectedType] = useState('episode')
+  const [selectedType, setSelectedType] = useState("episode");
 
+  const [contentText, setContentText] = useState("Ajouter un titre");
+  const [iconText, setIconText] = useState("");
 
-    const [contentText, setContentText] = useState('Ajouter un titre')
-    const [iconText, setIconText] = useState('')
+  const [selectedStartDate, setSelectedStartDate] = useState(new Date());
+  const [selectedEndDate, setSelectedEndDate] = useState(new Date());
+  const [selectedEventDate, setSelectedEventDate] = useState(new Date());
 
-    const [selectedStartDate, setSelectedStartDate] = useState(new Date())
-    const [selectedEndDate, setSelectedEndDate] = useState(new Date())
-    const [selectedEventDate, setSelectedEventDate] = useState(new Date())
-
-    const handleFormSubmit = (e) => {
-        e.preventDefault();
-        if (selectedType === 'episode') {
-            const item = ajouterEpisode(contentText, selectedStartDate, selectedEndDate, selectedAttributeId);
-            if (window.webrtcSync && window.webrtcSync.isActive()) {
-                try {
-                    window.webrtcSync.sendMessage({
-                        type: "ADD_ITEMS",
-                        items: [item]
-                    });
-                } catch (e) {
-                    console.warn("Erreur lors de l'ajout de l'épisode", e);
-                }
-            }
-        } else if (selectedType === 'event') {
-            const item = ajouterEvenement(contentText, iconText.toLowerCase().trim(), selectedEventDate, selectedAttributeId);
-            if (window.webrtcSync && window.webrtcSync.isActive()) {
-                try {
-                    window.webrtcSync.sendMessage({
-                        type: "ADD_ITEMS",
-                        items: [item]
-                    });
-                } catch (e) {
-                    console.warn("Erreur lors de l'ajout de l'événement", e);
-                }
-            }
+  const handleFormSubmit = (e) => {
+    e.preventDefault();
+    if (selectedType === "episode") {
+      const item = ajouterEpisode(
+        contentText,
+        selectedStartDate,
+        selectedEndDate,
+        selectedAttributeId
+      );
+      if (window.webrtcSync && window.webrtcSync.isActive()) {
+        try {
+          window.webrtcSync.sendMessage({
+            type: "ADD_ITEMS",
+            items: [item],
+          });
+        } catch (e) {
+          console.warn("Erreur lors de l'ajout de l'épisode", e);
         }
-        document.getElementById('episode_modal').close();
-    };
-
+      }
+    } else if (selectedType === "event") {
+      const item = ajouterEvenement(
+        contentText,
+        iconText.toLowerCase().trim(),
+        selectedEventDate,
+        selectedAttributeId
+      );
+      if (window.webrtcSync && window.webrtcSync.isActive()) {
+        try {
+          window.webrtcSync.sendMessage({
+            type: "ADD_ITEMS",
+            items: [item],
+          });
+        } catch (e) {
+          console.warn("Erreur lors de l'ajout de l'événement", e);
+        }
+      }
+    }
+    document.getElementById("episode_modal").close();
+  };
 
   return (
-    <dialog id="episode_modal">
+    <dialog id="episode_modal" className="default-card">
       {/* {selectedTrajectoryId}
         {selectedAttributeId} {selectedType} {contentText} */}
       {/* <div className='title-row'>

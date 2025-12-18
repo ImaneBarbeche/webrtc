@@ -23,6 +23,8 @@
   --muted-beige: color-mix(in srgb, var(--primary-beige) 60%, transparent);
   /* --primary-grey: #f4e6da; */
   /* --primary-grey: rgb(201, 135, 135); */
+
+  --default-shadow: 0 0.25rem 0.625rem var(--secondary-grey);
 }
 
 * {
@@ -30,6 +32,12 @@
 }
 
 body {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary-dark);
   background-color: var(--primary-beige);
   /* for the summary modal */
   /* overflow-y: hidden; */
@@ -160,8 +168,6 @@ select {
   left: 0;
   width: 100vw;
   height: 100vh;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px); /* Pour Safari */
   z-index: 2000;
   display: flex;
   align-items: center;
@@ -184,10 +190,6 @@ select {
 
 /* Carte de reconnexion */
 #reconnect-container > div {
-  background: white;
-  padding: 50px 60px;
-  border-radius: 20px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   text-align: center;
   max-width: 450px;
   animation: slideUp 0.3s ease-out;
@@ -218,27 +220,6 @@ select {
   margin-bottom: 30px;
   line-height: 1.4;
   font-weight: 400;
-}
-
-.reconnect-button {
-  background-color: var(--primary-dark);
-  color: white;
-  border: none;
-  padding: 12px 30px;
-  font-size: 14px;
-  font-weight: 500;
-  border-radius: 20px;
-  cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-}
-
-.reconnect-button:hover {
-  transform: translateY(-2px);
-}
-
-.reconnect-button:active {
-  transform: translateY(0);
 }
 
 /* ========================================
@@ -310,4 +291,72 @@ select {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.default-card {
+  padding: 2.125rem;
+  background-color: var(--muted-beige);
+  border-radius: 2.5rem;
+  box-shadow: 0 0.25rem 0.625rem var(--secondary-grey);
+  backdrop-filter: blur(10rem) saturate(2);
+}
+
+button {
+  background-color: transparent;
+  appearance: unset;
+  border: none;
+}
+
+button:hover {
+  cursor: pointer;
+}
+
+.secondary-button,
+.btn-group,
+.primary-button {
+  color: var(--primary-dark);
+  padding: 0.5rem;
+  padding: 1rem;
+  border-radius: 2rem;
+  background-color: var(--primary-grey);
+  /* box-shadow: 0px 0.15rem 0.1rem var(--secondary-grey); */
+  box-shadow: 0 0.25rem 0.625rem var(--secondary-grey);
+
+  &:has(button) {
+    padding: 0rem;
+    backdrop-filter: blur(1rem);
+
+    button {
+      padding: 0.7rem;
+    }
+  }
+
+  /* TODO: create a proper primary button component */
+  &.primary {
+    background-color: var(--primary-dark);
+    box-shadow: unset;
+    color: var(--primary-beige);
+  }
+}
+
+.primary-button {
+  background-color: var(--primary-dark);
+  box-shadow: unset;
+  color: var(--primary-beige);
+}
+
+.btn-group {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.invisible-button {
+  padding: 1rem;
+}
+
+.button-with-icon {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.7rem;
 }

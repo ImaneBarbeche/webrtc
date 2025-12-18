@@ -111,7 +111,8 @@
   /* backdrop-filter: saturate(1.9) url(#lensFilter); */
   z-index: 99;
   transform: translateY(2rem);
-  transition: opacity 0.3s ease, transform 0.3s ease, top 0.3s ease, height 0.3s ease;
+  transition: opacity 0.3s ease, transform 0.3s ease, top 0.3s ease,
+    height 0.3s ease;
   /* transition: opacity 0.3s ease, transform 0.3s ease, visibility 0s linear 0.3s; */
   /* background-color: red; */
   overflow-y: hidden !important;
@@ -149,26 +150,26 @@
         display: block;
 
         &:nth-of-type(2) {
-          font-size: .95rem;
+          font-size: 0.95rem;
           font-weight: 100;
         }
       }
     }
   }
 
-    /* drag handle */
-    .handle {
-      touch-action: none; 
-      -webkit-user-select: none; /* Prevent text selection during drag */
-      user-select: none;
-      width: 12rem;
-      height: 4rem;
-      background-color: red;
-      border-radius: 2rem;
-      top: -1rem;
-      position: relative;
-      opacity: 0;
-    }
+  /* drag handle */
+  .handle {
+    touch-action: none;
+    -webkit-user-select: none; /* Prevent text selection during drag */
+    user-select: none;
+    width: 12rem;
+    height: 4rem;
+    background-color: red;
+    border-radius: 2rem;
+    top: -1rem;
+    position: relative;
+    opacity: 0;
+  }
 }
 
 #bricks {
@@ -320,8 +321,6 @@
         display: none;
       }
     }
-
-
   }
 }
 
@@ -342,59 +341,6 @@
 /* * {
     border: 1px solid blue;
 } */
-
-button {
-  background-color: transparent;
-  appearance: unset;
-  border: none;
-}
-
-button:hover {
-  cursor: pointer;
-}
-
-.secondary-button,
-.btn-group {
-  color: var(--primary-dark);
-  padding: 0.5rem;
-  padding: 1rem;
-  border-radius: 2rem;
-  background-color: var(--primary-grey);
-  /* box-shadow: 0px 0.15rem 0.1rem var(--secondary-grey); */
-  box-shadow: 0 0.25rem 0.625rem var(--secondary-grey);
-
-  &:has(button) {
-    padding: 0rem;
-    backdrop-filter: blur(1rem);
-
-    button {
-      padding: 0.7rem;
-    }
-  }
-
-/* TODO: create a proper primary button component */
-  &.primary {
-    background-color: var(--primary-dark);
-    box-shadow: unset;
-    color: var(--primary-beige)
-  }
-}
-
-.btn-group {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.invisible-button {
-  padding: 1rem;
-}
-
-.button-with-icon {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding: 0.7rem;
-}
 
 [data-lucide] {
   color: var(--primary-dark);
@@ -434,7 +380,7 @@ button:hover {
   font-size: 0.8rem;
   font-weight: bold;
   /* max-width: 2rem; */
-  padding: .5rem;
+  padding: 0.5rem;
   /* border-radius: 8px; */
   /* padding: 8px 16px; */
   /* margin-bottom: 12px; */

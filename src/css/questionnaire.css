@@ -19,21 +19,28 @@
    INPUTS
    ======================================== */
 
+.question-input,
 .question input {
   margin: 8px 0;
-  padding: 0.5rem;
-  border: 1px solid #ddd;
+  /* padding: 0.5rem; */
+  /* border: 1px solid #ddd; */
+  border: none;
+  padding-block: 0.5rem;
+  padding-inline: 0.75rem;
   border-radius: 2rem;
   width: 100%;
   background-color: var(--primary-grey);
   box-shadow: 0 0.25rem 0.625rem var(--secondary-grey);
   font-size: 0.8rem;
+  font-family: inherit;
 }
 
+.question-input:focus-visible,
 .question input:focus-visible {
   outline: none;
 }
 
+.question-input:disabled,
 .question input:disabled {
   background-color: #e9ecef;
   cursor: not-allowed;
@@ -144,22 +151,22 @@
 
 #export,
 #load {
-  background-color: var(--primary-dark);
-  color: var(--primary-beige);
-  padding: 8px 12px;
-  border: none;
-  border-radius: 6px;
+  /* background-color: var(--primary-dark); */
+  /* color: var(--primary-beige); */
+  /* padding: 8px 12px; */
+  /* border: none; */
+  /* border-radius: 6px; */
   /* font-weight: 600; */
   cursor: pointer;
   transition: all 0.2s ease;
-  font-size: 0.95rem;
+  /* font-size: 0.95rem; */
   display: inline-flex;
   align-items: center;
   justify-content: center;
   box-sizing: border-box;
   max-width: 100%;
-  padding: 0.5rem 1rem;
-  border-radius: 2rem;
+  /* padding: 0.5rem 1rem; */
+  /* border-radius: 2rem; */
 }
 
 #export:hover,
