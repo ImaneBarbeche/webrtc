@@ -9,7 +9,6 @@ import { ajouterEpisode, ajouterEvenement } from "../js/episodes/episodes.js";
 // Fonctions pour récupérer les données
 const getTrajectories = () => {
   const test = groupsData.filter((group) => group.nestedGroups);
-  console.log(test);
   return groupsData.filter((group) => group.nestedGroups);
 };
 
@@ -70,7 +69,6 @@ function AddEpisodeModal({ onClose }) {
   const handleAttributeChange = (newId) => {
     // const newId = parseInt(e.target.value);
     setSelectedAttributeId(newId);
-    console.log(newId);
   };
 
     const [selectedType, setSelectedType] = useState('episode')

@@ -71,7 +71,7 @@ export function getQuestionConfig(state) {
 
     case "askCommuneArrivalYear": {
       const commune = state.context.communes?.[state.context.currentCommuneIndex] || "cette commune";
-      questionText = `Donnez-nous les dates d'arrivée et de départ à ${commune}:`;
+      questionText = `En quelle année êtes-vous arrivé à ${commune} ?`;
       responseType = "input";
       eventType = "ANSWER_COMMUNE_ARRIVAL";
       eventKey = "start";

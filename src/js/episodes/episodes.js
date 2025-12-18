@@ -1,5 +1,5 @@
 import state from "../state.js";
-import { timeline, items, groups } from "../timeline/timeline.js";
+import { items } from "../timeline/timeline.js";
 
 /**
  ************************************************************************
@@ -18,22 +18,48 @@ import { timeline, items, groups } from "../timeline/timeline.js";
  * @returns 
  */
 export function ajouterEpisode(text, start, end, group){
-    if(end == 0){
-        end = new Date(start);
-        end.setFullYear(end.getFullYear() + 1);
+    // normalize start
+    const startDate = start instanceof Date ? new Date(start) : new Date(start);
+    if (Number.isNaN(startDate.getTime())) throw new Error('ajouterEpisode: invalid start date');
+
+    // determine endDate according to 3 options:
+    // 1) if end provided (not null/undefined/0) use it
+    // 2) else try to use the start of the next episode in same group
+    // 3) otherwise default to start + 1 year
+    let endDate;
+    if (end !== undefined && end !== null && end !== 0) {
+        endDate = end instanceof Date ? new Date(end) : new Date(end);
+        if (Number.isNaN(endDate.getTime())) {
+            endDate = new Date(startDate);
+            endDate.setFullYear(endDate.getFullYear() + 1);
+        }
+    } else {
+        const all = items.get() || [];
+        const next = all
+            .map(i => ({ item: i, _start: new Date(i.start) }))
+            .filter(i => !Number.isNaN(i._start.getTime()))
+            .filter(i => String(i.item.group) === String(group) && i._start.getTime() > startDate.getTime())
+            .sort((a,b) => a._start - b._start)[0];
+
+        if (next) endDate = new Date(next._start);
+        else {
+            endDate = new Date(startDate);
+            endDate.setFullYear(endDate.getFullYear() + 1);
+        }
     }
+
     let classColor = group.toString().startsWith('1') ? 'green' : (group.toString().startsWith('2') ? 'blue' : 'red')
     let item = {
         "id": new Date().toString(),
         "type": "range",
         "content": text,
-        "start": start,
-        "end": end,
+        "start": startDate,
+        "end": endDate,
         "group": group,
         "className":classColor
     }
 
-    if(state.lastEpisode?.end == item.start){
+    if(state.lastEpisode && new Date(state.lastEpisode.end).getTime() === startDate.getTime()){
         state.previousEpisode = state.lastEpisode
     }
     items.add(item)
