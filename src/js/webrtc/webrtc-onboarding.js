@@ -253,7 +253,6 @@ class WebRTCOnboarding {
       this.log(`Signaling State: ${this.pc.signalingState}`);
     });
 
-    // Note: Old createBtn and connectBtn removed in new UI
     // Buttons are now role-specific (selectInterviewer, selectInterviewee, etc.)
     this.setStateAndStatus("off", statusText);
   }
@@ -274,7 +273,7 @@ class WebRTCOnboarding {
     this.log(`State: ${newState}, Status: ${statusText}`);
   }
 
-  // New function for processing answer from guest
+  // function for processing answer from guest
   async processAnswer() {
     try {
       this.log("Parsing answer JSON...");
@@ -323,13 +322,6 @@ class WebRTCOnboarding {
           this.log(
             `Offer length: ${this.elements.connectionCode.value.length} chars`
           );
-
-          // Auto-show wait response section after QR code is displayed
-          // This happens automatically so it works on tablets (scan only, no copy)
-          // setTimeout(() => {
-          //   this.minimizeOfferAndShowWaitResponse();
-          // }, 800); // Small delay to let QR code render
-
           this.isOfferor = true;
           this.state = "waitAnswer";
           this.setStateAndStatus("waitAnswer", "En attente de connexion...");

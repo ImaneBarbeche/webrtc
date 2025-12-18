@@ -172,25 +172,25 @@ export const addCalendarEpisode = assign({
   lastEpisode: ({ context, event }, params) => {
     let defaultStart = null;
     let defaultEnd = 0;
-    let startDate = null;
-    let endDate = 0;
+    let start = null;
+    let end = 0;
 
     // 1. Parser la date de début depuis l'événement (PRIORITAIRE)
     if (event.start) {
-      startDate = parseAgeOrYear(event.start, context.birthYear);
+      start = parseAgeOrYear(event.start, context.birthYear);
     }
 
     // 2. Gestion du paramètre timeline_init (pour la commune de naissance)
     if (params?.start === "timeline_init") {
-      if (!startDate) {
-        startDate = window.timeline?.options?.start || new Date();
+      if (!start) {
+        start = window.timeline?.options?.start || new Date();
       }
       // Pour la commune de naissance, la fin sera demandée séparément
       // On met une date par défaut d'1 an après le début
       if (context.birthYear) {
-        startDate = new Date(`${context.birthYear}-01-01`);
+        start = new Date(`${context.birthYear}-01-01`);
       } else {
-        startDate = new Date();
+        start = new Date();
       }
       defaultEnd = 0; // sera calculé dans ajouterEpisode (+1 an)
     }
@@ -207,7 +207,7 @@ export const addCalendarEpisode = assign({
         let parentItem = filteritems[context.currentCommuneIndex];
 
         if (parentItem) {
-          if (!startDate) defaultStart = parentItem.start;
+          if (!start) defaultStart = parentItem.start;
           defaultEnd = parentItem.end;
         }
       }
@@ -216,7 +216,7 @@ export const addCalendarEpisode = assign({
         context.lastEpisode &&
         context.lastEpisode.group === currentGroup.dependsOn
       ) {
-        if (!startDate) defaultStart = context.lastEpisode.start;
+        if (!start) defaultStart = context.lastEpisode.start;
         defaultEnd = context.lastEpisode.end;
       } else {
         // Chercher le parent approprié - prendre le dernier item du groupe parent
@@ -227,7 +227,7 @@ export const addCalendarEpisode = assign({
           filteritems.length > 0 ? filteritems[filteritems.length - 1] : null;
 
         if (parentItem) {
-          if (!startDate) defaultStart = parentItem.start;
+          if (!start) defaultStart = parentItem.start;
           defaultEnd = parentItem.end;
         }
       }
@@ -253,10 +253,12 @@ export const addCalendarEpisode = assign({
       content = context.communes[context.currentCommuneIndex];
     }
 
-    // Utiliser startDate (de l'événement) en priorité, sinon defaultStart
-    let finalStart = startDate || defaultStart;
-    const finalEnd = endDate || defaultEnd;
-
+    // Utiliser la date fournie par l'événement (`start`) en priorité, sinon `defaultStart`
+    let finalStart = start || defaultStart;
+    let finalEnd = end || defaultEnd;
+    // Mettre à jour les variables locales `start` et `end` avant d'ajouter
+    start = finalStart;
+    end = finalEnd;
     // Fallback: si toujours pas de date de début, utiliser la date actuelle
     if (!finalStart) {
       console.warn(
@@ -265,7 +267,7 @@ export const addCalendarEpisode = assign({
       finalStart = new Date();
     }
 
-    return ajouterEpisode(content, finalStart, finalEnd, context.group);
+    return ajouterEpisode(content, start, end, context.group);
   },
 });
 
