@@ -51,7 +51,7 @@ document.addEventListener("DOMContentLoaded", () => {
   timeline = initTimeline();
   if (!timeline) return;
 
-  window.timeline = timeline;
+  window.timeline = timeline; // Pour acces global
 
   // Initialiser le module de detection des chevauchements
   initOverlapDetection(items, groups);
