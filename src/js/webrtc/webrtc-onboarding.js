@@ -61,6 +61,7 @@ class WebRTCOnboarding {
     if (this.elements.continueOfferBtn) {
       this.elements.continueOfferBtn.addEventListener("click", () => {
         this.minimizeOfferAndShowWaitResponse();
+        this.scanQRCode();
       });
     }
     // Role selection
@@ -119,6 +120,7 @@ class WebRTCOnboarding {
         this.selectInterviewerRole();
       } else if (this.selectedRole === "enquete") {
         this.selectIntervieweeRole();
+        this.scanQRCode();
       }
     });
   }

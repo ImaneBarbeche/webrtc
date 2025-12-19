@@ -1,68 +1,52 @@
-async function startScanner() {    
-    const overlay = document.createElement('div');
-    overlay.id = 'qrOverlay';
-    Object.assign(overlay.style, {
-        position: 'fixed', 
-        top: '0', 
-        left: '0', 
-        right: '0', 
-        bottom: '0',
-        background: 'rgba(0,0,0,0.85)',
-        display: 'flex', 
-        alignItems: 'center', 
-        justifyContent: 'center',
-        zIndex: '10000', 
-        flexDirection: 'column', 
-        color: '#fff',
-        fontFamily: 'Arial, sans-serif'
-    });
-    
+async function startScanner() {
+    const scanFrame = null;
+    setTimeout(() => {
+        // Find the visible scan frame
+        const scanFrame = document.querySelector('.scan-frame:not([style*="display: none"])');
+        const scanFrameInterviewee = document.querySelector('.scan-frame-interviewee:not([style*="display: none"])');
+    }, 50);
+
+    if (!scanFrame && !scanFrameInterviewee) {
+        alert('Scan frame not found!');
+        return;
+    }
+    // Create and style the video element
     const video = document.createElement('video');
     video.setAttribute('playsinline', '');
     Object.assign(video.style, {
-        maxWidth: '90%', 
-        maxHeight: '60%',
-        border: '3px solid #fff',
-        borderRadius: '15px'
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        objectFit: 'cover',
+        zIndex: 1
     });
-    overlay.appendChild(video);
-    
-    const info = document.createElement('div');
-    info.textContent = '📱 Alignez le QR code dans le cadre';
-    Object.assign(info.style, {
-        marginTop: '20px',
-        fontSize: '18px',
-        textAlign: 'center'
-    });
-    overlay.appendChild(info);
-    
-    const cancel = document.createElement('button');
-    cancel.textContent = '❌ Annuler';
-    Object.assign(cancel.style, {
-        marginTop: '20px',
-        padding: '12px 24px',
-        fontSize: '16px',
-        background: '#dc3545',
-        color: 'white',
-        border: 'none',
-        borderRadius: '8px',
-        cursor: 'pointer'
-    });
-    overlay.appendChild(cancel);
-    
-    document.body.appendChild(overlay);
+
+    // Prepare scan frame for video
+    scanFrame.style.position = 'relative';
+    scanFrame.style.overflow = 'hidden';
+
+     scanFrameInterviewee.style.position = 'relative';
+    scanFrameInterviewee.style.overflow = 'hidden';
+
+    // Insert video as first child
+    scanFrame.insertBefore(video, scanFrame.firstChild);
+    scanFrameInterviewee.insertBefore(video, scanFrameInterviewee.firstChild);
 
     let stream = null, detector = null, rafId = null;
-    cancel.addEventListener('click', stopScanner);
+
+    // Add a cancel button overlay (optional, or use existing UI button)
+    // If you want to add a cancel button inside the scan frame, you can do so here.
 
     try {
-        stream = await navigator.mediaDevices.getUserMedia({ 
-            video: { 
+        stream = await navigator.mediaDevices.getUserMedia({
+            video: {
                 facingMode: 'environment',
                 width: { ideal: 1280 },
                 height: { ideal: 720 }
-            }, 
-            audio: false 
+            },
+            audio: false
         });
         video.srcObject = stream;
         await video.play();
@@ -73,12 +57,15 @@ async function startScanner() {
         return;
     }
 
+    // BarcodeDetector logic
     if ('BarcodeDetector' in window) {
         try {
             const supported = await BarcodeDetector.getSupportedFormats();
             if (supported.includes('qr_code')) detector = new BarcodeDetector({ formats: ['qr_code'] });
         } catch (e) { console.warn(e); }
     }
+
+    // Info message (optional: you can show a message in your UI if needed)
 
     if (detector) {
         const loop = async () => {
@@ -94,14 +81,16 @@ async function startScanner() {
         };
         rafId = requestAnimationFrame(loop);
     } else {
-        info.textContent = 'Scan non supporté par ce WebView. Ajoute jsQR si besoin.';
+        // Optionally, show a message in your UI
+        alert('Scan non supporté par ce WebView. Ajoute jsQR si besoin.');
         console.warn('BarcodeDetector absent');
     }
 
+    // Clean up: remove video and stop stream
     function stopScanner() {
         if (rafId) cancelAnimationFrame(rafId);
         if (stream) stream.getTracks().forEach(t => t.stop());
-        const el = document.getElementById('qrOverlay'); if (el) el.remove();
+        if (video && video.parentNode) video.parentNode.removeChild(video);
     }
 }
 function applyScannedValue(value) {
@@ -121,4 +110,3 @@ function applyScannedValue(value) {
 }
 
 // Note: Event listeners are now attached in webrtc-onboarding.js
-// No need to attach here to avoid conflicts
