@@ -11,7 +11,8 @@ export function setupChapterToggle(toggleBtn, timeline) {
     return;
   }
 
-  let chaptersHidden = false;
+  // Store chaptersHidden on the timeline object for global access
+  timeline._chaptersHidden = timeline._chaptersHidden ?? false;
 
   /**
    * Applique l'état de visibilité sur tous les titres de trajectoire
@@ -19,7 +20,7 @@ export function setupChapterToggle(toggleBtn, timeline) {
   function applyChapterVisibility() {
     const chapterTitles = document.querySelectorAll(".trajectory-title");
     chapterTitles.forEach((chapter) => {
-      if (chaptersHidden) {
+      if (timeline._chaptersHidden) {
         chapter.classList.add("closed");
       } else {
         chapter.classList.remove("closed");
@@ -29,7 +30,7 @@ export function setupChapterToggle(toggleBtn, timeline) {
 
   // Événement clic sur le bouton
   toggleBtn.addEventListener("click", () => {
-    chaptersHidden = !chaptersHidden;
+    timeline._chaptersHidden = !timeline._chaptersHidden;
     applyChapterVisibility();
 
     // Attendre la fin de la transition CSS avant de redessiner
@@ -52,4 +53,7 @@ export function setupChapterToggle(toggleBtn, timeline) {
       subtree: true,
     });
   }
+
+  // Apply visibility on init
+  applyChapterVisibility();
 }

@@ -109,8 +109,12 @@ export function groupTemplate(group) {
     iconHtml += '<i data-lucide="pin" class="lucide landmark-pin"></i> ';
   }
 
-  // Texte du groupe avec classe trajectory-title
-  wrapper.innerHTML = iconHtml + `<span class="trajectory-title">${group.contentText || ""}</span>`;
+  // Ajout de la classe closed si les chapitres sont cachés
+  let closedClass = "";
+  if (window.timeline && window.timeline._chaptersHidden) {
+    closedClass = " closed";
+  }
+  wrapper.innerHTML = iconHtml + `<span class="trajectory-title${closedClass}">${group.contentText || ""}</span>`;
   return wrapper;
 }
 
