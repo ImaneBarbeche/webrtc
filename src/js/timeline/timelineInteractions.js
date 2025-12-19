@@ -45,7 +45,7 @@ export function setupInteractions(timeline, utils) {
         const item = items.get(longPressTargetItem);
         openEpisodeEditModal(item, (updatedItem) => {
           items.update(updatedItem);
-          setTimeout(() => timeline.redraw(), 0);
+          // setTimeout(() => timeline.redraw(), 0);
           timelineState.isEditingEpisode = false;
           
           // Synchroniser via WebRTC si activé (uniquement pour l'enquêteur)
@@ -111,6 +111,16 @@ export function setupInteractions(timeline, utils) {
 
     if (properties.what === "group-label" && properties.group) {
       const clickedGroup = groups.get(properties.group);
+
+      // Ignorer le click qui suit immédiatement un long-press sur le même groupe
+      const last = window.__lastLongPress || { time: 0, groupId: null };
+      const LONG_PRESS_CLICK_IGNORE_MS = 600;
+      if (Date.now() - last.time < LONG_PRESS_CLICK_IGNORE_MS && last.groupId === properties.group) {
+        try {
+          window.__lastLongPress = null;
+        } catch {}
+        return; // consommer le click issu du mouseUp du long-press
+      }
 
       if (
         timelineState.longPressTarget === null &&
