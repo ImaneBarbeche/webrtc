@@ -1,12 +1,12 @@
 /*
 ********************************************************************************
-* stateToQuestionMap.js - Mapping des états vers les questions                *
-* Permet d'afficher les questions lisibles au lieu des identifiants d'états   *
+* stateToQuestionMap.js - Map states to questions                              *
+* Show readable questions instead of state identifiers                         *
 ********************************************************************************
 */
 
 /**
- * Mapping entre les identifiants d'états de la machine et les questions affichées
+ * Mapping between the machine's state identifiers and the questions displayed
  */
 export const stateToQuestionMap = {
   'askBirthYear': 'Quelle est votre année de naissance ?',
@@ -29,9 +29,9 @@ export const stateToQuestionMap = {
 };
 
 /**
- * Obtient la question lisible à partir d'un identifiant d'état
- * @param {string} state - L'identifiant de l'état
- * @returns {string} La question correspondante ou l'état lui-même si non trouvé
+ * Obtains the readable question from a state identifier
+ * @param {string} state - state identifier
+ * @returns {string} The corresponding question or the state itself if not found
  */
 export function getQuestionFromState(state) {
   return stateToQuestionMap[state] || state;

@@ -1,7 +1,7 @@
 /*
  ********************************************************************************
- * actions.js - Actions de la machine à états                                  *
- * Fonctions qui modifient le contexte ou produisent des effets secondaires    *
+ * actions.js - State machine actions                                           *
+ * Functions that modify the context or produce side effects                    *
  ********************************************************************************
  */
 
@@ -11,32 +11,26 @@ import { setBirthYear, setupBirthYearButton } from "../timeline/birthYear.js";
 
 const { assign } = window.XState;
 
-// =============================================================================
-// ACTIONS SIMPLES (modification du contexte)
-// =============================================================================
+// ============================================================================= // SIMPLE ACTIONS (context updates) // ============================================================================= /** * Saves the birth year and updates the timeline age display. * Also initializes the birth-year button used in the UI. */
 
-/**
- * Sauvegarde l'année de naissance et met à jour l'affichage de l'âge sur la timeline
- */
 export const saveBirthYear = assign({
   birthYear: ({ context, event }) => {
     const year = parseInt(event.birthdate);
-    // Mettre à jour l'année de naissance pour l'affichage de l'âge côté timeline
-    setBirthYear(year);
-    setupBirthYearButton(); // brancher le bouton
+    setBirthYear(year); // Update global birth year for age calculations
+    setupBirthYearButton(); // Re-bind UI button for birth year
     return year;
   },
 });
 
 /**
- * Sauvegarde le lieu de naissance
+ * Saves the birthplace.
  */
 export const saveBirthPlace = assign({
   birthPlace: ({ context, event }) => event.birthPlace,
 });
 
 /**
- * Ajoute une commune au tableau
+ * Adds a single commune to the list.
  */
 export const addCommune = assign({
   communes: ({ context, event }) => {
@@ -45,7 +39,7 @@ export const addCommune = assign({
 });
 
 /**
- * Ajoute un département au tableau
+ * Adds a single département to the list.
  */
 export const addDepartement = assign({
   departements: ({ context, event }) => {
@@ -54,7 +48,8 @@ export const addDepartement = assign({
 });
 
 /**
- * Ajoute plusieurs communes d'un coup
+ * Adds multiple communes at once.
+ * Also updates the current commune index to point to the first newly added commune.
  */
 export const addMultipleCommunes = assign({
   communes: ({ context, event }) => {
@@ -62,14 +57,13 @@ export const addMultipleCommunes = assign({
     return newCommunes;
   },
   currentCommuneIndex: ({ context }) => {
-    // Positionner l'index sur la première nouvelle commune ajoutée
     const newIndex = context.communes.length;
     return newIndex;
   },
 });
 
 /**
- * Ajoute plusieurs logements pour la commune courante
+ * Adds multiple housings for the current commune.
  */
 export const addMultipleHousings = assign({
   logements: ({ context, event }) => {
@@ -77,26 +71,22 @@ export const addMultipleHousings = assign({
   },
 });
 
-// =============================================================================
-// ACTIONS DE NAVIGATION (index et groupes)
-// =============================================================================
+// ============================================================================= // NAVIGATION ACTIONS (indexes and groups) // =============================================================================
 
-/**
- * Réinitialise l'index des logements à 0
- */
+/** * Resets the housing index to 0. */
 export const resetLogement = assign({
   currentLogementIndex: () => 0,
 });
 
 /**
- * Passe au logement suivant
+ * Moves to the next housing.
  */
 export const nextLogement = assign({
   currentLogementIndex: ({ context }) => context.currentLogementIndex + 1,
 });
 
 /**
- * Passe à la commune suivante
+ * Moves to the next commune.
  */
 export const nextCommune = assign({
   currentCommuneIndex: ({ context, event }) => {
@@ -106,7 +96,7 @@ export const nextCommune = assign({
 });
 
 /**
- * Réinitialise l'index des communes à 0
+ * Resets the commune index to 0.
  */
 export const resetCommune = assign({
   currentCommuneIndex: ({ context, event }) => {
@@ -115,8 +105,8 @@ export const resetCommune = assign({
 });
 
 /**
- * Passe au groupe suivant (13→12→11)
- * TODO: À modifier, ne marche que pour 14,13,12,11
+ * Moves to the next group (13 → 12 → 11).
+ * NOTE: Only works for groups 14, 13, 12, 11.
  */
 export const nextGroup = assign({
   group: ({ context, event }) => {
@@ -125,7 +115,7 @@ export const nextGroup = assign({
 });
 
 /**
- * Remonte au groupe précédent (11→12→13)
+ * Moves back to the previous group (11 → 12 → 13).
  */
 export const previousGroup = assign({
   group: ({ context, event }) => {
@@ -133,16 +123,9 @@ export const previousGroup = assign({
   },
 });
 
-// =============================================================================
-// ACTIONS TIMELINE - Création et modification d'épisodes
-// =============================================================================
+// ============================================================================= // TIMELINE ACTIONS - Creating and modifying episodes // =============================================================================
 
-/**
- * Parse une valeur (âge ou année) et retourne une Date
- * @param {string|number} value - La valeur à parser
- * @param {number} birthYear - L'année de naissance pour convertir les âges
- * @returns {Date|null}
- */
+/** * Parses a value (age or year) and returns a Date object. * - If < 200 → interpreted as an age * - If ≥ 200 → interpreted as a year */
 function parseAgeOrYear(value, birthYear) {
   if (!value) return null;
 
@@ -152,11 +135,12 @@ function parseAgeOrYear(value, birthYear) {
   if (match) {
     let num = parseInt(match[0]);
 
-    // Si < 200, c'est un âge, sinon c'est une année
     if (num < 200) {
       let year = birthYear + num;
+      // Age → convert to year
       return new Date(`${year}-01-01`);
     } else {
+      // Year
       return new Date(`${num}-01-01`);
     }
   }
@@ -164,9 +148,15 @@ function parseAgeOrYear(value, birthYear) {
 }
 
 /**
- * Ajoute un épisode au calendrier
- * Gère la logique complexe des dates de début/fin selon le groupe et le contexte
- * IMPORTANT: La date fournie par l'utilisateur (event.start) a priorité sur les valeurs par défaut
+ * Adds a new episode to the timeline.
+ * Handles:
+ *  - start/end date logic
+ *  - group dependencies (e.g., housing depends on commune)
+ *  - special tokens (timeline_init)
+ *  - content resolution (commune, housing, status, etc.)
+ *
+ * IMPORTANT:
+ * The user-provided start date (event.start) always has priority.
  */
 export const addCalendarEpisode = assign({
   lastEpisode: ({ context, event }, params) => {
@@ -175,31 +165,29 @@ export const addCalendarEpisode = assign({
     let start = null;
     let end = 0;
 
-    // 1. Parser la date de début depuis l'événement (PRIORITAIRE)
+    // 1. Parse start date from event (highest priority)
     if (event.start) {
       start = parseAgeOrYear(event.start, context.birthYear);
     }
 
-    // 2. Gestion du paramètre timeline_init (pour la commune de naissance)
+    // 2. Handle timeline_init (used for birth commune)
     if (params?.start === "timeline_init") {
       if (!start) {
         start = window.timeline?.options?.start || new Date();
       }
-      // Pour la commune de naissance, la fin sera demandée séparément
-      // On met une date par défaut d'1 an après le début
       if (context.birthYear) {
         start = new Date(`${context.birthYear}-01-01`);
       } else {
         start = new Date();
       }
-      defaultEnd = 0; // sera calculé dans ajouterEpisode (+1 an)
+      defaultEnd = 0; // Will be computed by ajouterEpisode
     }
 
-    // 3. Vérifier les dépendances de groupe (pour les sous-éléments comme logements)
+    // 3. Handle group dependencies (e.g., housing depends on commune)
     const currentGroup = groups.get(context.group);
 
     if (currentGroup && currentGroup.dependsOn) {
-      // Pour les logements (groupe 12), utiliser currentCommuneIndex
+      // Housing depends on commune
       if (context.group === 12 && currentGroup.dependsOn === 13) {
         let filteritems = items
           .get()
@@ -211,15 +199,15 @@ export const addCalendarEpisode = assign({
           defaultEnd = parentItem.end;
         }
       }
-      // Si lastEpisode est du groupe parent, l'utiliser directement
+      // If lastEpisode is from parent group
       else if (
         context.lastEpisode &&
         context.lastEpisode.group === currentGroup.dependsOn
       ) {
         if (!start) defaultStart = context.lastEpisode.start;
         defaultEnd = context.lastEpisode.end;
+        // Otherwise use last item of parent group
       } else {
-        // Chercher le parent approprié - prendre le dernier item du groupe parent
         let filteritems = items
           .get()
           .filter((i) => i.group === currentGroup.dependsOn);
@@ -233,7 +221,7 @@ export const addCalendarEpisode = assign({
       }
     }
 
-    // 4. Déterminer le contenu de l'épisode
+    // 4. Determine episode content
     let content;
     if (event.type === "ANSWER_BIRTH_COMMUNE") {
       content = event.commune[0];
@@ -253,13 +241,11 @@ export const addCalendarEpisode = assign({
       content = context.communes[context.currentCommuneIndex];
     }
 
-    // Utiliser la date fournie par l'événement (`start`) en priorité, sinon `defaultStart`
+    // Final start/end resolution
     let finalStart = start || defaultStart;
     let finalEnd = end || defaultEnd;
-    // Mettre à jour les variables locales `start` et `end` avant d'ajouter
     start = finalStart;
     end = finalEnd;
-    // Fallback: si toujours pas de date de début, utiliser la date actuelle
     if (!finalStart) {
       console.warn(
         "addCalendarEpisode: pas de date de début, utilisation de la date actuelle"
@@ -272,8 +258,10 @@ export const addCalendarEpisode = assign({
 });
 
 /**
- * Modifie un épisode existant sur le calendrier
- * Gère les tokens spéciaux (timeline_end, timeline_init) et la conversion âge→année
+ * Modifies an existing episode on the timeline.
+ * Handles:
+ *  - special tokens (timeline_end, timeline_init)
+ *  - age → year conversion
  */
 export const modifyCalendarEpisode = assign({
   lastEpisode: ({ context, event }, params) => {
@@ -282,7 +270,7 @@ export const modifyCalendarEpisode = assign({
       return null;
     }
 
-    // Gestion des paramètres avec tokens spéciaux
+    // Handle special tokens
     if (params) {
       const normalized = Object.assign({}, params);
       try {
@@ -302,10 +290,10 @@ export const modifyCalendarEpisode = assign({
       return modifierEpisode(context.lastEpisode.id, normalized);
     }
 
-    // Parser les modifications de l'événement
+    // Parse event modifications
     const { type, ...modifs } = event;
 
-    // Convertir les dates (âge ou année)
+    // Convert dates (age or year)
     if (modifs.end && typeof modifs.end === "string") {
       modifs.end = parseAgeOrYear(modifs.end, context.birthYear) || modifs.end;
     }
@@ -324,13 +312,10 @@ export const modifyCalendarEpisode = assign({
 });
 
 /**
- * Ferme l'épisode de la commune précédente à la date d'arrivée dans la nouvelle
- * NOTE: Ne modifie pas la commune de naissance (index 0) car sa date de fin
- * a déjà été définie dans askBirthCommuneDepartureYear
+ * Closes the previous commune episode when entering a new commune.
+ * Does NOT modify the birth commune (index 0).
  */
 export const closePreviousCommuneEpisode = ({ context, event }) => {
-  // Ne pas modifier la commune de naissance (première commune, index 0)
-  // car sa date de fin a déjà été demandée séparément
   if (context.currentCommuneIndex <= 1) {
     return;
   }
@@ -346,7 +331,7 @@ export const closePreviousCommuneEpisode = ({ context, event }) => {
 };
 
 /**
- * Étend l'épisode précédent du calendrier
+ * Extends the previous episode by setting its end date equal to the new start.
  */
 export const extendPreviousCalendarEpisode = ({ context, event }) => {
   const { type, ...modifs } = event;
@@ -359,7 +344,7 @@ export const extendPreviousCalendarEpisode = ({ context, event }) => {
 };
 
 /**
- * Divise un épisode de logement en deux à une date donnée
+ * Splits a housing episode into two at a given year.
  */
 export const splitHousingEpisode = assign({
   lastEpisode: ({ context, event }) => {
@@ -370,10 +355,10 @@ export const splitHousingEpisode = assign({
     const endDate = new Date(episodeToSplit.end);
     const splitDate = new Date(splitYear, 0, 1);
 
-    // Modifier l'épisode existant (premier logement)
+    // Modify the first housing episode
     modifierEpisode(episodeToSplit.id, { end: splitDate });
 
-    // Ajouter le second logement
+    // Add the second housing episode
     const secondEpisode = ajouterEpisode(
       episodeToSplit.content,
       splitDate,
@@ -385,20 +370,15 @@ export const splitHousingEpisode = assign({
   },
 });
 
-// =============================================================================
-// ACTIONS DE CONFIGURATION
-// =============================================================================
+// ============================================================================= // CALENDAR SETUP ACTION // =============================================================================
 
-/**
- * Configure le calendrier avec l'année de naissance
- * Définit les options de la timeline et le format d'affichage de l'âge
- */
+/** * Configures the timeline based on the birth year. * Sets: * - timeline range * - initial position * - custom age labels * - birth-year markers */
 export const setupCalendar = ({ context, event }) => {
   timeline.setOptions({
     min: new Date(`${event.birthdate - 4}-01-01`),
     start: new Date(`${event.birthdate - 4}-01-01`),
   });
-  
+
   const birthDate = new Date(`${event.birthdate}-01-01`);
   timeline.moveTo(birthDate);
 
@@ -448,7 +428,7 @@ export const setupCalendar = ({ context, event }) => {
       },
     },
   });
-  // adding a new bar to show the birthdate
+  // Add birth-year markers
   timeline.addCustomTime(
     new Date(`${event.birthdate}-01-01`),
     "birth-year-bar"
@@ -460,12 +440,9 @@ export const setupCalendar = ({ context, event }) => {
 };
 
 // =============================================================================
-// EXPORT GROUPÉ POUR LA MACHINE
+// EXPORT ALL ACTIONS
 // =============================================================================
 
-/**
- * Objet contenant toutes les actions pour la configuration de la machine
- */
 export const actions = {
   saveBirthYear,
   saveBirthPlace,

@@ -1,509 +1,516 @@
-// XState est chargé via UMD en tant que variable globale window.XState
+// XState is loaded via UMD as a global window.XState
 const { createMachine, interpret, assign } = window.XState;
 import { modifierEpisode, ajouterEpisode } from "../episodes/episodes.js";
 import { timeline, items } from "../timeline/timeline.js";
-import { 
-  loadSavedContext, 
-  saveContext, 
-  saveAnsweredQuestion, 
-  loadAnsweredQuestions, 
-  resetAllData 
+import {
+  loadSavedContext,
+  saveContext,
+  saveAnsweredQuestion,
+  loadAnsweredQuestions,
+  resetAllData,
 } from "./persistence.js";
-import { 
-  stateToQuestionMap, 
-  getQuestionFromState 
+import {
+  stateToQuestionMap,
+  getQuestionFromState,
 } from "./stateToQuestionMap.js";
 import {
   defaultContext,
   getLastEpisodeFromTimeline,
-  initializeContext
+  initializeContext,
 } from "./context.js";
 import { guards } from "./guards.js";
 import { actions } from "./actions.js";
 /*
-********************************************************************************
-* stateMachine.js décrit la machine à état                                     *
-* (ensemble d'états et de transitions qui décrit le comportement d'un systeme) *
-********************************************************************************
-*/
-// Initialiser le contexte (charge depuis localStorage si disponible)
-const { initialContext, initialState, savedContext, savedState } = initializeContext();
+ ********************************************************************************
+ * stateMachine.js - Main state machine definition                               *
+ * Defines all states, transitions, guards, and actions for the survey workflow  *
+ ********************************************************************************
+ */
+// Load initial context and state (restored from localStorage if available)
+const { initialContext, initialState, savedContext, savedState } =
+  initializeContext();
 
-export const surveyMachine = createMachine({
-  id: 'survey',
-  initial: initialState, // Utiliser l'état sauvegardé 
-  context: initialContext, // Utiliser le contexte sauvegardé 
-  on: {
-    // Événement global pour restaurer lastEpisode après chargement
-    RESTORE_LAST_EPISODE: {
-      actions: assign({
-        lastEpisode: ({ event }) => event.lastEpisode
-      })
+export const surveyMachine = createMachine(
+  {
+    id: "survey",
+    // Start from restored state if available
+    initial: initialState,
+    // Use restored context if available
+    context: initialContext,
+
+    // Global event handlers (available in all states)
+    on: {
+      /** * RESTORE_LAST_EPISODE * Used after service startup to reattach the last timeline episode * into the machine context. */
+      RESTORE_LAST_EPISODE: {
+        actions: assign({
+          lastEpisode: ({ event }) => event.lastEpisode,
+        }),
+      },
+      /**
+       * UPDATE_ANSWER
+       * Allows modifying a previous answer WITHOUT changing state.
+       * This is used when editing past answers or timeline episodes.
+       */
+      UPDATE_ANSWER: {
+        actions: assign(({ context, event }) => {
+          const updates = {};
+
+          // Update context field
+          if (event.key) {
+            updates[event.key] = event.value;
+          }
+
+          // If modifying a timeline episode
+          if (event.updateEpisode) {
+            let episodeToUpdate = null;
+            // Special case: residential status (group 11)
+            if (event.key === "statut_res") {
+              const allItems = items.get();
+              const statusEpisodes = allItems.filter(
+                (item) => item.group === 11
+              );
+              if (statusEpisodes.length > 0) {
+                episodeToUpdate = statusEpisodes[statusEpisodes.length - 1]; // Prendre le dernier
+              }
+            } else {
+              // Default: use lastEpisode
+              episodeToUpdate = context.lastEpisode;
+            }
+
+            if (episodeToUpdate) {
+              const modifs = {};
+              modifs[event.key] = event.value;
+              // Apply modification locally (no WebRTC sync here)
+              modifierEpisode(episodeToUpdate.id, modifs, false);
+            } else {
+              console.warn("Aucun épisode trouvé pour la modification");
+            }
+            // Special case: modifying commune name
+          } else if (event.key === "commune") {
+            if (event.value && event.value !== "Yes" && event.value !== "No") {
+              const allItems = items.get();
+              const communeEpisodes = allItems.filter(
+                (item) => item.group === 13
+              );
+              if (communeEpisodes.length > 0) {
+                const lastCommuneEpisode =
+                  communeEpisodes[communeEpisodes.length - 1];
+                modifierEpisode(
+                  lastCommuneEpisode.id,
+                  { content: event.value },
+                  false
+                );
+              }
+            }
+
+            // Update communes[] array so future questions use the new value
+            if (context.communes && context.communes.length > 0) {
+              const indexToUpdate = context.currentCommuneIndex || 0;
+              const newCommunes = [...context.communes];
+              newCommunes[indexToUpdate] = event.value;
+              updates.communes = newCommunes;
+            }
+            // Special case: modifying the entire communes[] list
+          } else if (event.key === "communes") {
+            const allItems = items.get();
+            const communeEpisodes = allItems.filter(
+              (item) => item.group === 13
+            );
+            const newCommunes = event.value || [];
+
+            // Remove orphaned commune episodes (except birth commune)
+            if (communeEpisodes.length > 1) {
+              const episodesToRemove = communeEpisodes.slice(1).filter((ep) => {
+                return !newCommunes.includes(ep.content);
+              });
+
+              episodesToRemove.forEach((ep) => {
+                items.remove(ep.id);
+              });
+
+              // Remove child episodes (housing + status)
+              const childEpisodes = allItems.filter(
+                (item) => item.group === 12 || item.group === 11
+              );
+              childEpisodes.forEach((ep) => {
+                items.remove(ep.id);
+              });
+            }
+
+            // Reset indexes
+            updates.currentCommuneIndex = 0;
+            updates.logements = [];
+            updates.currentLogementIndex = 0;
+          }
+
+          return updates;
+        }),
+      },
     },
-    // Événement global pour mettre à jour une réponse sans changer d'état
-    UPDATE_ANSWER: {
-      actions: assign(({ context, event }) => {
-        // Mettre à jour le contexte selon le type de réponse
-        const updates = {};
-        
-        if (event.key) {
-          updates[event.key] = event.value;
-        }
-        
-        // Si on modifie un épisode, le mettre à jour dans la timeline
-        if (event.updateEpisode) {
-          // Trouver l'épisode à modifier selon la clé
-          let episodeToUpdate = null;
-          
-          if (event.key === 'statut_res') {
-            // Chercher l'épisode de statut (groupe 11)
-            const allItems = items.get();
-            const statusEpisodes = allItems.filter(item => item.group === 11);
-            if (statusEpisodes.length > 0) {
-              episodeToUpdate = statusEpisodes[statusEpisodes.length - 1]; // Prendre le dernier
-            }
-          } else {
-            // Pour les autres, utiliser lastEpisode
-            episodeToUpdate = context.lastEpisode;
-          }
-          
-          if (episodeToUpdate) {
-            const modifs = {};
-            modifs[event.key] = event.value;
-            // Ne pas synchroniser via WebRTC ici car l'événement UPDATE_ANSWER est déjà synchronisé
-            modifierEpisode(episodeToUpdate.id, modifs, false);
-          } else {
-            console.warn('Aucun épisode trouvé pour la modification');
-          }
-        } else if (event.key === 'commune') {
-          // Pour les communes, modifier l'épisode même si updateEpisode est false
-          // IMPORTANT: Ne pas modifier si la valeur est Yes/No (ce n'est pas un nom de commune)
-          if (event.value && event.value !== 'Yes' && event.value !== 'No') {
-            const allItems = items.get();
-            const communeEpisodes = allItems.filter(item => item.group === 13);
-            if (communeEpisodes.length > 0) {
-              const lastCommuneEpisode = communeEpisodes[communeEpisodes.length - 1];
-              // Ne pas synchroniser via WebRTC ici car l'événement UPDATE_ANSWER est déjà synchronisé
-              modifierEpisode(lastCommuneEpisode.id, {content: event.value}, false);
-            }
-          }
-          
-          // IMPORTANT: Mettre aussi à jour le tableau communes[] pour que les questions suivantes utilisent la nouvelle valeur
-          if (context.communes && context.communes.length > 0) {
-            // Mettre à jour la commune à l'index courant (ou la première si index = 0)
-            const indexToUpdate = context.currentCommuneIndex || 0;
-            const newCommunes = [...context.communes];
-            newCommunes[indexToUpdate] = event.value;
-            updates.communes = newCommunes;
-          }
-        } else if (event.key === 'communes') {
-          // Modification de la liste complète des communes
-          // Nettoyer les épisodes orphelins sur la timeline (groupe 13)
-          const allItems = items.get();
-          const communeEpisodes = allItems.filter(item => item.group === 13);
-          const newCommunes = event.value || [];
-          
-          // Supprimer les épisodes qui ne correspondent plus à aucune commune
-          // On garde le premier épisode (commune de naissance) et on nettoie les autres
-          if (communeEpisodes.length > 1) {
-            // Garder seulement les épisodes dont le contenu est dans la nouvelle liste
-            // ou le premier épisode (commune de naissance)
-            const episodesToRemove = communeEpisodes.slice(1).filter(ep => {
-              return !newCommunes.includes(ep.content);
-            });
-            
-            episodesToRemove.forEach(ep => {
-              items.remove(ep.id);
-            });
-            
-            // Supprimer aussi les épisodes enfants (logements groupe 12, statuts groupe 11)
-            const childEpisodes = allItems.filter(item => item.group === 12 || item.group === 11);
-            childEpisodes.forEach(ep => {
-              items.remove(ep.id);
-            });
-          }
-          
-          // Réinitialiser l'index des communes pour recommencer
-          updates.currentCommuneIndex = 0;
-          updates.logements = [];
-          updates.currentLogementIndex = 0;
-        }
-        
-        return updates;
-      })
+    // ======================================================================== // STATES // ========================================================================
+    states: {
+      // ---------------------- Birth year ----------------------
+      askBirthYear: {
+        on: {
+          ANSWER_BIRTH_YEAR: {
+            actions: ["saveBirthYear", "setupCalendar"],
+            target: "birthPlaceIntro",
+          },
+        },
+      },
+      // ---------------------- Birthplace intro ----------------------
+      birthPlaceIntro: {
+        on: {
+          NEXT: {
+            target: "askCurrentCommune",
+          },
+        },
+      },
+      // ---------------------- First commune ----------------------
+      askCurrentCommune: {
+        on: {
+          ANSWER_CURRENT_COMMUNE: {
+            actions: ["addCommune"],
+            target: "askDepartementOrPays",
+          },
+        },
+      },
+
+      askDepartementOrPays: {
+        on: {
+          ANSWER_DEPARTEMENT: {
+            actions: [
+              "addDepartement",
+              {
+                type: "addCalendarEpisode",
+                params: { start: "timeline_init" },
+              },
+            ],
+            target: "askAlwaysLivedInCommune",
+          },
+        },
+      },
+      // ---------------------- Always lived in commune? ----------------------
+      askAlwaysLivedInCommune: {
+        on: {
+          YES: {
+            actions: [
+              {
+                type: "modifyCalendarEpisode",
+                params: { end: "timeline_end" },
+              },
+              "nextGroup",
+            ],
+            target: "askSameHousingInCommune",
+          },
+          NO: "askBirthCommuneDepartureYear",
+        },
+      },
+
+      // ---------------------- Departure year from birth commune ----------------------
+      askBirthCommuneDepartureYear: {
+        on: {
+          ANSWER_BIRTH_COMMUNE_DEPARTURE: {
+            actions: ["modifyCalendarEpisode"],
+            target: "askMultipleCommunes",
+          },
+        },
+      },
+      // ---------------------- Multiple communes ----------------------
+      askMultipleCommunes: {
+        on: {
+          ANSWER_MULTIPLE_COMMUNES: {
+            actions: ["addMultipleCommunes"],
+            target: "placeNextCommuneOnTimeline",
+          },
+        },
+      },
+
+      placeNextCommuneOnTimeline: {
+        always: [
+          {
+            guard: "hasMoreCommunesToPlace",
+            target: "askCommuneArrivalYear",
+          },
+          {
+            actions: [
+              "nextGroup", // Passer de groupe 13 (commune) à groupe 12 (logement)
+              "resetCommune", // Réinitialiser l'index pour recommencer à la première commune
+            ],
+            target: "askSameHousingInCommune",
+          },
+        ],
+      },
+
+      askCommuneArrivalYear: {
+        on: {
+          ANSWER_COMMUNE_ARRIVAL: {
+            actions: ["addCalendarEpisode"],
+            target: "askCommuneDepartureYear",
+          },
+        },
+      },
+
+      askCommuneDepartureYear: {
+        on: {
+          ANSWER_COMMUNE_DEPARTURE: {
+            actions: ["modifyCalendarEpisode", "nextCommune"],
+            target: "placeNextCommuneOnTimeline",
+          },
+        },
+      },
+      // ---------------------- Housing logic ----------------------
+      askSameHousingInCommune: {
+        entry: [],
+        on: {
+          YES: {
+            actions: [
+              assign({
+                logements: ({ context }) => {
+                  return ["Logement unique"];
+                },
+                currentLogementIndex: 0,
+              }),
+              "addCalendarEpisode", // Créer épisode dans groupe 12 (logement)
+            ],
+            target: "askHousingOccupationStatusEntry",
+          },
+          NO: "askMultipleHousings",
+        },
+      },
+
+      askMultipleHousings: {
+        on: {
+          ANSWER_MULTIPLE_HOUSINGS: {
+            actions: ["addMultipleHousings", "resetLogement"],
+            target: "askHousingArrivalAge",
+          },
+        },
+      },
+
+      askHousingArrivalAge: {
+        on: {
+          ANSWER_HOUSING_ARRIVAL: {
+            actions: ["addCalendarEpisode"],
+            target: "askHousingDepartureAge",
+          },
+        },
+      },
+
+      askHousingDepartureAge: {
+        on: {
+          ANSWER_HOUSING_DEPARTURE: {
+            actions: ["modifyCalendarEpisode"],
+            target: "askHousingOccupationStatusEntry",
+          },
+        },
+      },
+
+      askHousingOccupationStatusEntry: {
+        entry: ["nextGroup"],
+        on: {
+          ANSWER_STATUS_ENTRY: {
+            actions: ["addCalendarEpisode"], // Créer épisode dans groupe 11 (statut)
+            target: "askHousingOccupationStatusExit",
+          },
+        },
+      },
+
+      askHousingOccupationStatusExit: {
+        on: {
+          ANSWER_STATUS_EXIT: {
+            actions: ["modifyCalendarEpisode"],
+            target: "checkMoreHousings",
+          },
+        },
+      },
+      // ---------------------- Looping logic ----------------------
+      checkMoreHousings: {
+        entry: [],
+        always: [
+          {
+            guard: "moreLogementsToProcess",
+            actions: [
+              "nextLogement",
+              "previousGroup", // Remonter de groupe 11 (statut) à groupe 12 (logement)
+            ],
+            target: "askHousingArrivalAge",
+          },
+          {
+            guard: "moreCommunesToProcess",
+            actions: [
+              "nextCommune", // Passer à la commune suivante
+              "resetLogement", // Réinitialiser l'index des logements pour la prochaine commune
+              "previousGroup", // 11 → 12
+            ],
+            target: "askSameHousingInCommune",
+          },
+          {
+            actions: [],
+            target: "surveyComplete",
+          },
+        ],
+      },
+      surveyComplete: {
+        type: "final",
+      },
     },
   },
-  states: {
-    askBirthYear: {
-      on: {
-        ANSWER_BIRTH_YEAR: {
-          actions: ['saveBirthYear', 'setupCalendar'],
-          target: 'birthPlaceIntro'
-        }
-      }
-    },
-    
-    birthPlaceIntro: {
-      on: {
-        NEXT: {
-          target: 'askCurrentCommune'
-        }
-      }
-    },
-
-    askCurrentCommune: {
-      on: {
-        ANSWER_CURRENT_COMMUNE: {
-          actions: ['addCommune'],
-          target: 'askDepartementOrPays'
-        }
-      }
-    },
-
-    askDepartementOrPays: {
-      on: {
-        ANSWER_DEPARTEMENT: {
-          actions: [
-            'addDepartement',
-            {
-              type: 'addCalendarEpisode', params: {start: "timeline_init"}
-            }
-          ],
-          target: 'askAlwaysLivedInCommune'
-        }
-      }
-    },
-
-    askAlwaysLivedInCommune: {
-      on: {
-        YES: {
-          actions: [
-            {
-              type: 'modifyCalendarEpisode', params: {end: 'timeline_end'}
-            },
-            'nextGroup',  // Passer de groupe 13 (commune) à groupe 12 (type logement)
-          ],
-          target: 'askSameHousingInCommune'
-        },
-        NO: 'askBirthCommuneDepartureYear'
-      }
-    },
-
-    // Nouvelle question: demander quand l'utilisateur a quitté sa commune de naissance
-    askBirthCommuneDepartureYear: {
-      on: {
-        ANSWER_BIRTH_COMMUNE_DEPARTURE: {
-          actions: ['modifyCalendarEpisode'],
-          target: 'askMultipleCommunes'
-        }
-      }
-    },
-
-    askMultipleCommunes: {
-      on: {
-        ANSWER_MULTIPLE_COMMUNES: {
-          actions: [
-            'addMultipleCommunes'
-          ],
-          target: 'placeNextCommuneOnTimeline'
-        }
-      }
-    },
-
-    placeNextCommuneOnTimeline: {
-      always: [
-        {
-          guard: 'hasMoreCommunesToPlace',
-          target: 'askCommuneArrivalYear'
-        },
-        {
-          actions: [
-            'nextGroup',  // Passer de groupe 13 (commune) à groupe 12 (logement)
-            'resetCommune'  // Réinitialiser l'index pour recommencer à la première commune
-          ],
-          target: 'askSameHousingInCommune'
-        }
-      ]
-    },
-
-    askCommuneArrivalYear: {
-      on: {
-        ANSWER_COMMUNE_ARRIVAL: {
-          actions: ['addCalendarEpisode'],
-          target: 'askCommuneDepartureYear'
-        }
-      }
-    },
-
-    askCommuneDepartureYear: {
-      on: {
-        ANSWER_COMMUNE_DEPARTURE: {
-          actions: ['modifyCalendarEpisode', 'nextCommune'],
-          target: 'placeNextCommuneOnTimeline'
-        }
-      }
-    },
-
-    askSameHousingInCommune: {
-      entry: [
-      ],
-      on: {
-        YES: {
-          actions: [
-            assign({
-              logements: ({context}) => {
-                return ['Logement unique'];
-              },
-              currentLogementIndex: 0
-            }),
-            'addCalendarEpisode',     // Créer épisode dans groupe 12 (logement)
-          ],
-          target: 'askHousingOccupationStatusEntry'
-        },
-        NO: 'askMultipleHousings'
-      }
-    },
-
-    askMultipleHousings: {
-      on: {
-        ANSWER_MULTIPLE_HOUSINGS: {
-          actions: [
-            'addMultipleHousings',
-            'resetLogement'
-          ],
-          target: 'askHousingArrivalAge'
-        }
-      }
-    },
-
-    askHousingArrivalAge: {
-      on: {
-        ANSWER_HOUSING_ARRIVAL: {
-          actions: ['addCalendarEpisode'],
-          target: 'askHousingDepartureAge'
-        }
-      }
-    },
-
-    askHousingDepartureAge: {
-      on: {
-        ANSWER_HOUSING_DEPARTURE: {
-          actions: ['modifyCalendarEpisode'],
-          target: 'askHousingOccupationStatusEntry'
-        }
-      }
-    },
-
-    askHousingOccupationStatusEntry: {
-      entry: [
-        'nextGroup',
-      ],
-      on: {
-        ANSWER_STATUS_ENTRY: {
-          actions: ['addCalendarEpisode'],  // Créer épisode dans groupe 11 (statut)
-          target: 'askHousingOccupationStatusExit'
-        }
-      }
-    },
-
-    askHousingOccupationStatusExit: {
-      on: {
-        ANSWER_STATUS_EXIT: {
-          actions: ['modifyCalendarEpisode'],
-          target: 'checkMoreHousings'
-        }
-      }
-    },
-
-    checkMoreHousings: {
-      entry: [
-      ],
-      always: [
-        {
-          guard: 'moreLogementsToProcess',
-          actions: [
-            'nextLogement',
-            'previousGroup',  // Remonter de groupe 11 (statut) à groupe 12 (logement)
-          ],
-          target: 'askHousingArrivalAge'
-        },
-        {
-          guard: 'moreCommunesToProcess',
-          actions: [
-            'nextCommune',  // Passer à la commune suivante
-            'resetLogement',  // Réinitialiser l'index des logements pour la prochaine commune
-            'previousGroup',  // 11 → 12
-          ],
-          target: 'askSameHousingInCommune'
-        },
-        {
-          actions: [
-          ],
-          target: 'surveyComplete'
-        }
-      ]
-    },
-    surveyComplete: {
-      type: 'final'
-    }
+  {
+    actions,
+    guards,
   }
-}, {
-  actions,
-  guards
-});
+);
 
-// Créer le service et le configurer avec les données sauvegardées
-// Utiliser let pour pouvoir réassigner lors de la navigation
+// ============================================================================ // SERVICE INITIALIZATION // ============================================================================
 export let surveyService = interpret(surveyMachine);
 
-// Callback pour re-rendre les questions après navigation
+// Callback for UI rendering
 let renderCallback = null;
 
-// Fonction pour définir le callback de rendu (appelée depuis questionnaire.js)
 export function setRenderCallback(callback) {
   renderCallback = callback;
 }
-
-// Fonction pour initialiser le service avec l'état sauvegardé
+/**
+ * Initializes the service, restores lastEpisode, and restores timeline options.
+ */
 export function initializeSurveyService() {
-  // Démarrer le service (l'état initial est déjà configuré dans la machine)
   surveyService.start();
-  
-  // IMPORTANT : Restaurer lastEpisode APRÈS le démarrage
+  // Restore lastEpisode after startup
   if (savedContext && savedState) {
     const lastEpisode = getLastEpisodeFromTimeline();
     if (lastEpisode) {
-      // Mettre à jour le contexte du service
       surveyService.send({
-        type: 'RESTORE_LAST_EPISODE',
-        lastEpisode: lastEpisode
+        type: "RESTORE_LAST_EPISODE",
+        lastEpisode: lastEpisode,
       });
     }
   }
-  
-  
-  
-  // Si on a un contexte sauvegardé, restaurer les options de la timeline
-  if (initialContext && initialContext.birthYear && initialContext.birthYear > 0) {
-    // Vérifier que timeline existe avant de l'utiliser
-    if (timeline && typeof timeline.setOptions === 'function') {
+  // Restore timeline options if birthYear exists
+  if (
+    initialContext &&
+    initialContext.birthYear &&
+    initialContext.birthYear > 0
+  ) {
+    if (timeline && typeof timeline.setOptions === "function") {
       timeline.setOptions({
-        min: new Date(`${initialContext.birthYear}-01-01`), 
-        start: new Date(`${initialContext.birthYear}-01-01`)
+        min: new Date(`${initialContext.birthYear}-01-01`),
+        start: new Date(`${initialContext.birthYear}-01-01`),
       });
-      
-      // Restaurer aussi le format de l'âge
+
       timeline.setOptions({
         format: {
-          minorLabels: function(date, scale, step) {
+          minorLabels: function (date, scale, step) {
             switch (scale) {
-              case 'year':
-                const age = new Date(date).getFullYear() - initialContext.birthYear;
-                return '<b>' + new Date(date).getFullYear() + '</b></br><b>' + age + `</b> ${age != 0 && age != 1 ? 'ans' : 'an'}`;
+              case "year":
+                const age =
+                  new Date(date).getFullYear() - initialContext.birthYear;
+                return (
+                  "<b>" +
+                  new Date(date).getFullYear() +
+                  "</b></br><b>" +
+                  age +
+                  `</b> ${age != 0 && age != 1 ? "ans" : "an"}`
+                );
               default:
-                return vis.moment(date).format(scale === 'month' ? 'MMM' : 'D');
+                return vis.moment(date).format(scale === "month" ? "MMM" : "D");
             }
-          }
-        }
+          },
+        },
       });
     } else {
-      console.warn('⚠️ Timeline pas encore initialisée ou setOptions non disponible');
+      console.warn(
+        "⚠️ Timeline pas encore initialisée ou setOptions non disponible"
+      );
     }
-  }  // Sauvegarder le contexte après chaque transition
+  }
+  // Persist context after every transition
   surveyService.subscribe((state) => {
     saveContext(state.context, state.value);
   });
 }
 
 /**
- * Restaurer l'état depuis un état distant (WebRTC)
- * IMPORTANT : Utilisé UNIQUEMENT pour la synchronisation en temps réel
- * PAS pour la persistance après fermeture (localStorage fait ça)
+ * Restores state from a remote peer (WebRTC sync).
+ * Used ONLY for real-time synchronization.
  */
 export function restoreFromRemoteState(remoteState) {
   try {
-    // Sauvegarder dans localStorage (pour persistance)
     saveContext(remoteState.context, remoteState.value);
-    
-    // Arrêter le service actuel
+
     surveyService.stop();
-    
-    // Redémarrer avec le nouvel état
+
     surveyService.start({
       value: remoteState.value,
-      context: remoteState.context
+      context: remoteState.context,
     });
-    
   } catch (error) {
-    console.error('❌ Erreur lors de la synchronisation distante:', error);
+    console.error("❌ Erreur lors de la synchronisation distante:", error);
   }
 }
 
 /**
- * Naviguer vers un état spécifique en recréant la machine
- * @param {string} targetState - L'état cible
- * @param {object} contextUpdates - Mises à jour du contexte
- * @param {function} clearQuestionsCallback - Callback pour vider les questions du DOM
+ * Navigates to a specific state by recreating the machine.
+ * Used when editing past answers and needing to "rewind" the flow.
  */
-export function navigateToState(targetState, contextUpdates = {}, clearQuestionsCallback = null) {
+export function navigateToState(
+  targetState,
+  contextUpdates = {},
+  clearQuestionsCallback = null
+) {
   try {
-    // Récupérer le contexte actuel
     const currentSnapshot = surveyService.getSnapshot();
     const currentContext = currentSnapshot.context;
-    
-    // Fusionner les mises à jour avec le contexte actuel
+
     const newContext = {
       ...currentContext,
       ...contextUpdates,
-      lastEpisode: getLastEpisodeFromTimeline()
+      lastEpisode: getLastEpisodeFromTimeline(),
     };
-    
-    // Sauvegarder dans localStorage
+
     saveContext(newContext, targetState);
-    
-    // Arrêter l'ancien service
+
     surveyService.stop();
-    
-    // Créer une nouvelle machine avec le nouvel état initial
-    const newMachine = createMachine({
-      ...surveyMachine.config,
-      initial: targetState,
-      context: newContext
-    }, surveyMachine.implementations);
-    
-    // Créer un nouveau service
+
+    const newMachine = createMachine(
+      {
+        ...surveyMachine.config,
+        initial: targetState,
+        context: newContext,
+      },
+      surveyMachine.implementations
+    );
+
     surveyService = interpret(newMachine);
-    
-    // Réabonner pour sauvegarder après chaque transition
+
     surveyService.subscribe((state) => {
       saveContext(state.context, state.value);
-      // Appeler le callback de rendu si défini
       if (renderCallback) {
         renderCallback(state);
       }
     });
-    
-    // Vider les questions du DOM si callback fourni
+
     if (clearQuestionsCallback) {
       clearQuestionsCallback();
     }
-    
-    // Démarrer le nouveau service
+
     surveyService.start();
-    
-    // Rendre la question initiale
+
     if (renderCallback) {
       const newState = surveyService.getSnapshot();
       renderCallback(newState);
     }
-        
   } catch (error) {
-    console.error('❌ Erreur lors de la navigation:', error);
+    console.error("❌ Erreur lors de la navigation:", error);
   }
 }
 
-// Exporter pour que questionnaire.js puisse l'utiliser
 export { savedContext, savedState };
 
-// Réexporter les fonctions pour les autres modules
-export { saveAnsweredQuestion, loadAnsweredQuestions, resetAllData, stateToQuestionMap, getQuestionFromState };
+export {
+  saveAnsweredQuestion,
+  loadAnsweredQuestions,
+  resetAllData,
+  stateToQuestionMap,
+  getQuestionFromState,
+};
