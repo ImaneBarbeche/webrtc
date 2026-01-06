@@ -188,6 +188,7 @@ async function startScanner() {
  * Otherwise, fallback to writing into the second <textarea>.
  */
 function applyScannedValue(value) {
+    console.log("SCANNED VALUE:", JSON.stringify(value));
   if (typeof window.handleScannedData === "function") {
     window.handleScannedData(value);
   } else {

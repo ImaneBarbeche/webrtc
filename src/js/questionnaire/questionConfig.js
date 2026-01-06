@@ -1,12 +1,12 @@
 /**
- * Configuration des questions du questionnaire
- * Retourne les paramètres de rendu pour chaque état de la machine
+ * Questionnaire question configuration
+ * Returns the rendering parameters for each state of the state machine
  */
 
 /**
- * Obtient la configuration d'une question selon l'état actuel
- * @param {object} state - L'état actuel de la machine (avec state.value et state.context)
- * @returns {object} - Configuration de la question { questionText, responseType, choices, eventType, eventKey }
+ * Gets the configuration for a question based on the current state
+ * @param {object} state - The current state of the state machine (with state.value and state.context)
+ * @returns {object} - Question configuration { questionText, responseType, choices, eventType, eventKey }
  */
 export function getQuestionConfig(state) {
   let questionText = "";
@@ -164,9 +164,9 @@ export function getQuestionConfig(state) {
 }
 
 /**
- * Met à jour le texte d'une question existante (pour les modifications de commune)
- * @param {HTMLElement} questionP - L'élément <p> contenant le texte
- * @param {object} state - L'état actuel
+ * Updates the text of an existing question (for commune modifications)
+ * @param {HTMLElement} questionP - The <p> element containing the text
+ * @param {object} state - The current state
  */
 export function updateQuestionText(questionP, state) {
   const commune = state.context.communes?.[state.context.currentCommuneIndex] || "cette commune";

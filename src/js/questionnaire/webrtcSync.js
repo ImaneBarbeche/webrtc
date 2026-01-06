@@ -1,6 +1,6 @@
 /**
- * Gestion de la synchronisation WebRTC pour le questionnaire
- * Permet la communication entre deux tablettes (enquêteur/enquêté)
+ * WebRTC synchronization management for the questionnaire
+ * Enables communication between two tablets (interviewer/interviewee)
  */
 
 import { items } from "../timeline/timeline.js";
@@ -9,18 +9,18 @@ import { setSyncConfig } from "./eventHandlers.js";
 import { setBirthYear } from "../timeline/birthYear.js";
 import { saveAnsweredQuestion } from "../stateMachine/persistence.js";
 
-// Variable locale pour tracker si WebRTC est déjà activé
+// Local variable to track if WebRTC is already activated
 let webrtcActivated = false;
 
 /**
- * Gérer les messages reçus de l'autre tablette
- * @param {object} message - Le message reçu
+ * Handle messages received from the other tablet
+ * @param {object} message - The received message
  */
 export function handleRemoteMessage(message) {
   if (message.type === "SURVEY_EVENT") {
-    // Appliquer l'événement reçu à notre machine à états
+    // Apply the received event to our state machine
     surveyService.send(message.event);
-    // sauvegarder la réponse modifiée
+    // Save the modified answer
     if (message.event.type === "UPDATE_ANSWER" && message.event.key) {
       saveAnsweredQuestion(message.event.key, {
         key: message.event.key,
@@ -28,20 +28,20 @@ export function handleRemoteMessage(message) {
       });
     }
 
-    // Cas spécial : mise à jour de la date de naissance
+    // Special case: update of the birth date
     if (
       message.event.type === "UPDATE_ANSWER" &&
       (message.event.key === "birthdate" || message.event.key === "birthYear")
     ) {
       const birthYear = Number(message.event.value);
       if (!isNaN(birthYear) && window.timeline) {
-        // Mettre à jour l'affichage fixe
+        // Update the fixed display
         setBirthYear(birthYear);
 
         const birthDate = new Date(birthYear, 0, 1);
         const nowYear = new Date().getFullYear();
 
-        // Mettre à jour les options de la timeline
+        // Update the timeline options
         window.timeline.setOptions({
           min: new Date(birthYear - 4, 0, 1),
           start: new Date(birthYear - 4, 0, 1),
@@ -94,7 +94,7 @@ export function handleRemoteMessage(message) {
           },
         });
 
-        // Mettre à jour la barre existante au lieu de la recréer
+        // Update the existing bar instead of recreating it
         window.timeline.setCustomTime(birthDate, "birth-year-bar");
         window.timeline.setCustomTimeTitle(birthYear, "birth-year-bar");
 
@@ -110,10 +110,10 @@ export function handleRemoteMessage(message) {
   } else if (message.type === "UPDATE_ITEMS") {
     handleUpdateItems(message.items);
   } else if (message.type === "ADD_ITEMS") {
-    // Ajout manuel d'épisodes/événements via la modale
+    // Manual addition of episodes/events via the modal
     handleUpdateItems(message.items);
   } else if (message.type === "SURVEY_STATE") {
-    // TODO: synchroniser l'état complet si nécessaire
+    // TODO: synchronize the full state if needed
   } else if (message.type === "RESET_ALL_DATA") {
     import("../stateMachine/stateMachine.js").then((module) => {
       module.resetAllData();
@@ -122,8 +122,8 @@ export function handleRemoteMessage(message) {
 }
 
 /**
- * Gère la mise à jour des items modifiés reçus via WebRTC
- * @param {Array} updatedItems - Les items à mettre à jour
+ * Handles the update of modified items received via WebRTC
+ * @param {Array} updatedItems - The items to update
  */
 function handleUpdateItems(updatedItems) {
   try {
@@ -131,22 +131,22 @@ function handleUpdateItems(updatedItems) {
       return;
     }
 
-    // Convertir les dates ISO en objets Date si nécessaire
+    // Convert ISO dates to Date objects if needed
     const parsed = updatedItems.map((i) => ({
       ...i,
       start: i.start ? new Date(i.start) : undefined,
       end: i.end ? new Date(i.end) : undefined,
     }));
 
-    // Mettre à jour les items existants
+    // Update existing items
     parsed.forEach((updatedItem) => {
       try {
         const existingItem = items.get(updatedItem.id);
         if (existingItem) {
-          // L'item existe, le mettre à jour
+          // The item exists, update it
           items.update(updatedItem);
         } else {
-          // L'item n'existe pas, l'ajouter
+          // The item does not exist, add it
           items.add(updatedItem);
         }
       } catch (e) {
@@ -154,7 +154,7 @@ function handleUpdateItems(updatedItems) {
       }
     });
 
-    // Redessiner la timeline si disponible
+    // Redraw the timeline if available
     if (window.timeline && typeof window.timeline.redraw === "function") {
       try {
         window.timeline.redraw();
@@ -168,8 +168,8 @@ function handleUpdateItems(updatedItems) {
 }
 
 /**
- * Gère le chargement des items reçus via WebRTC
- * @param {Array} receivedItems - Les items à charger
+ * Handles the loading of items received via WebRTC
+ * @param {Array} receivedItems - The items to load
  */
 function handleLoadItems(receivedItems) {
   try {
@@ -177,19 +177,19 @@ function handleLoadItems(receivedItems) {
       return;
     }
 
-    // Convertir les dates ISO en objets Date si nécessaire
+    // Convert ISO dates to Date objects if needed
     const parsed = receivedItems.map((i) => ({
       ...i,
       start: i.start ? new Date(i.start) : undefined,
       end: i.end ? new Date(i.end) : undefined,
     }));
 
-    // Ajouter en évitant les doublons
+    // Add while avoiding duplicates
     const toAdd = [];
     parsed.forEach((i) => {
       try {
         if (items.get(i.id)) {
-          // Générer un id unique si conflit
+          // Generate a unique id if conflict
           const newId = `${i.id}_${Date.now()}`;
           toAdd.push(Object.assign({}, i, { id: newId }));
         } else {
@@ -210,12 +210,12 @@ function handleLoadItems(receivedItems) {
 }
 
 /**
- * Ajoute des items à la timeline, avec gestion du cas où elle n'est pas encore prête
- * @param {Array} itemsToAdd - Les items à ajouter
+ * Adds items to the timeline, handling the case where it is not yet ready
+ * @param {Array} itemsToAdd - The items to add
  */
 function addItemsToTimeline(itemsToAdd) {
   try {
-    // Si la timeline est déjà initialisée, ajouter et ajuster la vue
+    // If the timeline is already initialized, add and adjust the view
     if (window.timeline && typeof window.timeline.fit === "function") {
       items.add(itemsToAdd);
       try {
@@ -225,7 +225,7 @@ function addItemsToTimeline(itemsToAdd) {
         window.timeline.fit();
       } catch (e) {}
     } else {
-      // Persister temporairement pour traitement lorsque la timeline sera prête
+      // Temporarily persist for processing when the timeline is ready
       try {
         const existing = JSON.parse(
           localStorage.getItem("lifestories_pending_load_items") || "[]"
@@ -236,7 +236,7 @@ function addItemsToTimeline(itemsToAdd) {
           JSON.stringify(merged)
         );
       } catch (e) {
-        // si localStorage indisponible, essayer d'ajouter directement
+        // if localStorage unavailable, try to add directly
         try {
           items.add(itemsToAdd);
         } catch (err) {
@@ -253,12 +253,12 @@ function addItemsToTimeline(itemsToAdd) {
 }
 
 /**
- * Active la synchronisation WebRTC
- * @returns {boolean} - true si activée avec succès
+ * Enables WebRTC synchronization
+ * @returns {boolean} - true if successfully activated
  */
 export function enableWebRTCSync() {
   if (window.webrtcSync && window.webrtcSync.isActive()) {
-    // N'activer qu'une seule fois
+    // Only activate once
     if (webrtcActivated) {
       return true;
     }
@@ -267,7 +267,7 @@ export function enableWebRTCSync() {
     const isHost = window.webrtcSync.getRole() === "host";
     setSyncConfig(true, isHost);
 
-    // Écouter les événements reçus de l'autre tablette (une seule fois)
+    // Listen to events received from the other tablet (only once)
     if (!window.webrtcSyncListenerAdded) {
       window.webrtcSync.onMessage((message) => {
         handleRemoteMessage(message);
@@ -281,17 +281,17 @@ export function enableWebRTCSync() {
   }
 }
 
+
 /**
- * Vérifie si WebRTC est activé
+ * Checks if WebRTC is activated
  * @returns {boolean}
  */
 export function isWebRTCActivated() {
   return webrtcActivated;
 }
-
 /**
- * Traite les items en attente stockés dans localStorage
- * À appeler une fois que la timeline est prête
+ * Processes pending items stored in localStorage
+ * To be called once the timeline is ready
  */
 export function processPendingItems() {
   try {

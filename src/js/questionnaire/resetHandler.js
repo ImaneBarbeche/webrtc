@@ -1,11 +1,11 @@
 /**
- * Gestionnaire du bouton de réinitialisation
- * Gère le reset des données questionnaire + timeline avec sync WebRTC
+ * Handler for resetting questionnaire and timeline data with WebRTC sync
+ * Handles the reset of questionnaire + timeline data with WebRTC sync
  */
 
 /**
- * Initialise le gestionnaire du bouton reset
- * À appeler au DOMContentLoaded
+ * Initializes the reset handler
+ * 
  */
 export function initResetHandler() {
   const resetButton = document.getElementById("resetButton");
@@ -18,10 +18,9 @@ export function initResetHandler() {
 }
 
 /**
- * Gère le clic sur le bouton reset
+ * Handles the reset action when the reset button is clicked
  */
 function handleReset() {
-  // Demander confirmation
   const confirmed = confirm(
     "Êtes-vous sûr de vouloir tout réinitialiser ? Toutes les données (questionnaire + timeline) seront perdues."
   );
@@ -30,14 +29,14 @@ function handleReset() {
     return;
   }
 
-  // Si on est connecté en WebRTC, envoyer un message de reset à l'autre appareil
+  // If the device is connected via WebRTC, send a reset message to the other device
   if (window.webrtcSync && window.webrtcSync.connected) {
     window.webrtcSync.sendMessage({
       type: "RESET_ALL_DATA",
     });
   }
 
-  // Réinitialiser localement
+  // Reinitialize locally
   import("../stateMachine/stateMachine.js").then((module) => {
     module.resetAllData();
   });

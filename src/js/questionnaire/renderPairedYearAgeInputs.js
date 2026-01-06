@@ -1,5 +1,5 @@
 // renderPairedYearAgeInputs.js
-// Rend deux paires (année+âge) pour arrivée et départ logement
+// Renders two paired inputs (year + age) for housing arrival and departure.
 
 import { getBirthYear as getGlobalBirthYear } from '../timeline/birthYear.js';
 
@@ -11,18 +11,28 @@ export function renderPairedYearAgeInputs(
   sendEvent,
   isHost = true
 ) {
+  // Container for the two pairs (arrival + departure)
   const pair = document.createElement('div');
   pair.className = 'date-pair';
-  // Stack arrival above departure for better vertical spacing
+
+  // Vertical stacking for better spacing
   pair.style.display = 'flex';
   pair.style.flexDirection = 'column';
   pair.style.gap = '10px';
-  // Prevent duplicate rendering elsewhere by setting a stable pair id
+
+  // Assign a stable identifier to avoid duplicate rendering
   try {
     const pairId = `pair_housing_c${(state && state.context && state.context.currentCommuneIndex) || 0}_l${(state && state.context && state.context.currentLogementIndex) || 0}`;
     pair.setAttribute('data-pair-id', pairId);
   } catch (e) {}
 
+  /**
+   * Creates a single (year + age) input block.
+   * Handles:
+   *  - bidirectional sync between year and age
+   *  - auto-validation with debounce
+   *  - sending events when both fields are filled
+   */
   function makeYearAgeField(cfg, onBothFilled) {
     const field = document.createElement('div');
     field.className = 'date-field';
@@ -30,11 +40,13 @@ export function renderPairedYearAgeInputs(
     const wrapper = document.createElement('div');
     wrapper.className = 'year-age-pair';
 
-    // Année (year number input)
+    // --- YEAR INPUT ---
     const yearField = document.createElement('div');
     yearField.className = 'year-field';
+
     const yearLabel = document.createElement('label');
     yearLabel.innerText = cfg.yearLabel || 'Année';
+
     const yearInput = document.createElement('input');
     yearInput.type = 'number';
     yearInput.placeholder = 'YYYY';
@@ -44,14 +56,17 @@ export function renderPairedYearAgeInputs(
     yearInput.dataset.eventKey = cfg.yearEventKey;
     yearInput.dataset.eventType = cfg.yearEventType;
     yearInput.disabled = !isHost;
+
     yearField.appendChild(yearLabel);
     yearField.appendChild(yearInput);
 
-    // Âge (number)
+    // --- AGE INPUT ---
     const ageField = document.createElement('div');
     ageField.className = 'age-field';
+
     const ageLabel = document.createElement('label');
     ageLabel.innerText = cfg.ageLabel || 'Âge';
+
     const ageInput = document.createElement('input');
     ageInput.type = 'number';
     ageInput.placeholder = 'Âge';
@@ -61,20 +76,24 @@ export function renderPairedYearAgeInputs(
     ageInput.dataset.eventKey = cfg.ageEventKey;
     ageInput.dataset.eventType = cfg.ageEventType;
     ageInput.disabled = !isHost;
+
     ageField.appendChild(ageLabel);
     ageField.appendChild(ageInput);
 
-    // Synchronisation année <-> âge
-    // On suppose que l'année de naissance est disponible dans cfg.birthYear (format YYYY)
+    /**
+     * Retrieves the birth year from:
+     *  1. config
+     *  2. state context
+     *  3. global timeline module
+     *  4. fallback (2000)
+     */
     function getBirthYear() {
-      // Priorité: cfg.birthYear -> state.context.birthYear -> timeline module -> fallback 2000
       if (typeof cfg.birthYear === 'string') {
         const match = cfg.birthYear.match(/\d{4}/);
         if (match) return parseInt(match[0], 10);
       }
-      if (typeof cfg.birthYear === 'number') {
-        return cfg.birthYear;
-      }
+      if (typeof cfg.birthYear === 'number') return cfg.birthYear;
+
       if (state && state.context && state.context.birthYear) {
         const by = state.context.birthYear;
         if (typeof by === 'string') {
@@ -83,23 +102,27 @@ export function renderPairedYearAgeInputs(
         }
         if (typeof by === 'number') return by;
       }
+
       try {
         const g = getGlobalBirthYear();
         if (g) return parseInt(g, 10);
       } catch (e) {}
+
       return 2000;
     }
 
-    let updating = false; // Pour éviter la boucle infinie
+    // Prevent infinite loops when syncing year <-> age
+    let updating = false;
 
-
-    // Synchronisation visuelle immédiate
+    // Debounce timers for auto-validation
     let yearDebounce = null;
     let ageDebounce = null;
 
+    // --- YEAR → AGE sync ---
     yearInput.addEventListener('input', () => {
       if (updating) return;
       updating = true;
+
       if (yearInput.value) {
         const year = parseInt(String(yearInput.value), 10);
         const birthYear = getBirthYear();
@@ -110,17 +133,19 @@ export function renderPairedYearAgeInputs(
           }
         }
       }
+
       updating = false;
-      // debounce auto-validate after user stops interacting
+
+      // Debounced validation
       if (yearDebounce) clearTimeout(yearDebounce);
-      yearDebounce = setTimeout(() => {
-        checkAndSend();
-      }, 800);
+      yearDebounce = setTimeout(() => checkAndSend(), 800);
     });
 
+    // --- AGE → YEAR sync ---
     ageInput.addEventListener('input', () => {
       if (updating) return;
       updating = true;
+
       const age = parseInt(ageInput.value, 10);
       const birthYear = getBirthYear();
       if (!isNaN(age) && !isNaN(birthYear)) {
@@ -129,64 +154,63 @@ export function renderPairedYearAgeInputs(
           yearInput.value = String(year);
         }
       }
+
       updating = false;
+
       if (ageDebounce) clearTimeout(ageDebounce);
-      ageDebounce = setTimeout(() => {
-        checkAndSend();
-      }, 800);
+      ageDebounce = setTimeout(() => checkAndSend(), 800);
     });
 
-    // Validation explicite : blur ou entrée
+    /**
+     * Explicit validation on blur or Enter key.
+     */
     function tryValidate(e) {
       if (e.type === 'keydown' && e.key !== 'Enter') return;
-      // ignore focus/mousedown
       if (e.type === 'focus' || e.type === 'mousedown') return;
       checkAndSend();
     }
+
     yearInput.addEventListener('blur', tryValidate);
     yearInput.addEventListener('keydown', tryValidate);
     ageInput.addEventListener('blur', tryValidate);
     ageInput.addEventListener('keydown', tryValidate);
-    // Note: do not prevent mousedown/default behavior — allow spinners and pickers to work
 
+    /**
+     * Validates both fields and triggers the callback when both are filled.
+     * Also computes missing values when possible.
+     */
     function checkAndSend() {
-      // Allow validation when only one field is provided by computing the other
-      let yearVal = yearInput.value && String(yearInput.value).trim() ? String(yearInput.value).trim() : null;
-      let ageVal = ageInput.value && String(ageInput.value).trim() ? String(ageInput.value).trim() : null;
+      let yearVal = yearInput.value?.trim() || null;
+      let ageVal = ageInput.value?.trim() || null;
 
       const birthYear = getBirthYear();
-      const birthMonth = parseInt(cfg.birthMonth, 10) || 1;
 
-      // If age provided but year missing, compute year from birthYear + age
-      if (!yearVal && ageVal && !isNaN(parseInt(ageVal, 10)) && birthYear) {
-        const ageNum = parseInt(ageVal, 10);
-        let computedYear = birthYear + ageNum;
-        yearVal = String(computedYear);
+      // Compute missing year from age
+      if (!yearVal && ageVal && !isNaN(parseInt(ageVal, 10))) {
+        yearVal = String(birthYear + parseInt(ageVal, 10));
         yearInput.value = yearVal;
       }
 
-      // If year provided but age missing, compute age
-      if (yearVal && !ageVal && birthYear) {
-        const parts = String(yearVal).split('-');
-        const yyyy = parseInt(parts[0], 10);
-        let computedAge = yyyy - birthYear;
+      // Compute missing age from year
+      if (yearVal && !ageVal) {
+        const yyyy = parseInt(String(yearVal).split('-')[0], 10);
+        const computedAge = yyyy - birthYear;
         if (!isNaN(computedAge) && computedAge >= 0 && computedAge <= 120) {
           ageVal = String(computedAge);
           ageInput.value = ageVal;
         }
       }
 
-      if (yearVal && ageVal) {
-        if (typeof onBothFilled === 'function') {
-          onBothFilled({ year: yearVal, age: ageVal, cfg });
-        }
+      if (yearVal && ageVal && typeof onBothFilled === 'function') {
+        onBothFilled({ year: yearVal, age: ageVal, cfg });
       }
     }
 
+    // Return API for parent component
     wrapper.appendChild(yearField);
     wrapper.appendChild(ageField);
     field.appendChild(wrapper);
-    // API for parent control
+
     return {
       element: field,
       enable() {
@@ -207,45 +231,51 @@ export function renderPairedYearAgeInputs(
     };
   }
 
-  // Pour chaque bloc (arrivée/départ), on ne passe à la suite que si les deux champs sont remplis
+  // Track completion state for both sides
   let leftFilled = false;
   let rightFilled = false;
-  
+
+  // Track whether events were already sent
   let leftSent = false;
   let rightSent = false;
-  // Track created episode ids so updates can target the correct timeline items
+
+  // Track episode IDs for UPDATE events
   let leftEpisodeId = null;
   let rightEpisodeId = null;
 
   function checkAllFilled() {
     if (leftFilled && rightFilled) {
-      // Optionnel : callback ou action supplémentaire
+      // Optional: additional logic when both sides are filled
     }
   }
 
+  // --- LEFT FIELD (arrival) ---
   const leftFieldObj = makeYearAgeField(leftConfig, (data) => {
-    // initial submit for left side: allow advancing
     const evYear = { type: leftConfig.yearEventType };
-    // Send only the year (YYYY) part even if the picker contains YYYY-MM
+
+    // Extract YYYY even if input is YYYY-MM
     try {
       const y = String(data.year).split('-')[0];
       evYear[leftConfig.yearEventKey] = Number.isNaN(Number(y)) ? y : Number(y);
     } catch (e) {
       evYear[leftConfig.yearEventKey] = data.year;
     }
+
     const evAge = { type: leftConfig.ageEventType };
     evAge[leftConfig.ageEventKey] = data.age;
+
     try {
       const resp = sendEvent(evYear);
-      // sendEvent returns lastEpisode when advancing; capture its id if present
+      // Capture episode ID if returned
       try {
-        if (resp && resp.id) leftEpisodeId = resp.id;
-        else if (resp && resp.context && resp.context.lastEpisode) leftEpisodeId = resp.context.lastEpisode.id;
+        if (resp?.id) leftEpisodeId = resp.id;
+        else if (resp?.context?.lastEpisode) leftEpisodeId = resp.context.lastEpisode.id;
       } catch (e) {}
       sendEvent(evAge);
     } catch (e) {
       console.warn('Failed to send left events', e);
     }
+
     leftFieldObj.disable();
     leftSent = true;
     leftFilled = true;
@@ -253,27 +283,31 @@ export function renderPairedYearAgeInputs(
     if (leftSent && rightSent) editIcon.style.display = 'inline-block';
   });
 
+  // --- RIGHT FIELD (departure) ---
   const rightFieldObj = makeYearAgeField(rightConfig, (data) => {
-    // initial submit for right side: allow advancing
     const evYear = { type: rightConfig.yearEventType };
+
     try {
       const y = String(data.year).split('-')[0];
       evYear[rightConfig.yearEventKey] = Number.isNaN(Number(y)) ? y : Number(y);
     } catch (e) {
       evYear[rightConfig.yearEventKey] = data.year;
     }
+
     const evAge = { type: rightConfig.ageEventType };
     evAge[rightConfig.ageEventKey] = data.age;
+
     try {
       const resp = sendEvent(evYear);
       try {
-        if (resp && resp.id) rightEpisodeId = resp.id;
-        else if (resp && resp.context && resp.context.lastEpisode) rightEpisodeId = resp.context.lastEpisode.id;
+        if (resp?.id) rightEpisodeId = resp.id;
+        else if (resp?.context?.lastEpisode) rightEpisodeId = resp.context.lastEpisode.id;
       } catch (e) {}
       sendEvent(evAge);
     } catch (e) {
       console.warn('Failed to send right events', e);
     }
+
     rightFieldObj.disable();
     rightSent = true;
     rightFilled = true;
@@ -281,13 +315,10 @@ export function renderPairedYearAgeInputs(
     if (leftSent && rightSent) editIcon.style.display = 'inline-block';
   });
 
-  const leftField = leftFieldObj;
-  const rightField = rightFieldObj;
+  pair.appendChild(leftFieldObj.element);
+  pair.appendChild(rightFieldObj.element);
 
-  pair.appendChild(leftField.element);
-  pair.appendChild(rightField.element);
-
-  // Shared edit icon that unlocks both when both sides have been submitted
+  // --- EDIT BUTTON (shared for both fields) ---
   const editIcon = document.createElement('button');
   editIcon.type = 'button';
   editIcon.title = 'Modifier';
@@ -295,23 +326,28 @@ export function renderPairedYearAgeInputs(
   editIcon.style.display = 'none';
   editIcon.style.marginLeft = '8px';
   editIcon.innerHTML = '<i data-lucide="pencil"></i>';
+
   if (window.lucide && typeof window.lucide.createIcons === 'function') window.lucide.createIcons();
+
   let editingAll = false;
 
   editIcon.addEventListener('click', () => {
     if (!leftSent || !rightSent) return;
+
+    // Enter edit mode
     if (!editingAll) {
-      leftField.enable();
-      rightField.enable();
+      leftFieldObj.enable();
+      rightFieldObj.enable();
       editingAll = true;
       editIcon.innerHTML = '<i data-lucide="check"></i>';
       editIcon.title = 'Enregistrer';
       if (window.lucide && typeof window.lucide.createIcons === 'function') window.lucide.createIcons();
       return;
     }
-    // Save edits via UPDATE (no advance)
-    const leftVals = leftField.getValues();
-    const rightVals = rightField.getValues();
+
+    // Save edits (UPDATE mode, no advance)
+    const leftVals = leftFieldObj.getValues();
+    const rightVals = rightFieldObj.getValues();
 
     const evLeftYear = { type: leftConfig.yearEventType };
     try {
@@ -320,8 +356,8 @@ export function renderPairedYearAgeInputs(
     } catch (e) {
       evLeftYear[leftConfig.yearEventKey] = leftVals.year;
     }
-    // include episode id to target modification
     if (leftEpisodeId) evLeftYear.episodeId = leftEpisodeId;
+
     const evLeftAge = { type: leftConfig.ageEventType };
     evLeftAge[leftConfig.ageEventKey] = leftVals.age;
     if (leftEpisodeId) evLeftAge.episodeId = leftEpisodeId;
@@ -334,6 +370,7 @@ export function renderPairedYearAgeInputs(
       evRightYear[rightConfig.yearEventKey] = rightVals.year;
     }
     if (rightEpisodeId) evRightYear.episodeId = rightEpisodeId;
+
     const evRightAge = { type: rightConfig.ageEventType };
     evRightAge[rightConfig.ageEventKey] = rightVals.age;
     if (rightEpisodeId) evRightAge.episodeId = rightEpisodeId;
@@ -347,9 +384,10 @@ export function renderPairedYearAgeInputs(
       console.warn('Failed to send update events', e);
     }
 
-    leftField.disable();
-    rightField.disable();
+    leftFieldObj.disable();
+    rightFieldObj.disable();
     editingAll = false;
+
     editIcon.innerHTML = '<i data-lucide="pencil"></i>';
     editIcon.title = 'Modifier';
     if (window.lucide && typeof window.lucide.createIcons === 'function') window.lucide.createIcons();

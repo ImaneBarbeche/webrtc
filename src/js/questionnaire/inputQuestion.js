@@ -1,16 +1,16 @@
-// Fonction pour créer les questions avec un input simple (ex: commune, année, statut)
+// Function to create questions with a simple input (e.g., city, year, status)
 import { setBirthYear } from "../timeline/birthYear.js";
 import { sendEvent } from "./eventHandlers.js";
 import { saveAnsweredQuestion } from "../stateMachine/persistence.js";
 
 /**
- * Crée un champ input simple avec gestion de l'édition
- * @param {HTMLElement} questionDiv - Le conteneur de la question
- * @param {object} state - L'état actuel de la machine
- * @param {string} eventType - Le type d'événement à envoyer (ex: "ANSWER_BIRTH_YEAR")
- * @param {string} eventKey - La clé pour les données (ex: "birthdate", "commune", "start")
- * @param {function} sendEvent - Fonction pour envoyer l'événement à la machine
- * @param {boolean} isHost - Si l'utilisateur est l'hôte (pour désactiver les contrôles)
+ * Creates a simple input field with edit management
+ * @param {HTMLElement} questionDiv - The question container
+ * @param {object} state - The current state of the state machine
+ * @param {string} eventType - The event type to send (e.g., "ANSWER_BIRTH_YEAR")
+ * @param {string} eventKey - The key for the data (e.g., "birthdate", "commune", "start")
+ * @param {function} sendEvent - Function to send the event to the state machine
+ * @param {boolean} isHost - If the user is the host (to disable controls)
  */
 export function renderInputQuestion(
   questionDiv,
@@ -22,7 +22,7 @@ export function renderInputQuestion(
 ) {
   const input = document.createElement("input");
   input.className = "question-input";
-  // Déterminer si la question porte sur un temps (années, mois, jour, heure)
+  // Determine if the question is about time (years, months, day, hour)
   const qText = questionDiv.querySelector("p")?.textContent || "";
   const isTimeQuestion = /ann(e|ée)|année|âge|age|date|jour|naiss|né|née|heure|h:/i.test(qText);
 
@@ -37,7 +37,7 @@ export function renderInputQuestion(
     input.placeholder = "Votre réponse";
   }
 
-  // Si une valeur existe déjà dans le contexte, la pré-remplir et désactiver
+  // If a value already exists in the context, pre-fill and disable
   if (state.context[eventKey]) {
     const stored = state.context[eventKey];
     try {
@@ -67,14 +67,14 @@ export function renderInputQuestion(
   const editBtn = document.createElement("button");
   editBtn.innerHTML = '<i data-lucide="pencil"></i>';
   editBtn.className = "edit-btn";
-  editBtn.style.display = "none"; // caché tant que pas de réponse
+  editBtn.style.display = "none"; // hidden until there is an answer
 
-  // Gestion du bouton d'édition
+  // Edit button management
   editBtn.addEventListener("click", () => {
     input.disabled = false;
     input.focus();
 
-    // Listener pour valider la modification avec Entrée
+    // Listener to validate the modification with Enter
     function onEditKey(event) {
       if (event.key === "Enter" && String(input.value).trim() !== "") {
         handleEditUpdate(input, eventKey);
@@ -100,11 +100,11 @@ export function renderInputQuestion(
     input.addEventListener("change", onEditChange);
   });
 
-  // Listener pour la première réponse (Entrée) et pour les changements (date picker)
+  // Listener for the first answer (Enter) and for changes (date picker)
   function submitAnswer(value) {
     if (!eventType) return;
     const eventData = { type: eventType };
-    // Normaliser les dates sélectionnées : envoyer uniquement l'année pour préserver la logique existante
+    // Normalize selected dates: send only the year to preserve existing logic
     if (input.type === "number") {
       const num = Number(value);
       eventData[eventKey] = isNaN(num) ? value : num;
@@ -129,19 +129,19 @@ export function renderInputQuestion(
   questionDiv.appendChild(input);
   questionDiv.appendChild(editBtn);
 
-  // Transformer les icônes Lucide
+  // Update Lucide icons
   if (window.lucide && typeof window.lucide.createIcons === "function") {
     window.lucide.createIcons();
   }
 }
 
 /**
- * Gère la mise à jour d'une réponse existante
- * @param {HTMLInputElement} input - Le champ input
- * @param {string} eventKey - La clé pour les données
+ * Handles updating an existing answer
+ * @param {HTMLInputElement} input - The input field
+ * @param {string} eventKey - The key for the data
  */
 function handleEditUpdate(input, eventKey) {
-  // Normaliser la valeur pour les inputs `date` : envoyer l'année seulement
+  // Normalize the value for `date` inputs: send only the year
   let outVal = input.value;
   if (input.type === 'number') {
     const rawYear = String(input.value).trim();
@@ -161,12 +161,12 @@ function handleEditUpdate(input, eventKey) {
     updateEpisode: ["start", "end", "statut_res"].includes(eventKey),
   };
   sendEvent(updateEvent);
-  // Sauvegarder la réponse modifiée
+  // Save the modified answer
   saveAnsweredQuestion(eventKey, updateEvent);
 
-  // Cas spécial pour l'année de naissance - mettre à jour la timeline
+  // Special case for birth year - update the timeline
   if (eventKey === "birthdate" || eventKey === "birthYear") {
-    // Mettre à jour l'affichage fixe (utiliser la valeur normalisée)
+    // Update the fixed display (use the normalized value)
     setBirthYear(outVal);
 
     if (window.timeline) {
@@ -174,7 +174,7 @@ function handleEditUpdate(input, eventKey) {
       const nowYear = new Date().getFullYear();
       const birthDate = new Date(birthYear, 0, 1);
 
-      // Mettre à jour la barre verticale noire
+      // Update the black vertical bar
       window.timeline.setCustomTime(birthDate, "custom-bar");
       window.timeline.setCustomTimeTitle(birthYear, "custom-bar");
 
@@ -243,7 +243,7 @@ function handleEditUpdate(input, eventKey) {
         },
       });
 
-      // Forcer un redraw pour appliquer la nouvelle logique
+      // Force a redraw to apply the new logic
       window.timeline.redraw();
       window.timeline.fit();
     }
@@ -251,9 +251,9 @@ function handleEditUpdate(input, eventKey) {
 }
 
 /**
- * Désactive tous les contrôles d'une question sauf le bouton d'édition
- * @param {HTMLElement} questionDiv - Le conteneur de la question
- * @param {HTMLElement} editBtn - Le bouton d'édition à ne pas désactiver
+ * Disables all controls of a question except the edit button
+ * @param {HTMLElement} questionDiv - The question container
+ * @param {HTMLElement} editBtn - The edit button not to disable
  */
 function disableQuestionControls(questionDiv, editBtn) {
   try {
@@ -261,9 +261,9 @@ function disableQuestionControls(questionDiv, editBtn) {
       "input, button, textarea, select"
     );
     controls.forEach((c) => {
-      if (c !== editBtn) c.disabled = true; // ne pas désactiver le bouton ✏️
+      if (c !== editBtn) c.disabled = true; // do not disable the ✏️ button
     });
   } catch (e) {
-    console.warn("Impossible de désactiver les contrôles", e);
+    console.warn("Unable to disable controls", e);
   }
 }
