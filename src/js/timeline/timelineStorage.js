@@ -1,5 +1,5 @@
 // timelineStorage.js
-// Utilitaires pour la persistance des items, groupes et options de la timeline dans localStorage
+// Utilities for persisting timeline items, groups, and options in localStorage
 
 export function restoreItems(items) {
   const savedItems = localStorage.getItem("lifestories_items");
@@ -9,7 +9,7 @@ export function restoreItems(items) {
       items.clear();
       items.add(parsedItems);
     } catch (e) {
-      console.error("❌ Erreur lors du chargement des items:", e);
+      console.error("❌ Error loading items:", e);
     }
   }
 }
@@ -22,8 +22,8 @@ export function restoreGroups(groups) {
       parsedGroups.forEach((savedGroup) => {
         const existingGroup = groups.get(savedGroup.id);
         if (existingGroup) {
-          // Restaurer uniquement les propriétés dynamiques, 
-          // les propriétés structurelles (nestedInGroup, order) viennent de timelineData.js
+          // Restore only dynamic properties,
+          // structural properties (nestedInGroup, order) come from timelineData.js
           groups.update({
             id: savedGroup.id,
             showNested: savedGroup.showNested,
@@ -33,7 +33,7 @@ export function restoreGroups(groups) {
         }
       });
     } catch (e) {
-      console.error("❌ Erreur lors du chargement des groupes:", e);
+      console.error("❌ Error loading groups:", e);
     }
   }
 }
@@ -64,7 +64,7 @@ export function restoreOptions(options) {
         }
       }
     } catch (e) {
-      console.error("❌ Erreur lors du chargement des options:", e);
+      console.error("❌ Error loading options:", e);
     }
   }
 }

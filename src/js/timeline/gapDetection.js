@@ -3,11 +3,11 @@ import { items, groups } from "./timeline.js";
 export function detectGaps(episodes, groups) {
   const gaps = [];
 
-  // Regrouper les épisodes par groupe
+  // Group episodes by group
   const groupedEpisodes = {};
 
   episodes.forEach((episode) => {
-    const groupId = episode.group; // récupère les groupes depuis les épisodes
+    const groupId = episode.group; // retrieve groups from episodes
 
     if (!groupedEpisodes[groupId]) {
       groupedEpisodes[groupId] = [];
@@ -15,10 +15,10 @@ export function detectGaps(episodes, groups) {
     groupedEpisodes[groupId].push(episode);
   });
 
-  // Pour chaque groupe, détecter les gaps
+  // For each group, detect gaps
   for (const groupId in groupedEpisodes) {
-    // Si un DataSet `groups` est fourni, n'analyser que les groupes
-    // explicitement autorisés via `showGaps: true`.
+    // If a DataSet `groups` is provided, only analyze groups
+    // explicitly allowed via `showGaps: true`.
     if (groups) {
       const allGroups = groups.get();
       const groupInfo = allGroups.find((g) => String(g.id) === String(groupId));
@@ -28,10 +28,10 @@ export function detectGaps(episodes, groups) {
     }
     const groupEpisodes = groupedEpisodes[groupId];
 
-    // Trier par date de début (accepter string/number/Date)
+    // Sort by start date (accept string/number/Date)
     groupEpisodes.sort((a, b) => new Date(a.start) - new Date(b.start));
 
-    // Boucler et détecter les gaps
+    // Loop and detect gaps
     for (let i = 1; i < groupEpisodes.length; i++) {
       const actuel = groupEpisodes[i];
       const precedent = groupEpisodes[i - 1];
@@ -44,7 +44,7 @@ export function detectGaps(episodes, groups) {
           start: endDate,
           end: startDate,
           duration: startDate - endDate,
-          group: groupId, // Le gap appartient à ce groupe
+          group: groupId, // The gap belongs to this group
         };
         if (gap.duration <= 0) continue;
 
@@ -65,13 +65,13 @@ export function createGapItems(gaps) {
       type: "background",
       className: "timeline-gap",
       group: gap.group,
-      content: "Aucune donnée pour cette période (période manquante).",
+      content: "No data for this period (missing period).",
     };
   });
 }
 
 let isUpdating = false;
-let previousGapKeys = []; // Clés des gaps précédents pour comparaison
+let previousGapKeys = []; // Keys of previous gaps for comparison
 
 export function updateGapsInTimeline(items, groups) {
   if (isUpdating) return;
@@ -79,12 +79,12 @@ export function updateGapsInTimeline(items, groups) {
 
   const allItems = items.get();
 
-  // Supprimer les anciens gaps visuels
+  // Remove old visual gaps
   const ancientGaps = allItems.filter((item) => item.id.startsWith("gap-"));
   const idsASupprimer = ancientGaps.map((gap) => gap.id);
   items.remove(idsASupprimer);
 
-  // Récupérer les épisodes
+  // Retrieve episodes
   const episodes = allItems.filter(
     (item) =>
       !item.id.startsWith("gap-") &&
@@ -94,15 +94,15 @@ export function updateGapsInTimeline(items, groups) {
       item.type === "range"
   );
 
-  // Détecter les gaps
+  // Detect gaps
   const gaps = detectGaps(episodes, groups);
 
-  // Créer les clés des gaps actuels
+  // Create keys for current gaps
   const currentGapKeys = gaps.map(
     (gap) => `${gap.group}-${gap.start}-${gap.end}`
   );
 
-  // Notifier seulement les NOUVEAUX gaps
+  // Notify only NEW gaps
   gaps.forEach((gap) => {
     const key = `${gap.group}-${gap.start}-${gap.end}`;
     if (!previousGapKeys.includes(key)) {
@@ -110,10 +110,10 @@ export function updateGapsInTimeline(items, groups) {
     }
   });
 
-  // Sauvegarder pour la prochaine fois
+  // Save for next time
   previousGapKeys = currentGapKeys;
 
-  // Ajouter les gaps visuels
+  // Add visual gaps
   const gapItems = createGapItems(gaps);
   items.add(gapItems);
 
@@ -124,11 +124,11 @@ const notifiedGapKeys = new Set();
 
 function notifyNewGap(gap, groups) {
   const key = `${gap.group}-${gap.start}-${gap.end}`;
-  if (notifiedGapKeys.has(key)) return; // déjà notifié
+  if (notifiedGapKeys.has(key)) return; // already notified
   notifiedGapKeys.add(key);
   const allGroups = groups.get();
 
-  // Trouver le groupe par son ID
+  // Find the group by its ID
   let groupInfo = allGroups.find((g) => String(g.id) === String(gap.group));
   if (!groupInfo) {
     groupInfo = allGroups.find(
@@ -138,7 +138,7 @@ function notifyNewGap(gap, groups) {
 
   const groupName = groupInfo ? groupInfo.contentText : gap.group;
 
-  // Extraire l'année (si gap.start et gap.end sont des dates, sinon adapte)
+  // Extract the year (if gap.start and gap.end are dates, otherwise adapt)
   const startYear = new Date(gap.start).getFullYear();
   const endYear = new Date(gap.end).getFullYear();
 
@@ -146,16 +146,16 @@ function notifyNewGap(gap, groups) {
     toast: true,
     position: "top-end",
     icon: "warning",
-    title: "Période non renseignée",
-    html: `<b>Pour ${groupName} : ${startYear} → ${endYear}</b><br>
-         <span>Veuillez renseigner cette période pour une meilleure précision des données.</span>`,
+    title: "Missing period",
+    html: `<b>For ${groupName}: ${startYear} → ${endYear}</b><br>
+         <span>Please fill in this period for better data accuracy.</span>`,
     showConfirmButton: false,
     timer: 7000,
     timerProgressBar: true,
   });
 }
 
-// Helpers pour questionnaire.js
+// Helpers for questionnaire.js
 export function getGapList() {
   const episodes = items.get().filter((i) => i.type === "range");
   return detectGaps(episodes, groups);

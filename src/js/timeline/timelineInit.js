@@ -12,19 +12,19 @@ import {
   updateGapsInTimeline,
 } from "./gapDetection.js";
 
-// Garde pour eviter la double initialisation
+// Guard to prevent double initialization
 let _timelineInstance = null;
 
 export function initTimeline() {
-  // Eviter la double initialisation
+  // Avoid double initialization
   if (_timelineInstance) {
-    console.warn("Timeline deja initialisee, retour de l'instance existante");
+    console.warn("Timeline already initialized, returning existing instance");
     return _timelineInstance;
   }
 
-  // Restaurer depuis localStorage
+  // Restore from localStorage
   restoreItems(items);
-  // Nettoyer les anciens gaps restaurés pour éviter les ids dupliqués
+  // Clean up old restored gaps to avoid duplicate IDs
   try {
     const restoredGaps = items.get().filter((it) => String(it.id).startsWith("gap-"));
     if (restoredGaps.length > 0) {
@@ -32,30 +32,30 @@ export function initTimeline() {
       items.remove(idsToRemove);
     }
   } catch (e) {
-    console.warn('Erreur lors du nettoyage des gaps restaurés', e);
+    console.warn('Error cleaning up restored gaps', e);
   }
   restoreGroups(groups);
   restoreOptions(options);
 
-  // Définir editable selon le rôle (enqueté = viewer) conservé en sessionStorage
+  // Set editable based on role (respondent = viewer) stored in sessionStorage
   try {
     const isViewer = sessionStorage.getItem("webrtc_isOfferor") === "false";
-    // Si isViewer true -> utilisateur est enquêté -> désactiver édition
+    // If isViewer true -> user is respondent -> disable editing
     options.editable = !isViewer;
   } catch (e) {}
 
-  // Creer la timeline
+  // Create the timeline
   const container = document.getElementById("timeline");
   if (!container) {
-    console.error("Element #timeline introuvable");
+    console.error("Element #timeline not found");
     return null;
   }
 
   const timeline = new vis.Timeline(container, items, groups, options);
   _timelineInstance = timeline;
 
-  // S'assurer que lorsque LifeStories est affiché (après onboarding),
-  // l'option editable est mise à jour en fonction du rôle courant.
+  // Ensure that when LifeStories is displayed (after onboarding),
+  // the editable option is updated based on the current role.
   document.addEventListener("lifestoriesShown", () => {
     try {
       const isViewer = sessionStorage.getItem("webrtc_isOfferor") === "false";
@@ -64,26 +64,26 @@ export function initTimeline() {
     } catch (e) {}
   });
 
-  // Attacher la persistance automatique
+  // Attach automatic persistence
   attachPersistenceListeners(items, groups, timeline);
 
-  // 1. Récupérer les épisodes
+  // 1. Retrieve episodes
   const episodes = items.get();
 
-  // 2. Détecter les gaps (respecter les flags `showGaps` des groupes)
+  // 2. Detect gaps (respect the `showGaps` flags of groups)
   const gaps = detectGaps(episodes, groups);
 
-  // 3. Créer les items visuels
+  // 3. Create visual items
   const gapItems = createGapItems(gaps);
 
-  // 4. Ajouter à la timeline
+  // 4. Add to timeline
   items.add(gapItems);
 
-  // Après la création de la timeline, ajoute les écouteurs :
+  // After timeline creation, add listeners:
   items.on("add", () => updateGapsInTimeline(items, groups));
   items.on("update", () => updateGapsInTimeline(items, groups));
   items.on("remove", () => updateGapsInTimeline(items, groups));
 
-  // Retourner l'instance pour l'utiliser ailleurs
+  // Return the instance for use elsewhere
   return timeline;
 }

@@ -14,7 +14,7 @@ export function setBirthYear(year) {
   if (window.lucide && typeof window.lucide.createIcons === "function") {
     window.lucide.createIcons();
   }
-  // expose on window for other modules that may check it
+  // Expose on window for other modules that may check it
   try {
     window.birthYear = birthYear;
   } catch (e) {}
@@ -24,26 +24,26 @@ export function getBirthYear() {
   return birthYear;
 }
 
-// Ramener la timeline au début
+// Bring the timeline back to the start
 export function goToTimelineStart() {
-  // Si une librairie timeline est utilisée et accessible globalement
+  // Check if a timeline library is used and globally accessible
   if (window.timeline && typeof window.timeline.moveTo === 'function') {
-    // determine birth year from module or from window fallback
+    // Determine birth year from module or from window fallback
     const by = birthYear || (window.birthYear ? parseInt(window.birthYear, 10) : null);
-    // Ramène la timeline à la date de naissance si connue
+    // Bring the timeline to the birth date if known
     if (by) {
-      // Affiche la barre verticale de l'année de naissance si elle existe
+      // Display the vertical bar for the birth year if it exists
       if (typeof window.timeline.setCustomTime === 'function') {
         const targetDate = new Date(`${by}-01-01`);
-        // set the birth-year custom bar (used elsewhere)
+        // Set the birth-year custom bar (used elsewhere)
         try { window.timeline.setCustomTime(targetDate, 'birth-year-bar'); } catch (e) {/* ignore */}
-        // also set the main custom bar used for navigation/highlight if present
+        // Also set the main custom bar used for navigation/highlight if present
         try { window.timeline.setCustomTime(targetDate, 'custom-bar'); } catch (e) {/* ignore */}
-        // optionally set titles
+        // Optionally set titles
         try { window.timeline.setCustomTimeTitle(by, 'birth-year-bar'); } catch (e) {/* ignore */}
         try { window.timeline.setCustomTimeTitle(by, 'custom-bar'); } catch (e) {/* ignore */}
       }
-      // then move the timeline to center on that date
+      // Then move the timeline to center on that date
       window.timeline.moveTo(new Date(`${by}-01-01`));
     } else if (window.timeline.options && window.timeline.options.min) {
       window.timeline.moveTo(window.timeline.options.min);
@@ -52,25 +52,25 @@ export function goToTimelineStart() {
     }
     return;
   }
-  // Fallback DOM : scroll horizontal au début
+  // Fallback DOM: scroll horizontally to the start
   const timeline = document.getElementById('timeline');
   if (timeline) {
     timeline.scrollLeft = 0;
   }
 }
 
-// Dézoomer complètement
+// Completely zoom out
 export function zoomOutTimeline() {
-  // Ne dézoome que si la librairie timeline est disponible
+  // Only zoom out if the timeline library is available
   if (window.timeline && typeof window.timeline.fit === 'function') {
     try {
-      // ask for a moderately animated fit for smoother UX
+      // Request a moderately animated fit for smoother UX
       window.timeline.fit({ animation: { duration: 350 } });
     } catch (e) {
       try { window.timeline.fit(); } catch (e2) { /* ignore */ }
     }
   }
-  // Sinon, ne fait rien (pas de scale CSS par défaut)
+  // Otherwise, do nothing (no default CSS scale)
 }
 
 export function setupBirthYearButton() {

@@ -3,23 +3,23 @@
 export function renderGroupLabel(group) {
   if (!group) return "";
 
-  // Icônes pour tous les groupes
+  // Icons for all groups
   const icons = {
-    // Groupes racine
+    // Root groups
     1: "map-pin-house",
     2: "school",
     3: "briefcase",
     // Nested groups (Migratoire)
-    11: "key-round",      // Statut résidentiel
-    12: "house",          // Logement
-    13: "map-pinned",     // Commune
+    11: "key-round",      // Residential status
+    12: "house",          // Housing
+    13: "map-pinned",     // Municipality
     // Nested groups (Scolaire)
-    21: "building-2",     // Établissements
-    22: "book-marked",    // Formations
-    23: "graduation-cap", // Diplômes
+    21: "building-2",     // Establishments
+    22: "book-marked",    // Training
+    23: "graduation-cap", // Diplomas
     // Nested groups (Professionnelle)
-    31: "contact-round",  // Postes
-    32: "file-text",      // Contrats
+    31: "contact-round",  // Positions
+    32: "file-text",      // Contracts
   };
 
   let iconHtml = icons[group.id] ? `<i data-lucide="${icons[group.id]}"></i> ` : "";
@@ -33,7 +33,7 @@ export function renderGroupLabel(group) {
 
 export function scheduleRedraw(timeline) {
   if (!timeline) return;
-  // Utilise requestAnimationFrame pour un redraw fluide
+  // Use requestAnimationFrame for fluid redraw
   requestAnimationFrame(() => {
     try {
       timeline.redraw();
@@ -47,7 +47,7 @@ export function scheduleRedraw(timeline) {
 }
 
 /**
- * Vérifie si un item est dans la plage de temps sélectionnée
+ * Check if an item is within the selected time range
  */
 export function isItemInRange(item, snappedTime) {
   if (!item) return false;

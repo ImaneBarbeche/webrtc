@@ -5,7 +5,7 @@ import { renderGroupLabel, isItemInRange } from "./timelineUtils.js";
 import { timelineState } from "./timelineState.js";
 
 /**
- * Initialise la barre verticale custom et la logique de highlight/synthèse
+ * Initialize the custom vertical bar and highlight/summary logic
  */
 export function setupVerticalBar(timeline, stepSize) {
   // Remove any existing custom time bar with id "custom-bar" before adding
@@ -34,7 +34,7 @@ export function setupVerticalBar(timeline, stepSize) {
   timelineState.customTimeId = customTimeId;
 
   let timechangeDebounce = null;
-  // Pendant le drag : barre + highlight fluide + synthèse
+  // During drag: bar + fluid highlight + summary
   timeline.on("timechange", (event) => {
     timelineState.isCustomBarMoving = true;
 
@@ -50,20 +50,20 @@ export function setupVerticalBar(timeline, stepSize) {
 
     timechangeDebounce = setTimeout(() => {
       highlightItems(snappedTime);
-      // Synthèse en temps réel
+      // Real-time summary
       renderSummary(snappedTime);
       renderYearAndAge(snappedTime);
     }, 20);
   });
 
-  // Réinitialiser l'était après le drag
+  // Reset the state after the drag
   timeline.on("timechanged", () => {
     timelineState.isCustomBarMoving = false;
   });
 }
 
 /**
- * Surligne les items correspondant à l'année sélectionnée
+ * Highlight items corresponding to the selected year
  */
 function highlightItems(snappedTime) {
   items.forEach((item) => {
@@ -84,12 +84,12 @@ function highlightItems(snappedTime) {
 }
 
 /**
- * Génère la synthèse affichée dans #moreInfos
+ * Generate the summary displayed in #moreInfos
  */
 function renderSummary(snappedTime) {
   const themeData = {};
   groups.get().forEach((group) => {
-    // Inclure tous les groupes, pas seulement ceux avec nestedGroups
+    // Include all groups, not just those with nestedGroups
     themeData[group.id] = {
       name: group.contentText,
       items: [],
@@ -150,7 +150,7 @@ function renderSummary(snappedTime) {
       moreInfos.querySelectorAll(".theme-section").forEach((section) => {
         section.classList.add("visible");
       });
-      // Ajout ici pour transformer les icônes
+      // Add here to transform the icons
       if (window.lucide && typeof window.lucide.createIcons === "function") {
         window.lucide.createIcons();
       }
@@ -159,7 +159,7 @@ function renderSummary(snappedTime) {
 }
 
 /**
- * Affiche l'année et l'âge
+ * Display the year and age
  */
 function renderYearAndAge(snappedTime) {
   const yearEl = document.getElementById("year");
