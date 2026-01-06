@@ -32,6 +32,7 @@
   "devDependencies": {
     "@capacitor/cli": "latest",
     "@vitejs/plugin-react": "^5.1.0",
+    "baseline-browser-mapping": "^2.9.11",
     "vite": "^5.4.2",
     "vite-plugin-static-copy": "^3.1.3"
   },
