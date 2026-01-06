@@ -3,8 +3,7 @@ import { items } from "../timeline/timeline.js";
 
 /**
  ************************************************************************
- * episodes.js gère l'ajout, la modification, la suppression d'épisodes *
- *                                                                      *
+ * episodes.js handles adding, modifying and deleting episodes or events
  ************************************************************************
  **/
 
@@ -21,7 +20,6 @@ export function ajouterEpisode(text, start, end, group) {
   if (end == 0) {
     end = new Date(start);
     end.setFullYear(end.getFullYear() + 1);
-    console.log(end);
   }
   let classColor = group.toString().startsWith("1")
     ? "green"
@@ -68,23 +66,21 @@ export function ajouterEvenement(text, icon, start, group) {
   return item;
 }
 
-/* Modifier fin d'un épisode
- * Ajouter un épisode avec date de début = date de fin du précedent
- *
- *
+/* Modify the end of an episode
+ * Add an episode with start date = end date of the previous one
  */
 export function modifierEpisode(id, modifications, syncViaWebRTC = false) {
   let itemtomodify = items.get(id);
   const convertYearToDate = (year) =>
-    year && /^\d{4}$/.test(year) ? new Date(`${year}-01-01`) : year; //TODO, faire la vérif de si c'est pas une année
+    year && /^\d{4}$/.test(year) ? new Date(`${year}-01-01`) : year; 
 
-  // Appliquer la conversion sur 'start' et 'end'
+  // Apply the conversion on 'start' and 'end'
   if (modifications.start)
     modifications.start = convertYearToDate(modifications.start);
   if (modifications.end)
     modifications.end = convertYearToDate(modifications.end);
 
-  // Si on modifie seulement date de début et que la nv date de début est après la date de fin, on met 1 an
+  // If we modify only the start date and the new start date is after the end date, we set 1 year
   if (
     modifications.start &&
     !modifications.end &&
@@ -97,7 +93,7 @@ export function modifierEpisode(id, modifications, syncViaWebRTC = false) {
     modifications.end = endDate;
   }
 
-  // Si on modifie seulement date de fin et que la nv date de fin est avant la date de debut, on met 1 an
+  // If we modify only the end date and the new end date is before the start date, we set 1 year
   if (
     modifications.end &&
     !modifications.start &&
@@ -113,7 +109,7 @@ export function modifierEpisode(id, modifications, syncViaWebRTC = false) {
   Object.assign(itemtomodify, modifications);
   items.update(itemtomodify);
 
-  // Synchroniser via WebRTC si explicitement demandé (pour modifications directes depuis l'UI)
+  // Synchronize via WebRTC if needed
   if (syncViaWebRTC && window.webrtcSync && window.webrtcSync.isActive()) {
     try {
       window.webrtcSync.sendMessage({
@@ -127,16 +123,13 @@ export function modifierEpisode(id, modifications, syncViaWebRTC = false) {
       );
     }
   }
-
-  /*if(state.lastEpisode.end < itemtomodify.end)
-        state.lastEpisode = itemtomodify*/ //decommenter pour extend
   return itemtomodify;
 }
 
 /**
- * Fonction de recherche d'un épisode par son groupe et si une date incluse
- * @param {int} groupId groupe dans lequel rechercher un episode
- * @param {Date} dateRecherchee rechercher un episode qui contient cette date
+ * Function to search for an episode by its group and if a date is included
+ * @param {int} groupId group in which to search for an episode
+ * @param {Date} dateRecherchee search for an episode that contains this date
  */
 function rechercherEpisode(groupId, dateRecherchee) {
   const date = new Date(dateRecherchee);
@@ -149,7 +142,5 @@ function rechercherEpisode(groupId, dateRecherchee) {
     );
   });
 
-  return episodesCorrespondants; // Retourne la liste des épisodes trouvés
+  return episodesCorrespondants; // Return the matching episodes
 }
-
-// TODO : Verifier que le logement lorsqu'on divise la cellule a un minimum de un an
