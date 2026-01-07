@@ -170,18 +170,17 @@ async function startScanner() {
       console.warn("BarcodeDetector absent");
     }
 
-    /**
-     * STEP 7 — Cleanup function: stop camera + remove video element
-     */
-    function stopScanner() {
-      if (scanLoopId) cancelAnimationFrame(scanLoopId);
-      if (stream) stream.getTracks().forEach((t) => t.stop());
-      if (video && video.parentNode) video.parentNode.removeChild(video);
-    }
-
+    
   }, 50); // Small delay to ensure layout is ready
 }
-
+/**
+ * STEP 7 — Cleanup function: stop camera + remove video element
+ */
+function stopScanner() {
+  if (scanLoopId) cancelAnimationFrame(scanLoopId);
+  if (stream) stream.getTracks().forEach((t) => t.stop());
+  if (video && video.parentNode) video.parentNode.removeChild(video);
+}
 /**
  * Apply the scanned QR value to the UI.
  * If handleScannedData() exists, use it.
