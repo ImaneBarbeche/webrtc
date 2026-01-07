@@ -172,14 +172,14 @@ async function startScanner() {
 
     
   }, 50); // Small delay to ensure layout is ready
-}
-/**
- * STEP 7 — Cleanup function: stop camera + remove video element
- */
-function stopScanner() {
-  if (scanLoopId) cancelAnimationFrame(scanLoopId);
-  if (stream) stream.getTracks().forEach((t) => t.stop());
-  if (video && video.parentNode) video.parentNode.removeChild(video);
+  /**
+   * STEP 7 — Cleanup function: stop camera + remove video element
+   */
+  function stopScanner() {
+    if (scanLoopId) cancelAnimationFrame(scanLoopId);
+    if (stream) stream.getTracks().forEach((t) => t.stop());
+    if (video && video.parentNode) video.parentNode.removeChild(video);
+  }
 }
 /**
  * Apply the scanned QR value to the UI.
