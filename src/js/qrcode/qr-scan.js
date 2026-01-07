@@ -170,16 +170,16 @@ async function startScanner() {
       console.warn("BarcodeDetector absent");
     }
 
-    
+    /**
+     * STEP 7 — Cleanup function: stop camera + remove video element
+     */
+    function stopScanner() {
+      if (scanLoopId) cancelAnimationFrame(scanLoopId);
+      if (stream) stream.getTracks().forEach((t) => t.stop());
+      if (video && video.parentNode) video.parentNode.removeChild(video);
+    }
+
   }, 50); // Small delay to ensure layout is ready
-  /**
-   * STEP 7 — Cleanup function: stop camera + remove video element
-   */
-  function stopScanner() {
-    if (scanLoopId) cancelAnimationFrame(scanLoopId);
-    if (stream) stream.getTracks().forEach((t) => t.stop());
-    if (video && video.parentNode) video.parentNode.removeChild(video);
-  }
 }
 /**
  * Apply the scanned QR value to the UI.
@@ -187,7 +187,10 @@ async function startScanner() {
  * Otherwise, fallback to writing into the second <textarea>.
  */
 function applyScannedValue(value) {
-    console.log("SCANNED VALUE:", JSON.stringify(value));
+  console.log("RAW VALUE:", value);
+  console.log("CLEANED VALUE:", JSON.stringify(value));
+
+  console.log("SCANNED VALUE:", JSON.stringify(value));
   if (typeof window.handleScannedData === "function") {
     window.handleScannedData(value);
   } else {
