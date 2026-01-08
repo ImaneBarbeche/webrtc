@@ -57,11 +57,10 @@ class WebRTCOnboarding {
   }
 
   setupEventListeners() {
-    // Add the continue button for the interviewer
+    // Ajout du bouton continuer pour l'enquêteur
     if (this.elements.continueOfferBtn) {
       this.elements.continueOfferBtn.addEventListener("click", () => {
         this.minimizeOfferAndShowWaitResponse();
-        this.scanQRCode();
       });
     }
     // Role selection
@@ -120,7 +119,6 @@ class WebRTCOnboarding {
         this.selectInterviewerRole();
       } else if (this.selectedRole === "enquete") {
         this.selectIntervieweeRole();
-        this.scanQRCode();
       }
     });
   }
@@ -255,6 +253,7 @@ class WebRTCOnboarding {
       this.log(`Signaling State: ${this.pc.signalingState}`);
     });
 
+    // Note: Old createBtn and connectBtn removed in new UI
     // Buttons are now role-specific (selectInterviewer, selectInterviewee, etc.)
     this.setStateAndStatus("off", statusText);
   }
@@ -266,16 +265,16 @@ class WebRTCOnboarding {
       Connecté: "connected",
     };
     this.state = newState;
-    // Convert text to technical value
+    // Convertir le texte en valeur technique
     const statusValue = statusTextToValue[statusText] || "offline";
-    // Call the React function if available
+    // Appeler la fonction React si disponible
     if (window.updateReactStatus) {
       window.updateReactStatus(statusValue);
     }
     this.log(`State: ${newState}, Status: ${statusText}`);
   }
 
-  // function for processing answer from guest
+  // New function for processing answer from guest
   async processAnswer() {
     try {
       this.log("Parsing answer JSON...");
@@ -312,7 +311,7 @@ class WebRTCOnboarding {
           };
           this.elements.connectionCode.value = JSON.stringify(offerData);
 
-          // Generate QR code for the offer
+          // Generate QR Code for the offer
           this.log(`Génération QR code pour l'offre`);
           if (typeof generateQRCode === "function" && this.elements.qrCanvas) {
             generateQRCode(JSON.stringify(offerData), "qrCanvas");
@@ -324,6 +323,13 @@ class WebRTCOnboarding {
           this.log(
             `Offer length: ${this.elements.connectionCode.value.length} chars`
           );
+
+          // Auto-show wait response section after QR code is displayed
+          // This happens automatically so it works on tablets (scan only, no copy)
+          // setTimeout(() => {
+          //   this.minimizeOfferAndShowWaitResponse();
+          // }, 800); // Small delay to let QR code render
+
           this.isOfferor = true;
           this.state = "waitAnswer";
           this.setStateAndStatus("waitAnswer", "En attente de connexion...");
@@ -335,7 +341,7 @@ class WebRTCOnboarding {
           const answerData = this.pc.localDescription.toJSON();
           this.elements.answerCode.value = JSON.stringify(answerData);
 
-          // Generate QR code for the answer
+          // Generate QR Code for the answer
           this.log(`Génération QR code pour la réponse`);
           if (
             typeof generateQRCode === "function" &&
@@ -412,16 +418,16 @@ class WebRTCOnboarding {
   }
   // New method to handle disconnection cleanup and UI updates
   handleDisconnection() {
-    // 1. Notify webrtcSync of disconnection
+    // 1. Informer webrtcSync de la déconnexion
     if (window.webrtcSync) {
       window.webrtcSync.connected = false;
-      window.webrtcSync.updateStatusIndicator(); // Red badge
+      window.webrtcSync.updateStatusIndicator(); // Badge rouge
     }
 
-    // 2. Clean up sessionStorage
+    // 2. Nettoyer sessionStorage
     sessionStorage.setItem("webrtc_connected", "false");
 
-    // 3. If in LifeStories, show the reconnect button
+    // 3. Si on est dans LifeStories, afficher le bouton reconnecter
     const lifestoriesContainer = document.getElementById(
       "lifestoriesContainer"
     );
@@ -458,16 +464,16 @@ class WebRTCOnboarding {
       this.dc.addEventListener("message", (e) => this.dcMessage(e));
     }
   }
-  // Export the data channel to retrieve it elsewhere to avoid rewriting the webrtc connection
+  // On exporte le data channel pour le récupérer ailleurs pour éviter de réecrire la connexion webrtc
   dcOpen() {
     this.log("Data channel opened");
-    this.connectionEstablished = true; // Mark the connection as established
+    this.connectionEstablished = true; // Marquer la connexion comme établie
     this.setStateAndStatus(
       "connected",
       "Connexion établie - Canal de données ouvert !"
     );
 
-    // IMPORTANT: Save the role BEFORE configuring webrtcSync
+    // IMPORTANT: Sauvegarder le rôle AVANT de configurer webrtcSync
     sessionStorage.setItem("webrtc_connected", "true");
     sessionStorage.setItem(
       "webrtc_isOfferor",
@@ -475,18 +481,18 @@ class WebRTCOnboarding {
     );
     sessionStorage.setItem("webrtc_sessionId", this.sessionId || "");
     this.log(
-      `📝 SessionStorage saved: isOfferor=${this.isOfferor}, sessionId=${this.sessionId}`
+      `📝 SessionStorage sauvegardé: isOfferor=${this.isOfferor}, sessionId=${this.sessionId}`
     );
 
-    // Register the data channel globally for webrtc-sync.js
+    // Enregistrer le data channel globalement pour webrtc-sync.js
     if (typeof window !== "undefined") {
       window.webrtcDataChannel = this.dc;
-      this.log("Data channel exported globally (window.webrtcDataChannel)");
+      this.log("Data channel exporté globalement (window.webrtcDataChannel)");
 
-      // Notify webrtc-sync that the data channel is ready
-      this.log(`DEBUG: window.webrtcSync exists? ${!!window.webrtcSync}`);
+      // Notifier webrtc-sync que le data channel est prêt
+      this.log(`DEBUG: window.webrtcSync existe? ${!!window.webrtcSync}`);
       this.log(
-        `DEBUG: window.webrtcSync.setDataChannel exists? ${!!(
+        `DEBUG: window.webrtcSync.setDataChannel existe? ${!!(
           window.webrtcSync &&
           typeof window.webrtcSync.setDataChannel === "function"
         )}`
@@ -497,15 +503,15 @@ class WebRTCOnboarding {
         typeof window.webrtcSync.setDataChannel === "function"
       ) {
         window.webrtcSync.setDataChannel(this.dc);
-        this.log("Data channel sent to webrtcSync");
+        this.log("Data channel transmis à webrtcSync");
       } else {
         this.log(
-          "ERROR: webrtcSync unavailable or setDataChannel missing!"
+          "ERREUR: webrtcSync non disponible ou setDataChannel manquant!"
         );
       }
     }
 
-    // Use setTimeout + add the .show class
+    // Utiliser setTimeout + ajouter la classe .show
     const elements = this.elements;
     setTimeout(() => {
       elements.connectedActions.classList.remove("hidden");
@@ -626,13 +632,13 @@ class WebRTCOnboarding {
 
   // Minimize offer display and show wait response section (interviewer)
   minimizeOfferAndShowWaitResponse() {
-    // Completely hide the QR code view
+    // Masquer complètement la vue QR code
     if (this.elements.offerDisplay.classList.contains("hidden")) {
       this.log("Offer already hidden, skipping");
       return;
     }
 
-    this.log("Hiding the QR code view and showing the scan");
+    this.log("Masquage de la vue QR code et affichage du scan");
     this.elements.offerDisplay.classList.add("hidden");
     this.elements.offerDisplay.classList.remove("minimized");
     this.elements.waitResponse.classList.remove("hidden");
@@ -645,7 +651,7 @@ class WebRTCOnboarding {
     this.elements.answerDisplay.classList.remove("hidden");
   }
 
-  // When transitioning from onboarding page to lifestories page, keeps a temporary memory of the connection to verify that we came from the onboarding process
+  // quand on passe de la page onboarding à la page lifestories, permet de garder une mémoire temporaire de la connexion afin de vérifier qu'on vient bien du process onboarding
   startApplication() {
     if (!this.connectionEstablished) {
       this.showMessage("Connexion non établie", "error");
@@ -654,17 +660,17 @@ class WebRTCOnboarding {
 
     this.log("Starting LifeStories application...");
 
-    // SessionStorage already saved in dcOpen(), just verify
+    // SessionStorage déjà sauvegardé dans dcOpen(), juste vérifier
     this.log(
-      `DEBUG startApp: window.webrtcSync exists? ${!!window.webrtcSync}`
+      `DEBUG startApp: window.webrtcSync existe? ${!!window.webrtcSync}`
     );
     this.log(
       `DEBUG startApp: window.webrtcDataChannel existe? ${!!window.webrtcDataChannel}`
     );
 
-    // No need to re-send the data channel, already done in dcOpen()
+    // Pas besoin de re-transmettre le data channel, déjà fait dans dcOpen()
 
-    // Hide onboarding and show LifeStories
+    // Cacher l'onboarding et afficher LifeStories
     const onboarding = document.querySelector(".onboarding-container");
     const debugPanel = document.getElementById("debugPanel");
     const lifestories = document.getElementById("lifestoriesContainer");
@@ -674,27 +680,27 @@ class WebRTCOnboarding {
     if (lifestories) {
       lifestories.classList.add("active");
       lifestories.style.display = "block";
-      // If it's the viewer (not the offeror), activate viewer mode
+      // Si c'est le viewer (pas l'offeror), activer le mode viewer
       if (!this.isOfferor) {
         lifestories.classList.add("viewer-mode");
-        this.log("VIEWER mode activated - questionnaire hidden");
+        this.log("Mode VIEWER activé - questionnaire masqué");
       } else {
         this.log("Mode HÔTE activé - questionnaire visible");
       }
     }
 
-    // Dispatch an event to initialize Split.js
+    // Dispatcher un événement pour initialiser Split.js
     document.dispatchEvent(new Event("lifestoriesShown"));
 
     this.log("LifeStories UI activated, onboarding hidden");
   }
 
-  // Method to get the active instance
+  // Méthode pour obtenir l'instance active
   getDataChannel() {
     return this.dc;
   }
 
-  // Method to check if connection is established
+  // Méthode pour vérifier si la connexion est établie
   isConnected() {
     return this.connectionEstablished;
   }
