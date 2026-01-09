@@ -64,7 +64,7 @@ export function setupLongPressHandlers(timeline, groups, utils) {
  * Updates the parent to track its landmark children.
  */
 export function activateInitialLandmarks(groups) {
-  const initialLandmarks = [13, 23, 31];
+  const initialLandmarks = [13, 21, 31, 42];
 
   // Persistence: key to store a mapping parentId -> landmarkId
   const LANDMARKS_STORAGE_KEY = "landmarksByParent";
