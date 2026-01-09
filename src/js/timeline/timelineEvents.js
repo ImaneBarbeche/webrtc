@@ -100,13 +100,20 @@ export function groupTemplate(group) {
   if (group.id === 12) iconHtml = '<i data-lucide="house"></i> '; // Housing
   if (group.id === 13) iconHtml = '<i data-lucide="map-pinned"></i> '; // Municipality
 
+ // Icons for nested groups (Family)
+  if (group.id === 21) iconHtml = '<i data-lucide="users"></i> '; // House members
+  if (group.id === 22) iconHtml = '<i data-lucide="baby"></i> '; // Children
+  if (group.id === 23) iconHtml = '<i data-lucide="book-heart"></i> '; // Marital status
+
   // Icons for nested groups (Educational)
   if (group.id === 31) iconHtml = '<i data-lucide="building-2"></i> '; // Establishments
-  if (group.id === 32) iconHtml = '<i data-lucide="book-marked"></i> '; // Training
+  if (group.id === 32) iconHtml = '<i data-lucide="book-marked"></i> '; // Type (private, public)
 
   // Icons for nested groups (Professional)
-  if (group.id === 41) iconHtml = '<i data-lucide="contact-round"></i> '; // Positions
-  if (group.id === 42) iconHtml = '<i data-lucide="file-text"></i> '; // Contracts
+  if (group.id === 41) iconHtml = '<i data-lucide="factory"></i> '; // Industry
+  if (group.id === 42) iconHtml = '<i data-lucide="file-text"></i> '; // Profession
+  if (group.id === 43) iconHtml = '<i data-lucide="id-card-lanyard"></i> '; // Employement status
+  if (group.id === 44) iconHtml = '<i data-lucide="map-plus"></i> '; // Place of activity
 
   // Landmark icon if enabled
   if (group.isLandmark) {

@@ -227,7 +227,7 @@
 }
 
 .vis-label.vis-group-level-0 {
-  --label-color: red;
+  /* --label-color: red; */
 
   background-color: var(--primary-grey);
   background-color: color-mix(
@@ -269,7 +269,7 @@
     border-bottom: none !important;
     border-bottom-left-radius: 0 !important;
     border-bottom-right-radius: 0 !important;
-
+/* 
     &.vert {
       --label-color: #eabca5;
     }
@@ -283,7 +283,7 @@
     }
     &.jaune {
       --label-color: #a0d698
-    }
+    } */
   }
 }
 
@@ -339,7 +339,7 @@
 }
 
 .vis-label.vis-nested-group.vis-group-level-unknown-but-gte1 {
-  --label-color: red;
+  /* --label-color: red; */
 
   border: none;
   border-bottom: none !important;
@@ -350,32 +350,40 @@
 
 /* we have to do this because they are not descendants, but rather siblings :/ */
 
-/* Migratoire: IDs 11-13 */
-.vis-label.vis-nested-group.line_11,
-.vis-label.vis-nested-group.line_12,
-.vis-label.vis-nested-group.line_13 {
+/* .vis-label.vis-group-level-0.vert,
+.vis-label.vis-group-level-0.vert ~ .vis-label.vis-nested-group {
   --label-color: #eabca5;
 }
 
-/* Familiale: IDs 21-23 */
-.vis-label.vis-nested-group.line_21,
-.vis-label.vis-nested-group.line_22,
-.vis-label.vis-nested-group.line_23 {
+.vis-label.vis-group-level-0.bleu,
+.vis-label.vis-group-level-0.bleu ~ .vis-label.vis-nested-group {
   --label-color: #eaada5;
 }
 
-/* Scolaire: IDs 31-32 */
-.vis-label.vis-nested-group.line_31,
-.vis-label.vis-nested-group.line_32 {
-  --label-color: #a0d698;
+.vis-label.vis-group-level-0.rouge,
+.vis-label.vis-group-level-0.rouge ~ .vis-label.vis-nested-group {
+  --label-color: #a5beea;
 }
 
-/* Professionnelle: IDs 41-44 */
-.vis-label.vis-nested-group.line_41,
-.vis-label.vis-nested-group.line_42,
-.vis-label.vis-nested-group.line_43,
-.vis-label.vis-nested-group.line_44 {
+.vis-label.vis-group-level-0.jaune,
+.vis-label.vis-group-level-0.jaune ~ .vis-label.vis-nested-group {
+  --label-color: #a0d698;
+} */
+
+.vert {
+  --label-color: #eabca5;
+}
+
+.bleu {
+  --label-color: #eaada5;
+}
+
+.rouge {
   --label-color: #a5beea;
+}
+
+.jaune {
+  --label-color: #a0d698;
 }
 
 .vis-ltr .vis-label .vis-inner:has(.trajectory-title.closed) {
@@ -550,9 +558,10 @@
   height: 0;
 }
 
-.vis-item.vis-range.green,
-.vis-item.vis-range.red,
-.vis-item.vis-range.blue,
+.vis-item.vis-range.vert,
+.vis-item.vis-range.rouge,
+.vis-item.vis-range.bleu,
+.vis-item.vis-range.jaune,
 .vis-item.vis-box {
   --label-color: #eabca5;
 
@@ -566,14 +575,19 @@
     outline: none;
 } */
 
-.vis-item.vis-range.red,
-.vis-item.vis-box.red {
+.vis-item.vis-range.rouge,
+.vis-item.vis-box.rouge {
   --label-color: #a5beea;
 }
 
-.vis-item.vis-range.blue,
-.vis-item.vis-box.blue {
+.vis-item.vis-range.bleu,
+.vis-item.vis-box.bleu {
   --label-color: #eaada5;
+}
+
+.vis-item.vis-range.jaune,
+.vis-item.vis-box.jaune {
+  --label-color: #a0d698;
 }
 
 .vis-item.vis-line,
