@@ -204,31 +204,20 @@ export const test_items = [
     className: "bleu"
   },
   
-  // Enfants (groupe 22)
+  // Enfants (groupe 22) - EVENTS (type box)
   {
-    id: "fam_enfants_1",
-    type: "range",
-    content: "Aucun enfant",
-    start: "1980-01-01T00:00:00.000Z",
-    end: "2006-08-12T00:00:00.000Z",
-    group: 22,
-    className: "bleu"
-  },
-  {
-    id: "fam_enfants_2",
-    type: "range",
-    content: "1 enfant (Léa)",
+    id: "fam_enfant_1",
+    type: "box",
+    content: "baby",
     start: "2006-08-12T00:00:00.000Z",
-    end: "2009-04-23T00:00:00.000Z",
     group: 22,
     className: "bleu"
   },
   {
-    id: "fam_enfants_3",
-    type: "range",
-    content: "2 enfants (Léa, Thomas)",
+    id: "fam_enfant_2",
+    type: "box",
+    content: "baby",
     start: "2009-04-23T00:00:00.000Z",
-    end: "2026-01-09T00:00:00.000Z",
     group: 22,
     className: "bleu"
   },
@@ -333,7 +322,7 @@ export const test_items = [
   {
     id: "scol_niveau_4",
     type: "range",
-    content: "Université (Licence)",
+    content: "Licence",
     start: "1998-09-01T00:00:00.000Z",
     end: "2001-06-30T00:00:00.000Z",
     group: 32,
@@ -348,66 +337,48 @@ export const test_items = [
     group: 32,
     className: "jaune"
   },
+  {
+    id: "scol_niveau_6",
+    type: "range",
+    content: "MBA",
+    start: "2016-09-01T00:00:00.000Z",
+    end: "2018-06-30T00:00:00.000Z",
+    group: 32,
+    className: "jaune"
+  },
   
-  // Type (groupe 31)
+  // Type (groupe 31) - ONLY Public or Private
   {
     id: "scol_type_1",
     type: "range",
-    content: "École publique",
+    content: "Public",
     start: "1986-09-01T00:00:00.000Z",
-    end: "1991-06-30T00:00:00.000Z",
+    end: "1998-06-30T00:00:00.000Z",
     group: 31,
     className: "jaune"
   },
   {
     id: "scol_type_2",
     type: "range",
-    content: "Collège public",
-    start: "1991-09-01T00:00:00.000Z",
-    end: "1995-06-30T00:00:00.000Z",
-    group: 31,
-    className: "jaune"
-  },
-  {
-    id: "scol_type_3",
-    type: "range",
-    content: "Lycée général",
-    start: "1995-09-01T00:00:00.000Z",
-    end: "1998-06-30T00:00:00.000Z",
-    group: 31,
-    className: "jaune"
-  },
-  {
-    id: "scol_type_4",
-    type: "range",
-    content: "Fac Sciences Éco",
+    content: "Public",
     start: "1998-09-01T00:00:00.000Z",
     end: "2001-06-30T00:00:00.000Z",
     group: 31,
     className: "jaune"
   },
   {
-    id: "scol_type_5",
+    id: "scol_type_3",
     type: "range",
-    content: "École de Commerce",
+    content: "Privé",
     start: "2001-09-01T00:00:00.000Z",
     end: "2003-06-30T00:00:00.000Z",
     group: 31,
     className: "jaune"
   },
   {
-    id: "scol_type_6",
+    id: "scol_type_4",
     type: "range",
-    content: "Formation continue",
-    start: "2012-01-15T00:00:00.000Z",
-    end: "2012-06-30T00:00:00.000Z",
-    group: 31,
-    className: "jaune"
-  },
-  {
-    id: "scol_type_7",
-    type: "range",
-    content: "MBA Executive",
+    content: "Privé",
     start: "2016-09-01T00:00:00.000Z",
     end: "2018-06-30T00:00:00.000Z",
     group: 31,
@@ -617,7 +588,7 @@ export const test_items = [
   {
     id: "pro_secteur_3",
     type: "range",
-    content: "Services (conseil)",
+    content: "Services",
     start: "2003-09-01T00:00:00.000Z",
     end: "2012-12-31T00:00:00.000Z",
     group: 41,
@@ -626,7 +597,7 @@ export const test_items = [
   {
     id: "pro_secteur_4",
     type: "range",
-    content: "Industrie (Tech)",
+    content: "Industrie",
     start: "2013-01-01T00:00:00.000Z",
     end: "2015-09-30T00:00:00.000Z",
     group: 41,
@@ -635,7 +606,7 @@ export const test_items = [
   {
     id: "pro_secteur_5",
     type: "range",
-    content: "Services (Digital)",
+    content: "Services",
     start: "2016-03-15T00:00:00.000Z",
     end: "2026-01-09T00:00:00.000Z",
     group: 41,
