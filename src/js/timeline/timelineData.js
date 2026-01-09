@@ -39,25 +39,25 @@ export const groupsData = [
     showGaps: true,
     showOverlaps: true,
   },
-    // Familiale
+  // Familiale
   {
     id: 2,
     contentText: "Familiale",
     nestedGroups: [21, 22, 23],
     showNested: false,
-    className: "jaune",
+    className: "bleu",
     order: 2,
   },
-   {
+  {
     id: 21,
     contentText: "Etat matrimoniale",
     nestedInGroup: 2,
     className: "line_21",
-    order: 2,
+    order: 1,
     showGaps: false,
     showOverlaps: false,
   },
-   {
+  {
     id: 22,
     contentText: "Enfants",
     nestedInGroup: 2,
@@ -66,29 +66,30 @@ export const groupsData = [
     showGaps: false,
     showOverlaps: false,
   },
-   {
+  {
     id: 23,
     contentText: "Composition ménage",
     nestedInGroup: 2,
+    dependsOn: [21, 22],
     className: "line_23",
-    order: 2,
+    order: 3,
     showGaps: false,
     showOverlaps: false,
   },
+
   // SCOLAIRE
   {
     id: 3,
     contentText: "Scolaire",
     nestedGroups: [31, 32],
     showNested: false,
-    className: "bleu",
+    className: "jaune",
     order: 3,
   },
   {
     id: 31,
     contentText: "Niveau",
     nestedInGroup: 3,
-    dependsOn: 31,
     className: "line_31",
     order: 1,
     showGaps: false,
@@ -98,7 +99,7 @@ export const groupsData = [
     id: 32,
     contentText: "Type",
     nestedInGroup: 3,
-    dependsOn: 32,
+    dependsOn: 31,
     className: "line_32",
     order: 2,
     showGaps: false,
@@ -137,7 +138,7 @@ export const groupsData = [
     id: 43,
     contentText: "Secteur",
     nestedInGroup: 4,
-    dependsOn: 41,
+    dependsOn: 42,
     className: "line_43",
     order: 3,
     showGaps: false,
@@ -147,7 +148,7 @@ export const groupsData = [
     id: 44,
     contentText: "Lieu",
     nestedInGroup: 4,
-    dependsOn: 41,
+    dependsOn: 42,
     className: "line_44",
     order: 4,
     showGaps: false,

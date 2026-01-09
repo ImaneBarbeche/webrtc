@@ -281,6 +281,9 @@
     &.rouge {
       --label-color: #a5beea;
     }
+    &.jaune {
+      --label-color: #a0d698
+    }
   }
 }
 
@@ -347,18 +350,31 @@
 
 /* we have to do this because they are not descendants, but rather siblings :/ */
 
-.vis-label.vis-group-level-0.vert,
-.vis-label.vis-group-level-0.vert ~ .vis-label.vis-nested-group {
+/* Migratoire: IDs 11-13 */
+.vis-label.vis-nested-group.line_11,
+.vis-label.vis-nested-group.line_12,
+.vis-label.vis-nested-group.line_13 {
   --label-color: #eabca5;
 }
 
-.vis-label.vis-group-level-0.bleu,
-.vis-label.vis-group-level-0.bleu ~ .vis-label.vis-nested-group {
+/* Familiale: IDs 21-23 */
+.vis-label.vis-nested-group.line_21,
+.vis-label.vis-nested-group.line_22,
+.vis-label.vis-nested-group.line_23 {
   --label-color: #eaada5;
 }
 
-.vis-label.vis-group-level-0.rouge,
-.vis-label.vis-group-level-0.rouge ~ .vis-label.vis-nested-group {
+/* Scolaire: IDs 31-32 */
+.vis-label.vis-nested-group.line_31,
+.vis-label.vis-nested-group.line_32 {
+  --label-color: #a0d698;
+}
+
+/* Professionnelle: IDs 41-44 */
+.vis-label.vis-nested-group.line_41,
+.vis-label.vis-nested-group.line_42,
+.vis-label.vis-nested-group.line_43,
+.vis-label.vis-nested-group.line_44 {
   --label-color: #a5beea;
 }
 

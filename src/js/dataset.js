@@ -267,7 +267,7 @@ export const test_items=[
           "content": "Job étudiant - Caissier",
           "start": "2019-07-01T00:00:00.000Z",
           "end": "2019-08-31T00:00:00.000Z",
-          "group": 31,
+          "group": 41,
           "className": "red"
         },
         {
@@ -276,7 +276,7 @@ export const test_items=[
           "content": "Stage développement web",
           "start": "2021-02-01T00:00:00.000Z",
           "end": "2021-07-31T00:00:00.000Z",
-          "group": 31,
+          "group": 41,
           "className": "red"
         },
         {
@@ -285,7 +285,7 @@ export const test_items=[
           "content": "Alternance Data Analyst",
           "start": "2022-09-01T00:00:00.000Z",
           "end": "2024-08-31T00:00:00.000Z",
-          "group": 31,
+          "group": 41,
           "className": "red"
         },
         {
@@ -294,7 +294,7 @@ export const test_items=[
           "content": "CDI Data Scientist",
           "start": "2024-09-01T00:00:00.000Z",
           "end": "2025-12-31T00:00:00.000Z",
-          "group": 31,
+          "group": 41,
           "className": "red"
         },
         
@@ -305,7 +305,7 @@ export const test_items=[
           "content": "CDD saisonnier",
           "start": "2019-07-01T00:00:00.000Z",
           "end": "2019-08-31T00:00:00.000Z",
-          "group": 32,
+          "group": 42,
           "className": "red"
         },
         {
@@ -314,7 +314,7 @@ export const test_items=[
           "content": "Convention de stage",
           "start": "2021-02-01T00:00:00.000Z",
           "end": "2021-07-31T00:00:00.000Z",
-          "group": 32,
+          "group": 42,
           "className": "red"
         },
         {
@@ -323,7 +323,7 @@ export const test_items=[
           "content": "Contrat d'alternance",
           "start": "2022-09-01T00:00:00.000Z",
           "end": "2024-08-31T00:00:00.000Z",
-          "group": 32,
+          "group": 42,
           "className": "red"
         },
         {
@@ -332,7 +332,7 @@ export const test_items=[
           "content": "CDI temps plein",
           "start": "2024-09-01T00:00:00.000Z",
           "end": "2025-12-31T00:00:00.000Z",
-          "group": 32,
+          "group": 42,
           "className": "red"
         }
       ]

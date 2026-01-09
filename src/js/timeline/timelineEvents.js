@@ -66,7 +66,11 @@ export function onUpdate(item, callback) {
 }
 
 export function onRemove(item, callback) {
-  utils.prettyConfirm("Remove item", `Do you really want to remove item ${item.content}?`)
+  utils
+    .prettyConfirm(
+      "Remove item",
+      `Do you really want to remove item ${item.content}?`
+    )
     .then((ok) => {
       if (ok) callback(item);
       else callback(null);
@@ -87,8 +91,9 @@ export function groupTemplate(group) {
 
   // Icons for root groups
   if (group.id === 1) iconHtml = '<i data-lucide="map-pin-house"></i> ';
-  if (group.id === 2) iconHtml = '<i data-lucide="school"></i> ';
-  if (group.id === 3) iconHtml = '<i data-lucide="briefcase"></i> ';
+  if (group.id === 2) iconHtml = '<i data-lucide="contact"></i> ';
+  if (group.id === 3) iconHtml = '<i data-lucide="school"></i> ';
+  if (group.id === 4) iconHtml = '<i data-lucide="briefcase"></i> ';
 
   // Icons for nested groups (Migratory)
   if (group.id === 11) iconHtml = '<i data-lucide="key-round"></i> '; // Residential status
@@ -96,13 +101,12 @@ export function groupTemplate(group) {
   if (group.id === 13) iconHtml = '<i data-lucide="map-pinned"></i> '; // Municipality
 
   // Icons for nested groups (Educational)
-  if (group.id === 21) iconHtml = '<i data-lucide="building-2"></i> '; // Establishments
-  if (group.id === 22) iconHtml = '<i data-lucide="book-marked"></i> '; // Training
-  if (group.id === 23) iconHtml = '<i data-lucide="graduation-cap"></i> '; // Diplomas
+  if (group.id === 31) iconHtml = '<i data-lucide="building-2"></i> '; // Establishments
+  if (group.id === 32) iconHtml = '<i data-lucide="book-marked"></i> '; // Training
 
   // Icons for nested groups (Professional)
-  if (group.id === 31) iconHtml = '<i data-lucide="contact-round"></i> '; // Positions
-  if (group.id === 32) iconHtml = '<i data-lucide="file-text"></i> '; // Contracts
+  if (group.id === 41) iconHtml = '<i data-lucide="contact-round"></i> '; // Positions
+  if (group.id === 42) iconHtml = '<i data-lucide="file-text"></i> '; // Contracts
 
   // Landmark icon if enabled
   if (group.isLandmark) {
@@ -114,7 +118,10 @@ export function groupTemplate(group) {
   if (window.timeline && window.timeline._chaptersHidden) {
     closedClass = " closed";
   }
-  wrapper.innerHTML = iconHtml + `<span class="trajectory-title${closedClass}">${group.contentText || ""}</span>`;
+  wrapper.innerHTML =
+    iconHtml +
+    `<span class="trajectory-title${closedClass}">${
+      group.contentText || ""
+    }</span>`;
   return wrapper;
 }
-

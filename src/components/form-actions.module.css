@@ -148,6 +148,9 @@
             &[data-color="rouge"] {
               --label-color: #a5beea;
             }
+            &[data-color="jaune"] {
+              --label-color: #a0d698;
+            }
           }
 
           span {
