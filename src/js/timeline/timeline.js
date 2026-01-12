@@ -19,12 +19,12 @@ import {
 import { setupChapterToggle } from "./chapterToggle.js";
 
 // ===============================
-// VARIABLES GLOBALES
+// GLOBAL VARIABLES
 // ===============================
 let timeline;
 const items = new vis.DataSet();
 const groups = new vis.DataSet(groupsData);
-const stepSize = 1000 * 60 * 60 * 24; // 1 jour en ms
+const stepSize = 1000 * 60 * 60 * 24; // 1 day in ms
 
 // ===============================
 // DOM
@@ -38,7 +38,7 @@ const zoomOutBtns = document.querySelectorAll("#zoom-out");
 const moveBackwardsBtns = document.querySelectorAll("#move-backwards");
 const moveForwardsBtns = document.querySelectorAll("#move-forwards");
 
-// Boutons Load / Export
+// Load / Export Buttons
 document.getElementById("load").addEventListener("click", () => {
   importTimelineData(items, test_items, utils);
 });
@@ -46,42 +46,42 @@ document.getElementById("export").addEventListener("click", async () => {
   await exportTimelineData(items);
 });
 
-// Creation de la timeline
+// Timeline creation
 document.addEventListener("DOMContentLoaded", () => {
   timeline = initTimeline();
   if (!timeline) return;
 
-  window.timeline = timeline;
+  window.timeline = timeline; // For global access
 
-  // Initialiser le module de detection des chevauchements
+  // Initialize the overlap detection module
   initOverlapDetection(items, groups);
 
   if (window.lucide?.createIcons) window.lucide.createIcons();
 
-  // Flag pour eviter les appels recursifs lors de l'ajout de marqueurs de chevauchement
+  // Flag to prevent recursive calls when adding overlap markers
   let isDetectingOverlaps = false;
 
-  // Fit/redraw sur ajout/update + detection des chevauchements
+  // Fit/redraw on add/update + overlap detection
   items.on("add", (event, properties) => {
-    // Ignorer les marqueurs de chevauchement pour eviter la boucle infinie
+    // Ignore overlap markers to prevent infinite loop
     const addedItems = properties?.items || [];
     const isOverlapMarker = addedItems.some((id) =>
       id.toString().startsWith("__overlap_")
     );
-    // Ignorer aussi les gaps visuels (créés automatiquement) pour éviter le fit
+    // Also ignore visual gaps (created automatically) to avoid fit
     const isGapMarker = addedItems.some((id) =>
       id.toString().startsWith("gap-")
     );
 
     if (!isOverlapMarker && !isGapMarker) {
-      // Scroll automatique UNIQUEMENT si l'ajout est programmatique (pas via interaction utilisateur)
+      // Automatic scrolling ONLY if the addition is programmatic (not via user interaction)
       const isManual = properties && properties.event && properties.event.trigger === 'manual';
       if (!isManual) {
         try {
           if (addedItems.length === 1) {
             try {
               const newItem = items.get(addedItems[0]);
-              // Scroll à la fin si end existe et est différente de start, sinon au début
+              // Scroll to the end if end exists and is different from start, otherwise to the beginning
               if (
                 newItem &&
                 newItem.end &&
@@ -103,7 +103,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     scheduleRedraw(timeline);
 
-    // Detecter les chevauchements (sauf si c'est un marqueur ou si deja en cours)
+    // Detect overlaps (unless it's a marker or already in progress)
     if (!isOverlapMarker && !isDetectingOverlaps) {
       isDetectingOverlaps = true;
       setTimeout(() => {
@@ -114,7 +114,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   items.on("update", (event, properties) => {
-    // Ignorer les marqueurs de chevauchement
+    // Ignore overlap markers
     const updatedItems = properties?.items || [];
     const isOverlapMarker = updatedItems.some((id) =>
       id.toString().startsWith("__overlap_")
@@ -122,7 +122,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     scheduleRedraw(timeline);
 
-    // Detecter les chevauchements apres modification
+    // Detect overlaps after modification
     if (!isOverlapMarker && !isDetectingOverlaps) {
       isDetectingOverlaps = true;
       setTimeout(() => {
@@ -133,13 +133,13 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   items.on("remove", (event, properties) => {
-    // Ignorer les marqueurs de chevauchement
+    // Ignore overlap markers
     const removedItems = properties?.items || [];
     const isOverlapMarker = removedItems.some((id) =>
       id.toString().startsWith("__overlap_")
     );
 
-    // Detecter les chevauchements apres suppression
+    // Detect overlaps after deletion
     if (!isOverlapMarker && !isDetectingOverlaps) {
       isDetectingOverlaps = true;
       setTimeout(() => {
@@ -151,20 +151,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
   document.dispatchEvent(new CustomEvent("timelineReady"));
 
-  // Interactions et barre verticale
+  // Interactions and vertical bar
   setupInteractions(timeline, utils);
   setupVerticalBar(timeline, stepSize);
 
-  // Resume
+  // Summary
   setupSummaryHandlers({ summaryContainer, viewSummaryBtn, closeSummaryBtn });
 
-  // Toggle chapitres
+  // Toggle chapters
   setupChapterToggle(toggleChaptersBtn, timeline);
 
-  // Landmarks init
+  // Landmarks initialization
   activateInitialLandmarks(groups);
 
-  // Initialisation de la date de naissance
+  // Birth year initialization
   try {
     let birthYearStored = localStorage.getItem("birthYear");
     if (!birthYearStored) {

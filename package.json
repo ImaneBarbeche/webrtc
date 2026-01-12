@@ -20,6 +20,8 @@
     "@capacitor/filesystem": "^7.1.4",
     "@capacitor/share": "^7.0.2",
     "@capacitor/splash-screen": "latest",
+    "@ionic/pwa-elements": "^3.3.0",
+    "jsqr": "^1.4.0",
     "lucide": "^0.554.0",
     "lucide-react": "^0.554.0",
     "react": "^19.2.0",
@@ -30,6 +32,7 @@
   "devDependencies": {
     "@capacitor/cli": "latest",
     "@vitejs/plugin-react": "^5.1.0",
+    "baseline-browser-mapping": "^2.9.11",
     "vite": "^5.4.2",
     "vite-plugin-static-copy": "^3.1.3"
   },

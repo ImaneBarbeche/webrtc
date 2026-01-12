@@ -285,6 +285,8 @@ header h1 {
 
 .interviewee-btn,
 .interviewer-btn {
+.interviewee-btn,
+.interviewer-btn {
   background: transparent;
   color: black;
   padding: 14px 32px;
@@ -303,6 +305,7 @@ header h1 {
   gap: 10px;
 }
 
+.interviewee-btn img,
 .interviewee-btn img,
 .interviewer-btn img {
   width: 100%;
@@ -375,25 +378,30 @@ header h1 {
   transform: translateY(-4px);
 }
 
-/* Scan frame with corner marks (L-shaped corners) */
+/* Scan frame */
 .scan-area {
   display: flex;
   justify-content: center;
   align-items: center;
   margin: 20px 0 10px 0;
 }
-.scan-frame {
+.scan-frame,
+.scan-frame-interviewee {
   position: relative;
-  width: 260px;
-  height: 260px;
+  width: 260px !important;
+  height: 260px !important;
   display: flex;
   align-items: center;
   justify-content: center;
   background: #fff; /* white inner square */
   border-radius: 8px;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
 }
-.scan-frame .scan-btn {
+
+/* Bouton de scan dans les deux frames */
+.scan-frame .scan-btn,
+.scan-frame-interviewee .scan-btn {
   width: 100%;
   height: 100%;
   background: transparent !important;
@@ -406,82 +414,18 @@ header h1 {
   align-items: center;
   justify-content: center;
 }
-.scan-frame .scan-btn:hover {
+
+/* Pas d'effet hover */
+.scan-frame .scan-btn:hover,
+.scan-frame-interviewee .scan-btn:hover {
   transform: none;
 }
 
-.corner {
-  position: absolute;
-  width: 44px;
-  height: 44px;
-  pointer-events: none;
+/* IMPORTANT : si un flow est caché, ses frames le sont aussi */
+.interviewer-flow.hidden .scan-frame,
+.interviewee-flow.hidden .scan-frame-interviewee {
+  display: none !important;
 }
-.corner::before,
-.corner::after {
-  content: "";
-  position: absolute;
-  background: #111;
-  border-radius: 3px;
-}
-.corner::before {
-  /* horizontal */
-  height: 6px;
-  width: 28px;
-}
-.corner::after {
-  /* vertical */
-  width: 6px;
-  height: 28px;
-}
-.top-left {
-  left: -8px;
-  top: -8px;
-}
-.top-left::before {
-  left: 0;
-  top: 0;
-}
-.top-left::after {
-  left: 0;
-  top: 0;
-}
-.top-right {
-  right: -8px;
-  top: -8px;
-}
-.top-right::before {
-  right: 0;
-  top: 0;
-}
-.top-right::after {
-  right: 0;
-  top: 0;
-}
-.bottom-left {
-  left: -8px;
-  bottom: -8px;
-}
-.bottom-left::before {
-  left: 0;
-  bottom: 0;
-}
-.bottom-left::after {
-  left: 0;
-  bottom: 0;
-}
-.bottom-right {
-  right: -8px;
-  bottom: -8px;
-}
-.bottom-right::before {
-  right: 0;
-  bottom: 0;
-}
-.bottom-right::after {
-  right: 0;
-  bottom: 0;
-}
-
 .secondary-btn {
   background: #000000;
   color: white;
@@ -613,14 +557,17 @@ header h1 {
     gap: 20px;
   }
 
+
   .onboarding-container {
     padding: 80px 20px 20px 20px;
     margin: 20px;
   }
 
+
   .header h1 {
     font-size: 2rem;
   }
+
 
   header {
     position: fixed;
@@ -628,14 +575,17 @@ header h1 {
     left: 15px;
   }
 
+
   header img {
     width: 50px;
     height: 50px;
   }
 
+
   header h1 {
     font-size: 1.5rem;
   }
+
 
   .connection-status {
     position: fixed;
@@ -645,13 +595,16 @@ header h1 {
     font-size: 0.9rem;
   }
 
+
   .role-icon {
     max-width: 200px;
   }
 
+
   .role-selection h2 {
     font-size: 1.6rem;
   }
+
 
   .role-selection p {
     font-size: 1rem;
@@ -660,10 +613,12 @@ header h1 {
 
 /* Tablette 11" (landscape: 1024x768, portrait: 768x1024) */
 @media (min-width: 769px) and (max-width: 1200px) {
+@media (min-width: 769px) and (max-width: 1200px) {
   .onboarding-container {
     max-width: 90%;
     padding: 100px 30px 30px 30px;
   }
+
 
   .role-cards {
     grid-template-columns: 1fr 1fr !important;
@@ -672,33 +627,40 @@ header h1 {
     max-width: 700px;
   }
 
+
   .role-icon {
     max-width: 240px;
   }
+
 
   header img {
     width: 70px;
     height: 70px;
   }
 
+
   header h1 {
     font-size: 2rem;
   }
+
 
   .qr-section {
     max-width: 600px;
     margin: 20px auto;
   }
 
+
   #qrCanvas,
   #qrCanvasAnswer {
     max-width: 300px;
   }
 
+
   .scan-frame {
     width: 280px;
     height: 280px;
   }
+
 
   #scanResponseBtn {
     width: 260px;
@@ -714,9 +676,11 @@ header h1 {
     margin: 30px auto;
   }
 
+
   .role-icon {
     max-width: 300px;
   }
+
 
   .connection-modes {
     grid-template-columns: 1fr;
@@ -735,9 +699,11 @@ header h1 {
     font-size: 1.1rem;
   }
 
+
   .role-card {
     padding: 20px;
   }
+
 
   /* Augmenter les zones tactiles */
   .scan-btn,
@@ -785,6 +751,54 @@ header h1 {
   bottom: 40px;
   right: 20px;
   display: none; /* Caché par défaut */
+}
+
+#confirm-button.visible {
+  display: block; /* Affiche le bouton lorsqu'il est visible */
+}
+
+/* Responsive - Mobile */
+@media (max-width: 600px) {
+  .onboarding-container {
+    padding: 16px 4px 4px 4px;
+    max-width: 100vw;
+    min-height: 100vh;
+    width: 100vw;
+    font-size: 1em;
+  }
+  header {
+    position: static;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  header img {
+    width: 32px;
+    height: 32px;
+  }
+  header h1 {
+    font-size: 1.1em;
+  }
+  .role-selection h2 {
+    font-size: 1.2em;
+    margin-bottom: 10px;
+  }
+  .role-cards {
+    flex-direction: column;
+    gap: 12px;
+  }
+  .role-card {
+    width: 100%;
+    margin-bottom: 8px;
+  }
+  .interviewer-btn,
+  .interviewee-btn {
+    font-size: 1em;
+    padding: 10px 18px;
+  }
 }
 
 #confirm-button.visible {

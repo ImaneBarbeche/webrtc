@@ -41,7 +41,7 @@ export function onUpdate(item, callback) {
   let attributes = utils.getAttributes(item.content);
   if (item.type == "point") {
     if (attributes === "erreur") {
-      console.error("Attributs non définis pour cet item");
+      console.error("Attributes not defined for this item");
       callback(null);
       return;
     }
@@ -66,7 +66,11 @@ export function onUpdate(item, callback) {
 }
 
 export function onRemove(item, callback) {
-  utils.prettyConfirm("Remove item", `Do you really want to remove item ${item.content}?`)
+  utils
+    .prettyConfirm(
+      "Remove item",
+      `Do you really want to remove item ${item.content}?`
+    )
     .then((ok) => {
       if (ok) callback(item);
       else callback(null);
@@ -85,32 +89,46 @@ export function groupTemplate(group) {
   const wrapper = document.createElement("span");
   let iconHtml = "";
 
-  // Icônes pour groupes racine
+  // Icons for root groups
   if (group.id === 1) iconHtml = '<i data-lucide="map-pin-house"></i> ';
-  if (group.id === 2) iconHtml = '<i data-lucide="school"></i> ';
-  if (group.id === 3) iconHtml = '<i data-lucide="briefcase"></i> ';
+  if (group.id === 2) iconHtml = '<i data-lucide="contact"></i> ';
+  if (group.id === 3) iconHtml = '<i data-lucide="school"></i> ';
+  if (group.id === 4) iconHtml = '<i data-lucide="briefcase"></i> ';
 
-  // Icônes pour nested groups (Migratoire)
-  if (group.id === 11) iconHtml = '<i data-lucide="key-round"></i> '; // Statut résidentiel
-  if (group.id === 12) iconHtml = '<i data-lucide="house"></i> '; // Logement
-  if (group.id === 13) iconHtml = '<i data-lucide="map-pinned"></i> '; // Commune
+  // Icons for nested groups (Migratory)
+  if (group.id === 11) iconHtml = '<i data-lucide="key-round"></i> '; // Residential status
+  if (group.id === 12) iconHtml = '<i data-lucide="house"></i> '; // Housing
+  if (group.id === 13) iconHtml = '<i data-lucide="map-pinned"></i> '; // Municipality
 
-  // Icônes pour nested groups (Scolaire)
-  if (group.id === 21) iconHtml = '<i data-lucide="building-2"></i> '; // Établissements
-  if (group.id === 22) iconHtml = '<i data-lucide="book-marked"></i> '; // Formations
-  if (group.id === 23) iconHtml = '<i data-lucide="graduation-cap"></i> '; // Diplômes
+ // Icons for nested groups (Family)
+  if (group.id === 21) iconHtml = '<i data-lucide="users"></i> '; // House members
+  if (group.id === 22) iconHtml = '<i data-lucide="baby"></i> '; // Children
+  if (group.id === 23) iconHtml = '<i data-lucide="book-heart"></i> '; // Marital status
 
-  // Icônes pour nested groups (Professionnelle)
-  if (group.id === 31) iconHtml = '<i data-lucide="contact-round"></i> '; // Postes
-  if (group.id === 32) iconHtml = '<i data-lucide="file-text"></i> '; // Contrats
+  // Icons for nested groups (Educational)
+  if (group.id === 31) iconHtml = '<i data-lucide="building-2"></i> '; // Establishments
+  if (group.id === 32) iconHtml = '<i data-lucide="book-marked"></i> '; // Type (private, public)
 
-  // Icône Landmark si activé
+  // Icons for nested groups (Professional)
+  if (group.id === 41) iconHtml = '<i data-lucide="factory"></i> '; // Industry
+  if (group.id === 42) iconHtml = '<i data-lucide="file-text"></i> '; // Profession
+  if (group.id === 43) iconHtml = '<i data-lucide="id-card-lanyard"></i> '; // Employement status
+  if (group.id === 44) iconHtml = '<i data-lucide="map-plus"></i> '; // Place of activity
+
+  // Landmark icon if enabled
   if (group.isLandmark) {
     iconHtml += '<i data-lucide="pin" class="lucide landmark-pin"></i> ';
   }
 
-  // Texte du groupe avec classe trajectory-title
-  wrapper.innerHTML = iconHtml + `<span class="trajectory-title">${group.contentText || ""}</span>`;
+  // Add closed class if chapters are hidden
+  let closedClass = "";
+  if (window.timeline && window.timeline._chaptersHidden) {
+    closedClass = " closed";
+  }
+  wrapper.innerHTML =
+    iconHtml +
+    `<span class="trajectory-title${closedClass}">${
+      group.contentText || ""
+    }</span>`;
   return wrapper;
 }
-

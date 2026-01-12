@@ -1,7 +1,7 @@
 /*
 ********************************************************************************
-* persistence.js - Fonctions de persistance localStorage                       *
-* Gère la sauvegarde et le chargement du contexte et des réponses             *
+* persistence.js - localStorage persistence utilities                          *
+* Handles saving and loading of the survey context and answered questions      *
 ********************************************************************************
 */
 
@@ -15,8 +15,14 @@ const STORAGE_KEYS = {
 };
 
 /**
- * Charge le contexte sauvegardé depuis localStorage
+ * Loads the saved context from localStorage.
+ * This includes:
+ *  - the serialized XState context
+ *  - the last known state of the state machine
+ *
  * @returns {{ context: object|null, savedState: string|null }}
+ *          context:     the restored context object or null if none exists
+ *          savedState:  the restored state name or null if none exists
  */
 export function loadSavedContext() {
   try {
@@ -26,24 +32,30 @@ export function loadSavedContext() {
     if (savedContextStr) {
       const context = JSON.parse(savedContextStr);
       const state = savedStateStr ? JSON.parse(savedStateStr) : null;
-            
       return { context, savedState: state };
     }
   } catch (e) {
-    console.error('❌ Erreur lors du chargement du contexte:', e);
+    console.error('❌ Error while loading context:', e);
   }
+
+  // No saved data found or an error occurred
   return { context: null, savedState: null };
 }
 
 /**
- * Sauvegarde le contexte dans localStorage
- * Note: lastEpisode est exclu car il contient des références circulaires
- * @param {object} context - Le contexte à sauvegarder
- * @param {string} state - L'état actuel
+ * Saves the current context and state into localStorage.
+ *
+ * Important:
+ *  - lastEpisode is intentionally excluded because it contains circular
+ *    references (timeline items referencing groups, etc.), which cannot be
+ *    serialized with JSON.stringify.
+ *
+ * @param {object} context - The current XState context
+ * @param {string} state - The current state of the state machine
  */
 export function saveContext(context, state) {
   try {
-    // Créer une copie du contexte sans lastEpisode (car il contient des références circulaires)
+    // Create a serializable copy of the context without lastEpisode
     const contextToSave = {
       birthYear: context.birthYear,
       birthPlace: context.birthPlace,
@@ -58,14 +70,22 @@ export function saveContext(context, state) {
     localStorage.setItem(STORAGE_KEYS.CONTEXT, JSON.stringify(contextToSave));
     localStorage.setItem(STORAGE_KEYS.CURRENT_STATE, JSON.stringify(state));
   } catch (e) {
-    console.error('❌ Erreur lors de la sauvegarde du contexte:', e);
+    console.error('❌ Error while saving context:', e);
   }
 }
 
 /**
- * Sauvegarde une question répondue dans l'historique
- * @param {string} state - L'état de la question
- * @param {object} eventData - Les données de l'événement/réponse
+ * Saves a single answered question into the history.
+ * Each entry contains:
+ *  - the state in which the question was asked
+ *  - the event data (the answer)
+ *  - a timestamp
+ *
+ * If a question with the same state already exists, it is replaced.
+ * This ensures that the history always reflects the latest answer.
+ *
+ * @param {string} state - The state associated with the question
+ * @param {object} eventData - The event payload representing the answer
  */
 export function saveAnsweredQuestion(state, eventData) {
   try {
@@ -79,16 +99,16 @@ export function saveAnsweredQuestion(state, eventData) {
       timestamp: new Date().toISOString()
     };
 
-    // Vérifier si une réponse existe déjà pour cette question (par state uniquement)
+    // Check if an answer already exists for this state
     const existingIndex = answeredQuestions.findIndex(
       q => q.state === state
     );
 
     if (existingIndex >= 0) {
-      // Remplacer l'ancienne réponse
+      // Replace the previous answer
       answeredQuestions[existingIndex] = newEntry;
     } else {
-      // Ajouter une nouvelle entrée
+      // Add a new entry
       answeredQuestions.push(newEntry);
     }
 
@@ -97,28 +117,29 @@ export function saveAnsweredQuestion(state, eventData) {
       JSON.stringify(answeredQuestions)
     );
   } catch (e) {
-    console.error('❌ Erreur lors de la sauvegarde de la réponse:', e);
+    console.error('❌ Error while saving answer:', e);
   }
 }
 
-
 /**
- * Charge l'historique des réponses depuis localStorage
- * @returns {Array} Tableau des questions répondues
+ * Loads the full history of answered questions from localStorage.
+ *
+ * @returns {Array} An array of saved answer entries (or an empty array)
  */
 export function loadAnsweredQuestions() {
   try {
     const saved = localStorage.getItem(STORAGE_KEYS.ANSWERED_QUESTIONS);
     return saved ? JSON.parse(saved) : [];
   } catch (e) {
-    console.error('❌ Erreur lors du chargement de l\'historique:', e);
+    console.error('❌ Error while loading answer history:', e);
     return [];
   }
 }
 
 /**
- * Réinitialise toutes les données de l'application
- * Supprime toutes les clés localStorage et recharge la page
+ * Completely resets all application data.
+ * Removes every key used by the app from localStorage,
+ * then reloads the page to restart with a clean state.
  */
 export function resetAllData() {
   Object.values(STORAGE_KEYS).forEach(key => {
@@ -127,5 +148,5 @@ export function resetAllData() {
   window.location.reload();
 }
 
-// Export des clés pour usage externe si nécessaire
+// Export storage keys for external use if needed
 export { STORAGE_KEYS };

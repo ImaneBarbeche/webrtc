@@ -1,17 +1,17 @@
 // overlapDetection.js
-// Détection des chevauchements d'épisodes et affichage visuel avec des background areas
+// Detection of episode overlaps and visual display with background areas
 
-// Préfixe pour identifier les items de background d'incohérence
+// Prefix to identify inconsistency background items
 const OVERLAP_PREFIX = "__overlap_";
 
-// Références aux DataSets (injectées à l'initialisation)
+// References to DataSets (injected at initialization)
 let _items = null;
 let _groups = null;
 
 /**
- * Initialise le module avec les références aux DataSets
- * @param {vis.DataSet} items - Le DataSet des items
- * @param {vis.DataSet} groups - Le DataSet des groupes
+ * Initialize the module with references to DataSets
+ * @param {vis.DataSet} items - The items DataSet
+ * @param {vis.DataSet} groups - The groups DataSet
  */
 export function initOverlapDetection(items, groups) {
   _items = items;
@@ -21,25 +21,25 @@ export function initOverlapDetection(items, groups) {
 const notifiedOverlapKeys = new Set();
 
 /**
- * Détecte les chevauchements d'épisodes dans un même groupe
- * et crée des items de background pour les signaler visuellement
+ * Detect episode overlaps in the same group
+ * and create background items to signal them visually
  */
 export function detectAndShowOverlaps() {
   if (!_items || !_groups) {
-    console.warn("[OverlapDetection] Module non initialisé");
+    console.warn("[OverlapDetection] Module not initialized");
     return;
   }
 
-  // Supprimer les anciens marqueurs de chevauchement
+  // Remove old overlap markers
   clearOverlapMarkers();
 
-  // Récupérer tous les groupes qui peuvent avoir des chevauchements
-  // (sous-groupes comme Commune, Logement, etc.)
+  // Retrieve all groups that can have overlaps
+  // (subgroups like Municipality, Housing, etc.)
   const subGroups = _groups.get({
     filter: (g) => g.nestedInGroup !== undefined
   });
 
-  // Ne traiter que les sous-groupes explicitement autorisés pour les overlaps
+  // Only handle subgroups explicitly allowed for overlaps
   const allowed = subGroups.filter((g) => g.showOverlaps === true);
   allowed.forEach((group) => {
     detectOverlapsInGroup(group.id);
@@ -47,11 +47,11 @@ export function detectAndShowOverlaps() {
 }
 
 /**
- * Détecte les chevauchements dans un groupe spécifique
- * @param {number} groupId - L'ID du groupe à analyser
+ * Detect overlaps in a specific group
+ * @param {number} groupId - The ID of the group to analyze
  */
 function detectOverlapsInGroup(groupId) {
-  // Récupérer tous les items de type "range" dans ce groupe
+  // Retrieve all "range" type items in this group
   const groupItems = _items.get({
     filter: (item) => 
       item.group === groupId && 
@@ -59,10 +59,10 @@ function detectOverlapsInGroup(groupId) {
       !item.id.toString().startsWith(OVERLAP_PREFIX)
   });
 
-  // Trier par date de début
+  // Sort by start date
   groupItems.sort((a, b) => new Date(a.start) - new Date(b.start));
 
-  // Détecter les chevauchements
+  // Detect overlaps
   for (let i = 0; i < groupItems.length - 1; i++) {
     const current = groupItems[i];
     const next = groupItems[i + 1];
@@ -70,20 +70,20 @@ function detectOverlapsInGroup(groupId) {
     const currentEnd = new Date(current.end);
     const nextStart = new Date(next.start);
 
-    // S'il y a chevauchement (la fin du premier dépasse le début du suivant)
+    // If there is overlap (end of first exceeds start of next)
     if (currentEnd > nextStart) {
-      // Calculer la zone de chevauchement
+      // Calculate the overlap zone
       const overlapStart = nextStart;
       const overlapEnd = currentEnd < new Date(next.end) ? currentEnd : new Date(next.end);
 
-      // Créer un item de background pour marquer le chevauchement
+      // Create a background item to mark the overlap
       createOverlapMarker(groupId, overlapStart, overlapEnd, current.id, next.id);
     }
   }
 }
 
 /**
- * Crée un marqueur visuel de chevauchement (background area)
+ * Create a visual overlap marker (background area)
  */
 function createOverlapMarker(groupId, start, end, item1Id, item2Id) {
   const markerId = `${OVERLAP_PREFIX}${groupId}_${item1Id}_${item2Id}`;
@@ -98,8 +98,8 @@ function createOverlapMarker(groupId, start, end, item1Id, item2Id) {
     _isOverlapMarker: true,
     _overlappingItems: [item1Id, item2Id],
     _originalGroup: groupId,
-    content: "Chevauchement détecté entre deux épisodes.",
-    title: `Incohérence : chevauchement entre épisodes du ${formatDate(start)} au ${formatDate(end)}`
+    content: "Overlap detected between two episodes.",
+    title: `Inconsistency: overlap between episodes from ${formatDate(start)} to ${formatDate(end)}`
   };
 
   _items.add(overlapItem);
@@ -125,9 +125,9 @@ function notifyNewOverlap(overlapItem) {
     toast: true,
     position: "top-start",
     icon: "error",
-    title: "Chevauchement détecté",
-    html: `<b>Pour ${groupName} : ${startYear} → ${endYear}</b><br>
-         <span>Veuillez notifier l'enquêté d'un chevauchement.</span>`,
+    title: "Overlap detected",
+    html: `<b>For ${groupName}: ${startYear} → ${endYear}</b><br>
+         <span>Please notify the respondent of an overlap.</span>`,
     showConfirmButton: false,
     timer: 7000,
     timerProgressBar: true,
@@ -135,7 +135,7 @@ function notifyNewOverlap(overlapItem) {
 }
 
 /**
- * Supprime tous les marqueurs de chevauchement existants
+ * Remove all existing overlap markers
  */
 export function clearOverlapMarkers() {
   if (!_items) return;
@@ -150,7 +150,7 @@ export function clearOverlapMarkers() {
 }
 
 /**
- * Formate une date pour l'affichage
+ * Format a date for display
  */
 function formatDate(date) {
   const d = new Date(date);
@@ -158,9 +158,9 @@ function formatDate(date) {
 }
 
 /**
- * Vérifie si un groupe a des chevauchements
- * @param {number} groupId - L'ID du groupe
- * @returns {boolean} - True s'il y a des chevauchements
+ * Check if a group has overlaps
+ * @param {number} groupId - The ID of the group
+ * @returns {boolean} - True if there are overlaps
  */
 export function hasOverlaps(groupId) {
   if (!_items) return false;
@@ -174,9 +174,9 @@ export function hasOverlaps(groupId) {
 }
 
 /**
- * Retourne la liste des chevauchements pour un groupe
- * @param {number} groupId - L'ID du groupe
- * @returns {Array} - Liste des marqueurs de chevauchement
+ * Return the list of overlaps for a group
+ * @param {number} groupId - The ID of the group
+ * @returns {Array} - List of overlap markers
  */
 export function getOverlaps(groupId) {
   if (!_items) return [];

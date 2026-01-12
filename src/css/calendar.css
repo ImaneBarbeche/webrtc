@@ -249,6 +249,9 @@
   &.rouge {
     --bar-color: #a5beea;
   }
+  &.jaune {
+    --bar-color:#a0d698
+  }
 
   &:before {
     content: "";

@@ -119,10 +119,6 @@
                 class="scan-btn"
                 title="Scanner la réponse"
               ></button>
-              <div class="corner top-left"></div>
-              <div class="corner top-right"></div>
-              <div class="corner bottom-left"></div>
-              <div class="corner bottom-right"></div>
             </div>
           </div>
           <div class="manual-input">
@@ -144,16 +140,12 @@
           <h3>Il est temps de se connecter</h3>
           <p>Scannez le QR code fourni par l'enquêteur</p>
           <div class="scan-area">
-            <div class="scan-frame">
+            <div class="scan-frame-interviewee">
               <button
                 id="scanBtn"
                 class="scan-btn"
                 title="Scanner le QR Code"
               ></button>
-              <div class="corner top-left"></div>
-              <div class="corner top-right"></div>
-              <div class="corner bottom-left"></div>
-              <div class="corner bottom-right"></div>
             </div>
           </div>
           <div class="manual-input">
@@ -367,7 +359,6 @@
     <script type="module" src="js/stateMachine/stateMachine.js"></script>
     <script type="module" src="js/webrtc/webrtc-sync.js"></script>
     <script src="js/swipeDetector.js"></script>
-
     <script>
       // Global dev-mode toggle (fallback) - ensure it's clickable in any view
       (function () {

@@ -1,338 +1,617 @@
-export const test_items=[
-        // ========================================
-        // TRAJECTOIRE MIGRATOIRE
-        // ========================================
-        
-        // Communes (groupe 13 - LANDMARK)
-        {
-          "id": "mig_commune_1",
-          "type": "range",
-          "content": "Saint-Denis",
-          "start": "2001-01-01T00:00:00.000Z",
-          "end": "2017-01-01T00:00:00.000Z",
-          "group": 13,
-          "className": "green"
-        },
-        {
-          "id": "mig_commune_2",
-          "type": "range",
-          "content": "Pau",
-          "start": "2017-01-01T00:00:00.000Z",
-          "end": "2024-01-01T00:00:00.000Z",
-          "group": 13,
-          "className": "green"
-        },
-        {
-          "id": "mig_commune_3",
-          "type": "range",
-          "content": "Grenoble",
-          "start": "2024-01-01T00:00:00.000Z",
-          "end": "2025-12-31T00:00:00.000Z",
-          "group": 13,
-          "className": "green"
-        },
-        
-        // Logements (groupe 12)
-        {
-          "id": "mig_logement_1",
-          "type": "range",
-          "content": "Appartement familial",
-          "start": "2001-01-01T00:00:00.000Z",
-          "end": "2011-01-01T00:00:00.000Z",
-          "group": 12,
-          "className": "green"
-        },
-        {
-          "id": "mig_logement_2",
-          "type": "range",
-          "content": "Pavillon",
-          "start": "2011-01-01T00:00:00.000Z",
-          "end": "2017-01-01T00:00:00.000Z",
-          "group": 12,
-          "className": "green"
-        },
-        {
-          "id": "mig_logement_3",
-          "type": "range",
-          "content": "Résidence étudiante",
-          "start": "2017-01-01T00:00:00.000Z",
-          "end": "2021-01-01T00:00:00.000Z",
-          "group": 12,
-          "className": "green"
-        },
-        {
-          "id": "mig_logement_4",
-          "type": "range",
-          "content": "Colocation",
-          "start": "2021-01-01T00:00:00.000Z",
-          "end": "2024-01-01T00:00:00.000Z",
-          "group": 12,
-          "className": "green"
-        },
-        {
-          "id": "mig_logement_5",
-          "type": "range",
-          "content": "Studio",
-          "start": "2024-01-01T00:00:00.000Z",
-          "end": "2025-12-31T00:00:00.000Z",
-          "group": 12,
-          "className": "green"
-        },
-        
-        // Statut résidentiel (groupe 11)
-        {
-          "id": "mig_statut_1",
-          "type": "range",
-          "content": "Chez parents (locataires)",
-          "start": "2001-01-01T00:00:00.000Z",
-          "end": "2011-01-01T00:00:00.000Z",
-          "group": 11,
-          "className": "green"
-        },
-        {
-          "id": "mig_statut_2",
-          "type": "range",
-          "content": "Chez parents (propriétaires)",
-          "start": "2011-01-01T00:00:00.000Z",
-          "end": "2017-01-01T00:00:00.000Z",
-          "group": 11,
-          "className": "green"
-        },
-        {
-          "id": "mig_statut_3",
-          "type": "range",
-          "content": "Locataire (logement étudiant)",
-          "start": "2017-01-01T00:00:00.000Z",
-          "end": "2021-01-01T00:00:00.000Z",
-          "group": 11,
-          "className": "green"
-        },
-        {
-          "id": "mig_statut_4",
-          "type": "range",
-          "content": "Locataire (colocation)",
-          "start": "2021-01-01T00:00:00.000Z",
-          "end": "2024-01-01T00:00:00.000Z",
-          "group": 11,
-          "className": "green"
-        },
-        {
-          "id": "mig_statut_5",
-          "type": "range",
-          "content": "Locataire (seul)",
-          "start": "2024-01-01T00:00:00.000Z",
-          "end": "2025-12-31T00:00:00.000Z",
-          "group": 11,
-          "className": "green"
-        },
-        
-        // ========================================
-        // TRAJECTOIRE SCOLAIRE
-        // ========================================
-        
-        // Diplômes (groupe 23 - LANDMARK)
-        {
-          "id": "scol_diplome_1",
-          "type": "box",
-          "content": "Brevet des collèges",
-          "category": "degree",
-          "start": "2015-06-25T00:00:00.000Z",
-          "end": "2025-12-31T00:00:00.000Z",
+export const test_items = [
+  // ========================================
+  // TRAJECTOIRE MIGRATOIRE (Groupes 11-13)
+  // ========================================
+  
+  // Communes (groupe 13 - LANDMARK)
+  {
+    id: "mig_commune_1",
+    type: "range",
+    content: "Lyon",
+    start: "1980-01-01T00:00:00.000Z",
+    end: "1998-09-01T00:00:00.000Z",
+    group: 13,
+    className: "vert"
+  },
+  {
+    id: "mig_commune_2",
+    type: "range",
+    content: "Toulouse",
+    start: "1998-09-01T00:00:00.000Z",
+    end: "2003-06-30T00:00:00.000Z",
+    group: 13,
+    className: "vert"
+  },
+  {
+    id: "mig_commune_3",
+    type: "range",
+    content: "Paris",
+    start: "2003-06-30T00:00:00.000Z",
+    end: "2010-01-01T00:00:00.000Z",
+    group: 13,
+    className: "vert"
+  },
+  {
+    id: "mig_commune_4",
+    type: "range",
+    content: "Nantes",
+    start: "2010-01-01T00:00:00.000Z",
+    end: "2018-08-01T00:00:00.000Z",
+    group: 13,
+    className: "vert"
+  },
+  {
+    id: "mig_commune_5",
+    type: "range",
+    content: "Bordeaux",
+    start: "2018-08-01T00:00:00.000Z",
+    end: "2026-01-09T00:00:00.000Z",
+    group: 13,
+    className: "vert"
+  },
+  
+  // Logements (groupe 12)
+  {
+    id: "mig_logement_1",
+    type: "range",
+    content: "Appartement familial",
+    start: "1980-01-01T00:00:00.000Z",
+    end: "1998-09-01T00:00:00.000Z",
+    group: 12,
+    className: "vert"
+  },
+  {
+    id: "mig_logement_2",
+    type: "range",
+    content: "Résidence universitaire",
+    start: "1998-09-01T00:00:00.000Z",
+    end: "2000-09-01T00:00:00.000Z",
+    group: 12,
+    className: "vert"
+  },
+  {
+    id: "mig_logement_3",
+    type: "range",
+    content: "Appartement T2",
+    start: "2000-09-01T00:00:00.000Z",
+    end: "2003-06-30T00:00:00.000Z",
+    group: 12,
+    className: "vert"
+  },
+  {
+    id: "mig_logement_4",
+    type: "range",
+    content: "Studio Paris",
+    start: "2003-06-30T00:00:00.000Z",
+    end: "2006-05-01T00:00:00.000Z",
+    group: 12,
+    className: "vert"
+  },
+  {
+    id: "mig_logement_5",
+    type: "range",
+    content: "Appartement T3",
+    start: "2006-05-01T00:00:00.000Z",
+    end: "2010-01-01T00:00:00.000Z",
+    group: 12,
+    className: "vert"
+  },
+  {
+    id: "mig_logement_6",
+    type: "range",
+    content: "Maison",
+    start: "2010-01-01T00:00:00.000Z",
+    end: "2018-08-01T00:00:00.000Z",
+    group: 12,
+    className: "vert"
+  },
+  {
+    id: "mig_logement_7",
+    type: "range",
+    content: "Appartement T4",
+    start: "2018-08-01T00:00:00.000Z",
+    end: "2026-01-09T00:00:00.000Z",
+    group: 12,
+    className: "vert"
+  },
+  
+  // Statut résidentiel (groupe 11)
+  {
+    id: "mig_statut_1",
+    type: "range",
+    content: "Chez parents",
+    start: "1980-01-01T00:00:00.000Z",
+    end: "1998-09-01T00:00:00.000Z",
+    group: 11,
+    className: "vert"
+  },
+  {
+    id: "mig_statut_2",
+    type: "range",
+    content: "Logement universitaire",
+    start: "1998-09-01T00:00:00.000Z",
+    end: "2000-09-01T00:00:00.000Z",
+    group: 11,
+    className: "vert"
+  },
+  {
+    id: "mig_statut_3",
+    type: "range",
+    content: "Locataire",
+    start: "2000-09-01T00:00:00.000Z",
+    end: "2010-01-01T00:00:00.000Z",
+    group: 11,
+    className: "vert"
+  },
+  {
+    id: "mig_statut_4",
+    type: "range",
+    content: "Propriétaire",
+    start: "2010-01-01T00:00:00.000Z",
+    end: "2018-08-01T00:00:00.000Z",
+    group: 11,
+    className: "vert"
+  },
+  {
+    id: "mig_statut_5",
+    type: "range",
+    content: "Locataire",
+    start: "2018-08-01T00:00:00.000Z",
+    end: "2026-01-09T00:00:00.000Z",
+    group: 11,
+    className: "vert"
+  },
 
+  // ========================================
+  // TRAJECTOIRE FAMILIALE (Groupes 21-23)
+  // ========================================
+  
+  // Statut matrimonial (groupe 23 - landmark)
+  {
+    id: "fam_statut_1",
+    type: "range",
+    content: "Célibataire",
+    start: "1980-01-01T00:00:00.000Z",
+    end: "2004-03-15T00:00:00.000Z",
+    group: 23,
+    className: "bleu"
+  },
+  {
+    id: "fam_statut_2",
+    type: "range",
+    content: "Marié(e)",
+    start: "2004-03-15T00:00:00.000Z",
+    end: "2015-11-20T00:00:00.000Z",
+    group: 23,
+    className: "bleu"
+  },
+  {
+    id: "fam_statut_3",
+    type: "range",
+    content: "Divorcé(e)",
+    start: "2015-11-20T00:00:00.000Z",
+    end: "2019-06-10T00:00:00.000Z",
+    group: 23,
+    className: "bleu"
+  },
+  {
+    id: "fam_statut_4",
+    type: "range",
+    content: "En couple (union libre)",
+    start: "2019-06-10T00:00:00.000Z",
+    end: "2026-01-09T00:00:00.000Z",
+    group: 23,
+    className: "bleu"
+  },
+  
+  // Enfants (groupe 22) - EVENTS (type box)
+  {
+    id: "fam_enfant_1",
+    type: "box",
+    content: "birth",
+    icon: "baby",
+    start: "2006-08-12T00:00:00.000Z",
+    group: 22,
+    className: "bleu"
+  },
+  {
+    id: "fam_enfant_2",
+    type: "box",
+    content: "birth",
+    icon: "baby",
+    start: "2009-04-23T00:00:00.000Z",
+    group: 22,
+    className: "bleu"
+  },
+  
+  // Composition ménage (groupe 21)
+  {
+    id: "fam_menage_1",
+    type: "range",
+    content: "Avec parents",
+    start: "1980-01-01T00:00:00.000Z",
+    end: "1998-09-01T00:00:00.000Z",
+    group: 21,
+    className: "bleu"
+  },
+  {
+    id: "fam_menage_2",
+    type: "range",
+    content: "Seul(e)",
+    start: "1998-09-01T00:00:00.000Z",
+    end: "2004-03-15T00:00:00.000Z",
+    group: 21,
+    className: "bleu"
+  },
+  {
+    id: "fam_menage_3",
+    type: "range",
+    content: "Couple",
+    start: "2004-03-15T00:00:00.000Z",
+    end: "2006-08-12T00:00:00.000Z",
+    group: 21,
+    className: "bleu"
+  },
+  {
+    id: "fam_menage_4",
+    type: "range",
+    content: "Couple + 1 enfant",
+    start: "2006-08-12T00:00:00.000Z",
+    end: "2009-04-23T00:00:00.000Z",
+    group: 21,
+    className: "bleu"
+  },
+  {
+    id: "fam_menage_5",
+    type: "range",
+    content: "Couple + 2 enfants",
+    start: "2009-04-23T00:00:00.000Z",
+    end: "2015-11-20T00:00:00.000Z",
+    group: 21,
+    className: "bleu"
+  },
+  {
+    id: "fam_menage_6",
+    type: "range",
+    content: "Parent seul + 2 enfants",
+    start: "2015-11-20T00:00:00.000Z",
+    end: "2019-06-10T00:00:00.000Z",
+    group: 21,
+    className: "bleu"
+  },
+  {
+    id: "fam_menage_7",
+    type: "range",
+    content: "Famille recomposée (4 pers.)",
+    start: "2019-06-10T00:00:00.000Z",
+    end: "2026-01-09T00:00:00.000Z",
+    group: 21,
+    className: "bleu"
+  },
 
-          "group": 23,
-          "className": "blue"
-        },
-        {
-          "id": "scol_diplome_2",
-          "type": "box",
-          "content": "Baccalauréat S",
-          "category": "degree",
-          "start": "2018-06-20T00:00:00.000Z",
-          "group": 23,
-          "className": "blue"
-        },
-        {
-          "id": "scol_diplome_3",
-          "type": "box",
-          "content": "Licence Informatique",
-          "category": "degree",
-          "start": "2021-06-15T00:00:00.000Z",
-          "group": 23,
-          "className": "blue"
-        },
-        {
-          "id": "scol_diplome_4",
-          "type": "box",
-          "content": "Master Data Science",
-          "category": "degree",
-          "start": "2023-09-30T00:00:00.000Z",
-          "group": 23,
-          "className": "blue"
-        },
-        
-        // Établissements (groupe 21)
-        {
-          "id": "scol_etab_1",
-          "type": "range",
-          "content": "École primaire Jules Ferry",
-          "start": "2007-09-01T00:00:00.000Z",
-          "end": "2012-06-30T00:00:00.000Z",
-          "group": 21,
-          "className": "blue"
-        },
-        {
-          "id": "scol_etab_2",
-          "type": "range",
-          "content": "Collège Victor Hugo",
-          "start": "2012-09-01T00:00:00.000Z",
-          "end": "2016-06-30T00:00:00.000Z",
-          "group": 21,
-          "className": "blue"
-        },
-        {
-          "id": "scol_etab_3",
-          "type": "range",
-          "content": "Lycée Louis le Grand",
-          "start": "2016-09-01T00:00:00.000Z",
-          "end": "2019-06-30T00:00:00.000Z",
-          "group": 21,
-          "className": "blue"
-        },
-        {
-          "id": "scol_etab_4",
-          "type": "range",
-          "content": "Université de Pau - Licence Info",
-          "start": "2019-09-01T00:00:00.000Z",
-          "end": "2022-06-30T00:00:00.000Z",
-          "group": 21,
-          "className": "blue"
-        },
-        {
-          "id": "scol_etab_5",
-          "type": "range",
-          "content": "Université Grenoble Alpes - Master",
-          "start": "2022-09-01T00:00:00.000Z",
-          "end": "2024-06-30T00:00:00.000Z",
-          "group": 21,
-          "className": "blue"
-        },
-        
-        // Formations (groupe 22)
-        {
-          "id": "scol_form_1",
-          "type": "range",
-          "content": "Option Sciences (4ème-3ème)",
-          "start": "2014-09-01T00:00:00.000Z",
-          "end": "2016-06-30T00:00:00.000Z",
-          "group": 22,
-          "className": "blue"
-        },
-        {
-          "id": "scol_form_2",
-          "type": "range",
-          "content": "Spécialité Maths/Physique (Terminale)",
-          "start": "2018-09-01T00:00:00.000Z",
-          "end": "2019-06-30T00:00:00.000Z",
-          "group": 22,
-          "className": "blue"
-        },
-        {
-          "id": "scol_form_3",
-          "type": "range",
-          "content": "Formation Python/SQL",
-          "start": "2020-01-01T00:00:00.000Z",
-          "end": "2020-06-30T00:00:00.000Z",
-          "group": 22,
-          "className": "blue"
-        },
-        {
-          "id": "scol_form_4",
-          "type": "range",
-          "content": "Certification Machine Learning",
-          "start": "2022-09-01T00:00:00.000Z",
-          "end": "2023-01-31T00:00:00.000Z",
-          "group": 22,
-          "className": "blue"
-        },
-        
-        // ========================================
-        // TRAJECTOIRE PROFESSIONNELLE
-        // ========================================
-        
-        // Postes (groupe 31 - LANDMARK)
-        {
-          "id": "pro_poste_1",
-          "type": "range",
-          "content": "Job étudiant - Caissier",
-          "start": "2019-07-01T00:00:00.000Z",
-          "end": "2019-08-31T00:00:00.000Z",
-          "group": 31,
-          "className": "red"
-        },
-        {
-          "id": "pro_poste_2",
-          "type": "range",
-          "content": "Stage développement web",
-          "start": "2021-02-01T00:00:00.000Z",
-          "end": "2021-07-31T00:00:00.000Z",
-          "group": 31,
-          "className": "red"
-        },
-        {
-          "id": "pro_poste_3",
-          "type": "range",
-          "content": "Alternance Data Analyst",
-          "start": "2022-09-01T00:00:00.000Z",
-          "end": "2024-08-31T00:00:00.000Z",
-          "group": 31,
-          "className": "red"
-        },
-        {
-          "id": "pro_poste_4",
-          "type": "range",
-          "content": "CDI Data Scientist",
-          "start": "2024-09-01T00:00:00.000Z",
-          "end": "2025-12-31T00:00:00.000Z",
-          "group": 31,
-          "className": "red"
-        },
-        
-        // Contrats (groupe 32)
-        {
-          "id": "pro_contrat_1",
-          "type": "range",
-          "content": "CDD saisonnier",
-          "start": "2019-07-01T00:00:00.000Z",
-          "end": "2019-08-31T00:00:00.000Z",
-          "group": 32,
-          "className": "red"
-        },
-        {
-          "id": "pro_contrat_2",
-          "type": "range",
-          "content": "Convention de stage",
-          "start": "2021-02-01T00:00:00.000Z",
-          "end": "2021-07-31T00:00:00.000Z",
-          "group": 32,
-          "className": "red"
-        },
-        {
-          "id": "pro_contrat_3",
-          "type": "range",
-          "content": "Contrat d'alternance",
-          "start": "2022-09-01T00:00:00.000Z",
-          "end": "2024-08-31T00:00:00.000Z",
-          "group": 32,
-          "className": "red"
-        },
-        {
-          "id": "pro_contrat_4",
-          "type": "range",
-          "content": "CDI temps plein",
-          "start": "2024-09-01T00:00:00.000Z",
-          "end": "2025-12-31T00:00:00.000Z",
-          "group": 32,
-          "className": "red"
-        }
-      ]
+  // ========================================
+  // TRAJECTOIRE SCOLAIRE (Groupes 31-32)
+  // ========================================
+  
+  // Niveau (groupe 32 - landmark)
+  {
+    id: "scol_niveau_1",
+    type: "range",
+    content: "Primaire",
+    start: "1986-09-01T00:00:00.000Z",
+    end: "1991-06-30T00:00:00.000Z",
+    group: 32,
+    className: "jaune"
+  },
+  {
+    id: "scol_niveau_2",
+    type: "range",
+    content: "Collège",
+    start: "1991-09-01T00:00:00.000Z",
+    end: "1995-06-30T00:00:00.000Z",
+    group: 32,
+    className: "jaune"
+  },
+  {
+    id: "scol_niveau_3",
+    type: "range",
+    content: "Lycée",
+    start: "1995-09-01T00:00:00.000Z",
+    end: "1998-06-30T00:00:00.000Z",
+    group: 32,
+    className: "jaune"
+  },
+  {
+    id: "scol_niveau_4",
+    type: "range",
+    content: "Licence",
+    start: "1998-09-01T00:00:00.000Z",
+    end: "2001-06-30T00:00:00.000Z",
+    group: 32,
+    className: "jaune"
+  },
+  {
+    id: "scol_niveau_5",
+    type: "range",
+    content: "Master",
+    start: "2001-09-01T00:00:00.000Z",
+    end: "2003-06-30T00:00:00.000Z",
+    group: 32,
+    className: "jaune"
+  },
+  {
+    id: "scol_niveau_6",
+    type: "range",
+    content: "MBA",
+    start: "2016-09-01T00:00:00.000Z",
+    end: "2018-06-30T00:00:00.000Z",
+    group: 32,
+    className: "jaune"
+  },
+  
+  // Type (groupe 31) - ONLY Public or Private
+  {
+    id: "scol_type_1",
+    type: "range",
+    content: "Public",
+    start: "1986-09-01T00:00:00.000Z",
+    end: "1998-06-30T00:00:00.000Z",
+    group: 31,
+    className: "jaune"
+  },
+  {
+    id: "scol_type_2",
+    type: "range",
+    content: "Public",
+    start: "1998-09-01T00:00:00.000Z",
+    end: "2001-06-30T00:00:00.000Z",
+    group: 31,
+    className: "jaune"
+  },
+  {
+    id: "scol_type_3",
+    type: "range",
+    content: "Privé",
+    start: "2001-09-01T00:00:00.000Z",
+    end: "2003-06-30T00:00:00.000Z",
+    group: 31,
+    className: "jaune"
+  },
+  {
+    id: "scol_type_4",
+    type: "range",
+    content: "Privé",
+    start: "2016-09-01T00:00:00.000Z",
+    end: "2018-06-30T00:00:00.000Z",
+    group: 31,
+    className: "jaune"
+  },
+
+  // ========================================
+  // TRAJECTOIRE PROFESSIONNELLE (Groupes 41-44)
+  // ========================================
+  
+  // Lieu de travail (groupe 44 - landmark)
+  {
+    id: "pro_lieu_1",
+    type: "range",
+    content: "Lyon",
+    start: "1996-07-01T00:00:00.000Z",
+    end: "1998-09-01T00:00:00.000Z",
+    group: 44,
+    className: "rouge"
+  },
+  {
+    id: "pro_lieu_2",
+    type: "range",
+    content: "Toulouse",
+    start: "2002-02-01T00:00:00.000Z",
+    end: "2003-08-31T00:00:00.000Z",
+    group: 44,
+    className: "rouge"
+  },
+  {
+    id: "pro_lieu_3",
+    type: "range",
+    content: "Paris",
+    start: "2003-09-01T00:00:00.000Z",
+    end: "2010-01-01T00:00:00.000Z",
+    group: 44,
+    className: "rouge"
+  },
+  {
+    id: "pro_lieu_4",
+    type: "range",
+    content: "Nantes",
+    start: "2010-01-01T00:00:00.000Z",
+    end: "2018-08-01T00:00:00.000Z",
+    group: 44,
+    className: "rouge"
+  },
+  {
+    id: "pro_lieu_5",
+    type: "range",
+    content: "Bordeaux",
+    start: "2018-08-01T00:00:00.000Z",
+    end: "2026-01-09T00:00:00.000Z",
+    group: 44,
+    className: "rouge"
+  },
+  
+  // Statut d'activité (groupe 43)
+  {
+    id: "pro_statut_1",
+    type: "range",
+    content: "Job étudiant",
+    start: "1996-07-01T00:00:00.000Z",
+    end: "1998-08-31T00:00:00.000Z",
+    group: 43,
+    className: "rouge"
+  },
+  {
+    id: "pro_statut_2",
+    type: "range",
+    content: "Étudiant",
+    start: "1998-09-01T00:00:00.000Z",
+    end: "2003-06-30T00:00:00.000Z",
+    group: 43,
+    className: "rouge"
+  },
+  {
+    id: "pro_statut_3",
+    type: "range",
+    content: "Stagiaire",
+    start: "2002-02-01T00:00:00.000Z",
+    end: "2002-07-31T00:00:00.000Z",
+    group: 43,
+    className: "rouge"
+  },
+  {
+    id: "pro_statut_4",
+    type: "range",
+    content: "Salarié CDI",
+    start: "2003-09-01T00:00:00.000Z",
+    end: "2007-12-31T00:00:00.000Z",
+    group: 43,
+    className: "rouge"
+  },
+  {
+    id: "pro_statut_5",
+    type: "range",
+    content: "Congé parental (6 mois)",
+    start: "2006-08-12T00:00:00.000Z",
+    end: "2007-02-12T00:00:00.000Z",
+    group: 43,
+    className: "rouge"
+  },
+  {
+    id: "pro_statut_6",
+    type: "range",
+    content: "Salarié CDI",
+    start: "2008-01-01T00:00:00.000Z",
+    end: "2015-09-30T00:00:00.000Z",
+    group: 43,
+    className: "rouge"
+  },
+  {
+    id: "pro_statut_7",
+    type: "range",
+    content: "Chômage",
+    start: "2015-10-01T00:00:00.000Z",
+    end: "2016-03-15T00:00:00.000Z",
+    group: 43,
+    className: "rouge"
+  },
+  {
+    id: "pro_statut_8",
+    type: "range",
+    content: "Salarié CDI",
+    start: "2016-03-15T00:00:00.000Z",
+    end: "2026-01-09T00:00:00.000Z",
+    group: 43,
+    className: "rouge"
+  },
+  
+  // Profession (groupe 42)
+  {
+    id: "pro_profession_1",
+    type: "range",
+    content: "Vendeur",
+    start: "1996-07-01T00:00:00.000Z",
+    end: "1998-08-31T00:00:00.000Z",
+    group: 42,
+    className: "rouge"
+  },
+  {
+    id: "pro_profession_2",
+    type: "range",
+    content: "Stagiaire Marketing",
+    start: "2002-02-01T00:00:00.000Z",
+    end: "2002-07-31T00:00:00.000Z",
+    group: 42,
+    className: "rouge"
+  },
+  {
+    id: "pro_profession_3",
+    type: "range",
+    content: "Chargé d'études",
+    start: "2003-09-01T00:00:00.000Z",
+    end: "2007-12-31T00:00:00.000Z",
+    group: 42,
+    className: "rouge"
+  },
+  {
+    id: "pro_profession_4",
+    type: "range",
+    content: "Responsable Marketing",
+    start: "2008-01-01T00:00:00.000Z",
+    end: "2012-12-31T00:00:00.000Z",
+    group: 42,
+    className: "rouge"
+  },
+  {
+    id: "pro_profession_5",
+    type: "range",
+    content: "Directeur Marketing",
+    start: "2013-01-01T00:00:00.000Z",
+    end: "2015-09-30T00:00:00.000Z",
+    group: 42,
+    className: "rouge"
+  },
+  {
+    id: "pro_profession_6",
+    type: "range",
+    content: "Directeur Commercial",
+    start: "2016-03-15T00:00:00.000Z",
+    end: "2026-01-09T00:00:00.000Z",
+    group: 42,
+    className: "rouge"
+  },
+  
+  // Secteur (groupe 41)
+  {
+    id: "pro_secteur_1",
+    type: "range",
+    content: "Commerce",
+    start: "1996-07-01T00:00:00.000Z",
+    end: "1998-08-31T00:00:00.000Z",
+    group: 41,
+    className: "rouge"
+  },
+  {
+    id: "pro_secteur_2",
+    type: "range",
+    content: "Industrie",
+    start: "2002-02-01T00:00:00.000Z",
+    end: "2002-07-31T00:00:00.000Z",
+    group: 41,
+    className: "rouge"
+  },
+  {
+    id: "pro_secteur_3",
+    type: "range",
+    content: "Services",
+    start: "2003-09-01T00:00:00.000Z",
+    end: "2012-12-31T00:00:00.000Z",
+    group: 41,
+    className: "rouge"
+  },
+  {
+    id: "pro_secteur_4",
+    type: "range",
+    content: "Industrie",
+    start: "2013-01-01T00:00:00.000Z",
+    end: "2015-09-30T00:00:00.000Z",
+    group: 41,
+    className: "rouge"
+  },
+  {
+    id: "pro_secteur_5",
+    type: "range",
+    content: "Services",
+    start: "2016-03-15T00:00:00.000Z",
+    end: "2026-01-09T00:00:00.000Z",
+    group: 41,
+    className: "rouge"
+  }
+];

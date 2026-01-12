@@ -3,15 +3,15 @@ import { persistItems, persistGroups, persistOptions } from "../timeline/timelin
 let _persistenceAttached = false;
 
 /**
- * Attache des listeners sur items et groups pour persister automatiquement
- * les changements dans localStorage, avec un petit debounce.
- * Les options sont persistées via la timeline.
+ * Attach listeners on items and groups to automatically persist
+ * changes to localStorage, with a small debounce.
+ * Options are persisted via the timeline.
  */
 export function attachPersistenceListeners(items, groups, timeline) {
   if (_persistenceAttached) return;
 
   try {
-    // Debounce commun pour éviter les écritures trop fréquentes
+    // Common debounce to avoid too frequent writes
     let debounceTimer = null;
     const persistDebounced = () => {
       clearTimeout(debounceTimer);
@@ -26,19 +26,19 @@ export function attachPersistenceListeners(items, groups, timeline) {
       }, 150);
     };
 
-    // Attacher les listeners sur items
+    // Attach listeners on items
     if (items && typeof items.on === "function") {
       items.on("add", persistDebounced);
       items.on("update", persistDebounced);
       items.on("remove", persistDebounced);
     }
 
-    // Attacher les listeners sur groups
+    // Attach listeners on groups
     if (groups && typeof groups.on === "function") {
       groups.on("update", persistDebounced);
     }
 
-    // Persister aussi quand les options changent
+    // Also persist when options change
     if (timeline && typeof timeline.on === "function") {
       timeline.on("changed", persistDebounced);
     }

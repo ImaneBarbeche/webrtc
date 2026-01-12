@@ -164,6 +164,7 @@
 /* The trajectory title inside the timeline (e.g Migratoire) */
 .vis-label.vis-group-level-0 {
   /* --label-color: red; */
+  /* --label-color: red; */
 
   /* color when closed */
   background-color: color-mix(
@@ -272,7 +273,7 @@
 
 /* we have to do this because they are not descendants, but rather siblings :/ */
 
-.vis-label.vis-group-level-0.vert,
+/* .vis-label.vis-group-level-0.vert,
 .vis-label.vis-group-level-0.vert ~ .vis-label.vis-nested-group {
   --label-color: #eabca5;
 }
@@ -422,8 +423,8 @@
   --label-color: #a5beea;
 }
 
-.vis-item.vis-range.blue,
-.vis-item.vis-box.blue {
+.vis-item.vis-range.bleu,
+.vis-item.vis-box.bleu {
   --label-color: #eaada5;
 }
 

@@ -1,22 +1,22 @@
 // landmarkUtils.js
 
-// Gestion d'appui long pour les landmarks (labels des sous-groupes)
-// Détecte un appui long sur un label de sous-groupe pour activer/désactiver le landmark.
+// Long press handling for landmarks (subgroup labels)
+// Detects a long press on a subgroup label to activate/deactivate the landmark.
 
-const LONG_PRESS_DURATION = 500; // ms pour déclencher l'appui long
-const LONG_PRESS_MOVE_THRESHOLD = 5; // px de tolérance avant annulation
+const LONG_PRESS_DURATION = 500; // ms to trigger long press
+const LONG_PRESS_MOVE_THRESHOLD = 5; // px tolerance before cancellation
 
 export function setupLongPressHandlers(timeline, groups, utils) {
   let longPressTimer = null;
   let longPressTarget = null;
   let longPressStartPos = null;
 
-  // Démarrage de la détection d'appui long sur les labels de groupe
+  // Start long press detection on group labels
   timeline.on("mouseDown", (properties) => {
     if (properties.what !== "group-label" || !properties.group) return;
 
     const clickedGroup = groups.get(properties.group);
-    // Seulement pour les sous-groupes
+    // Only for subgroups
     if (!clickedGroup || !clickedGroup.nestedInGroup) return;
 
     longPressTarget = properties.group;
@@ -25,7 +25,7 @@ export function setupLongPressHandlers(timeline, groups, utils) {
       y: properties.event?.clientY ?? 0,
     };
 
-    // Démarrer le timer d'appui long
+    // Start long press timer
     clearTimeout(longPressTimer);
     longPressTimer = setTimeout(() => {
       toggleLandmark(longPressTarget, groups, utils);
@@ -34,7 +34,7 @@ export function setupLongPressHandlers(timeline, groups, utils) {
     }, LONG_PRESS_DURATION);
   });
 
-  // Annulation si mouvement trop grand pendant l'appui
+  // Cancel if movement too large during press
   timeline.on("mouseMove", (properties) => {
     if (!longPressTimer || !longPressStartPos || !properties.event) return;
 
@@ -48,7 +48,7 @@ export function setupLongPressHandlers(timeline, groups, utils) {
     }
   });
 
-  // Annulation à la fin de l’appui
+  // Cancel at end of press
   timeline.on("mouseUp", () => {
     if (longPressTimer) {
       clearTimeout(longPressTimer);
@@ -60,13 +60,13 @@ export function setupLongPressHandlers(timeline, groups, utils) {
 }
 
 /**
- * Active certains sous-groupes comme landmarks au démarrage.
- * Met à jour le parent pour suivre ses children landmarks.
+ * Activates certain subgroups as landmarks on startup.
+ * Updates the parent to track its landmark children.
  */
 export function activateInitialLandmarks(groups) {
-  const initialLandmarks = [13, 23, 31];
+  const initialLandmarks = [13, 22, 32, 42];
 
-  // Persistance: clé pour stocker un mapping parentId -> landmarkId
+  // Persistence: key to store a mapping parentId -> landmarkId
   const LANDMARKS_STORAGE_KEY = "landmarksByParent";
 
   function loadLandmarksByParent() {
@@ -78,7 +78,7 @@ export function activateInitialLandmarks(groups) {
     }
   }
 
-  // Tenter de restaurer depuis le localStorage (un seul par parent)
+  // Try to restore from localStorage (one per parent)
   const stored = loadLandmarksByParent();
   if (stored && typeof stored === "object") {
     Object.entries(stored).forEach(([parentIdStr, childId]) => {
@@ -87,31 +87,31 @@ export function activateInitialLandmarks(groups) {
       if (!g) return;
       if (g.nestedInGroup !== parentId) return;
 
-      // Activer le landmark sur le sous-groupe
+      // Activate landmark on the subgroup
       g.isLandmark = true;
       groups.update(g);
 
-      // Mettre à jour le parent
+      // Update the parent
       const parent = groups.get(parentId);
       if (!parent) return;
       parent.landmarkChildren = [childId];
       groups.update(parent);
     });
   } else {
-    // S'assurer d'activer au plus un landmark par parent (prendre le premier trouvé)
+    // Ensure activating at most one landmark per parent (take the first found)
     const seenParents = new Set();
     initialLandmarks.forEach((id) => {
       const g = groups.get(id);
       if (!g) return;
       const parentId = g.nestedInGroup || null;
       if (!parentId) return;
-      if (seenParents.has(parentId)) return; // déjà un activé pour ce parent
+      if (seenParents.has(parentId)) return; // already one activated for this parent
 
-      // Activer le landmark sur le sous-groupe
+      // Activate landmark on the subgroup
       g.isLandmark = true;
       groups.update(g);
 
-      // Mettre à jour le parent
+      // Update the parent
       const parent = groups.get(parentId);
       if (!parent) return;
 
@@ -125,21 +125,21 @@ export function activateInitialLandmarks(groups) {
     });
   }
 
-  // Sauvegarde initiale dans localStorage si aucune sauvegarde n’existe
+  // Initial save to localStorage if no save exists
   try {
     if (!localStorage.getItem("lifestories_groups")) {
       localStorage.setItem("lifestories_groups", JSON.stringify(groups.get()));
     }
   } catch {
-    // silent fail si storage indisponible (par ex. mode privé strict)
+    // silent fail if storage unavailable (e.g. strict private mode)
   }
 
-  // Re-transformer les icônes Lucide
+  // Re-transform Lucide icons
   if (window.lucide && typeof window.lucide.createIcons === "function") {
     window.lucide.createIcons();
   }
 
-  // Écouteur pour synchroniser entre onglets (applique la map stockée)
+  // Listener to synchronize between tabs (applies stored map)
   try {
     window.addEventListener("storage", (e) => {
       if (e.key !== LANDMARKS_STORAGE_KEY) return;
@@ -172,12 +172,12 @@ export function activateInitialLandmarks(groups) {
       }
     });
   } catch {
-    // ignore si window/storage inaccessible
+    // ignore if window/storage inaccessible
   }
 }
 
 /**
- * Désactive tous les landmarks frères (mêmes enfants du même parent), sauf `exceptId`.
+ * Deactivates all sibling landmarks (same children of same parent), except `exceptId`.
  */
 function deactivateSiblingLandmarks(groups, parentId, exceptId = null) {
   if (!parentId) return;
@@ -197,7 +197,7 @@ function deactivateSiblingLandmarks(groups, parentId, exceptId = null) {
   }
 }
 
-// Helpers pour persister la map parent -> activeLandmark
+// Helpers to persist the map parent -> activeLandmark
 const LANDMARKS_STORAGE_KEY = "landmarksByParent";
 
 function saveLandmarksByParent(groups) {
@@ -225,39 +225,39 @@ function loadLandmarksByParent() {
 }
 
 /**
- * Bascule le statut landmark d’un sous-groupe et maintient la liste landmarkChildren du parent.
+ * Toggle landmark status of a subgroup and maintain parent's landmarkChildren list.
  */
 export function toggleLandmark(groupId, groups, utils) {
   const group = groups.get(groupId);
   if (!group) {
-    console.warn("Groupe introuvable pour toggleLandmark:", groupId);
+    console.warn("Group not found for toggleLandmark:", groupId);
     return;
   }
 
-  // Vérifier que c’est bien un sous-groupe
+  // Check that it's a subgroup
   const parentId = group.nestedInGroup;
   if (!parentId) {
-    console.warn("Ce groupe n'est pas un sous-groupe, toggleLandmark ignoré:", groupId);
+    console.warn("This group is not a subgroup, toggleLandmark ignored:", groupId);
     return;
   }
 
   const parentGroup = groups.get(parentId);
   if (!parentGroup) {
-    console.warn("Parent introuvable pour le groupe:", groupId);
+    console.warn("Parent not found for group:", groupId);
     return;
   }
 
-  // Basculer le statut landmark
+  // Toggle landmark status
   const isCurrentlyLandmark = Boolean(group.isLandmark);
 
-  // Si on active, désactiver les autres sous-groupes du même parent
+  // If activating, deactivate other subgroups of same parent
   if (!isCurrentlyLandmark) {
     deactivateSiblingLandmarks(groups, parentId, groupId);
   }
 
   group.isLandmark = !isCurrentlyLandmark;
 
-  // Maintenir la liste des enfants landmarks du parent (un seul autorisé)
+  // Maintain list of parent's landmark children (only one allowed)
   parentGroup.landmarkChildren = parentGroup.landmarkChildren || [];
   if (group.isLandmark) {
     parentGroup.landmarkChildren = [groupId];
@@ -265,23 +265,23 @@ export function toggleLandmark(groupId, groups, utils) {
     parentGroup.landmarkChildren = parentGroup.landmarkChildren.filter((id) => id !== groupId);
   }
 
-  // Mettre à jour les groupes
+  // Update groups
   groups.update(group);
   groups.update(parentGroup);
 
-  // Persister l'état des landmarks par parent
+  // Persist landmark state by parent
   try {
     saveLandmarksByParent(groups);
   } catch {
     // ignore
   }
 
-  // Re-transformer les icônes Lucide
+  // Re-transform Lucide icons
   if (window.lucide && typeof window.lucide.createIcons === "function") {
     window.lucide.createIcons();
   }
 
-  // Feedback visuel (optionnel)
+  // Visual feedback (optional)
   if (utils && typeof utils.prettyAlert === "function") {
     utils.prettyAlert(
       group.isLandmark ? "Landmark activé" : "Landmark désactivé",
@@ -292,7 +292,7 @@ export function toggleLandmark(groupId, groups, utils) {
       1500
     );
   } else {
-    // Fallback discret en console si pas d’UI de feedback
+    // Subtle fallback in console if no feedback UI
     console.log(
       `[Landmark] ${group.contentText || groupId}:`,
       group.isLandmark ? "activé" : "désactivé"

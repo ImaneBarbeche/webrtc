@@ -1,6 +1,6 @@
 /**
  * WebRTC Synchronization Module
- * Gère la synchronisation en temps réel du questionnaire entre tablettes
+ * Manages real-time synchronization of the questionnaire between tablets
  */
 
 class WebRTCSync {
@@ -11,37 +11,37 @@ class WebRTCSync {
     this.connected = false;
     this.messageHandlers = [];
 
-    // Vérifier si on vient de l'onboarding
+    // Check if coming from onboarding
     this.checkOnboardingConnection();
   }
 
   checkOnboardingConnection() {
-    // Vérifie si on vient d'un onboarding WebRTC
+    // Check if coming from WebRTC onboarding
     const wasConnected = sessionStorage.getItem("webrtc_connected");
 
     if (wasConnected === "true") {
-      // Récupère les infos
-      this.isOfferor = sessionStorage.getItem("webrtc_isOfferor") === "true"; // Suis-je l'hôte ou l'invité ?
+      // Retrieve connection info
+      this.isOfferor = sessionStorage.getItem("webrtc_isOfferor") === "true"; // Am I the host or guest?
       this.sessionId = sessionStorage.getItem("webrtc_sessionId") || null;
-      this.connected = true; // ID de session
-      // Essayer de récupérer le data channel depuis window
+      this.connected = true; // Session ID
+      // Try to retrieve the data channel from window
       this.tryConnectDataChannel();
     } else {
-      this.updateStatusIndicator(); // Afficher "Mode standalone"
+      this.updateStatusIndicator(); // Show "Standalone Mode"
     }
   }
 
   /**
-   * Tenter de récupérer le data channel depuis window
+   * Try to retrieve the data channel from window
    */
   tryConnectDataChannel() {
-    // Vérifier immédiatement
+    // Check immediately
     if (window.webrtcDataChannel) {
       this.setDataChannel(window.webrtcDataChannel);
       return;
     }
 
-    // Sinon, attendre qu'il soit disponible (max 5 secondes)
+    // Otherwise, wait for it to become available (max 5 seconds)
     let attempts = 0;
     const maxAttempts = 50;
     const interval = setInterval(() => {
@@ -51,23 +51,23 @@ class WebRTCSync {
         this.setDataChannel(window.webrtcDataChannel);
         clearInterval(interval);
       } else if (attempts >= maxAttempts) {
-        console.warn("⚠️ Data channel non trouvé après 5 secondes");
+        console.warn("⚠️ Data channel not found after 5 seconds");
         clearInterval(interval);
       }
     }, 100);
   }
 
   /**
-   * Initialiser avec un data channel existant
-   * @param {RTCDataChannel} dataChannel - Le canal de données WebRTC
+   * Initialize with an existing data channel
+   * @param {RTCDataChannel} dataChannel - The WebRTC data channel
    */
   setDataChannel(dataChannel) {
     if (!dataChannel) {
-      console.warn("⚠️ Data channel null fourni à WebRTCSync");
+      console.warn("⚠️ Null data channel provided to WebRTCSync");
       return;
     }
 
-    // Si on a déjà un data channel, ne pas le réinitialiser
+    // If we already have a data channel, do not reinitialize it
     if (this.dc && this.dc.readyState === "open") {
       return;
     }
@@ -75,24 +75,24 @@ class WebRTCSync {
     this.dc = dataChannel;
     this.connected = dataChannel.readyState === "open";
 
-    // Récupérer les infos de session si pas encore fait
+    // Retrieve session info if not already done
     if (this.isOfferor === null) {
       const storedIsOfferor = sessionStorage.getItem("webrtc_isOfferor");
       this.isOfferor = storedIsOfferor === "true";
       this.sessionId = sessionStorage.getItem("webrtc_sessionId") || null;
     } else {
-      console.log("Rôle déjà défini:", {
+      console.log("Role already defined:", {
         isOfferor: this.isOfferor,
         sessionId: this.sessionId,
       });
     }
 
-    this.updateStatusIndicator(); // Mettre à jour l'indicateur APRÈS avoir lu le rôle
+    this.updateStatusIndicator(); // Update the indicator AFTER reading the role
 
-    // Écouter les messages entrants
+    // Listen for incoming messages
     this.dc.addEventListener("message", (e) => this.handleMessage(e));
 
-    // Surveiller l'état du canal
+    // Monitor the channel state
     this.dc.addEventListener("open", () => {
       this.connected = true;
       this.updateStatusIndicator();
@@ -100,18 +100,18 @@ class WebRTCSync {
 
     this.dc.addEventListener("close", () => {
       this.connected = false;
-      this.updateStatusIndicator(); // Badge rouge
-      this.showReconnectButton(); // Afficher bouton
+      this.updateStatusIndicator(); // Red badge
+      this.showReconnectButton(); // Show button
     });
 
     this.dc.addEventListener("error", (e) => {
-      console.error("❌ Erreur data channel:", e);
+      console.error("❌ Data channel error:", e);
     });
   }
 
   /**
-   * Enregistrer un gestionnaire de messages
-   * @param {Function} handler - Fonction appelée à la réception d'un message
+   * Register a message handler
+   * @param {Function} handler - Function called when a message is received
    */
   onMessage(handler) {
     if (typeof handler === "function") {
@@ -120,40 +120,40 @@ class WebRTCSync {
   }
 
   /**
-   * Gérer les messages reçus
-   * @param {MessageEvent} event - Événement message
+   * Handle received messages
+   * @param {MessageEvent} event - Message event
    */
   handleMessage(event) {
     try {
       const data = JSON.parse(event.data);
-      // Appeler tous les gestionnaires enregistrés
+      // Call all registered handlers
       this.messageHandlers.forEach((handler) => {
         try {
           handler(data);
         } catch (err) {
-          console.error("❌ Erreur dans le gestionnaire de message:", err);
+          console.error("❌ Error in message handler:", err);
         }
       });
     } catch (err) {
       console.error(
-        "❌ Erreur parsing message WebRTC:",
+        "❌ Error parsing WebRTC message:",
         err,
-        "Data brute:",
+        "Raw data:",
         event.data
       );
     }
   }
 
   /**
-   * Envoyer un événement XState
-   * @param {Object} event - L'événement XState { type: '...', data: {...} }
+   * Send an XState event
+   * @param {Object} event - The XState event { type: '...', data: {...} }
    */
   sendEvent(event) {
     if (!this.connected || !this.dc) {
       console.warn(
-        "⚠️ Impossible d'envoyer l'événement: data channel non connecté"
+        "⚠️ Unable to send event: data channel not connected"
       );
-      console.warn("   État:", {
+      console.warn("   State:", {
         connected: this.connected,
         dc: !!this.dc,
         readyState: this.dc?.readyState,
@@ -172,18 +172,18 @@ class WebRTCSync {
       this.dc.send(JSON.stringify(message));
       return true;
     } catch (err) {
-      console.error("❌ Erreur envoi événement WebRTC:", err);
+      console.error("❌ Error sending WebRTC event:", err);
       return false;
     }
   }
 
   /**
-   * Envoyer l'état complet du questionnaire
-   * @param {Object} state - L'état XState complet
+   * Send the complete questionnaire state
+   * @param {Object} state - The complete XState state
    */
   sendState(state) {
     if (!this.connected || !this.dc) {
-      console.warn("⚠️ Impossible d'envoyer l'état: data channel non connecté");
+      console.warn("⚠️ Unable to send state: data channel not connected");
       return false;
     }
 
@@ -201,18 +201,18 @@ class WebRTCSync {
       this.dc.send(JSON.stringify(message));
       return true;
     } catch (err) {
-      console.error("❌ Erreur envoi état:", err);
+      console.error("❌ Error sending state:", err);
       return false;
     }
   }
 
   /**
-   * Envoyer un message générique
-   * @param {Object} messageData - Les données du message
+   * Send a generic message
+   * @param {Object} messageData - The message data
    */
   sendMessage(messageData) {
     if (!this.connected || !this.dc) {
-      console.warn("⚠️ Impossible d'envoyer le message: data channel non connecté");
+      console.warn("⚠️ Unable to send message: data channel not connected");
       return false;
     }
 
@@ -226,42 +226,42 @@ class WebRTCSync {
       this.dc.send(JSON.stringify(message));
       return true;
     } catch (err) {
-      console.error("❌ Erreur envoi message:", err);
+      console.error("❌ Error sending message:", err);
       return false;
     }
   }
 
   /**
-   * Vérifier si la synchronisation est active
+   * Check if synchronization is active
    */
   isActive() {
     return this.connected && this.dc !== null;
   }
 
   /**
-   * Mettre à jour l'indicateur visuel de statut WebRTC
+   * Update the WebRTC status visual indicator
    */
   updateStatusIndicator() {
-    // Vérifier si on a été connecté avant (pour distinguer "jamais connecté" vs "déconnecté")
+    // Check if we were connected before (to distinguish "never connected" vs "disconnected")
     const wasConnected = sessionStorage.getItem('webrtc_connected') === 'true';
 
     let status, role;
 
     if (this.connected && this.dc && this.dc.readyState === 'open') {
-      // ✅ CONNECTÉ
+      // ✅ CONNECTED
       status = "connected";
       role = this.isOfferor ? "offeror" : "answerer";
     } else if (wasConnected && !this.connected) {
-      // ❌ DÉCONNECTÉ (était connecté avant, plus maintenant)
+      // ❌ DISCONNECTED (was connected before, not anymore)
       status = "disconnected";
       role = this.isOfferor ? "offeror" : "answerer";
     } else {
-      // ⚪ Hors ligne (jamais connecté)
+      // ⚪ Offline (never connected)
       status = "standalone";
       role = null;
     }
 
-    // Appeler la fonction React si disponible
+    // Call the React function if available
     if (window.updateWebRTCStatus) {
       window.updateWebRTCStatus(role, status);
     }
@@ -289,7 +289,7 @@ class WebRTCSync {
   }
 
   /**
-   * Obtenir le rôle (host/guest)
+   * Get the role (host/guest)
    */
   getRole() {
     const role = this.isOfferor ? "host" : "guest";
@@ -297,7 +297,7 @@ class WebRTCSync {
   }
 }
 
-// Créer une instance globale
+// Create a global instance
 window.webrtcSync = new WebRTCSync();
 
 // Export pour modules

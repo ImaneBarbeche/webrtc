@@ -19,12 +19,12 @@ import { getOverlaps } from "../timeline/overlapDetection.js";
 import { groupsData } from "../timeline/timelineData.js";
 /**
  ************************************************************************************************************
- * questionnaire.js gère l'affichage des questions et transition vers les états suivant                     *
- * Chaque question a un type d'evenement, correspondant à un état ou une transition dans la machine à états *
+ * questionnaire.js manages the display of questions and transitions to the next states                     *
+ * Each question has an event type, corresponding to a state or transition in the state machine             *
  ************************************************************************************************************
  */
 function getGroupName(groupId) {
-  // Cherche le groupe par son id
+  // Find the group by its id
   const groupInfo = groupsData.find((g) => g.id === Number(groupId));
   return groupInfo ? groupInfo.contentText : groupId;
 }
@@ -176,42 +176,41 @@ document.addEventListener("DOMContentLoaded", async () => {
   items.on("update", updateGapCounter);
   items.on("remove", updateGapCounter);
 
-  // Essayer d'activer WebRTC au chargement
+  // Try to enable WebRTC on load
   enableWebRTCSync();
 
-  // Ré-essayer lors de l'affichage de LifeStories
+  // Retry when LifeStories is displayed
   document.addEventListener("lifestoriesShown", () => {
     enableWebRTCSync();
   });
 
-  // Initialisation de la machine à états avec restauration si nécessaire
+  // Initialize the state machine with restoration if needed
   initializeSurveyService();
 
-  // S'abonner aux changements d'état
+  // Subscribe to state changes
   surveyService.subscribe((state) => {
-    renderQuestion(state); // Mise à jour à chaque transition
+    renderQuestion(state); // Update on each transition
   });
 
-  // Définir le callback de rendu pour navigateToState
+  // Set the render callback for navigateToState
   setRenderCallback(renderQuestion);
 
-  // Exposer container et items globalement pour renderYesNoQuestion
+  // Expose container and items globally for renderYesNoQuestion
   window._questionnaireContainer = container;
   window._timelineItems = items;
 
-  // IMPORTANT : Attendre le prochain tick pour que l'état soit restauré
+  // IMPORTANT: Wait for the next tick so that the state is restored
   setTimeout(() => {
     const currentState = surveyService.getSnapshot();
-    // Afficher les réponses précédentes AVANT la question actuelle
+    // Display previous answers BEFORE the current question
     displayPreviousAnswers(container);
     renderQuestion(currentState);
-    // Si des items ont été stockés en attente (LOAD_ITEMS arrivés avant que la timeline
-    // ait été initialisée), les ajouter maintenant et ajuster la timeline.
+    // If items were stored pending (LOAD_ITEMS arrived before the timeline was initialized), add them now and adjust the timeline.
     processPendingItems();
   }, 0);
 
   function renderQuestion(state) {
-    // Ignorer les états transitionnels (sans question à afficher)
+    // Ignore transitional states (no question to display)
     const transitionalStates = [
       "placeNextCommuneOnTimeline",
       "checkMoreHousings",
@@ -220,7 +219,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       return;
     }
 
-    // Pour les questions qui dépendent de l'index (commune ou logement), créer un identifiant unique
+    // For questions that depend on the index (commune or housing), create a unique identifier
     const statesThatDependOnIndex = [
       "askCommuneArrivalYear",
       "askCommuneDepartureYear",
@@ -233,30 +232,25 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     let questionId = state.value;
     if (statesThatDependOnIndex.includes(state.value)) {
-      // Ajouter l'index de la commune/logement pour rendre l'ID unique
+      // Add the commune/housing index to make the ID unique
       questionId = `${state.value}_c${state.context.currentCommuneIndex}_l${state.context.currentLogementIndex}`;
     }
 
-    // Vérifier si une question avec le même identifiant existe déjà
+    // Check if a question with the same identifier already exists
     const existingQuestion = container.querySelector(
       `[data-question-id="${questionId}"]`
     );
 
-    // Si la question existe déjà, mettre à jour uniquement le texte (pour refléter les modifications de commune)
+    // If the question already exists, only update the text (to reflect commune modifications)
     if (existingQuestion) {
       const questionP = existingQuestion.querySelector("p");
       if (questionP && state.context.communes) {
         updateQuestionText(questionP, state);
       }
-      return; // Ne pas créer de nouvelle question
+      return; // Do not create a new question
     }
 
-    // Eviter le rendu doublé quand un bloc pair a déjà été inséré
-    if (state.value === "askCommuneArrivalYear" || state.value === "askCommuneDepartureYear") {
-      const pairId = `pair_commune_c${state.context.currentCommuneIndex || 0}`;
-      const existingPair = container.querySelector(`[data-pair-id="${pairId}"]`);
-      if (existingPair) return;
-    }
+    // Avoid double rendering when a paired block has already been inserted
     if (state.value === "askHousingArrivalAge" || state.value === "askHousingDepartureAge") {
       const pairId = `pair_housing_c${state.context.currentCommuneIndex || 0}_l${state.context.currentLogementIndex || 0}`;
       const existingPair = container.querySelector(`[data-pair-id="${pairId}"]`);
@@ -268,18 +262,18 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (existingPair) return;
     }
 
-    // Obtenir la configuration de la question
+    // Get the question configuration
     const { questionText, responseType, choices, eventType, eventKey } =
       getQuestionConfig(state);
 
-    // Créer l'élément de question
+    // Create the question element
     const questionDiv = document.createElement("div");
     questionDiv.classList.add("question");
     questionDiv.dataset.state = state.value;
     questionDiv.dataset.questionId = questionId;
     questionDiv.innerHTML += `<p>${questionText}</p>`;
 
-    // État final (surveyComplete) : afficher le message de remerciement
+    // Final state (surveyComplete): display the thank you message
     if (responseType === "none") {
       questionDiv.classList.add("survey-complete");
       container.appendChild(questionDiv);
@@ -287,7 +281,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       return;
     }
 
-    // Gestion du type INFO (texte informatif + bouton suivant)
+    // Handle INFO type (informative text + next button)
     if (responseType === "info") {
       const nextBtn = document.createElement("button");
       nextBtn.innerText = "Suivant";
@@ -297,29 +291,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       questionDiv.appendChild(nextBtn);
     }
 
-    // Gestion des réponses INPUT (ex: une commune, une année)
+    // Handle INPUT responses (e.g., a commune, a year)
     else if (responseType === "input") {
-      // Special: make commune departure optional with a skip button
-      if (state.value === "askCommuneDepartureYear") {
-        renderInputQuestion(
-          questionDiv,
-          state,
-          eventType,
-          eventKey,
-          sendEvent,
-          getIsHost()
-        );
-        const skipBtn = document.createElement("button");
-        skipBtn.type = "button";
-        skipBtn.className = "skip-btn";
-        skipBtn.innerText = "Je ne sais pas / Ne s'applique pas";
-        skipBtn.addEventListener("click", () => {
-          // advance without providing an end value
-          sendEvent({ type: eventType });
-        });
-        questionDiv.appendChild(skipBtn);
-      }
-      // Paires année+âge pour logement
+      // Year+age pairs for housing
       if (state.value === "askHousingArrivalAge") {
         const pairId = `pair_housing_c${state.context.currentCommuneIndex || 0}_l${state.context.currentLogementIndex || 0}`;
         const existing = container.querySelector(`[data-pair-id="${pairId}"]`);
@@ -379,12 +353,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     }
 
-    // Gestion des boutons choix ("Oui", "Non")
+    // Handle choice buttons ("Yes", "No")
     else if (responseType === "choice") {
       renderYesNoQuestion(questionDiv, state, eventKey, choices);
     }
 
-    // Gestion des réponses avec un input et une liste
+    // Handle responses with an input and a list
     else if (responseType === "inputlist") {
       renderInputListQuestion(
         questionDiv,
@@ -404,6 +378,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  // Initialiser le gestionnaire du bouton reset
+  // Initialize the reset button handler
   initResetHandler();
 });

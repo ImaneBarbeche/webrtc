@@ -14,8 +14,8 @@ import { timelineState } from "./timelineState.js"; // objet centralisé pour is
 
 export const options = {
   editable: true,
-  zoomMin: 1000 * 60 * 60 * 24 * 365 * 1,
-  zoomMax: 1000 * 60 * 60 * 24 * 365 * 50,
+  zoomMin: 1000 * 60 * 60 * 24 * 365 * 1, // 1 an en ms
+  zoomMax: 1000 * 60 * 60 * 24 * 365 * 50, // 50 ans en ms
   min: new Date(),
   max: new Date(`${new Date().getFullYear() + 5}-12-31`),
   showCurrentTime: false,
@@ -47,22 +47,14 @@ export const options = {
   format: {
     minorLabels: function (date, scale) {
       switch (scale) {
-        case "millisecond":
-          return vis.moment(date).format("SSS");
-        case "second":
-          return vis.moment(date).format("s");
-        case "minute":
-          return vis.moment(date).format("HH:mm");
-        case "hour":
-          return vis.moment(date).format("HH:mm");
-        case "weekday":
-          return vis.moment(date).format("ddd D");
-        case "day":
-          return vis.moment(date).format("D");
-        case "week":
-          return vis.moment(date).format("w");
-        case "month":
-          return vis.moment(date).format("MMM");
+        case "millisecond": return vis.moment(date).format("SSS");
+        case "second": return vis.moment(date).format("s");
+        case "minute": return vis.moment(date).format("HH:mm");
+        case "hour": return vis.moment(date).format("HH:mm");
+        case "weekday": return vis.moment(date).format("ddd D");
+        case "day": return vis.moment(date).format("D");
+        case "week": return vis.moment(date).format("w");
+        case "month": return ""; // Empty minor label for month scale
         case "year":
           const year = new Date(date).getFullYear();
           const birthYear = getBirthYear();
