@@ -133,19 +133,19 @@
               box-shadow: none;
             }
 
-            &[data-color="vert"] {
-              --label-color: #eabca5;
+            &[data-color="orange"] {
+              --label-color: var(--label-orange);
             }
 
-            &[data-color="bleu"] {
-              --label-color: #eaada5;
+            &[data-color="red"] {
+              --label-color: var(--label-red);
             }
 
-            &[data-color="rouge"] {
-              --label-color: #a5beea;
+            &[data-color="blue"] {
+              --label-color: var(--label-blue);
             }
-            &[data-color="jaune"] {
-              --label-color: #a0d698;
+            &[data-color="green"] {
+              --label-color: var(--label-green);
             }
           }
 

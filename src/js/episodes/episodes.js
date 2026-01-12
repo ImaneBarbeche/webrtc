@@ -22,10 +22,12 @@ export function ajouterEpisode(text, start, end, group) {
     end.setFullYear(end.getFullYear() + 1);
   }
   let classColor = group.toString().startsWith("1")
-    ? "green"
+    ? "orange"
     : group.toString().startsWith("2")
-    ? "blue"
-    : "red";
+    ? "red"
+    : group.toString().startsWith("3")
+    ? "green"
+    : "blue";
   let item = {
     id: crypto.randomUUID(),
     type: "range",
@@ -49,10 +51,12 @@ export function ajouterEpisode(text, start, end, group) {
 
 export function ajouterEvenement(text, icon, start, group) {
   let classColor = group.toString().startsWith("1")
-    ? "green"
+    ? "orange"
     : group.toString().startsWith("2")
-    ? "blue"
-    : "red";
+    ? "red"
+    : group.toString().startsWith("3")
+    ? "green"
+    : "blue";
   let item = {
     id: crypto.randomUUID(),
     type: "box",
@@ -72,7 +76,7 @@ export function ajouterEvenement(text, icon, start, group) {
 export function modifierEpisode(id, modifications, syncViaWebRTC = false) {
   let itemtomodify = items.get(id);
   const convertYearToDate = (year) =>
-    year && /^\d{4}$/.test(year) ? new Date(`${year}-01-01`) : year; 
+    year && /^\d{4}$/.test(year) ? new Date(`${year}-01-01`) : year;
 
   // Apply the conversion on 'start' and 'end'
   if (modifications.start)

@@ -238,19 +238,20 @@
     /* transition: opacity 0.3s ease-in-out; */
   }
 
-  &.vert {
-    --bar-color: #eabca5;
+  &.orange {
+    --bar-color: var(--label-orange);
   }
 
-  &.bleu {
-    --bar-color: #eaada5;
+  &.red {
+    --bar-color: var(--label-red);
   }
 
-  &.rouge {
-    --bar-color: #a5beea;
+  &.blue {
+    --bar-color: var(--label-blue);
   }
-  &.jaune {
-    --bar-color:#a0d698
+
+  &.green {
+    --bar-color: var(--label-green);
   }
 
   &:before {

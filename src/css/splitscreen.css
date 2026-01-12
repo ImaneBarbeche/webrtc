@@ -262,7 +262,7 @@
 
 /* trajectory attributes (e.g commune) */
 .vis-label.vis-nested-group.vis-group-level-unknown-but-gte1 {
-  --label-color: blue;
+  /* --label-color: blue; */
 
   border: none;
   border-bottom: none !important;
@@ -286,6 +286,22 @@
 .vis-label.vis-group-level-0.rouge,
 .vis-label.vis-group-level-0.rouge ~ .vis-label.vis-nested-group {
   --label-color: #a5beea;
+} */
+
+.orange {
+  --label-color: var(--label-orange);
+}
+
+.red {
+  --label-color: var(--label-red);
+}
+
+.blue {
+  --label-color: var(--label-blue);
+}
+
+.green {
+  --label-color: var(--label-green);
 }
 
 /* properly minimizing chapters */
@@ -356,7 +372,7 @@
 /* The timeline episodes and events */
 .vis-item.vis-range,
 .vis-item.vis-box {
-  --label-color: red;
+  /* --label-color: red; */
 
   background-color: var(--label-color) !important;
   margin-inline: 1rem;
@@ -406,11 +422,12 @@
 }
 
 /* adding the color */
-.vis-item.vis-range.green,
+.vis-item.vis-range.orange,
 .vis-item.vis-range.red,
+.vis-item.vis-range.green,
 .vis-item.vis-range.blue,
 .vis-item.vis-box {
-  --label-color: #eabca5;
+  --label-color: red;
 
   border: none;
   border-inline: 0.2rem solid transparent;
@@ -418,14 +435,24 @@
   background-clip: padding-box;
 }
 
-.vis-item.vis-range.red,
-.vis-item.vis-box.red {
-  --label-color: #a5beea;
+.vis-item.vis-range.orange,
+.vis-item.vis-box.orange {
+  --label-color: var(--label-orange);
 }
 
-.vis-item.vis-range.bleu,
-.vis-item.vis-box.bleu {
-  --label-color: #eaada5;
+.vis-item.vis-range.red,
+.vis-item.vis-box.red {
+  --label-color: var(--label-red);
+}
+
+.vis-item.vis-range.green,
+.vis-item.vis-box.green {
+  --label-color: var(--label-green);
+}
+
+.vis-item.vis-range.blue,
+.vis-item.vis-box.blue {
+  --label-color: var(--label-blue);
 }
 
 /* hiding the default event line and bullet */

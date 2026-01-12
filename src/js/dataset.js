@@ -2,7 +2,7 @@ export const test_items = [
   // ========================================
   // TRAJECTOIRE MIGRATOIRE (Groupes 11-13)
   // ========================================
-  
+
   // Communes (groupe 13 - LANDMARK)
   {
     id: "mig_commune_1",
@@ -11,7 +11,7 @@ export const test_items = [
     start: "1980-01-01T00:00:00.000Z",
     end: "1998-09-01T00:00:00.000Z",
     group: 13,
-    className: "vert"
+    className: "orange",
   },
   {
     id: "mig_commune_2",
@@ -20,7 +20,7 @@ export const test_items = [
     start: "1998-09-01T00:00:00.000Z",
     end: "2003-06-30T00:00:00.000Z",
     group: 13,
-    className: "vert"
+    className: "orange",
   },
   {
     id: "mig_commune_3",
@@ -29,7 +29,7 @@ export const test_items = [
     start: "2003-06-30T00:00:00.000Z",
     end: "2010-01-01T00:00:00.000Z",
     group: 13,
-    className: "vert"
+    className: "orange",
   },
   {
     id: "mig_commune_4",
@@ -38,7 +38,7 @@ export const test_items = [
     start: "2010-01-01T00:00:00.000Z",
     end: "2018-08-01T00:00:00.000Z",
     group: 13,
-    className: "vert"
+    className: "orange",
   },
   {
     id: "mig_commune_5",
@@ -47,9 +47,9 @@ export const test_items = [
     start: "2018-08-01T00:00:00.000Z",
     end: "2026-01-09T00:00:00.000Z",
     group: 13,
-    className: "vert"
+    className: "orange",
   },
-  
+
   // Logements (groupe 12)
   {
     id: "mig_logement_1",
@@ -58,7 +58,7 @@ export const test_items = [
     start: "1980-01-01T00:00:00.000Z",
     end: "1998-09-01T00:00:00.000Z",
     group: 12,
-    className: "vert"
+    className: "orange",
   },
   {
     id: "mig_logement_2",
@@ -67,7 +67,7 @@ export const test_items = [
     start: "1998-09-01T00:00:00.000Z",
     end: "2000-09-01T00:00:00.000Z",
     group: 12,
-    className: "vert"
+    className: "orange",
   },
   {
     id: "mig_logement_3",
@@ -76,7 +76,7 @@ export const test_items = [
     start: "2000-09-01T00:00:00.000Z",
     end: "2003-06-30T00:00:00.000Z",
     group: 12,
-    className: "vert"
+    className: "orange",
   },
   {
     id: "mig_logement_4",
@@ -85,7 +85,7 @@ export const test_items = [
     start: "2003-06-30T00:00:00.000Z",
     end: "2006-05-01T00:00:00.000Z",
     group: 12,
-    className: "vert"
+    className: "orange",
   },
   {
     id: "mig_logement_5",
@@ -94,7 +94,7 @@ export const test_items = [
     start: "2006-05-01T00:00:00.000Z",
     end: "2010-01-01T00:00:00.000Z",
     group: 12,
-    className: "vert"
+    className: "orange",
   },
   {
     id: "mig_logement_6",
@@ -103,7 +103,7 @@ export const test_items = [
     start: "2010-01-01T00:00:00.000Z",
     end: "2018-08-01T00:00:00.000Z",
     group: 12,
-    className: "vert"
+    className: "orange",
   },
   {
     id: "mig_logement_7",
@@ -112,9 +112,9 @@ export const test_items = [
     start: "2018-08-01T00:00:00.000Z",
     end: "2026-01-09T00:00:00.000Z",
     group: 12,
-    className: "vert"
+    className: "orange",
   },
-  
+
   // Statut résidentiel (groupe 11)
   {
     id: "mig_statut_1",
@@ -123,7 +123,7 @@ export const test_items = [
     start: "1980-01-01T00:00:00.000Z",
     end: "1998-09-01T00:00:00.000Z",
     group: 11,
-    className: "vert"
+    className: "orange",
   },
   {
     id: "mig_statut_2",
@@ -132,7 +132,7 @@ export const test_items = [
     start: "1998-09-01T00:00:00.000Z",
     end: "2000-09-01T00:00:00.000Z",
     group: 11,
-    className: "vert"
+    className: "orange",
   },
   {
     id: "mig_statut_3",
@@ -141,7 +141,7 @@ export const test_items = [
     start: "2000-09-01T00:00:00.000Z",
     end: "2010-01-01T00:00:00.000Z",
     group: 11,
-    className: "vert"
+    className: "orange",
   },
   {
     id: "mig_statut_4",
@@ -150,7 +150,7 @@ export const test_items = [
     start: "2010-01-01T00:00:00.000Z",
     end: "2018-08-01T00:00:00.000Z",
     group: 11,
-    className: "vert"
+    className: "orange",
   },
   {
     id: "mig_statut_5",
@@ -159,13 +159,13 @@ export const test_items = [
     start: "2018-08-01T00:00:00.000Z",
     end: "2026-01-09T00:00:00.000Z",
     group: 11,
-    className: "vert"
+    className: "orange",
   },
 
   // ========================================
   // TRAJECTOIRE FAMILIALE (Groupes 21-23)
   // ========================================
-  
+
   // Statut matrimonial (groupe 23 - landmark)
   {
     id: "fam_statut_1",
@@ -174,7 +174,7 @@ export const test_items = [
     start: "1980-01-01T00:00:00.000Z",
     end: "2004-03-15T00:00:00.000Z",
     group: 23,
-    className: "bleu"
+    className: "red",
   },
   {
     id: "fam_statut_2",
@@ -183,7 +183,7 @@ export const test_items = [
     start: "2004-03-15T00:00:00.000Z",
     end: "2015-11-20T00:00:00.000Z",
     group: 23,
-    className: "bleu"
+    className: "red",
   },
   {
     id: "fam_statut_3",
@@ -192,7 +192,7 @@ export const test_items = [
     start: "2015-11-20T00:00:00.000Z",
     end: "2019-06-10T00:00:00.000Z",
     group: 23,
-    className: "bleu"
+    className: "red",
   },
   {
     id: "fam_statut_4",
@@ -201,9 +201,9 @@ export const test_items = [
     start: "2019-06-10T00:00:00.000Z",
     end: "2026-01-09T00:00:00.000Z",
     group: 23,
-    className: "bleu"
+    className: "red",
   },
-  
+
   // Enfants (groupe 22) - EVENTS (type box)
   {
     id: "fam_enfant_1",
@@ -212,7 +212,7 @@ export const test_items = [
     icon: "baby",
     start: "2006-08-12T00:00:00.000Z",
     group: 22,
-    className: "bleu"
+    className: "red",
   },
   {
     id: "fam_enfant_2",
@@ -221,9 +221,9 @@ export const test_items = [
     icon: "baby",
     start: "2009-04-23T00:00:00.000Z",
     group: 22,
-    className: "bleu"
+    className: "red",
   },
-  
+
   // Composition ménage (groupe 21)
   {
     id: "fam_menage_1",
@@ -232,7 +232,7 @@ export const test_items = [
     start: "1980-01-01T00:00:00.000Z",
     end: "1998-09-01T00:00:00.000Z",
     group: 21,
-    className: "bleu"
+    className: "red",
   },
   {
     id: "fam_menage_2",
@@ -241,7 +241,7 @@ export const test_items = [
     start: "1998-09-01T00:00:00.000Z",
     end: "2004-03-15T00:00:00.000Z",
     group: 21,
-    className: "bleu"
+    className: "red",
   },
   {
     id: "fam_menage_3",
@@ -250,7 +250,7 @@ export const test_items = [
     start: "2004-03-15T00:00:00.000Z",
     end: "2006-08-12T00:00:00.000Z",
     group: 21,
-    className: "bleu"
+    className: "red",
   },
   {
     id: "fam_menage_4",
@@ -259,7 +259,7 @@ export const test_items = [
     start: "2006-08-12T00:00:00.000Z",
     end: "2009-04-23T00:00:00.000Z",
     group: 21,
-    className: "bleu"
+    className: "red",
   },
   {
     id: "fam_menage_5",
@@ -268,7 +268,7 @@ export const test_items = [
     start: "2009-04-23T00:00:00.000Z",
     end: "2015-11-20T00:00:00.000Z",
     group: 21,
-    className: "bleu"
+    className: "red",
   },
   {
     id: "fam_menage_6",
@@ -277,7 +277,7 @@ export const test_items = [
     start: "2015-11-20T00:00:00.000Z",
     end: "2019-06-10T00:00:00.000Z",
     group: 21,
-    className: "bleu"
+    className: "red",
   },
   {
     id: "fam_menage_7",
@@ -286,13 +286,13 @@ export const test_items = [
     start: "2019-06-10T00:00:00.000Z",
     end: "2026-01-09T00:00:00.000Z",
     group: 21,
-    className: "bleu"
+    className: "red",
   },
 
   // ========================================
   // TRAJECTOIRE SCOLAIRE (Groupes 31-32)
   // ========================================
-  
+
   // Niveau (groupe 32 - landmark)
   {
     id: "scol_niveau_1",
@@ -301,7 +301,7 @@ export const test_items = [
     start: "1986-09-01T00:00:00.000Z",
     end: "1991-06-30T00:00:00.000Z",
     group: 32,
-    className: "jaune"
+    className: "green",
   },
   {
     id: "scol_niveau_2",
@@ -310,7 +310,7 @@ export const test_items = [
     start: "1991-09-01T00:00:00.000Z",
     end: "1995-06-30T00:00:00.000Z",
     group: 32,
-    className: "jaune"
+    className: "green",
   },
   {
     id: "scol_niveau_3",
@@ -319,7 +319,7 @@ export const test_items = [
     start: "1995-09-01T00:00:00.000Z",
     end: "1998-06-30T00:00:00.000Z",
     group: 32,
-    className: "jaune"
+    className: "green",
   },
   {
     id: "scol_niveau_4",
@@ -328,7 +328,7 @@ export const test_items = [
     start: "1998-09-01T00:00:00.000Z",
     end: "2001-06-30T00:00:00.000Z",
     group: 32,
-    className: "jaune"
+    className: "green",
   },
   {
     id: "scol_niveau_5",
@@ -337,7 +337,7 @@ export const test_items = [
     start: "2001-09-01T00:00:00.000Z",
     end: "2003-06-30T00:00:00.000Z",
     group: 32,
-    className: "jaune"
+    className: "green",
   },
   {
     id: "scol_niveau_6",
@@ -346,9 +346,9 @@ export const test_items = [
     start: "2016-09-01T00:00:00.000Z",
     end: "2018-06-30T00:00:00.000Z",
     group: 32,
-    className: "jaune"
+    className: "green",
   },
-  
+
   // Type (groupe 31) - ONLY Public or Private
   {
     id: "scol_type_1",
@@ -357,7 +357,7 @@ export const test_items = [
     start: "1986-09-01T00:00:00.000Z",
     end: "1998-06-30T00:00:00.000Z",
     group: 31,
-    className: "jaune"
+    className: "green",
   },
   {
     id: "scol_type_2",
@@ -366,7 +366,7 @@ export const test_items = [
     start: "1998-09-01T00:00:00.000Z",
     end: "2001-06-30T00:00:00.000Z",
     group: 31,
-    className: "jaune"
+    className: "green",
   },
   {
     id: "scol_type_3",
@@ -375,7 +375,7 @@ export const test_items = [
     start: "2001-09-01T00:00:00.000Z",
     end: "2003-06-30T00:00:00.000Z",
     group: 31,
-    className: "jaune"
+    className: "green",
   },
   {
     id: "scol_type_4",
@@ -384,13 +384,13 @@ export const test_items = [
     start: "2016-09-01T00:00:00.000Z",
     end: "2018-06-30T00:00:00.000Z",
     group: 31,
-    className: "jaune"
+    className: "green",
   },
 
   // ========================================
   // TRAJECTOIRE PROFESSIONNELLE (Groupes 41-44)
   // ========================================
-  
+
   // Lieu de travail (groupe 44 - landmark)
   {
     id: "pro_lieu_1",
@@ -399,7 +399,7 @@ export const test_items = [
     start: "1996-07-01T00:00:00.000Z",
     end: "1998-09-01T00:00:00.000Z",
     group: 44,
-    className: "rouge"
+    className: "blue",
   },
   {
     id: "pro_lieu_2",
@@ -408,7 +408,7 @@ export const test_items = [
     start: "2002-02-01T00:00:00.000Z",
     end: "2003-08-31T00:00:00.000Z",
     group: 44,
-    className: "rouge"
+    className: "blue",
   },
   {
     id: "pro_lieu_3",
@@ -417,7 +417,7 @@ export const test_items = [
     start: "2003-09-01T00:00:00.000Z",
     end: "2010-01-01T00:00:00.000Z",
     group: 44,
-    className: "rouge"
+    className: "blue",
   },
   {
     id: "pro_lieu_4",
@@ -426,7 +426,7 @@ export const test_items = [
     start: "2010-01-01T00:00:00.000Z",
     end: "2018-08-01T00:00:00.000Z",
     group: 44,
-    className: "rouge"
+    className: "blue",
   },
   {
     id: "pro_lieu_5",
@@ -435,9 +435,9 @@ export const test_items = [
     start: "2018-08-01T00:00:00.000Z",
     end: "2026-01-09T00:00:00.000Z",
     group: 44,
-    className: "rouge"
+    className: "blue",
   },
-  
+
   // Statut d'activité (groupe 43)
   {
     id: "pro_statut_1",
@@ -446,7 +446,7 @@ export const test_items = [
     start: "1996-07-01T00:00:00.000Z",
     end: "1998-08-31T00:00:00.000Z",
     group: 43,
-    className: "rouge"
+    className: "blue",
   },
   {
     id: "pro_statut_2",
@@ -455,7 +455,7 @@ export const test_items = [
     start: "1998-09-01T00:00:00.000Z",
     end: "2003-06-30T00:00:00.000Z",
     group: 43,
-    className: "rouge"
+    className: "blue",
   },
   {
     id: "pro_statut_3",
@@ -464,7 +464,7 @@ export const test_items = [
     start: "2002-02-01T00:00:00.000Z",
     end: "2002-07-31T00:00:00.000Z",
     group: 43,
-    className: "rouge"
+    className: "blue",
   },
   {
     id: "pro_statut_4",
@@ -473,7 +473,7 @@ export const test_items = [
     start: "2003-09-01T00:00:00.000Z",
     end: "2007-12-31T00:00:00.000Z",
     group: 43,
-    className: "rouge"
+    className: "blue",
   },
   {
     id: "pro_statut_5",
@@ -482,7 +482,7 @@ export const test_items = [
     start: "2006-08-12T00:00:00.000Z",
     end: "2007-02-12T00:00:00.000Z",
     group: 43,
-    className: "rouge"
+    className: "blue",
   },
   {
     id: "pro_statut_6",
@@ -491,7 +491,7 @@ export const test_items = [
     start: "2008-01-01T00:00:00.000Z",
     end: "2015-09-30T00:00:00.000Z",
     group: 43,
-    className: "rouge"
+    className: "blue",
   },
   {
     id: "pro_statut_7",
@@ -500,7 +500,7 @@ export const test_items = [
     start: "2015-10-01T00:00:00.000Z",
     end: "2016-03-15T00:00:00.000Z",
     group: 43,
-    className: "rouge"
+    className: "blue",
   },
   {
     id: "pro_statut_8",
@@ -509,9 +509,9 @@ export const test_items = [
     start: "2016-03-15T00:00:00.000Z",
     end: "2026-01-09T00:00:00.000Z",
     group: 43,
-    className: "rouge"
+    className: "blue",
   },
-  
+
   // Profession (groupe 42)
   {
     id: "pro_profession_1",
@@ -520,7 +520,7 @@ export const test_items = [
     start: "1996-07-01T00:00:00.000Z",
     end: "1998-08-31T00:00:00.000Z",
     group: 42,
-    className: "rouge"
+    className: "blue",
   },
   {
     id: "pro_profession_2",
@@ -529,7 +529,7 @@ export const test_items = [
     start: "2002-02-01T00:00:00.000Z",
     end: "2002-07-31T00:00:00.000Z",
     group: 42,
-    className: "rouge"
+    className: "blue",
   },
   {
     id: "pro_profession_3",
@@ -538,7 +538,7 @@ export const test_items = [
     start: "2003-09-01T00:00:00.000Z",
     end: "2007-12-31T00:00:00.000Z",
     group: 42,
-    className: "rouge"
+    className: "blue",
   },
   {
     id: "pro_profession_4",
@@ -547,7 +547,7 @@ export const test_items = [
     start: "2008-01-01T00:00:00.000Z",
     end: "2012-12-31T00:00:00.000Z",
     group: 42,
-    className: "rouge"
+    className: "blue",
   },
   {
     id: "pro_profession_5",
@@ -556,7 +556,7 @@ export const test_items = [
     start: "2013-01-01T00:00:00.000Z",
     end: "2015-09-30T00:00:00.000Z",
     group: 42,
-    className: "rouge"
+    className: "blue",
   },
   {
     id: "pro_profession_6",
@@ -565,9 +565,9 @@ export const test_items = [
     start: "2016-03-15T00:00:00.000Z",
     end: "2026-01-09T00:00:00.000Z",
     group: 42,
-    className: "rouge"
+    className: "blue",
   },
-  
+
   // Secteur (groupe 41)
   {
     id: "pro_secteur_1",
@@ -576,7 +576,7 @@ export const test_items = [
     start: "1996-07-01T00:00:00.000Z",
     end: "1998-08-31T00:00:00.000Z",
     group: 41,
-    className: "rouge"
+    className: "blue",
   },
   {
     id: "pro_secteur_2",
@@ -585,7 +585,7 @@ export const test_items = [
     start: "2002-02-01T00:00:00.000Z",
     end: "2002-07-31T00:00:00.000Z",
     group: 41,
-    className: "rouge"
+    className: "blue",
   },
   {
     id: "pro_secteur_3",
@@ -594,7 +594,7 @@ export const test_items = [
     start: "2003-09-01T00:00:00.000Z",
     end: "2012-12-31T00:00:00.000Z",
     group: 41,
-    className: "rouge"
+    className: "blue",
   },
   {
     id: "pro_secteur_4",
@@ -603,7 +603,7 @@ export const test_items = [
     start: "2013-01-01T00:00:00.000Z",
     end: "2015-09-30T00:00:00.000Z",
     group: 41,
-    className: "rouge"
+    className: "blue",
   },
   {
     id: "pro_secteur_5",
@@ -612,6 +612,6 @@ export const test_items = [
     start: "2016-03-15T00:00:00.000Z",
     end: "2026-01-09T00:00:00.000Z",
     group: 41,
-    className: "rouge"
-  }
+    className: "blue",
+  },
 ];

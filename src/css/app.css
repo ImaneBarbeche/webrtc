@@ -24,6 +24,11 @@
   /* --primary-grey: #f4e6da; */
   /* --primary-grey: rgb(201, 135, 135); */
 
+  --label-orange: #eabca5;
+  --label-red: #eaada5;
+  --label-blue: #a5beea;
+  --label-green: #b7e3b6;
+
   --default-shadow: 0 0.25rem 0.625rem var(--secondary-grey);
 }
 
