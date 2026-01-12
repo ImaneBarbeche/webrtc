@@ -20,7 +20,7 @@ export function renderPairedStatusDropdowns(
 
   // Global edit button (controls both dropdowns)
   const globalEditBtn = document.createElement("button");
-  globalEditBtn.className = "edit-btn pair-edit-btn";
+  globalEditBtn.className = "edit-btn pair-edit-btn secondary-button";
   globalEditBtn.innerHTML = '<i data-lucide="pencil"></i>';
   globalEditBtn.style.display = "none"; // Hidden until both dropdowns are filled
   globalEditBtn.dataset.editing = "false";
@@ -32,7 +32,7 @@ export function renderPairedStatusDropdowns(
     "Chez parents",
     "Logé par l'employeur",
     "Logement gratuit",
-    "Autre"
+    "Autre",
   ];
 
   /**

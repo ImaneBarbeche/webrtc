@@ -3,49 +3,6 @@
  * Gère l'affichage des questions, inputs et boutons
  */
 
-/* ========================================
-   QUESTIONS
-   ======================================== */
-
-.question {
-  margin-bottom: 15px;
-  padding: 10px;
-  border-left: 3px solid #eabca5;
-  /* background-color: #f8f9fa; */
-  border-radius: 4px;
-}
-
-/* ========================================
-   INPUTS
-   ======================================== */
-
-.question-input,
-.question input {
-  margin: 8px 0;
-  /* padding: 0.5rem; */
-  /* border: 1px solid #ddd; */
-  border: none;
-  padding-block: 0.5rem;
-  padding-inline: 0.75rem;
-  border-radius: 2rem;
-  width: 100%;
-  background-color: var(--primary-grey);
-  box-shadow: 0 0.25rem 0.625rem var(--secondary-grey);
-  font-size: 0.8rem;
-  font-family: inherit;
-}
-
-.question-input:focus-visible,
-.question input:focus-visible {
-  outline: none;
-}
-
-.question-input:disabled,
-.question input:disabled {
-  background-color: #e9ecef;
-  cursor: not-allowed;
-}
-
 .question ul {
   margin-left: 1rem;
 }
@@ -53,14 +10,13 @@
 /* ========================================
    BOUTONS
    ======================================== */
-
+/* 
 .question button {
   background: var(--primary-dark);
   color: var(--primary-beige);
   padding: 8px 12px;
   border: none;
   border-radius: 2rem;
-  /* font-weight: 600; */
   cursor: pointer;
   transition: all 0.2s ease;
   font-size: 0.9rem;
@@ -84,7 +40,6 @@
   padding: 8px 12px;
   border: none;
   border-radius: 2rem;
-  /* font-weight: 600; */
   cursor: pointer;
   transition: all 0.2s ease;
   font-size: 0.9rem;
@@ -108,7 +63,6 @@
   padding: 8px 12px;
   border: none;
   border-radius: 2rem;
-  /* font-weight: 600; */
   cursor: pointer;
   transition: all 0.2s ease;
   font-size: 0.9rem;
@@ -127,6 +81,17 @@
 }
 .question button:hover {
   background-color: #0056b3;
+} */
+
+.question button:not(.question-btn-container *) {
+  margin-top: 0.5rem;
+}
+
+.question-btn-container {
+  width: fit-content;
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
 }
 
 #resetButton {

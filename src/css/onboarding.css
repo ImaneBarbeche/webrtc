@@ -284,7 +284,7 @@ header h1 {
 }
 
 .interviewee-btn,
-.interviewer-btn {
+.interviewer-btn,
 .interviewee-btn,
 .interviewer-btn {
   background: transparent;
@@ -549,6 +549,118 @@ header h1 {
   }
 }
 
+/* ========================================
+   INDICATEUR DE SYNCHRONISATION WEBRTC
+   ======================================== */
+
+#webrtc-status {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  padding: 8px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: bold;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+#webrtc-status.connected {
+  background-color: #28a745;
+  color: white;
+}
+
+#webrtc-status.disconnected {
+  background-color: #dc3545;
+  color: white;
+}
+
+#webrtc-status.standalone {
+  background-color: #6c757d;
+  color: white;
+}
+
+#webrtc-status .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: white;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+/* Reconnect container - Overlay */
+#reconnect-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+#reconnect-container.hidden {
+  display: none;
+}
+
+/* Carte de reconnexion */
+#reconnect-container > div {
+  text-align: center;
+  max-width: 450px;
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+#reconnect-container img {
+  width: 250px;
+  height: auto;
+  margin-bottom: 30px;
+  opacity: 0.9;
+}
+
+#reconnect-container span {
+  display: block;
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 30px;
+  line-height: 1.4;
+  font-weight: 400;
+}
+
 /* Responsive design */
 @media (max-width: 768px) {
   .connection-modes,
@@ -557,17 +669,14 @@ header h1 {
     gap: 20px;
   }
 
-
   .onboarding-container {
     padding: 80px 20px 20px 20px;
     margin: 20px;
   }
 
-
   .header h1 {
     font-size: 2rem;
   }
-
 
   header {
     position: fixed;
@@ -575,17 +684,14 @@ header h1 {
     left: 15px;
   }
 
-
   header img {
     width: 50px;
     height: 50px;
   }
 
-
   header h1 {
     font-size: 1.5rem;
   }
-
 
   .connection-status {
     position: fixed;
@@ -595,16 +701,13 @@ header h1 {
     font-size: 0.9rem;
   }
 
-
   .role-icon {
     max-width: 200px;
   }
 
-
   .role-selection h2 {
     font-size: 1.6rem;
   }
-
 
   .role-selection p {
     font-size: 1rem;
@@ -613,12 +716,10 @@ header h1 {
 
 /* Tablette 11" (landscape: 1024x768, portrait: 768x1024) */
 @media (min-width: 769px) and (max-width: 1200px) {
-@media (min-width: 769px) and (max-width: 1200px) {
   .onboarding-container {
     max-width: 90%;
     padding: 100px 30px 30px 30px;
   }
-
 
   .role-cards {
     grid-template-columns: 1fr 1fr !important;
@@ -627,40 +728,33 @@ header h1 {
     max-width: 700px;
   }
 
-
   .role-icon {
     max-width: 240px;
   }
-
 
   header img {
     width: 70px;
     height: 70px;
   }
 
-
   header h1 {
     font-size: 2rem;
   }
-
 
   .qr-section {
     max-width: 600px;
     margin: 20px auto;
   }
 
-
   #qrCanvas,
   #qrCanvasAnswer {
     max-width: 300px;
   }
 
-
   .scan-frame {
     width: 280px;
     height: 280px;
   }
-
 
   #scanResponseBtn {
     width: 260px;
@@ -676,11 +770,9 @@ header h1 {
     margin: 30px auto;
   }
 
-
   .role-icon {
     max-width: 300px;
   }
-
 
   .connection-modes {
     grid-template-columns: 1fr;
@@ -699,11 +791,9 @@ header h1 {
     font-size: 1.1rem;
   }
 
-
   .role-card {
     padding: 20px;
   }
-
 
   /* Augmenter les zones tactiles */
   .scan-btn,

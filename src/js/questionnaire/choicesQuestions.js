@@ -1,8 +1,16 @@
 // Function responsible for rendering a Yes/No question and handling edits
-import { surveyService, navigateToState } from "../stateMachine/stateMachine.js";
+import {
+  surveyService,
+  navigateToState,
+} from "../stateMachine/stateMachine.js";
 import { sendEvent } from "./eventHandlers.js";
 
-export function renderYesNoQuestion(questionDiv, state, eventKey, choices = ["Yes", "No"]) {
+export function renderYesNoQuestion(
+  questionDiv,
+  state,
+  eventKey,
+  choices = ["Yes", "No"]
+) {
   // Capture the state name at the moment this question is rendered
   const questionState = state.value;
 
@@ -12,13 +20,17 @@ export function renderYesNoQuestion(questionDiv, state, eventKey, choices = ["Ye
   // Edit button (hidden until the user answers)
   const editBtn = document.createElement("button");
   editBtn.innerHTML = '<i data-lucide="pencil"></i>';
-  editBtn.className = "edit-btn";
+  editBtn.className = "edit-btn secondary-button";
   editBtn.style.display = "none";
+
+  const buttonContainer = document.createElement("div");
+  buttonContainer.className = "question-btn-container";
 
   // Create one button per choice (Yes / No by default)
   choices.forEach((choice) => {
     const button = document.createElement("button");
     button.innerText = choice;
+    button.className = "primary-button";
 
     button.addEventListener("click", () => {
       // Send the event through WebRTC to sync with other clients
@@ -34,7 +46,8 @@ export function renderYesNoQuestion(questionDiv, state, eventKey, choices = ["Ye
       editBtn.style.display = "inline-block";
     });
 
-    questionDiv.appendChild(button);
+    questionDiv.appendChild(buttonContainer);
+    buttonContainer.appendChild(button);
     choicesButtons.push(button);
   });
 
@@ -66,7 +79,9 @@ export function renderYesNoQuestion(questionDiv, state, eventKey, choices = ["Ye
 
         // --- 1. Remove all DOM questions that appear after this one ---
         if (container) {
-          const allQuestions = container.querySelectorAll('.question[data-state]');
+          const allQuestions = container.querySelectorAll(
+            ".question[data-state]"
+          );
           let foundCurrentQuestion = false;
 
           allQuestions.forEach((q) => {
@@ -84,13 +99,15 @@ export function renderYesNoQuestion(questionDiv, state, eventKey, choices = ["Ye
           if (questionState === "askAlwaysLivedInCommune") {
             // Remove groups 11 and 12 (housing history)
             const allItems = items.get();
-            const itemsToRemove = allItems.filter(item => item.group === 12 || item.group === 11);
-            itemsToRemove.forEach(item => items.remove(item.id));
+            const itemsToRemove = allItems.filter(
+              (item) => item.group === 12 || item.group === 11
+            );
+            itemsToRemove.forEach((item) => items.remove(item.id));
           } else if (questionState === "askSameHousingInCommune") {
             // Remove only group 11
             const allItems = items.get();
-            const itemsToRemove = allItems.filter(item => item.group === 11);
-            itemsToRemove.forEach(item => items.remove(item.id));
+            const itemsToRemove = allItems.filter((item) => item.group === 11);
+            itemsToRemove.forEach((item) => items.remove(item.id));
           }
         }
 
@@ -101,13 +118,13 @@ export function renderYesNoQuestion(questionDiv, state, eventKey, choices = ["Ye
           contextUpdates = {
             group: 13,
             logements: [],
-            currentLogementIndex: 0
+            currentLogementIndex: 0,
           };
         } else if (questionState === "askSameHousingInCommune") {
           contextUpdates = {
             group: 12,
             logements: [],
-            currentLogementIndex: 0
+            currentLogementIndex: 0,
           };
         }
 

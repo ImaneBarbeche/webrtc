@@ -36,8 +36,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   const gapBtn = document.createElement("button");
   gapBtn.id = "gap-counter-btn";
   const initialGapCount = getGapCount();
-  const initialOverlapCount = (typeof getOverlaps === 'function') ? getOverlaps().length : 0;
-  gapBtn.setAttribute("aria-label", `Périodes manquantes : ${initialGapCount} — Chevauchements : ${initialOverlapCount}`);
+  const initialOverlapCount =
+    typeof getOverlaps === "function" ? getOverlaps().length : 0;
+  gapBtn.setAttribute(
+    "aria-label",
+    `Périodes manquantes : ${initialGapCount} — Chevauchements : ${initialOverlapCount}`
+  );
   gapBtn.title = `Périodes manquantes : ${initialGapCount} — Chevauchements : ${initialOverlapCount}`;
   gapBtn.innerHTML = `
     <i data-lucide="triangle-alert" class="lucide gap-icon" aria-hidden="true"></i>
@@ -56,7 +60,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   gapBtn.addEventListener("click", () => {
     const gaps = getGapList();
-    const overlaps = (typeof getOverlaps === 'function') ? getOverlaps() : [];
+    const overlaps = typeof getOverlaps === "function" ? getOverlaps() : [];
 
     const overlay = document.createElement("div");
     overlay.className = "gap-modal-overlay";
@@ -92,13 +96,17 @@ document.addEventListener("DOMContentLoaded", async () => {
         ? `<div class="gap-modal-empty">Aucun chevauchement détecté.</div>`
         : `<ul class="overlap-list">
           ${overlaps
-            .map((ov) => `
+            .map(
+              (ov) => `
               <li>
-                <strong>${getGroupName(ov._originalGroup)}</strong> : ${new Date(
-                  ov.start
-                ).getFullYear()} → ${new Date(ov.end).getFullYear()}
+                <strong>${getGroupName(
+                  ov._originalGroup
+                )}</strong> : ${new Date(ov.start).getFullYear()} → ${new Date(
+                ov.end
+              ).getFullYear()}
               </li>
-            `)
+            `
+            )
             .join("")}
         </ul>`;
 
@@ -134,22 +142,23 @@ document.addEventListener("DOMContentLoaded", async () => {
     modal.appendChild(closeBtn);
     overlay.appendChild(modal);
     document.body.appendChild(overlay);
-    if (window.lucide && typeof window.lucide.createIcons === "function") window.lucide.createIcons();
+    if (window.lucide && typeof window.lucide.createIcons === "function")
+      window.lucide.createIcons();
   });
 
   const updateGapCounter = () => {
     const n = getGapCount();
-    const m = (typeof getOverlaps === 'function') ? getOverlaps().length : 0;
+    const m = typeof getOverlaps === "function" ? getOverlaps().length : 0;
     const gapBadge = gapBtn.querySelector(".gap-badge");
     const overlapBadge = gapBtn.querySelector(".overlap-badge");
     if (gapBadge) {
       gapBadge.textContent = String(n);
       if (n > 0 && gapBadge.animate) {
         try {
-          gapBadge.animate([
-            { transform: "scale(1.15)" },
-            { transform: "scale(1)" }
-          ], { duration: 220, easing: "ease-out" });
+          gapBadge.animate(
+            [{ transform: "scale(1.15)" }, { transform: "scale(1)" }],
+            { duration: 220, easing: "ease-out" }
+          );
         } catch (e) {
           // animation not supported — ignore
         }
@@ -159,10 +168,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       overlapBadge.textContent = String(m);
       if (m > 0 && overlapBadge.animate) {
         try {
-          overlapBadge.animate([
-            { transform: "scale(1.15)" },
-            { transform: "scale(1)" }
-          ], { duration: 220, easing: "ease-out" });
+          overlapBadge.animate(
+            [{ transform: "scale(1.15)" }, { transform: "scale(1)" }],
+            { duration: 220, easing: "ease-out" }
+          );
         } catch (e) {}
       }
     }
@@ -251,14 +260,28 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     // Avoid double rendering when a paired block has already been inserted
-    if (state.value === "askHousingArrivalAge" || state.value === "askHousingDepartureAge") {
-      const pairId = `pair_housing_c${state.context.currentCommuneIndex || 0}_l${state.context.currentLogementIndex || 0}`;
-      const existingPair = container.querySelector(`[data-pair-id="${pairId}"]`);
+    if (
+      state.value === "askHousingArrivalAge" ||
+      state.value === "askHousingDepartureAge"
+    ) {
+      const pairId = `pair_housing_c${
+        state.context.currentCommuneIndex || 0
+      }_l${state.context.currentLogementIndex || 0}`;
+      const existingPair = container.querySelector(
+        `[data-pair-id="${pairId}"]`
+      );
       if (existingPair) return;
     }
-    if (state.value === "askHousingOccupationStatusEntry" || state.value === "askHousingOccupationStatusExit") {
-      const pairId = `pair_status_c${state.context.currentCommuneIndex || 0}_l${state.context.currentLogementIndex || 0}`;
-      const existingPair = container.querySelector(`[data-pair-id="${pairId}"]`);
+    if (
+      state.value === "askHousingOccupationStatusEntry" ||
+      state.value === "askHousingOccupationStatusExit"
+    ) {
+      const pairId = `pair_status_c${state.context.currentCommuneIndex || 0}_l${
+        state.context.currentLogementIndex || 0
+      }`;
+      const existingPair = container.querySelector(
+        `[data-pair-id="${pairId}"]`
+      );
       if (existingPair) return;
     }
 
@@ -285,6 +308,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (responseType === "info") {
       const nextBtn = document.createElement("button");
       nextBtn.innerText = "Suivant";
+      nextBtn.className = "primary-button";
       nextBtn.addEventListener("click", () => {
         sendEvent({ type: eventType });
       });
@@ -295,7 +319,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     else if (responseType === "input") {
       // Year+age pairs for housing
       if (state.value === "askHousingArrivalAge") {
-        const pairId = `pair_housing_c${state.context.currentCommuneIndex || 0}_l${state.context.currentLogementIndex || 0}`;
+        const pairId = `pair_housing_c${
+          state.context.currentCommuneIndex || 0
+        }_l${state.context.currentLogementIndex || 0}`;
         const existing = container.querySelector(`[data-pair-id="${pairId}"]`);
         if (existing) return;
 
@@ -322,7 +348,9 @@ document.addEventListener("DOMContentLoaded", async () => {
           getIsHost()
         );
       } else if (state.value === "askHousingOccupationStatusEntry") {
-        const pairId = `pair_status_c${state.context.currentCommuneIndex || 0}_l${state.context.currentLogementIndex || 0}`;
+        const pairId = `pair_status_c${
+          state.context.currentCommuneIndex || 0
+        }_l${state.context.currentLogementIndex || 0}`;
         const existing = container.querySelector(`[data-pair-id="${pairId}"]`);
         if (existing) return;
         renderPairedStatusDropdowns(

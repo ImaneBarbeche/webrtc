@@ -1,7 +1,10 @@
 // Function to create questions with input and dynamic list (e.g., cities, accommodations)
 
 import { handleDragStart, handleDragEnd, items } from "../timeline/timeline.js";
-import { surveyService, navigateToState } from "../stateMachine/stateMachine.js";
+import {
+  surveyService,
+  navigateToState,
+} from "../stateMachine/stateMachine.js";
 
 /**
  * Creates an input field with a dynamic list where the user can add items
@@ -12,7 +15,14 @@ import { surveyService, navigateToState } from "../stateMachine/stateMachine.js"
  * @param {function} sendEvent - Function to send the event to the state machine
  * @param {boolean} isHost - If the user is the host (to disable controls)
  */
-export function renderInputListQuestion(questionDiv, state, eventType, eventKey, sendEvent, isHost = true) {
+export function renderInputListQuestion(
+  questionDiv,
+  state,
+  eventType,
+  eventKey,
+  sendEvent,
+  isHost = true
+) {
   const input = document.createElement("input");
   input.type = "text";
   input.placeholder = "Votre réponse";
@@ -23,7 +33,7 @@ export function renderInputListQuestion(questionDiv, state, eventType, eventKey,
   // Edit button (hidden by default)
   const editBtn = document.createElement("button");
   editBtn.innerHTML = '<i data-lucide="pencil"></i>';
-  editBtn.className = "edit-btn";
+  editBtn.className = "edit-btn secondary-button";
   editBtn.style.display = "none";
   editBtn.dataset.editing = "false"; // Explicitly initialize
 
@@ -41,6 +51,7 @@ export function renderInputListQuestion(questionDiv, state, eventType, eventKey,
   // Button to go to the next question
   const nextQBtn = document.createElement("button");
   nextQBtn.innerHTML = "Suivant";
+  nextQBtn.className = "primary-button";
 
   nextQBtn.addEventListener("click", () => {
     // Get all items in the list (text only, not buttons)
@@ -61,7 +72,7 @@ export function renderInputListQuestion(questionDiv, state, eventType, eventKey,
   // Edit button management
   editBtn.addEventListener("click", () => {
     const isEditing = editBtn.dataset.editing === "true";
-    
+
     if (isEditing) {
       // Finish editing - save changes
       const listItems = getListItems(responseList);
@@ -76,14 +87,15 @@ export function renderInputListQuestion(questionDiv, state, eventType, eventKey,
 
         // Clean up timeline episodes (keep the first = birth city)
         const allItems = items.get();
-        const communeEpisodes = allItems.filter(item => item.group === 13);
+        const communeEpisodes = allItems.filter((item) => item.group === 13);
         // Remove all cities except the first (birth)
         if (communeEpisodes.length > 1) {
-          communeEpisodes.slice(1).forEach(ep => items.remove(ep.id));
+          communeEpisodes.slice(1).forEach((ep) => items.remove(ep.id));
         }
         // Remove all accommodations and statuses
-        allItems.filter(item => item.group === 12 || item.group === 11)
-          .forEach(ep => items.remove(ep.id));
+        allItems
+          .filter((item) => item.group === 12 || item.group === 11)
+          .forEach((ep) => items.remove(ep.id));
 
         // Preserve the birth city (first city in context)
         const currentContext = surveyService.getSnapshot().context;
@@ -97,7 +109,7 @@ export function renderInputListQuestion(questionDiv, state, eventType, eventKey,
           currentCommuneIndex: 1, // Start at the first city AFTER birth
           logements: [],
           currentLogementIndex: 0,
-          group: 13
+          group: 13,
         });
 
         // Disable controls
@@ -117,7 +129,7 @@ export function renderInputListQuestion(questionDiv, state, eventType, eventKey,
         type: "UPDATE_ANSWER",
         key: eventKey,
         value: listItems,
-        updateEpisode: false
+        updateEpisode: false,
       });
 
       // Disable controls and hide delete buttons
@@ -183,13 +195,13 @@ function addListItem(list, text, editMode = false) {
   listItem.draggable = true;
   listItem.addEventListener("dragstart", handleDragStart);
   listItem.addEventListener("dragend", handleDragEnd);
-  
+
   // Span for the text (allows separation from the button)
   const textSpan = document.createElement("span");
   textSpan.className = "item-text";
   textSpan.textContent = text;
   listItem.appendChild(textSpan);
-  
+
   // Delete button
   const deleteBtn = document.createElement("button");
   deleteBtn.innerHTML = '<i data-lucide="x"></i>';
@@ -202,9 +214,9 @@ function addListItem(list, text, editMode = false) {
     listItem.remove();
   });
   listItem.appendChild(deleteBtn);
-  
+
   list.appendChild(listItem);
-  
+
   // Update Lucide icons
   if (window.lucide && typeof window.lucide.createIcons === "function") {
     window.lucide.createIcons();
@@ -222,22 +234,22 @@ function setEditMode(list, input, nextBtn, enable) {
   // Enable/disable the input
   input.disabled = !enable;
   nextBtn.disabled = !enable;
-  
+
   // Show/hide delete buttons
   list.querySelectorAll(".delete-item-btn").forEach((btn) => {
     btn.style.display = enable ? "inline-block" : "none";
   });
-  
+
   // In edit mode, allow adding new items
   if (enable) {
     input.focus();
-    
+
     // Ensure the add listener works
     const existingListener = input._editKeyListener;
     if (existingListener) {
       input.removeEventListener("keypress", existingListener);
     }
-    
+
     const keyListener = (event) => {
       if (event.key === "Enter" && input.value.trim() !== "") {
         addListItem(list, input.value.trim(), true); // true = edit mode
@@ -256,7 +268,9 @@ function setEditMode(list, input, nextBtn, enable) {
  */
 function disableQuestionControls(questionDiv, editBtn) {
   try {
-    const controls = questionDiv.querySelectorAll("input, button, textarea, select");
+    const controls = questionDiv.querySelectorAll(
+      "input, button, textarea, select"
+    );
     controls.forEach((c) => {
       // Do not disable the edit button or delete buttons
       if (c !== editBtn && !c.classList.contains("delete-item-btn")) {
@@ -281,7 +295,7 @@ function cleanupFollowingQuestions(currentQuestionDiv) {
   const questionsToRemove = [];
 
   // Go through all questions and mark those to remove
-  container.querySelectorAll('.question[data-state]').forEach((q) => {
+  container.querySelectorAll(".question[data-state]").forEach((q) => {
     if (q === currentQuestionDiv) {
       foundCurrent = true;
     } else if (foundCurrent) {
@@ -299,28 +313,31 @@ function cleanupFollowingQuestions(currentQuestionDiv) {
  */
 function cleanupAnsweredQuestionsAfterCommunes() {
   try {
-    const answeredRaw = localStorage.getItem('lifestories_answered_questions');
+    const answeredRaw = localStorage.getItem("lifestories_answered_questions");
     if (!answeredRaw) return;
-    
+
     const answered = JSON.parse(answeredRaw);
-    
+
     // States to keep (before and including askMultipleCommunes)
     const statesToKeep = [
-      'askBirthYear',
-      'birthPlaceIntro', 
-      'askCurrentCommune',
-      'askDepartementOrPays',
-      'askAlwaysLivedInCommune',
-      'askMultipleCommunes'
+      "askBirthYear",
+      "birthPlaceIntro",
+      "askCurrentCommune",
+      "askDepartementOrPays",
+      "askAlwaysLivedInCommune",
+      "askMultipleCommunes",
     ];
-    
+
     // Filter to keep only answers before/including multiple cities
-    const filteredAnswers = answered.filter(item => 
+    const filteredAnswers = answered.filter((item) =>
       statesToKeep.includes(item.state)
     );
-    
-    localStorage.setItem('lifestories_answered_questions', JSON.stringify(filteredAnswers));
+
+    localStorage.setItem(
+      "lifestories_answered_questions",
+      JSON.stringify(filteredAnswers)
+    );
   } catch (e) {
-    console.warn('Erreur lors du nettoyage de l\'historique:', e);
+    console.warn("Erreur lors du nettoyage de l'historique:", e);
   }
 }

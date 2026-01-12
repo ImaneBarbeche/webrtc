@@ -1,0 +1,72 @@
+/* ========================================
+   LAYOUT PRINCIPAL - SECTIONS
+   ======================================== */
+
+/* Container onboarding (écran de connexion WebRTC) */
+.onboarding-container {
+  position: relative;
+  z-index: 1000;
+}
+
+/* Masquer l'onboarding quand on passe à LifeStories */
+.onboarding-container.hidden {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* Container LifeStories (questionnaire + calendrier) */
+.lifestories-container {
+  /* display: none;  */
+  position: relative;
+  width: 100%;
+  height: 100vh;
+}
+
+/* Afficher LifeStories quand actif */
+.lifestories-container.active {
+  display: block;
+}
+
+/* ========================================
+   MODE VIEWER - Affichage différencié
+   ======================================== */
+
+/* Mode viewer : masquer le questionnaire */
+.viewer-mode #questionnaire {
+  display: none !important;
+}
+
+/* Ajuster la timeline en plein écran */
+.viewer-mode #trajectories {
+  width: 100% !important;
+}
+
+/* Masquer le séparateur Split.js en mode viewer */
+.viewer-mode .gutter {
+  display: none !important;
+}
+
+#devmode-toggle-global i[data-lucide],
+#devmode-toggle-global svg {
+  width: 20px;
+  height: 20px;
+  display: inline-block;
+}
+
+#devmode-toggle-global {
+  background-color: transparent !important;
+  border: dashed 2px var(--primary-dark) !important;
+  position: fixed;
+  top: 8px;
+  right: 8px;
+  z-index: 2000;
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

@@ -24,7 +24,8 @@ export function renderInputQuestion(
   input.className = "question-input";
   // Determine if the question is about time (years, months, day, hour)
   const qText = questionDiv.querySelector("p")?.textContent || "";
-  const isTimeQuestion = /ann(e|ée)|année|âge|age|date|jour|naiss|né|née|heure|h:/i.test(qText);
+  const isTimeQuestion =
+    /ann(e|ée)|année|âge|age|date|jour|naiss|né|née|heure|h:/i.test(qText);
 
   if (isTimeQuestion) {
     // Use a number input for year (simple YYYY entry)
@@ -66,7 +67,7 @@ export function renderInputQuestion(
 
   const editBtn = document.createElement("button");
   editBtn.innerHTML = '<i data-lucide="pencil"></i>';
-  editBtn.className = "edit-btn";
+  editBtn.className = "edit-btn secondary-button";
   editBtn.style.display = "none"; // hidden until there is an answer
 
   // Edit button management
@@ -143,10 +144,10 @@ export function renderInputQuestion(
 function handleEditUpdate(input, eventKey) {
   // Normalize the value for `date` inputs: send only the year
   let outVal = input.value;
-  if (input.type === 'number') {
+  if (input.type === "number") {
     const rawYear = String(input.value).trim();
     const y = Number(rawYear);
-    if (["start","end","statut_res"].includes(eventKey)) {
+    if (["start", "end", "statut_res"].includes(eventKey)) {
       const dateObj = new Date(`${y}-01-01`);
       outVal = dateObj;
     } else {
