@@ -39,7 +39,7 @@ export const options = {
         b: [],
         br: [],
         div: ["class", "title"],
-        i: ['data-lucide'],
+        i: ["data-lucide"],
         img: ["src", "alt", "class", "width", "height"],
       },
     },
@@ -47,23 +47,34 @@ export const options = {
   format: {
     minorLabels: function (date, scale) {
       switch (scale) {
-        case "millisecond": return vis.moment(date).format("SSS");
-        case "second": return vis.moment(date).format("s");
-        case "minute": return vis.moment(date).format("HH:mm");
-        case "hour": return vis.moment(date).format("HH:mm");
-        case "weekday": return vis.moment(date).format("ddd D");
-        case "day": return vis.moment(date).format("D");
-        case "week": return vis.moment(date).format("w");
-        case "month": return vis.moment(date).format("MMM");
+        case "millisecond":
+          return vis.moment(date).format("SSS");
+        case "second":
+          return vis.moment(date).format("s");
+        case "minute":
+          return vis.moment(date).format("HH:mm");
+        case "hour":
+          return vis.moment(date).format("HH:mm");
+        case "weekday":
+          return vis.moment(date).format("ddd D");
+        case "day":
+          return vis.moment(date).format("D");
+        case "week":
+          return vis.moment(date).format("w");
+        case "month":
+          return vis.moment(date).format("MMM");
         case "year":
           const year = new Date(date).getFullYear();
           const birthYear = getBirthYear();
           const age = birthYear ? year - birthYear : "";
           return `<div style="display:flex;flex-direction:column;align-items:center;">
                     <b>${year}</b>
-                    <span style="font-size:12px;color:#888;">${age !== "" ? age + " ans" : ""}</span>
+                    <span style="font-size:12px;color:#888;">${
+                      age !== "" ? age + " ans" : ""
+                    }</span>
                   </div>`;
-        default: return "";
+        default:
+          return "";
       }
     },
   },
@@ -72,10 +83,10 @@ export const options = {
     if (item.type === "box" && item.category === "degree") {
       return `<img src="./assets/icon/degree.svg" alt="${item.content}" />`;
     }
-    if(item.type === "box" && item.category !== "degree") {
-      return `<i data-lucide="${item.icon}"></i>`
+    if (item.type === "box" && item.category !== "degree") {
+      return `<i data-lucide="${item.icon}"></i>`;
     }
-    return item.content ;
+    return item.content;
   },
   // Brancher les callbacks importés
   onAdd: (item, cb) => onAdd(item, cb, timelineState.isEditingEpisode),
@@ -83,6 +94,7 @@ export const options = {
   onMoving,
   onUpdate,
   onRemove,
-  snap: (date, scale) => snap(date, scale, stepSize, timelineState.isCustomBarMoving),
+  snap: (date, scale) =>
+    snap(date, scale, stepSize, timelineState.isCustomBarMoving),
   groupTemplate,
 };

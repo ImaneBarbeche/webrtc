@@ -224,7 +224,7 @@ function AddEpisodeModal({ onClose }) {
                 name="dateFrom"
                 value={formatDate(selectedStartDate)}
                 onChange={handleDateChange(setSelectedStartDate)}
-                className="secondary-button"
+                className="question-input"
               />
             </label>
             <label>
@@ -234,7 +234,7 @@ function AddEpisodeModal({ onClose }) {
                 name="dateTo"
                 value={formatDate(selectedEndDate)}
                 onChange={handleDateChange(setSelectedEndDate)}
-                className="secondary-button"
+                className="question-input"
               />
             </label>
           </div>
@@ -257,7 +257,7 @@ function AddEpisodeModal({ onClose }) {
                 name="eventDate"
                 value={formatDate(selectedEventDate)}
                 onChange={handleDateChange(setSelectedEventDate)}
-                className="secondary-button"
+                className="question-input"
               />
             </label>
           </div>
@@ -269,7 +269,7 @@ function AddEpisodeModal({ onClose }) {
           >
             Cancel
           </button>
-          <button type="submit" className="secondary-button primary">
+          <button type="submit" className="primary-button">
             Ajouter
           </button>
         </div>

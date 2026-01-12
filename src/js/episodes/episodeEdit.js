@@ -48,7 +48,8 @@ export function openEpisodeEditModal(item, onSave) {
       item.end ? new Date(item.end).toISOString().slice(0, 10) : ""
     }"></label>
     <div style="display:flex;gap:1em;justify-content:flex-end;">
-      <button id="save-edit" style="background:#2E2E2E;color:white;padding:0.6em 1.4em;border:none;border-radius:2em;cursor:pointer;font-size:1em;">Enregistrer</button>
+      <button id="save-edit" class="primary-button">
+        Enregistrer</button>
       <button id="cancel-edit" class="secondary-button">Annuler</button>
     </div>
   `;

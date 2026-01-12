@@ -151,11 +151,11 @@
 
 #export,
 #load {
-  /* background-color: var(--primary-dark); */
+  background-color: var(--primary-dark);
   /* color: var(--primary-beige); */
   /* padding: 8px 12px; */
   /* border: none; */
-  /* border-radius: 6px; */
+  border-radius: 6px;
   /* font-weight: 600; */
   cursor: pointer;
   transition: all 0.2s ease;
