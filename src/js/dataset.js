@@ -208,7 +208,8 @@ export const test_items = [
   {
     id: "fam_enfant_1",
     type: "box",
-    content: "baby",
+    content: "birth",
+    icon: "baby",
     start: "2006-08-12T00:00:00.000Z",
     group: 22,
     className: "bleu"
@@ -216,7 +217,8 @@ export const test_items = [
   {
     id: "fam_enfant_2",
     type: "box",
-    content: "baby",
+    content: "birth",
+    icon: "baby",
     start: "2009-04-23T00:00:00.000Z",
     group: 22,
     className: "bleu"
