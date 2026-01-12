@@ -30,13 +30,17 @@ export function renderPairedYearAgeInputs(
     const wrapper = document.createElement('div');
     wrapper.className = 'year-age-pair';
 
-    // Année (month picker)
+    // Année (year number input)
     const yearField = document.createElement('div');
     yearField.className = 'year-field';
     const yearLabel = document.createElement('label');
     yearLabel.innerText = cfg.yearLabel || 'Année';
     const yearInput = document.createElement('input');
-    yearInput.type = 'month';
+    yearInput.type = 'number';
+    yearInput.placeholder = 'YYYY';
+    yearInput.min = 1800;
+    yearInput.max = new Date().getFullYear();
+    yearInput.step = 1;
     yearInput.dataset.eventKey = cfg.yearEventKey;
     yearInput.dataset.eventType = cfg.yearEventType;
     yearInput.disabled = !isHost;
@@ -97,20 +101,10 @@ export function renderPairedYearAgeInputs(
       if (updating) return;
       updating = true;
       if (yearInput.value) {
-        const [yyyy, mm] = yearInput.value.split('-');
-        const year = parseInt(yyyy, 10);
-        const month = parseInt(mm, 10) || 1;
+        const year = parseInt(String(yearInput.value), 10);
         const birthYear = getBirthYear();
-        const birthMonth = parseInt(cfg.birthMonth, 10) || 1;
         if (!isNaN(year) && !isNaN(birthYear)) {
-          let age = year - birthYear;
-          if (month < birthMonth) {
-            age = age - 1;
-          }
-          // Si même année, mais mois d'arrivée < mois naissance, age = -1 (non valide)
-          if (year === birthYear && month < birthMonth) {
-            age = -1;
-          }
+          const age = year - birthYear;
           if (!isNaN(age) && age >= 0 && age <= 120) {
             ageInput.value = age;
           }
@@ -130,14 +124,9 @@ export function renderPairedYearAgeInputs(
       const age = parseInt(ageInput.value, 10);
       const birthYear = getBirthYear();
       if (!isNaN(age) && !isNaN(birthYear)) {
-        let month = '01';
-        if (yearInput.value) {
-          const parts = yearInput.value.split('-');
-          if (parts.length === 2) month = parts[1];
-        }
         const year = birthYear + age;
-        if (year > 1900 && year < 2100) {
-          yearInput.value = year + '-' + month;
+        if (year > 1800 && year < 3000) {
+          yearInput.value = String(year);
         }
       }
       updating = false;
@@ -162,7 +151,7 @@ export function renderPairedYearAgeInputs(
 
     function checkAndSend() {
       // Allow validation when only one field is provided by computing the other
-      let yearVal = yearInput.value && yearInput.value.trim() ? yearInput.value.trim() : null;
+      let yearVal = yearInput.value && String(yearInput.value).trim() ? String(yearInput.value).trim() : null;
       let ageVal = ageInput.value && String(ageInput.value).trim() ? String(ageInput.value).trim() : null;
 
       const birthYear = getBirthYear();
@@ -172,20 +161,15 @@ export function renderPairedYearAgeInputs(
       if (!yearVal && ageVal && !isNaN(parseInt(ageVal, 10)) && birthYear) {
         const ageNum = parseInt(ageVal, 10);
         let computedYear = birthYear + ageNum;
-        // Use birthMonth as default month unless yearInput had a month
-        const monthStr = String(birthMonth).padStart(2, '0');
-        yearVal = `${computedYear}-${monthStr}`;
+        yearVal = String(computedYear);
         yearInput.value = yearVal;
       }
 
       // If year provided but age missing, compute age
       if (yearVal && !ageVal && birthYear) {
-        const parts = yearVal.split('-');
+        const parts = String(yearVal).split('-');
         const yyyy = parseInt(parts[0], 10);
-        const mm = parseInt(parts[1], 10) || 1;
         let computedAge = yyyy - birthYear;
-        if (mm < birthMonth) computedAge--;
-        if (yyyy === birthYear && mm < birthMonth) computedAge = -1;
         if (!isNaN(computedAge) && computedAge >= 0 && computedAge <= 120) {
           ageVal = String(computedAge);
           ageInput.value = ageVal;
