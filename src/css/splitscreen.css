@@ -603,6 +603,94 @@
   background-color: #eee;
 }
 
+/* --------------------------GAP STYLING------------------ */
+
+/* Timeline gap visual: empty episode with yellow border (no background)
+/* Targets vis-timeline items created with className: "timeline-gap" */
+.vis-item.timeline-gap,
+.vis-background.timeline-gap,
+.vis-item.timeline-gap .vis-item-content {
+  background: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+
+.vis-item.timeline-gap {
+  border: 2px solid #ffca28 !important; /* yellow border */
+  border-radius: 1rem !important;
+  padding: 0 !important;
+  margin-inline: 0.6rem !important;
+  /* reduce visual height to make gap slimmer */
+  max-height: 60px !important;
+  min-height: 50px !important;
+}
+
+/* Ensure the inner content is empty/hidden so the gap looks hollow */
+.vis-item.timeline-gap .vis-item-content {
+  display: none !important;
+}
+
+/* For background-layer gap items, ensure border is visible by increasing z-index */
+.vis-background.timeline-gap {
+  z-index: 2 !important;
+  outline: none !important;
+}
+
+/* Birth year button: primary cake icon with year badge */
+/* More specific selector to override .birth-year-btn from app.css */
+#birth-year.birth-year-btn,
+#birth-year {
+  /* position: relative;
+  display: inline-grid;
+  place-items: center;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 6px !important;
+  background: var(--primary-grey);
+  color: #000000 !important;
+  cursor: pointer;
+  border: none; */
+}
+
+/* Target both injected <svg> and <i class="lucide"> placeholders */
+#birth-year .lucide,
+#birth-year svg {
+  width: 28px !important;
+  height: 28px !important;
+  stroke: currentColor !important;
+  fill: none !important;
+  color: inherit !important;
+}
+
+.birth-year-badge {
+  position: absolute;
+  top: -0.5rem;
+  left: 1rem;
+  /* background: linear-gradient(180deg, #f8d8d4, #f0a599); */
+  background-color: var(--primary-light);
+  color: var(--primary-dark);
+  font-weight: 400;
+  font-size: 0.7rem;
+  padding: 2px 6px;
+  border-radius: 999px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+  line-height: 1;
+  min-width: 26px;
+  text-align: center;
+}
+
+@media (max-width: 480px) {
+  #birth-year {
+    width: 36px;
+    height: 36px;
+  }
+  .birth-year-badge {
+    font-size: 0.65rem;
+    min-width: 22px;
+    padding: 2px 4px;
+  }
+}
+
 /* Responsive - Mobile */
 @media (max-width: 600px) {
   .split {

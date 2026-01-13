@@ -35,6 +35,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const gapBtn = document.createElement("button");
   gapBtn.id = "gap-counter-btn";
+  gapBtn.className = "primary-button";
   const initialGapCount = getGapCount();
   const initialOverlapCount =
     typeof getOverlaps === "function" ? getOverlaps().length : 0;
@@ -66,11 +67,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     overlay.className = "gap-modal-overlay";
 
     const modal = document.createElement("div");
-    modal.className = "gap-modal-content";
+    modal.className = "default-card";
 
     const closeBtn = document.createElement("button");
     closeBtn.className = "gap-modal-close";
-    closeBtn.innerText = "Fermer";
+    closeBtn.innerHTML = `<i data-lucide="x"></i>`;
     closeBtn.addEventListener("click", () => overlay.remove());
 
     const gapHtml =

@@ -205,7 +205,8 @@ function addListItem(list, text, editMode = false) {
   // Delete button
   const deleteBtn = document.createElement("button");
   deleteBtn.innerHTML = '<i data-lucide="x"></i>';
-  deleteBtn.className = "delete-item-btn";
+  deleteBtn.className = "primary-button delete";
+  deleteBtn.id = "delete-item-btn";
   deleteBtn.type = "button"; // Prevent submit behavior
   deleteBtn.style.display = editMode ? "inline-block" : "none";
   deleteBtn.addEventListener("click", (e) => {
@@ -236,7 +237,7 @@ function setEditMode(list, input, nextBtn, enable) {
   nextBtn.disabled = !enable;
 
   // Show/hide delete buttons
-  list.querySelectorAll(".delete-item-btn").forEach((btn) => {
+  list.querySelectorAll("#delete-item-btn").forEach((btn) => {
     btn.style.display = enable ? "inline-block" : "none";
   });
 
@@ -273,7 +274,7 @@ function disableQuestionControls(questionDiv, editBtn) {
     );
     controls.forEach((c) => {
       // Do not disable the edit button or delete buttons
-      if (c !== editBtn && !c.classList.contains("delete-item-btn")) {
+      if (c !== editBtn && !c.id === "delete-item-btn") {
         c.disabled = true;
       }
     });

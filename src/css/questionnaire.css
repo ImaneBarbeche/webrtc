@@ -10,78 +10,8 @@
 /* ========================================
    BOUTONS
    ======================================== */
-/* 
-.question button {
-  background: var(--primary-dark);
-  color: var(--primary-beige);
-  padding: 8px 12px;
-  border: none;
-  border-radius: 2rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-size: 0.9rem;
-  margin-top: 10px;
-  margin-right: 10px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  box-sizing: border-box;
-  max-width: 100%;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  flex-shrink: 1;
-}
 
-.question .edit-btn {
-  background-color: transparent;
-  color: var(--primary-beige);
-  padding: 8px 12px;
-  border: none;
-  border-radius: 2rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-size: 0.9rem;
-  margin-top: 10px;
-  margin-right: 10px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  box-sizing: border-box;
-  max-width: 100%;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  flex-shrink: 1;
-}
-
-.question .delete-item-btn {
-  background-color: transparent;
-  color: var(--primary-beige);
-  padding: 8px 12px;
-  border: none;
-  border-radius: 2rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-size: 0.9rem;
-  margin-top: 10px;
-  margin-right: 10px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  box-sizing: border-box;
-  max-width: 100%;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  flex-shrink: 1;
-}
-.question button:hover {
-  background-color: #0056b3;
-} */
+/* TODO: style question edit and delete button */
 
 .question button:not(.question-btn-container *) {
   margin-top: 0.5rem;
@@ -94,71 +24,15 @@
   margin-top: 0.5rem;
 }
 
-#resetButton {
-  /* display: none; */
-  padding: 6px 10px;
-  background: #ee6573;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.85rem;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  box-sizing: border-box;
-  max-width: 100%;
-}
-
 /* ========================================
    BOUTON EXPORT/LOAD
    ======================================== */
-
-#export,
-#load {
-  background-color: var(--primary-dark);
-  /* color: var(--primary-beige); */
-  /* padding: 8px 12px; */
-  /* border: none; */
-  border-radius: 6px;
-  /* font-weight: 600; */
-  cursor: pointer;
-  transition: all 0.2s ease;
-  /* font-size: 0.95rem; */
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  box-sizing: border-box;
-  max-width: 100%;
-  /* padding: 0.5rem 1rem; */
-  /* border-radius: 2rem; */
-}
-
-#export:hover,
-#load:hover {
-  background-color: #000000;
-}
-
-/* Lucide icons color for dark buttons (use currentColor for stroke) */
-#export,
-#load {
-  color: #ffffff; /* sets currentColor for injected SVG strokes */
-}
-
-#export svg,
-#load svg,
-#export i[data-lucide],
-#load i[data-lucide] {
-  color: inherit;
-  stroke: currentColor !important;
-  fill: none !important;
-}
 
 /* Helper: group buttons and allow wrapping instead of overlapping */
 .btn-row,
 .question .btn-row {
   display: flex;
-  gap: 8px;
+  gap: 0.5rem;
   flex-wrap: wrap;
   align-items: center;
 }
@@ -166,7 +40,7 @@
 /* Align footer buttons: ensure consistent height, spacing and vertical alignment */
 #questionnaire-actions {
   display: flex;
-  gap: 8px;
+  gap: 0.5rem;
   align-items: center;
 }
 
@@ -191,26 +65,10 @@
 #questionnaire-actions svg,
 #questionnaire button i[data-lucide],
 #questionnaire button svg {
-  width: 18px;
-  height: 18px;
+  width: 1rem;
+  aspect-ratio: 1 / 1;
   display: inline-block;
   vertical-align: middle;
-}
-
-/* Responsive: stack buttons on small screens */
-@media (max-width: 600px) {
-  .question button,
-  #export,
-  #load,
-  #resetButton {
-    display: block;
-    width: 100%;
-    margin-right: 0;
-    margin-top: 8px;
-    font-size: 0.95rem;
-    white-space: normal;
-    text-overflow: clip;
-  }
 }
 
 /* ========================================
@@ -218,7 +76,6 @@
    ======================================== */
 
 .previous-answers-section {
-  /* background-color: #e8f4f8; */
   border-left: 4px solid #eabca5;
   padding: 15px;
   margin-bottom: 20px;
@@ -228,13 +85,10 @@
 .previous-answers-section h3 {
   margin-top: 0;
   margin-bottom: 15px;
-  color: #155724;
   font-size: 16px;
 }
 
 .previous-answer {
-  /* background-color: white; */
-  /* border-left: 3px solid #28a745; */
   padding: 12px;
   margin-bottom: 10px;
   border-radius: 3px;
@@ -258,7 +112,6 @@
   color: #0d3817;
   margin-left: 15px;
   padding: 5px;
-  /* background-color: #f0f8f0; */
   border-radius: 2px;
 }
 
@@ -271,7 +124,6 @@
 
 .questions-separator {
   border: none;
-  /* border-top: 2px solid #f5ddd0; */
   margin: 20px 0;
 }
 
@@ -282,54 +134,22 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
-}
-
-/* Contenu de la modale */
-.gap-modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-}
-
-.gap-modal-content {
-  background: #fff;
-  border-radius: 10px;
-  padding: 2em;
-  max-width: 600px;
-  width: 90%;
-  box-shadow: 0 6px 30px rgba(0, 0, 0, 0.3);
-  position: relative;
-  font-family: sans-serif;
 }
 
 .gap-modal-close {
   position: absolute;
-  top: 12px;
-  right: 16px;
-  background: #eee;
-  border: none;
-  padding: 0.4em 0.9em;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: bold;
+  top: 2rem;
+  right: 2rem;
 }
 
 .gap-modal-content h3 {
   margin-top: 0;
   font-size: 1.4em;
-  color: #333;
+  color: var(--primary-dark);
 }
 
 /* Modal sections layout: allow two columns on wide screens */
@@ -349,14 +169,10 @@
   }
 }
 
-.gap-modal-section {
-  background: transparent;
-}
-
 .gap-modal-section .section-title {
   font-size: 1.05rem;
   margin-bottom: 0.6rem;
-  color: #333;
+  color: var(--primary-dark);
   display: flex;
   align-items: center;
   gap: 0.6rem;
@@ -439,28 +255,12 @@
 
 #gap-counter-btn {
   /* Match export/load button sizing and baseline */
-  background-color: var(--primary-dark);
-  color: var(--primary-beige);
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 2rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-size: 0.95rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  box-sizing: border-box;
-  max-width: 100%;
-  font-weight: 600;
-  -webkit-tap-highlight-color: transparent;
   position: relative;
-  vertical-align: middle;
-  line-height: 1;
-  height: 36px;
-  padding-left: 0.9rem;
-  padding-right: 0.9rem;
+  -webkit-tap-highlight-color: transparent;
 }
 
 #gap-counter-btn:hover {
@@ -476,6 +276,7 @@
   }
 }
 
+/* circle */
 #gap-counter-btn .gap-icon {
   width: 18px;
   height: 18px;
@@ -484,6 +285,7 @@
   display: inline-block;
   vertical-align: middle;
 }
+/* number */
 #gap-counter-btn .gap-badge {
   position: absolute;
   top: 4px;
@@ -534,92 +336,4 @@
 #gap-counter-btn:not(.has-gaps) .gap-badge {
   background: #e9ecef;
   color: #6b6b6b;
-}
-
-/* --------------------------GAP STYLING------------------ */
-
-/* Timeline gap visual: empty episode with yellow border (no background)
-/* Targets vis-timeline items created with className: "timeline-gap" */
-.vis-item.timeline-gap,
-.vis-background.timeline-gap,
-.vis-item.timeline-gap .vis-item-content {
-  background: transparent !important;
-  background-color: transparent !important;
-  box-shadow: none !important;
-}
-
-.vis-item.timeline-gap {
-  border: 2px solid #ffca28 !important; /* yellow border */
-  border-radius: 1rem !important;
-  padding: 0 !important;
-  margin-inline: 0.6rem !important;
-  /* reduce visual height to make gap slimmer */
-  max-height: 60px !important;
-  min-height: 50px !important;
-}
-
-/* Ensure the inner content is empty/hidden so the gap looks hollow */
-.vis-item.timeline-gap .vis-item-content {
-  display: none !important;
-}
-
-/* For background-layer gap items, ensure border is visible by increasing z-index */
-.vis-background.timeline-gap {
-  z-index: 2 !important;
-  outline: none !important;
-}
-
-/* Birth year button: primary cake icon with year badge */
-/* More specific selector to override .birth-year-btn from app.css */
-#birth-year.birth-year-btn,
-#birth-year {
-  /* position: relative;
-  display: inline-grid;
-  place-items: center;
-  min-width: 44px;
-  min-height: 44px;
-  padding: 6px !important;
-  background: var(--primary-grey);
-  color: #000000 !important;
-  cursor: pointer;
-  border: none; */
-}
-
-/* Target both injected <svg> and <i class="lucide"> placeholders */
-#birth-year .lucide,
-#birth-year svg {
-  width: 28px !important;
-  height: 28px !important;
-  stroke: currentColor !important;
-  fill: none !important;
-  color: inherit !important;
-}
-
-.birth-year-badge {
-  position: absolute;
-  top: -0.5rem;
-  left: 1rem;
-  /* background: linear-gradient(180deg, #f8d8d4, #f0a599); */
-  background-color: var(--primary-light);
-  color: var(--primary-dark);
-  font-weight: 400;
-  font-size: 0.7rem;
-  padding: 2px 6px;
-  border-radius: 999px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
-  line-height: 1;
-  min-width: 26px;
-  text-align: center;
-}
-
-@media (max-width: 480px) {
-  #birth-year {
-    width: 36px;
-    height: 36px;
-  }
-  .birth-year-badge {
-    font-size: 0.65rem;
-    min-width: 22px;
-    padding: 2px 4px;
-  }
 }

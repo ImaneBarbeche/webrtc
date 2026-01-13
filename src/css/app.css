@@ -97,6 +97,10 @@ button:hover {
     box-shadow: unset;
     color: var(--primary-beige);
   }
+
+  &.delete {
+    background-color: var(--label-red);
+  }
 }
 
 .primary-button {
