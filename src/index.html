@@ -37,17 +37,17 @@
     <link rel="stylesheet" href="css/dashboard.css" />
     <link rel="stylesheet" href="css/dropdown-status.css" />
     <link rel="stylesheet" href="css/year-age-pair.css" />
-
   </head>
 
   <body>
     <!-- Global dev-mode toggle (always present) -->
-    <button
-      id="devmode-toggle-global"
-      title="Basculer le mode développeur"
-    >
+    <button id="devmode-toggle-global" title="Basculer le mode développeur">
       <i data-lucide="code"></i>
     </button>
+    <button id="manualmode-toggle-global" title="Cacher les inputs manuels">
+      <i data-lucide="eye-off"></i>
+    </button>
+
     <div id="homepage-root"></div>
     <div id="dashboard-root" style="display: none"></div>
     <div class="onboarding-container" style="display: none">
@@ -194,7 +194,9 @@
         </div>
       </div>
 
-      <button id="confirm-button" class="hidden primary-button">Confirmer</button>
+      <button id="confirm-button" class="hidden primary-button">
+        Confirmer
+      </button>
     </div>
     <!-- Fin de .onboarding-container -->
 
@@ -221,13 +223,13 @@
         <!-- Left side-->
         <div id="questionnaire">
           <div class="questionnaire-header">
-            <h2 style="margin: 0"><i data-lucide="map-pin-house"></i> Migratoire</h2>
+            <h2 style="margin: 0">
+              <i data-lucide="map-pin-house"></i> Migratoire
+            </h2>
           </div>
           <div id="questions"></div>
           <!-- Footer actions: kept at the end of the questionnaire -->
-          <div
-            class="questionnaire-footer"
-          >
+          <div class="questionnaire-footer">
             <div id="questionnaire-actions">
               <button id="export" class="secondary-button" title="Exporter">
                 <i data-lucide="upload"></i>
@@ -236,7 +238,11 @@
                 <i data-lucide="download"></i>
               </button>
             </div>
-            <button id="resetButton" class="primary-button delete" title="Réinitialiser le questionnaire">
+            <button
+              id="resetButton"
+              class="primary-button delete"
+              title="Réinitialiser le questionnaire"
+            >
               <i data-lucide="trash"></i>
             </button>
             <div id="form-actions-root" style="display: none"></div>
@@ -362,6 +368,25 @@
     <script type="module" src="js/webrtc/webrtc-sync.js"></script>
     <script src="js/swipeDetector.js"></script>
     <script>
+      // Global toggle to hide manual input text and such
+      (function () {
+        const btn = document.getElementById("manualmode-toggle-global");
+        if (!btn) return;
+
+        btn.addEventListener("click", function () {
+          const isHidden = localStorage.getItem("hideManualInputs") === "true";
+          localStorage.setItem("hideManualInputs", isHidden ? "false" : "true");
+          window.location.reload();
+        });
+      })();
+      (function () {
+        const hideManual = localStorage.getItem("hideManualInputs") === "true";
+
+        if (hideManual) {
+          document.body.classList.add("hide-manual-inputs");
+        }
+      })();
+      
       // Global dev-mode toggle (fallback) - ensure it's clickable in any view
       (function () {
         const btn = document.getElementById("devmode-toggle-global");
