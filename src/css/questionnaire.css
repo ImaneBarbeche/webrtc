@@ -47,9 +47,7 @@
 #questionnaire-actions button,
 #questionnaire .questionnaire-footer > button,
 #questionnaire-actions button,
-#resetButton,
-#export,
-#load {
+#export {
   height: 36px;
   padding: 0 0.9rem;
   display: inline-flex;

@@ -101,6 +101,16 @@ button:hover {
   &.delete {
     background-color: var(--label-red);
   }
+
+  &.transparent {
+    background-color: var(--muted-beige);
+    border: none;
+    backdrop-filter: blur(10rem) saturate(2);
+    padding: 1rem;
+    border-radius: 2rem;
+    box-shadow: 0 0.25rem 0.625rem var(--secondary-grey);
+    /* border: 0.1rem dashed var(--primary-dark); */
+  }
 }
 
 .primary-button {
@@ -169,11 +179,13 @@ button:hover {
 /* dev mode toggle - closes when clicked outside */
 .dev-speed-dial {
   position: absolute;
-  bottom: 0;
-  left: 0;
+  bottom: 1rem;
+  left: 1rem;
   z-index: 99;
   display: flex;
-  flex-direction: row-reverse;
+  flex-direction: column-reverse;
+  justify-content: center;
+  align-items: center;
   gap: 0.5rem;
 
   #toggle-dev-btn {
