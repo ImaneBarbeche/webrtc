@@ -40,14 +40,6 @@
   </head>
 
   <body>
-    <!-- Global dev-mode toggle (always present) -->
-    <button id="devmode-toggle-global" title="Basculer le mode développeur">
-      <i data-lucide="code"></i>
-    </button>
-    <button id="manualmode-toggle-global" title="Cacher les inputs manuels">
-      <i data-lucide="eye-off"></i>
-    </button>
-
     <div id="homepage-root"></div>
     <div id="dashboard-root" style="display: none"></div>
     <div class="onboarding-container" style="display: none">
@@ -234,17 +226,36 @@
               <button id="export" class="secondary-button" title="Exporter">
                 <i data-lucide="upload"></i>
               </button>
-              <button id="load" class="secondary-button" title="Charger">
-                <i data-lucide="download"></i>
-              </button>
+
+              <div class="dev-speed-dial">
+                <div id="toggle-dev-btn" tabindex="0" role="button" class="secondary-button">
+                  <i data-lucide="ellipsis"></i>
+                </div>
+                <button id="load" class="secondary-button" title="Charger">
+                  <i data-lucide="download"></i>
+                </button>
+                <button
+                  id="resetButton"
+                  class="primary-button delete"
+                  title="Réinitialiser le questionnaire"
+                >
+                  <i data-lucide="trash"></i>
+                </button>
+                <!-- Global dev-mode toggle (always present) -->
+                <button
+                  id="devmode-toggle-global"
+                  title="Basculer le mode développeur"
+                >
+                  <i data-lucide="code"></i>
+                </button>
+                <button
+                  id="manualmode-toggle-global"
+                  title="Cacher les inputs manuels"
+                >
+                  <i data-lucide="eye-off"></i>
+                </button>
+              </div>
             </div>
-            <button
-              id="resetButton"
-              class="primary-button delete"
-              title="Réinitialiser le questionnaire"
-            >
-              <i data-lucide="trash"></i>
-            </button>
             <div id="form-actions-root" style="display: none"></div>
           </div>
         </div>
@@ -386,7 +397,7 @@
           document.body.classList.add("hide-manual-inputs");
         }
       })();
-      
+
       // Global dev-mode toggle (fallback) - ensure it's clickable in any view
       (function () {
         const btn = document.getElementById("devmode-toggle-global");

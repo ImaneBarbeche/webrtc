@@ -165,3 +165,35 @@ button:hover {
   background-color: #e9ecef;
   cursor: not-allowed;
 }
+
+/* dev mode toggle - closes when clicked outside */
+.dev-speed-dial {
+  display: flex;
+  flex-direction: row-reverse;
+  gap: 0.5rem;
+  position: relative;
+
+  #toggle-dev-btn {
+    cursor: pointer;
+    z-index: 2;
+  }
+  button {
+    z-index: 1;
+    position: absolute;
+    right: 0;
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(0.8);
+    transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out, right 1s ease-in-out;
+  }
+
+  &:focus-within {
+    button {
+      position: static;
+      right: 1rem;
+      opacity: 1;
+      pointer-events: auto;
+      transform: scale(1);
+    }
+  }
+}
