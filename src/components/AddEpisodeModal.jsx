@@ -200,7 +200,7 @@ function AddEpisodeModal({ onClose }) {
             <label
               key={attribute.id}
               className={styles["radio-label"]}
-              //   data-color={trajectory.className}
+              data-color={attribute.className}
             >
               <span>{attribute.contentText}</span>
               <input

@@ -76,7 +76,7 @@
   width: 90%;
   text-align: center;
   position: relative;
-  min-height: 100vh;
+  /* min-height: 100vh; */
 }
 
 header {
@@ -942,4 +942,4 @@ header h1 {
     font-size: 1em;
     padding: 10px 18px;
   }
-} 
+}

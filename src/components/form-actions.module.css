@@ -106,11 +106,6 @@
         overflow-x: auto;
         /* justify-items: center; */
 
-        .radio-label[data-color="vert"] {
-          /* background-color: green;
-                    background-color: attr(data-color); */
-        }
-
         .radio-label {
           --label-color: var(--primary-grey);
 
@@ -126,25 +121,29 @@
           cursor: pointer;
 
           &:has(input[type="radio"]:checked) {
-            background-color: var(--label-color);
+            background-color: color-mix(
+              in srgb,
+              var(--label-color),
+              var(--primary-grey)
+            );
 
             span {
               background-color: transparent;
               box-shadow: none;
             }
 
-            &[data-color="orange"] {
+            &[data-color*="orange"] {
               --label-color: var(--label-orange);
             }
 
-            &[data-color="red"] {
+            &[data-color*="red"] {
               --label-color: var(--label-red);
             }
 
-            &[data-color="blue"] {
+            &[data-color*="blue"] {
               --label-color: var(--label-blue);
             }
-            &[data-color="green"] {
+            &[data-color*="green"] {
               --label-color: var(--label-green);
             }
           }
