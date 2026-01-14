@@ -1,191 +1,13 @@
-/* =====================================================
-   ONBOARDING STYLES
-   ===================================================== */
-
-/* ===================== LAYOUT ===================== */
-
-.onboarding-container {
-  padding: 6.25rem 2.5rem 2.5rem 2.5rem;
-  max-width: 75rem;
-  width: 90%;
-  text-align: center;
-  position: relative;
-  min-height: 100vh;
-  z-index: 80;
+/* ===================== DEV ON PC ========================== */
+.hide-manual-inputs .manual-input,
+.hide-manual-inputs .secondary-btn,
+.hide-manual-inputs .start-btn,
+.hide-manual-inputs #connectionCode,
+.hide-manual-inputs #answerCode,
+.hide-manual-inputs #copyBtn {
+  display: none !important;
 }
 
-/* ===================== HEADER ===================== */
-
-header {
-  position: fixed;
-  top: 1.8rem;
-  left: 1.8rem;
-  display: flex;
-  align-items: center;
-  gap: 0.9rem;
-}
-
-header img {
-  width: 2.5rem;
-  height: 2.5rem;
-}
-
-header h1 {
-  font-size: 1.5rem;
-  margin: 0;
-  color: var(--primary-dark);
-}
-
-.header h1 {
-  font-size: 2.5rem;
-  margin-bottom: 0.6rem;
-}
-
-.header p {
-  color: var(--primary-dark);
-  font-size: 1.1rem;
-  margin-bottom: 1.8rem;
-}
-
-/* ===================== CONNECTION STATUS ===================== */
-
-.connection-status {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.6rem;
-  margin: 1.2rem 0;
-  padding: 0.6rem 1.2rem;
-  border-radius: 0.6rem;
-  position: fixed;
-  top: 1.8rem;
-  right: 1.8rem;
-  z-index: 100;
-}
-
-.status {
-  width: 0.6rem;
-  height: 0.6rem;
-  border-radius: 50%;
-  margin-right: 0;
-}
-
-.status.offline {
-  background: var(--label-red);
-}
-
-.status.connecting {
-  background: var(--label-orange);
-  animation: pulse 1s infinite;
-}
-
-.status.connected {
-  background: var(--label-green);
-}
-
-/* ===================== ROLE SELECTION ===================== */
-
-.role-selection {
-  padding: 1.2rem 0;
-  margin-top: 6.2rem;
-}
-
-.role-selection h2 {
-  font-size: 2.2rem;
-  margin-bottom: 0.9rem;
-  color: var(--primary-dark);
-}
-
-.role-selection p {
-  font-size: 1.2rem;
-  color: var(--primary-dark);
-  margin-bottom: 2.5rem;
-}
-
-.role-cards {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 3.2rem;
-  margin: 1.8rem auto;
-  align-items: stretch;
-  justify-items: center;
-}
-
-.role-card {
-  border-radius: 0.9rem;
-  transition: all 0.3s ease;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-}
-
-.role-icon {
-  width: 100%;
-  height: auto;
-  margin-bottom: 0.5rem;
-  display: block;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.role-card h3 {
-  margin-bottom: 0.9rem;
-  font-size: 1.5rem;
-}
-
-/* ===================== BUTTONS ===================== */
-
-/* Base role buttons */
-.interviewer-btn,
-.interviewee-btn {
-  background: transparent;
-  color: var(--primary-dark);
-  padding: 14px 32px;
-  border: none;
-  border-radius: 8px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-size: 1.15rem;
-  width: 100%;
-  max-width: 350px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-}
-
-.interviewer-btn img,
-.interviewee-btn img {
-  width: 100%;
-  max-width: 280px;
-  height: auto;
-}
-
-.interviewer-btn:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 16px #b7e9ff5a;
-}
-
-.interviewee-btn:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 16px #fee7b76e;
-}
-
-.interviewer-btn.selected {
-  background-color: #b7e9ff5a;
-}
-
-.interviewee-btn.selected {
-  background-color: #fee7b76e;
-}
-
-/* ===================== INPUTS ===================== */
-
-/* Manual input sections */
 .manual-input {
   flex-direction: column;
   gap: 10px;
@@ -200,12 +22,6 @@ header h1 {
   font-family: inherit;
 }
 
-.manual-input textarea:focus {
-  outline: none;
-  border-color: var(--primary-dark);
-}
-
-/* Code display inputs */
 #connectionCode,
 #answerCode {
   width: 100%;
@@ -216,14 +32,189 @@ header h1 {
   font-size: 0.85rem;
   resize: none;
   min-height: 100px;
-  background: var(--primary-light);
-  color: var(--primary-dark);
-  border: none;
-  box-shadow: var(--default-shadow);
+  background: white;
+  color: #000000;
 }
 
-/* ===================== FLOW SECTIONS ===================== */
+.secondary-btn,
+.scan-btn,
+.copy-btn,
+.start-btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+}
 
+.manual-input textarea:focus {
+  outline: none;
+  border-color: #000000;
+}
+
+.connection-details {
+  margin: 30px 0;
+  padding: 25px;
+  background: #f8f9fa;
+  border-radius: 15px;
+  display: none;
+}
+
+/* LifeStories Onboarding Styles */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.onboarding-container {
+  padding: 100px 40px 40px 40px;
+  max-width: 1200px;
+  width: 90%;
+  text-align: center;
+  position: relative;
+  min-height: 100vh;
+}
+
+header {
+  position: fixed;
+  top: 30px;
+  left: 30px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  z-index: 100;
+}
+
+header img {
+  width: 40px;
+  height: 40px;
+}
+
+header h1 {
+  font-size: 1.5rem;
+  margin: 0;
+  color: #333;
+}
+
+.header h1 {
+  font-size: 2.5rem;
+  margin-bottom: 10px;
+}
+
+.header p {
+  color: #666;
+  font-size: 1.1rem;
+  margin-bottom: 30px;
+}
+
+.connection-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin: 20px 0;
+  padding: 12px 20px;
+  border-radius: 10px;
+  position: fixed;
+  top: 30px;
+  right: 30px;
+  z-index: 100;
+}
+
+.status {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-right: 0;
+}
+
+.status.offline {
+  background: #dc3545;
+}
+.status.connecting {
+  background: #ffc107;
+  animation: pulse 1s infinite;
+}
+.status.connected {
+  background: #28a745;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* Role Selection */
+.role-selection {
+  padding: 20px 0;
+  margin-top: 100px;
+}
+
+.role-selection h2 {
+  font-size: 2.2rem;
+  margin-bottom: 15px;
+  color: #495057;
+}
+
+.role-selection p {
+  font-size: 1.2rem;
+  color: #666;
+  margin-bottom: 40px;
+}
+
+.role-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 50px;
+  margin: 30px auto;
+  max-width: 700px;
+  align-items: stretch;
+  justify-items: center;
+}
+
+.role-card {
+  border-radius: 15px;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.role-icon {
+  width: 100%;
+  max-width: 280px;
+  height: auto;
+  margin-bottom: 8px;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+.role-card h3 {
+  margin-bottom: 15px;
+  font-size: 1.5rem;
+}
+
+.role-btn span {
+  font-size: 1.1rem;
+  color: #495057;
+  font-weight: 500;
+  margin-top: 4px;
+}
+
+/* Interviewer Flow (Host) & Interviewee Flow (Guest) */
 .interviewer-flow,
 .interviewee-flow {
   animation: fadeIn 0.5s ease;
@@ -242,7 +233,7 @@ header h1 {
 .scan-offer h3,
 .answer-display h3 {
   margin-bottom: 15px;
-  color: var(--primary-dark);
+  color: #495057;
   font-size: 1.5rem;
 }
 
@@ -250,18 +241,22 @@ header h1 {
 .wait-response p,
 .scan-offer p,
 .answer-display p {
-  color: var(--primary-dark);
+  color: #6c757d;
   margin-bottom: 20px;
   font-size: 1rem;
 }
 
+.code-badge.hidden {
+  display: none;
+}
+
+/* Wait response - highlighted when active */
 .wait-response {
   border-radius: 15px;
   padding: 25px;
 }
 
-/* ===================== QR CODE SECTION ===================== */
-
+/* QR Section - both for offer and answer */
 .qr-section {
   display: flex;
   flex-direction: column;
@@ -277,20 +272,124 @@ header h1 {
   margin: 10px auto;
   border-radius: 10px;
   padding: 15px;
-  background: var(--primary-light);
+  background: white;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
   display: block;
 }
 
-/* ===================== SCAN FRAMES ===================== */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 
+.interviewee-btn,
+.interviewer-btn,
+.interviewee-btn,
+.interviewer-btn {
+  background: transparent;
+  color: black;
+  padding: 14px 32px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1.15rem;
+  width: 100%;
+  max-width: 350px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.interviewee-btn img,
+.interviewee-btn img,
+.interviewer-btn img {
+  width: 100%;
+  max-width: 280px;
+  height: auto;
+}
+
+.interviewee-btn span,
+.interviewer-btn span {
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+
+.continue-btn {
+  background: var(--primary-dark);
+  color: var(--primary-beige);
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  border-radius: 2rem;
+  /* font-weight: 600; */
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+}
+
+.interviewee-btn:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px #fee7b76e;
+}
+
+.interviewer-btn:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px #b7e9ff5a;
+}
+.continue-btn:hover {
+  transform: translateY(-5px);
+  background-color: #333;
+}
+
+.interviewer-btn.selected {
+  background-color: #b7e9ff5a;
+}
+
+.interviewee-btn.selected {
+  background-color: #fee7b76e;
+}
+
+.scan-btn {
+  background: #ff6f61;
+  color: white;
+  width: 100%;
+}
+
+/* Camera-like frame for the interviewer scan button */
+#scanResponseBtn {
+  width: 240px;
+  height: 240px;
+  background: white;
+  color: black;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.05rem;
+  margin: 20px auto; /* center horizontally */
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+}
+
+#scanResponseBtn:hover {
+  transform: translateY(-4px);
+}
+
+/* Scan frame */
 .scan-area {
   display: flex;
   justify-content: center;
   align-items: center;
   margin: 20px 0 10px 0;
 }
-
 .scan-frame,
 .scan-frame-interviewee {
   position: relative;
@@ -299,12 +398,13 @@ header h1 {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--primary-light);
+  background: #fff; /* white inner square */
   border-radius: 8px;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
   overflow: hidden;
 }
 
+/* Bouton de scan dans les deux frames */
 .scan-frame .scan-btn,
 .scan-frame-interviewee .scan-btn {
   width: 100%;
@@ -320,39 +420,94 @@ header h1 {
   justify-content: center;
 }
 
-/* ===================== CONNECTION DETAILS ===================== */
+/* Pas d'effet hover */
+.scan-frame .scan-btn:hover,
+.scan-frame-interviewee .scan-btn:hover {
+  transform: none;
+}
 
-.connection-details {
-  margin: 30px 0;
-  padding: 25px;
-  background: var(--primary-grey);
-  border-radius: 15px;
-  display: none;
+/* IMPORTANT : si un flow est caché, ses frames le sont aussi */
+.interviewer-flow.hidden .scan-frame,
+.interviewee-flow.hidden .scan-frame-interviewee {
+  display: none !important;
+}
+.secondary-btn {
+  background: #000000;
+  color: white;
+  width: 100%;
+}
+
+.secondary-btn:hover:not(:disabled) {
+  background: #000000;
+}
+
+.secondary-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .connection-details.show {
   display: block;
 }
 
-/* ===================== STATUS MESSAGES ===================== */
-
 .status-message {
+  margin: 20px 0;
+  padding: 15px;
+  border-radius: 10px;
   font-weight: 500;
 }
 
 .status-message.success {
-  color: var(--label-green);
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
 }
 
 .status-message.error {
-  color: var(--label-red);
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
 }
 
 .status-message.info {
-  color: var(--label-blue);
+  background: #cce7ff;
+  color: #004085;
+  border: 1px solid #b3d7ff;
 }
 
-/* ===================== ACTIONS ===================== */
+/* .progress-bar {
+  width: 100%;
+  height: 8px;
+  background: #e9ecef;
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 15px 0;
+  display: none;
+}
+
+.progress-bar.show {
+  display: block;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(45deg, #667eea, #764ba2);
+  width: 0%;
+  transition: width 0.3s ease;
+  animation: progress-animation 2s ease-in-out infinite;
+} */
+
+@keyframes progress-animation {
+  0% {
+    width: 0%;
+  }
+  50% {
+    width: 70%;
+  }
+  100% {
+    width: 100%;
+  }
+}
 
 .actions {
   margin: 30px 0;
@@ -366,16 +521,42 @@ header h1 {
 }
 
 .actions h3 {
-  color: var(--primary-dark);
+  color: #000000;
   margin-bottom: 10px;
 }
 
 .actions p {
-  color: var(--primary-dark);
+  color: #000000;
   margin-bottom: 20px;
 }
 
-/* ===================== WEBRTC STATUS INDICATOR ===================== */
+/* Auto-start indicator */
+.auto-start-indicator {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 20px 0;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* ========================================
+   INDICATEUR DE SYNCHRONISATION WEBRTC
+   ======================================== */
 
 #webrtc-status {
   position: fixed;
@@ -392,30 +573,39 @@ header h1 {
 }
 
 #webrtc-status.connected {
-  background-color: var(--label-green);
-  color: var(--primary-light);
+  background-color: #28a745;
+  color: white;
 }
 
 #webrtc-status.disconnected {
-  background-color: var(--label-red);
-  color: var(--primary-light);
+  background-color: #dc3545;
+  color: white;
 }
 
 #webrtc-status.standalone {
-  background-color: var(--secondary-grey);
-  color: var(--primary-light);
+  background-color: #6c757d;
+  color: white;
 }
 
 #webrtc-status .dot {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background-color: var(--primary-light);
+  background-color: white;
   animation: pulse 2s ease-in-out infinite;
 }
 
-/* ===================== RECONNECT OVERLAY ===================== */
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
 
+/* Reconnect container - Overlay */
 #reconnect-container {
   position: fixed;
   top: 0;
@@ -429,43 +619,24 @@ header h1 {
   animation: fadeIn 0.3s ease-in-out;
 }
 
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 #reconnect-container.hidden {
   display: none;
 }
 
+/* Carte de reconnexion */
 #reconnect-container > div {
   text-align: center;
   max-width: 450px;
   animation: slideUp 0.3s ease-out;
-}
-
-#reconnect-container img {
-  width: 250px;
-  height: auto;
-  margin-bottom: 30px;
-  opacity: 0.9;
-}
-
-#reconnect-container span {
-  display: block;
-  font-size: 14px;
-  color: var(--primary-dark);
-  margin-bottom: 30px;
-  line-height: 1.4;
-  font-weight: 400;
-}
-
-/* ===================== ANIMATIONS ===================== */
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 
 @keyframes slideUp {
@@ -479,139 +650,25 @@ header h1 {
   }
 }
 
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
+#reconnect-container img {
+  width: 250px;
+  height: auto;
+  margin-bottom: 30px;
+  opacity: 0.9;
 }
 
-/* ===================== UTILITY CLASSES ===================== */
-
-.hidden {
-  display: none !important;
-}
-
-.visible {
-  display: block !important;
-}
-
-.code-badge.hidden {
-  display: none;
-}
-
-/* Hide manual inputs when needed */
-.hide-manual-inputs .manual-input,
-.hide-manual-inputs #connectionCode,
-.hide-manual-inputs #answerCode,
-.hide-manual-inputs #copyBtn,
-.hide-manual-inputs #btn1,
-.hide-manual-inputs #copyAnswerBtn {
-  display: none !important;
-}
-
-/* Hide scan frames when flow is hidden */
-.interviewer-flow.hidden .scan-frame,
-.interviewee-flow.hidden .scan-frame-interviewee {
-  display: none !important;
-}
-
-/* Confirm button positioning */
-#confirm-button {
-  position: absolute;
-  bottom: 40px;
-  right: 20px;
-  display: none;
-}
-
-#confirm-button.visible {
+#reconnect-container span {
   display: block;
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 30px;
+  line-height: 1.4;
+  font-weight: 400;
 }
 
-/* ===================== RESPONSIVE DESIGN ===================== */
-
-/* Tablet (landscape: 1024x768, portrait: 768x1024) */
-@media (min-width: 769px) and (max-width: 1200px) {
-  .onboarding-container {
-    max-width: 90%;
-    padding: 100px 30px 30px 30px;
-  }
-
-  .role-cards {
-    grid-template-columns: 1fr 1fr !important;
-    gap: 40px;
-    margin: 40px auto;
-    max-width: 700px;
-  }
-
-  .role-icon {
-    max-width: 240px;
-  }
-
-  header img {
-    width: 70px;
-    height: 70px;
-  }
-
-  header h1 {
-    font-size: 2rem;
-  }
-
-  .qr-section {
-    max-width: 600px;
-    margin: 20px auto;
-  }
-
-  #qrCanvas,
-  #qrCanvasAnswer {
-    max-width: 300px;
-  }
-
-  .scan-frame {
-    width: 280px;
-    height: 280px;
-  }
-
-  #scanResponseBtn {
-    width: 260px;
-    height: 260px;
-  }
-}
-
-/* Tablet portrait mode */
-@media (max-width: 900px) and (orientation: portrait) {
-  .role-cards {
-    grid-template-columns: 1fr;
-    max-width: 500px;
-    margin: 30px auto;
-  }
-
-  .role-icon {
-    max-width: 300px;
-  }
-}
-
-/* Touch device improvements */
-@media (hover: none) and (pointer: coarse) {
-  button,
-  .continue-btn,
-  .scan-btn,
-  .copy-btn,
-  .secondary-btn {
-    min-height: 48px;
-    padding: 14px 28px;
-    font-size: 1.1rem;
-  }
-
-  .role-card {
-    padding: 20px;
-  }
-}
-
-/* Mobile devices */
+/* Responsive design */
 @media (max-width: 768px) {
+  .connection-modes,
   .role-cards {
     grid-template-columns: 1fr;
     gap: 20px;
@@ -662,7 +719,140 @@ header h1 {
   }
 }
 
-/* Small mobile devices */
+/* Tablette 11" (landscape: 1024x768, portrait: 768x1024) */
+@media (min-width: 769px) and (max-width: 1200px) {
+  .onboarding-container {
+    max-width: 90%;
+    padding: 100px 30px 30px 30px;
+  }
+
+  .role-cards {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 40px;
+    margin: 40px auto;
+    max-width: 700px;
+  }
+
+  .role-icon {
+    max-width: 240px;
+  }
+
+  header img {
+    width: 70px;
+    height: 70px;
+  }
+
+  header h1 {
+    font-size: 2rem;
+  }
+
+  .qr-section {
+    max-width: 600px;
+    margin: 20px auto;
+  }
+
+  #qrCanvas,
+  #qrCanvasAnswer {
+    max-width: 300px;
+  }
+
+  .scan-frame {
+    width: 280px;
+    height: 280px;
+  }
+
+  #scanResponseBtn {
+    width: 260px;
+    height: 260px;
+  }
+}
+
+/* Tablette en mode portrait */
+@media (max-width: 900px) and (orientation: portrait) {
+  .role-cards {
+    grid-template-columns: 1fr;
+    max-width: 500px;
+    margin: 30px auto;
+  }
+
+  .role-icon {
+    max-width: 300px;
+  }
+
+  .connection-modes {
+    grid-template-columns: 1fr;
+    max-width: 500px;
+    margin: 20px auto;
+  }
+}
+
+/* Amélioration tactile pour toutes les tablettes */
+@media (hover: none) and (pointer: coarse) {
+  button,
+  .role-btn,
+  .continue-btn {
+    min-height: 48px;
+    padding: 14px 28px;
+    font-size: 1.1rem;
+  }
+
+  .role-card {
+    padding: 20px;
+  }
+
+  /* Augmenter les zones tactiles */
+  .scan-btn,
+  .copy-btn,
+  .secondary-btn {
+    min-height: 48px;
+    font-size: 1.05rem;
+  }
+}
+
+/* ============================================
+   UTILITY CLASSES - Visibility Management
+   ============================================ */
+
+/* Hidden elements - initially invisible */
+.hidden {
+  display: none !important;
+}
+
+/* Show elements dynamically */
+.visible {
+  display: block !important;
+}
+
+/* Specific onboarding sections visibility */
+#connectionDetails.hidden,
+#responseSection.hidden,
+#progressBar.hidden,
+#connectedActions.hidden {
+  display: none;
+}
+
+#connectionDetails.visible,
+#connectedActions.visible {
+  display: block;
+}
+
+#responseSection.visible,
+#progressBar.visible {
+  display: flex;
+}
+
+#confirm-button {
+  position: absolute;
+  bottom: 40px;
+  right: 20px;
+  display: none; /* Caché par défaut */
+}
+
+#confirm-button.visible {
+  display: block; /* Affiche le bouton lorsqu'il est visible */
+}
+
+/* Responsive - Mobile */
 @media (max-width: 600px) {
   .onboarding-container {
     padding: 16px 4px 4px 4px;
@@ -671,7 +861,6 @@ header h1 {
     width: 100vw;
     font-size: 1em;
   }
-
   header {
     position: static;
     display: flex;
@@ -681,34 +870,76 @@ header h1 {
     gap: 8px;
     margin-bottom: 12px;
   }
-
   header img {
     width: 32px;
     height: 32px;
   }
-
   header h1 {
     font-size: 1.1em;
   }
-
   .role-selection h2 {
     font-size: 1.2em;
     margin-bottom: 10px;
   }
-
   .role-cards {
     flex-direction: column;
     gap: 12px;
   }
-
   .role-card {
     width: 100%;
     margin-bottom: 8px;
   }
-
   .interviewer-btn,
   .interviewee-btn {
     font-size: 1em;
     padding: 10px 18px;
   }
 }
+
+#confirm-button.visible {
+  display: block; /* Affiche le bouton lorsqu'il est visible */
+}
+
+/* Responsive - Mobile */
+@media (max-width: 600px) {
+  .onboarding-container {
+    padding: 16px 4px 4px 4px;
+    max-width: 100vw;
+    min-height: 100vh;
+    width: 100vw;
+    font-size: 1em;
+  }
+  header {
+    position: static;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  header img {
+    width: 32px;
+    height: 32px;
+  }
+  header h1 {
+    font-size: 1.1em;
+  }
+  .role-selection h2 {
+    font-size: 1.2em;
+    margin-bottom: 10px;
+  }
+  .role-cards {
+    flex-direction: column;
+    gap: 12px;
+  }
+  .role-card {
+    width: 100%;
+    margin-bottom: 8px;
+  }
+  .interviewer-btn,
+  .interviewee-btn {
+    font-size: 1em;
+    padding: 10px 18px;
+  }
+} 
