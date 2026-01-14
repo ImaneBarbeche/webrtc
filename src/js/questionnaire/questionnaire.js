@@ -154,27 +154,27 @@ document.addEventListener("DOMContentLoaded", async () => {
     const overlapBadge = gapBtn.querySelector(".overlap-badge");
     if (gapBadge) {
       gapBadge.textContent = String(n);
-      if (n > 0 && gapBadge.animate) {
-        try {
-          gapBadge.animate(
-            [{ transform: "scale(1.15)" }, { transform: "scale(1)" }],
-            { duration: 220, easing: "ease-out" }
-          );
-        } catch (e) {
-          // animation not supported — ignore
-        }
-      }
+      // if (n > 0 && gapBadge.animate) {
+      //   try {
+      //     gapBadge.animate(
+      //       [{ transform: "scale(1.15)" }, { transform: "scale(1)" }],
+      //       { duration: 220, easing: "ease-out" }
+      //     );
+      //   } catch (e) {
+      //     // animation not supported — ignore
+      //   }
+      // }
     }
     if (overlapBadge) {
       overlapBadge.textContent = String(m);
-      if (m > 0 && overlapBadge.animate) {
-        try {
-          overlapBadge.animate(
-            [{ transform: "scale(1.15)" }, { transform: "scale(1)" }],
-            { duration: 220, easing: "ease-out" }
-          );
-        } catch (e) {}
-      }
+      // if (m > 0 && overlapBadge.animate) {
+      //   try {
+      //     overlapBadge.animate(
+      //       [{ transform: "scale(1.15)" }, { transform: "scale(1)" }],
+      //       { duration: 220, easing: "ease-out" }
+      //     );
+      //   } catch (e) {}
+      // }
     }
     const label = `Périodes manquantes : ${n} — Chevauchements : ${m}`;
     gapBtn.setAttribute("aria-label", label);

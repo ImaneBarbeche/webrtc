@@ -98,8 +98,8 @@ function createOverlapMarker(groupId, start, end, item1Id, item2Id) {
     _isOverlapMarker: true,
     _overlappingItems: [item1Id, item2Id],
     _originalGroup: groupId,
-    content: "Overlap detected between two episodes.",
-    title: `Inconsistency: overlap between episodes from ${formatDate(start)} to ${formatDate(end)}`
+    content: "Chevauchement detecté entre " +
+             `${formatDate(start)} et ${formatDate(end)}`,
   };
 
   _items.add(overlapItem);
@@ -125,9 +125,9 @@ function notifyNewOverlap(overlapItem) {
     toast: true,
     position: "top-start",
     icon: "error",
-    title: "Overlap detected",
-    html: `<b>For ${groupName}: ${startYear} → ${endYear}</b><br>
-         <span>Please notify the respondent of an overlap.</span>`,
+    title: "Chevauchement detecté",
+    html: `<b>Pour ${groupName}: ${startYear} → ${endYear}</b><br>
+         <span>Veuillez notifier l'enquêté d'un chevauchement.</span>`,
     showConfirmButton: false,
     timer: 7000,
     timerProgressBar: true,

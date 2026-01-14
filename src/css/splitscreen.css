@@ -33,11 +33,11 @@
 }
 
 /* component style */
-#questionnaire,
+/* #questionnaire,
 #canvas,
 #bricks {
   overflow-y: auto;
-}
+} */
 
 .hidden {
   display: none;
@@ -471,6 +471,13 @@
   }
 }
 
+.vis-background.timeline-gap .vis-item-overflow, 
+.vis-item.vis-background.overlap-warning .vis-item-overflow {
+  &::before {
+    background-image: unset;
+  }
+}
+
 /* adding a fade effect for overflowing text */
 .vis-item-overflow {
   position: relative;
@@ -583,6 +590,11 @@
     rgba(220, 53, 69, 0.35) 10px,
     rgba(220, 53, 69, 0.35) 20px
   );
+}
+
+/* Cacher le texte du content (utilisé ailleurs dans la synthèse) */
+.vis-item.vis-background.overlap-warning .vis-item-content {
+  display: none;
 }
 
 .birth-year-btn {

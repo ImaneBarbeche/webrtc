@@ -64,6 +64,7 @@
 #questionnaire button i[data-lucide],
 #questionnaire button svg {
   width: 1rem;
+  height: 1rem;
   aspect-ratio: 1 / 1;
   display: inline-block;
   vertical-align: middle;
@@ -286,9 +287,8 @@
 /* number */
 #gap-counter-btn .gap-badge {
   position: absolute;
-  top: 4px;
+  top: -0.7rem;
   right: -8px;
-  transform: translateY(-50%);
   background: linear-gradient(180deg, #ffca28 0%, #ff9800 100%);
   color: #111;
   border-radius: 999px;
@@ -305,9 +305,8 @@
 /* Red badge for overlaps */
 #gap-counter-btn .overlap-badge {
   position: absolute;
-  top: 4px;
+  top: -0.7rem;
   right: 28px; /* more separated from gap badge */
-  transform: translateY(-50%);
   background: linear-gradient(180deg, #ff6b6b 0%, #d32f2f 100%);
   color: #fff;
   border-radius: 999px;

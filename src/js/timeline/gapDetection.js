@@ -65,7 +65,7 @@ export function createGapItems(gaps) {
       type: "background",
       className: "timeline-gap",
       group: gap.group,
-      content: "No data for this period (missing period).",
+      content: "Pas de données pour cette période.",
     };
   });
 }
@@ -146,9 +146,9 @@ function notifyNewGap(gap, groups) {
     toast: true,
     position: "top-end",
     icon: "warning",
-    title: "Missing period",
-    html: `<b>For ${groupName}: ${startYear} → ${endYear}</b><br>
-         <span>Please fill in this period for better data accuracy.</span>`,
+    title: "Période manquante",
+    html: `<b>Pour ${groupName}: ${startYear} → ${endYear}</b><br>
+         <span>Veuillez clarifier les informations pour cette période.</span>`,
     showConfirmButton: false,
     timer: 7000,
     timerProgressBar: true,
