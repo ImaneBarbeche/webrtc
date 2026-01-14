@@ -2,12 +2,6 @@
    LAYOUT PRINCIPAL - SECTIONS
    ======================================== */
 
-/* Container onboarding (écran de connexion WebRTC) */
-.onboarding-container {
-  position: relative;
-  z-index: 1000;
-}
-
 /* Masquer l'onboarding quand on passe à LifeStories */
 .onboarding-container.hidden {
   display: none !important;
