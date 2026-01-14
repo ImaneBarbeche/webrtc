@@ -30,14 +30,24 @@
 .gutter.gutter-vertical {
   background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAFAQMAAABo7865AAAABlBMVEVHcEzMzMzyAv2sAAAAAXRSTlMAQObYZgAAABBJREFUeF5jOAMEEAIEEFwAn3kMwcB6I2AAAAAASUVORK5CYII=");
   cursor: row-resize;
-}
+} 
 
 /* component style */
+
 /* #questionnaire,
 #canvas,
 #bricks {
   overflow-y: auto;
 } */
+
+#questionnaire {
+  overflow-y: auto;
+  padding-right: 0.5rem;
+  padding-bottom: 0.5rem;
+  scrollbar-width: thin;
+  scrollbar-color: var(--secondary-grey) transparent;
+  /* max-width: 20rem; */
+}
 
 .hidden {
   display: none;

@@ -90,7 +90,9 @@ button:hover {
       padding: 0.7rem;
     }
   }
-
+  &:active {
+    filter: brightness(0.9);
+  }
   /* TODO: create a proper primary button component */
   &.primary {
     background-color: var(--primary-dark);
@@ -190,6 +192,7 @@ button:hover {
 
   #toggle-dev-btn {
     cursor: pointer;
+    backdrop-filter: blur(1rem);
   }
   button {
     opacity: 0;
