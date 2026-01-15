@@ -1,7 +1,8 @@
 .sidebar {
-  position: fixed;
+  /* position: fixed;
   left: 20px;
-  top: 20px;
+  top: 20px; */
+  margin-left: 1.5rem;
   height: calc(100vh - 40px);
   background: white;
   color: black;
@@ -10,7 +11,7 @@
   display: flex;
   flex-direction: column;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
-  overflow-x: hidden; 
+  overflow-x: hidden;
 }
 
 .sidebar.open {
@@ -43,7 +44,13 @@
 .sidebar-divider {
   width: 100%;
   height: 1px;
-  background: linear-gradient(to right, transparent, #ddd 20%, #ddd 80%, transparent);
+  background: linear-gradient(
+    to right,
+    transparent,
+    #ddd 20%,
+    #ddd 80%,
+    transparent
+  );
   margin: 0;
 }
 
@@ -152,12 +159,14 @@
 /* Ajuster le contenu principal pour laisser de l'espace pour la sidebar flottante */
 /* Appliquer la marge seulement en mode enquêteur */
 body.interviewer-mode.sidebar-closed .lifestories-container {
-  margin-left: 120px; /* 80px sidebar fermée + 40px espace */
+  /* margin-left: 120px;  */
+  /* 80px sidebar fermée + 40px espace */
   transition: margin-left 0.3s ease;
 }
 
 body.interviewer-mode.sidebar-open .lifestories-container {
-  margin-left: 290px; /* 250px sidebar + 40px espace */
+  /* margin-left: 290px;  */
+  /* 250px sidebar + 40px espace */
   transition: margin-left 0.3s ease;
 }
 

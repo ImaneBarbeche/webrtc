@@ -50,33 +50,6 @@
   pointer-events: none; /* N'interfère pas avec les clics */
 }
 
-/* Positionnement des formes SVG */
-/* .shape {
-  position: absolute;
-  opacity: 0.9;
-}
-
-.shape-green {
-  top: 200px;
-  right: -10px;
-  width: 80px;
-  height: auto;
-}
-
-.shape-blue {
-  bottom: -65px;
-  left: 0px;
-  width: 180px;
-  height: auto;
-}
-
-.shape-yellow {
-  bottom: 0px;
-  left: 10px;
-  width: 200px;
-  height: auto;
-} */
-
 /* Section droite - 50% */
 .homepage-right {
   flex: 1;

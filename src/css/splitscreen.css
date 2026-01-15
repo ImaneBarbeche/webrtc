@@ -30,7 +30,7 @@
 .gutter.gutter-vertical {
   background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAFAQMAAABo7865AAAABlBMVEVHcEzMzMzyAv2sAAAAAXRSTlMAQObYZgAAABBJREFUeF5jOAMEEAIEEFwAn3kMwcB6I2AAAAAASUVORK5CYII=");
   cursor: row-resize;
-} 
+}
 
 /* component style */
 
@@ -41,6 +41,9 @@
 } */
 
 #questionnaire {
+  display: flex;
+  flex-direction: column;
+  max-height: 100%;
   overflow-y: auto;
   padding-right: 0.5rem;
   padding-bottom: 0.5rem;
@@ -481,7 +484,7 @@
   }
 }
 
-.vis-background.timeline-gap .vis-item-overflow, 
+.vis-background.timeline-gap .vis-item-overflow,
 .vis-item.vis-background.overlap-warning .vis-item-overflow {
   &::before {
     background-image: unset;
@@ -564,7 +567,7 @@
 }
 
 .questionnaire-footer {
-  margin-top: 12px;
+  margin-top: auto;
   display: flex;
   gap: 8px;
   align-items: center;

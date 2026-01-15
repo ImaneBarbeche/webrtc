@@ -45,7 +45,7 @@
         id="toggle-dev-btn"
         tabindex="0"
         role="button"
-        class="secondary-button"
+        class="secondary-button button-with-icon"
       >
         <i data-lucide="ellipsis"></i>
       </div>
@@ -68,7 +68,7 @@
       </button>
     </div>
     <div id="homepage-root"></div>
-    <div id="dashboard-root" style="display: none"></div>
+    <!-- <div id="dashboard-root" style="display: none"></div> -->
     <div class="onboarding-container" style="display: none">
       <header>
         <img src="./assets/imgs/logo.png" alt="Logo LifeStories" />
@@ -220,6 +220,8 @@
 
     <!-- Section LifeStories (cachée au démarrage) -->
     <div class="lifestories-container" id="lifestoriesContainer">
+      <div id="dashboard-root" style="display: none"></div>
+
       <!-- Indicateur de statut WebRTC -->
       <div id="webrtc-status-root"></div>
 
@@ -249,7 +251,7 @@
           <!-- Footer actions: kept at the end of the questionnaire -->
           <div class="questionnaire-footer">
             <div id="questionnaire-actions">
-              <button id="export" class="secondary-button" title="Exporter">
+              <button id="export" class="secondary-button button-with-icon" title="Exporter">
                 <i data-lucide="upload"></i>
               </button>
             </div>

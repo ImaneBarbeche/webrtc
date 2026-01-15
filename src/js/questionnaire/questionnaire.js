@@ -35,7 +35,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const gapBtn = document.createElement("button");
   gapBtn.id = "gap-counter-btn";
-  gapBtn.className = "primary-button";
+  gapBtn.className = "secondary-button button-with-icon";
   const initialGapCount = getGapCount();
   const initialOverlapCount =
     typeof getOverlaps === "function" ? getOverlaps().length : 0;
