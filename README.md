@@ -2,7 +2,7 @@
 
 A hybrid mobile application for collecting life history data with real-time synchronization between interviewer and interviewee using WebRTC.
 
-![App Overview](webrtc/src/assets/imgs/readme-screen-cap.png)
+[App Overview](../src/assets/imgs/readme-screen-cap.png | width=400)
 
 ## Installation and Setup
 
