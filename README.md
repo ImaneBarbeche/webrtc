@@ -186,9 +186,11 @@ Interviewees can only view the timeline. All timeline editing functionality is d
 
  ### Figma Designs
 
-- **[Final Design](https://www.figma.com/design/dMe4ZYdj6tKyLolA9hcaxL/LifeStories?m=auto&t=3o3vvwr3PZr7xfjH-1) ** - Production-ready UI and components
+- **[Final Design](https://www.figma.com/design/dMe4ZYdj6tKyLolA9hcaxL/LifeStories?m=auto&t=3o3vvwr3PZr7xfjH-1)** - Production-ready UI and components
 - **[Brainstorming](https://www.figma.com/board/v9qDByOj3HOAcwidoQvg82/LifeStories---Final?t=3o3vvwr3PZr7xfjH-1)** - Initial concepts and ideas
 - **[Brainstorming & Process](https://www.figma.com/board/ZBvi9S5uDuBLEaXsL6mnD6/LifeStories?node-id=0-1&t=3o3vvwr3PZr7xfjH-1)** - Design iterations and process documentation
+
+---
 
 - **[Database Schema (DBDiagram)](https://dbdiagram.io/d/LifeStories-updated-690a046a6735e111702ffddc)** - Data model and relationships
 - **[Tasks & Roadmap (Whimsical)](https://whimsical.com/tasks-34iLabHiqveUoGJ3t1k46R)** - Development tasks and timeline
