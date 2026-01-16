@@ -3,10 +3,10 @@ import React from "react";
 export default function HomePage({ onStart }) {
   return (
     <div className="homepage-container" style={{ position: "relative" }}>
-      {/* Section gauche - Fenêtre avec SVG */}
       <div className="homepage-left">
         <div className="svg-window">
-          <img
+          {/* Visual idea */}
+          {/* <img
             src="assets/imgs/welcomegreenwave.svg"
             alt="Shape 1"
             className="shape shape-green"
@@ -20,11 +20,10 @@ export default function HomePage({ onStart }) {
             src="assets/imgs/welcomeyellowwave.svg"
             alt="Shape 3"
             className="shape shape-yellow"
-          />
+          /> */}
         </div>
       </div>
 
-      {/* Section droite - Texte et bouton */}
       <div className="homepage-right">
         <h1 className="homepage-title">
           Partagez.

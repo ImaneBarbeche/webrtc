@@ -1,7 +1,4 @@
 .sidebar {
-  /* position: fixed;
-  left: 20px;
-  top: 20px; */
   margin-left: 1.5rem;
   height: calc(100vh - 40px);
   background: white;
@@ -16,12 +13,12 @@
 
 .sidebar.open {
   width: 250px;
-  border-radius: 30px; /* Arrondi prononcé quand ouverte */
+  border-radius: 30px;
 }
 
 .sidebar.closed {
   width: 80px;
-  border-radius: 30px; /* Forme arrondie/pilule quand fermée */
+  border-radius: 30px;
 }
 
 .sidebar-header {
@@ -84,7 +81,6 @@
   transition: transform 0.3s ease;
 }
 
-/* Rotation de l'icône quand la sidebar est fermée */
 .sidebar.closed .toggle-icon-svg {
   transform: rotate(180deg);
 }
@@ -132,7 +128,6 @@
   flex: 1;
 }
 
-/* Quand la sidebar est fermée */
 .sidebar.closed .nav-button {
   padding: 12px;
   justify-content: center;
@@ -156,17 +151,11 @@
   background: #eabca5;
 }
 
-/* Ajuster le contenu principal pour laisser de l'espace pour la sidebar flottante */
-/* Appliquer la marge seulement en mode enquêteur */
 body.interviewer-mode.sidebar-closed .lifestories-container {
-  /* margin-left: 120px;  */
-  /* 80px sidebar fermée + 40px espace */
   transition: margin-left 0.3s ease;
 }
 
 body.interviewer-mode.sidebar-open .lifestories-container {
-  /* margin-left: 290px;  */
-  /* 250px sidebar + 40px espace */
   transition: margin-left 0.3s ease;
 }
 

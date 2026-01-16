@@ -4,16 +4,16 @@ import Sidebar from "./Sidebar.jsx";
 
 let root = null;
 
-// Fonction pour initialiser la sidebar
+// Function to initialize the sidebar
 function initializeSidebar() {
-  // Vérifier si c'est l'enquêteur (host)
+  // Check if user is the interviewer (host)
   const isInterviewer = sessionStorage.getItem("webrtc_isOfferor") === "true";
 
   if (!isInterviewer) {
-    return; // Ne rien faire si ce n'est pas l'enquêteur
+    return;
   }
 
-  // Créer le conteneur si nécessaire
+  // Create container if necessary
   let container = document.getElementById("sidebar-root");
   // using the first element of the page to insert
   let firstElement = document.querySelector(".dev-speed-dial");
@@ -24,12 +24,12 @@ function initializeSidebar() {
     document.body.insertBefore(container, firstElement);
   }
 
-  // Monter le composant React
+  // Mount the React component
   if (!root) {
     root = createRoot(container);
     root.render(<Sidebar />);
   }
 }
 
-// Écouter l'événement qui indique que l'app est affichée
+// Listen for the event indicating the app is displayed
 document.addEventListener("lifestoriesShown", initializeSidebar);

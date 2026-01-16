@@ -111,7 +111,6 @@ button:hover {
     padding: 1rem;
     border-radius: 2rem;
     box-shadow: 0 0.25rem 0.625rem var(--secondary-grey);
-    /* border: 0.1rem dashed var(--primary-dark); */
   }
 }
 

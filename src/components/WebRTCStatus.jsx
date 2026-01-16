@@ -1,8 +1,7 @@
 import React from "react";
 
+// Handles the status badge after the onboarding phase is complete
 export default function WebRTCStatus({ role, status }) {
-  // ← Reçoit role et status en props
-
   const roleConfig = {
     offeror: "Enquêteur",
     answerer: "Enquêté",

@@ -1,12 +1,12 @@
 /* ========================================
-   LAYOUT PRINCIPAL - SECTIONS
+   MAIN LAYOUT - SECTIONS
    ======================================== */
-/* Container onboarding (écran de connexion WebRTC) */
+/* Onboarding container (WebRTC connection screen) */
 .onboarding-container {
   position: relative;
   z-index: 1000;
 }
-/* Masquer l'onboarding quand on passe à LifeStories */
+/* Hide onboarding when switching to LifeStories */
 .onboarding-container.hidden {
   display: none !important;
   visibility: hidden !important;
@@ -14,7 +14,7 @@
   pointer-events: none !important;
 }
 
-/* Container LifeStories (questionnaire + calendrier) */
+/* LifeStories container (questionnaire + calendar) */
 .lifestories-container {
   /* display: none;  */
   position: relative;
@@ -22,26 +22,26 @@
   height: 100vh;
 }
 
-/* Afficher LifeStories quand actif */
+/* Display LifeStories when active */
 .lifestories-container.active {
   display: block;
 }
 
 /* ========================================
-   MODE VIEWER - Affichage différencié
+   VIEWER MODE - Differentiated display
    ======================================== */
 
-/* Mode viewer : masquer le questionnaire */
+/* Viewer mode: hide questionnaire */
 .viewer-mode #questionnaire {
   display: none !important;
 }
 
-/* Ajuster la timeline en plein écran */
+/* Adjust timeline fullscreen */
 .viewer-mode #trajectories {
   width: 100% !important;
 }
 
-/* Masquer le séparateur Split.js en mode viewer */
+/* Hide Split.js separator in viewer mode */
 .viewer-mode .gutter {
   display: none !important;
 }

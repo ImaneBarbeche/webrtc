@@ -69,13 +69,13 @@
   display: none;
 }
 
-/* LifeStories Onboarding Styles */
-
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
+
+/* LifeStories Onboarding Styles */
 
 .onboarding-container {
   padding: 100px 40px 40px 40px;
@@ -311,7 +311,6 @@ header h1 {
   padding: 12px 24px;
   border: none;
   border-radius: 2rem;
-  /* font-weight: 600; */
   cursor: pointer;
   transition: all 0.3s ease;
   font-size: 1rem;
@@ -384,7 +383,7 @@ header h1 {
   overflow: hidden;
 }
 
-/* Bouton de scan dans les deux frames */
+/* Scan button in both frames */
 .scan-frame .scan-btn,
 .scan-frame-interviewee .scan-btn {
   width: 100%;
@@ -400,13 +399,11 @@ header h1 {
   justify-content: center;
 }
 
-/* Pas d'effet hover */
 .scan-frame .scan-btn:hover,
 .scan-frame-interviewee .scan-btn:hover {
   transform: none;
 }
 
-/* IMPORTANT : si un flow est caché, ses frames le sont aussi */
 .interviewer-flow.hidden .scan-frame,
 .interviewee-flow.hidden .scan-frame-interviewee {
   display: none !important;
@@ -457,6 +454,7 @@ header h1 {
   border: 1px solid #b3d7ff;
 }
 
+/* Progress bar idea: See figma */
 /* .progress-bar {
   width: 100%;
   height: 8px;
@@ -591,7 +589,6 @@ header h1 {
   }
 }
 
-/* Reconnect container - Overlay */
 #reconnect-container {
   position: fixed;
   top: 0;
@@ -618,7 +615,6 @@ header h1 {
   display: none;
 }
 
-/* Carte de reconnexion */
 #reconnect-container > div {
   text-align: center;
   max-width: 450px;
@@ -652,7 +648,6 @@ header h1 {
   font-weight: 400;
 }
 
-/* Responsive design */
 @media (max-width: 768px) {
   .connection-modes,
   .role-cards {
@@ -705,7 +700,6 @@ header h1 {
   }
 }
 
-/* Tablette 11" (landscape: 1024x768, portrait: 768x1024) */
 @media (min-width: 769px) and (max-width: 1200px) {
   .onboarding-container {
     max-width: 90%;
@@ -753,7 +747,6 @@ header h1 {
   }
 }
 
-/* Tablette en mode portrait */
 @media (max-width: 900px) and (orientation: portrait) {
   .role-cards {
     grid-template-columns: 1fr;
@@ -772,11 +765,9 @@ header h1 {
   }
 }
 
-/* Amélioration tactile pour toutes les tablettes */
 @media (hover: none) and (pointer: coarse) {
   button,
-  .role-btn,
-  .continue-btn {
+  .role-btn {
     min-height: 48px;
     padding: 14px 28px;
     font-size: 1.1rem;
@@ -786,7 +777,7 @@ header h1 {
     padding: 20px;
   }
 
-  /* Augmenter les zones tactiles */
+  /* Increase button hitbox */
   .scan-btn,
   .copy-btn,
   .secondary-btn {
@@ -831,15 +822,15 @@ header h1 {
   position: absolute;
   bottom: 40px;
   right: 20px;
-  display: none; /* Caché par défaut */
+  display: none;
 }
 
 #confirm-button.visible {
-  display: block; /* Affiche le bouton lorsqu'il est visible */
+  display: block;
 }
 
 #confirm-button.visible {
-  display: block; /* Affiche le bouton lorsqu'il est visible */
+  display: block;
 }
 
 /* Responsive - Mobile */

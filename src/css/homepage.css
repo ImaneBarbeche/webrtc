@@ -1,4 +1,3 @@
-/* HomePage - Layout principal */
 .homepage-container {
   display: flex;
   width: 100%;
@@ -6,7 +5,6 @@
   background-color: #f6f1e8;
 }
 
-/* Section gauche - 50% */
 .homepage-left {
   flex: 1;
   display: flex;
@@ -15,7 +13,6 @@
   padding: 40px;
 }
 
-/* Fenêtre contenant les SVG */
 .svg-window {
   position: relative;
   width: 400px;
@@ -31,7 +28,6 @@
   right: 80px;
 }
 
-/* Overlay flou permanent par-dessus la SVG window */
 .svg-window::before {
   content: "";
   position: absolute;
@@ -47,10 +43,9 @@
   border-top-right-radius: 70px;
   border-bottom-right-radius: 70px;
   z-index: 1;
-  pointer-events: none; /* N'interfère pas avec les clics */
+  pointer-events: none;
 }
 
-/* Section droite - 50% */
 .homepage-right {
   flex: 1;
   display: flex;
@@ -60,7 +55,6 @@
   padding: 0 80px;
 }
 
-/* Titre */
 .homepage-title {
   font-size: 64px;
   font-weight: 400;
@@ -70,7 +64,6 @@
   font-family: "Courier New", monospace;
 }
 
-/* Sous-titre */
 .homepage-subtitle {
   font-size: 14px;
   color: #666;
@@ -78,7 +71,6 @@
   font-weight: 400;
 }
 
-/* Bouton Start */
 .homepage-start-btn {
   background: #2e2e2e;
   color: white;
@@ -101,7 +93,6 @@
   transform: translateY(0);
 }
 
-/* Responsive - Mobile */
 @media (max-width: 600px) {
   .homepage-container {
     flex-direction: column;

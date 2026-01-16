@@ -1,4 +1,4 @@
-/* Styles pour les menus déroulants de statut résidentiel (dropdown-pair) */
+/* Residential select (dropdown-pair) */
 
 .dropdown-pair {
   display: flex;
@@ -46,7 +46,6 @@
   cursor: not-allowed;
 }
 
-/* Flèche custom pour le select */
 .dropdown-field {
   position: relative;
 }

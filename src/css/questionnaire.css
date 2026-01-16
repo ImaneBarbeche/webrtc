@@ -1,8 +1,3 @@
-/**
- * questionnaire.css - Styles pour le questionnaire LifeStories
- * Gère l'affichage des questions, inputs et boutons
- */
-
 .question ul {
   margin-left: 1rem;
 }
@@ -55,7 +50,7 @@
 }
 
 /* ========================================
-   RÉPONSES PRÉCÉDENTES
+   History
    ======================================== */
 
 .previous-answers-section {
@@ -110,7 +105,6 @@
   margin: 20px 0;
 }
 
-/* Fond semi-transparent */
 .gap-modal-overlay {
   position: fixed;
   top: 0;

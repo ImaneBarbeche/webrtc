@@ -14,7 +14,7 @@ function Sidebar() {
   const splitInstanceRef = useRef(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Gérer la classe sur le body quand l'état open/closed change
+  // Manage body class when open/closed state changes
   useEffect(() => {
     if (isOpen) {
       document.body.classList.add("sidebar-open");
@@ -24,7 +24,7 @@ function Sidebar() {
       document.body.classList.remove("sidebar-open");
     }
 
-    // Mettre à jour la classe sur le dashboard-root pour adapter le padding
+    // Update class on dashboard-root to adapt padding
     const dashboardRoot = document.getElementById("dashboard-root");
     if (dashboardRoot) {
       if (!isOpen) {
@@ -43,7 +43,7 @@ function Sidebar() {
     const dashboardSection = document.getElementById("dashboard-root");
     const splitContainer = document.querySelector(".split");
 
-    // Détruire l'instance Split.js si elle existe
+    // Destroy Split.js instance if it exists
     if (splitInstanceRef.current) {
       splitInstanceRef.current.destroy();
       splitInstanceRef.current = null;
@@ -58,7 +58,7 @@ function Sidebar() {
         break;
 
       case "questionnaire":
-        // Afficher uniquement le questionnaire
+        // Display only the questionnaire
         if (splitContainer) splitContainer.style.display = "block";
         if (dashboardSection) dashboardSection.style.display = "none";
         if (questionnaireSection) {
@@ -69,7 +69,7 @@ function Sidebar() {
         break;
 
       case "calendar":
-        // Afficher calendrier + synthèse
+        // Display calendar + summary
         if (splitContainer) splitContainer.style.display = "block";
         if (dashboardSection) dashboardSection.style.display = "none";
         if (questionnaireSection) questionnaireSection.style.display = "none";
@@ -77,26 +77,26 @@ function Sidebar() {
           trajectoriesSection.style.display = "flex";
           trajectoriesSection.style.width = "100%";
         }
-        // Forcer le redraw de la timeline
+        // Force timeline redraw
         if (window.timeline && typeof window.timeline.redraw === "function") {
           setTimeout(() => window.timeline.redraw(), 100);
         }
         break;
 
       case "split":
-        // Vue split : questionnaire + calendrier côte à côte
+        // Split view: questionnaire + calendar side by side
         if (splitContainer) splitContainer.style.display = "flex";
         if (dashboardSection) dashboardSection.style.display = "none";
         if (questionnaireSection) {
           questionnaireSection.style.display = "block";
-          questionnaireSection.style.width = ""; // Retirer la largeur forcée
+          questionnaireSection.style.width = ""; // Remove forced width
         }
         if (trajectoriesSection) {
           trajectoriesSection.style.display = "flex";
-          trajectoriesSection.style.width = ""; // Retirer la largeur forcée
+          trajectoriesSection.style.width = ""; // Remove forced width
         }
 
-        // Réinitialiser Split.js
+        // Reinitialize Split.js
         if (window.Split) {
           setTimeout(() => {
             splitInstanceRef.current = window.Split(
@@ -109,7 +109,7 @@ function Sidebar() {
               }
             );
 
-            // Forcer le redraw de la timeline
+            // Force timeline redraw
             if (
               window.timeline &&
               typeof window.timeline.redraw === "function"
