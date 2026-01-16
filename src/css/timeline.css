@@ -701,8 +701,6 @@
   .vis-label.vis-nested-group {
     padding: 8px;
     min-height: 44px;
-    background-color: red;
-    border: 2px solid salmon;
   }
 }
 
@@ -822,8 +820,6 @@
 }
 
 #moreInfos {
-  /* Styles pour les informations supplémentaires */
-
   display: grid;
   /* up to 2 columns*/
   grid-template-columns: repeat(
@@ -964,10 +960,6 @@
    CARTE
    ======================================== */
 
-/* * {
-    border: 1px solid blue;
-} */
-
 [data-lucide] {
   color: var(--primary-dark);
   stroke-width: 1.5;
@@ -995,8 +987,6 @@
   filter: brightness(0.7) saturate(1.7);
 }
 
-/* ------------ANNEE DE NAISSANCE------------- */
-
 #birth-year {
   position: absolute;
   left: 2%;
@@ -1010,7 +1000,7 @@
 
 #birth-year i[data-lucide="cake"] {
   margin-right: 6px;
-  font-size: 1.2em; /* taille personnalisée */
+  font-size: 1.2em;
   vertical-align: middle;
 }
 

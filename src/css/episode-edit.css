@@ -1,0 +1,49 @@
+.episode-edit-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 3000;
+  background: rgba(0, 0, 0, 0.15);
+  transition: background 0.2s;
+}
+
+.episode-edit-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 97vh;
+  width: 400px;
+  max-width: 90vw;
+  margin: 1rem;
+  display: flex;
+  flex-direction: column;
+  padding: 2em 2.5em;
+  transform: translateX(100%);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow-y: auto;
+}
+
+.episode-edit-drawer.open {
+  transform: translateX(0);
+}
+
+.episode-edit-drawer h2 {
+  margin-bottom: 1em;
+}
+
+.episode-edit-drawer label {
+  display: block;
+  margin-bottom: 1em;
+}
+
+.episode-edit-drawer label:last-of-type {
+  margin-bottom: 1.5em;
+}
+
+.episode-edit-actions {
+  display: flex;
+  gap: 1em;
+  justify-content: flex-end;
+}

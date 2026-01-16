@@ -2,13 +2,15 @@
 
 A hybrid mobile application for collecting life history data with real-time synchronization between interviewer and interviewee using WebRTC.
 
+[App Overview](../webrtc/src/assets/imgs/readme-screen-cap.png | width=400)
+
 ## Installation and Setup
 
 1. Clone the repository:
    ```bash
    git clone
    ```
-2. Use npm to install packages
+2. Install packages:
    ```bash
    npm install
    ```
@@ -16,24 +18,27 @@ A hybrid mobile application for collecting life history data with real-time sync
    ```bash
    npm start
    ```
-4. Build the app through Capacitor for your target platform (iOS/Android).
-    ```bash
+4. Build the app with Capacitor for your target platform:
+   ```bash
    npm run build
    npx cap sync
    npx cap open android # or ios 
-    ```
-5. See CSS changes without reloading
-    Use the GO Live extension in VS Code. (Warning: only shows dev mode container (not the onboarding process, to be used only for CSS changes))
+   ```
+5. View CSS changes without reloading:
+   Use the "Go Live" extension in VS Code (note: only shows dev mode container, not onboarding process).
 
-6. See changes on tablet
-    https://capacitorjs.com/docs/guides/live-reload : should work but the uga wifi does not allow it. 
-    To work around it you could use your phone as a hotspot and connect the computer to it. Then you can change the server url to the phone's ip address. ("server": {
-  "url": "http://192.168.1.68:8100",
-  "cleartext": true
-},)
+6. Debug on Android device:
+   Plug in the device and use `chrome://inspect` to view console logs and debug.
 
-7. To debug on android device
-    You can plug in the device and use chrome://inspect to see console logs and debug.
+## Known Issues & Workarounds
+
+- **Live reload on tablet**: Live reload doesn't work on the campus WiFi. Workaround: Use your phone as a hotspot and update the server URL to your phone's IP address in `capacitor.config.json`:
+  ```json
+  "server": {
+    "url": "http://192.168.1.68:8100",
+    "cleartext": true
+  }
+  ```
 
 
 ## Project Structure
@@ -111,39 +116,79 @@ Since this is a project that runs offline, libraries and fonts should be downloa
 - **`overlapDetection.js`** - Detect and mark overlapping episodes
 - **`importExportUtils.js`** - Export/import timeline data
 
-## Functionnalities 
+## Functionalities 
 
-### Dev tools 
-The app has buttons for dev purposes such as hidding the onboarding phase, hidding the offer and answer text (as to not have to manually comment css files before building on tablet after each change), deleting localStorage and reloading the app for both users (interviewer and interviewee) and loading a dataset (test_items) to fill the timeline with episodes and events.
+### Dev Tools
+
+The app includes developer tools for testing purposes:
+- Hide the onboarding phase
+- Hide offer and answer text (avoid manual CSS commenting before tablet builds)
+- Delete localStorage and reload the app for both users
+- Load tand visualizes gaps or overlaps between episodes. Alerts are color-coded and stored in a button (interviewer only) to review and address inconsistencies
+
 ### Gaps and Overlaps
+
 Detects gaps or overlaps between episodes, shows an alert (color coded) and store them in a button available only for the interviewer. It allows him to go over the alerts and act on it.
+
 ### Export
-Downloads the interview's data as a JSON file. Avalailable only on the interviewer's side.
-### Navigation buttons and summary
-Buttons for accessibility purposes that allows the user to navigate left and right and to zoom in and out.
-A button that shows the "synthèse" which is a snapshot of everything that happened the year selected.
-This is possible by dragging the vertical bar on top of episodes or events or by clicking on a specific date.
-### Birthyear button
-Shows the birthyear and allows you to zoom out and move towards the start of the timeline.
+
+Downloads the interview's data as a JSON file. Available only on the interviewer's side.
+
+### Navigation and Summary
+
+Accessibility buttons allow users to navigate and zoom the timeline. A summary button displays a snapshot of the selected year. Navigate by dragging the vertical bar over episodes or clicking specific dates.
+
+### Birth Year
+
+Displays birth year and allows users to zoom out and navigate to the timeline's start.
+
 ### Chapters
-They can be closed vertically or horizontally which saves space. By long holding an attribute, you can pin it which allows you, when you close a chapter, to only see the elements regarding that attribute.
+
+Chapters can be collapsed vertically or horizontally to save space. Long-press an attribute to pin it, which shows only that attribute's elements when the chapter is closed.
 
 
 
 ## Views
+
 ### Onboarding
-Users can select their role (interviewer or interviewee) and then begin the connection process. 
-After scanning each other's QR code, the users are redirected to their respective pages (dashboard and timeline). This is possible thanks to the WEBRTC phase, where we can save the respective role in localStorage. 
+
+Users select their role (interviewer or interviewee) and begin the connection process. After scanning each other's QR codes, users are redirected to their respective pages (dashboard and timeline). The WebRTC phase saves the user role to localStorage. 
 
 ### Interviewer's pages
-#### Sidebar 
-Navigate between different pages : dashboard (empty for now - see figma for design ideas), questionnaire (a view that only includes the questions), calendrier (a view that only includes the timeline) and splitview (a view that combines both questions and timeline). Be mindful that those views are created by hidding one another.
-#### Questionnaire
-View and answer questions, history of questions if disconnected, edit answers, export interview's data, see gaps and overlaps and manually add episodes or events. 
-#### Calendrier
-As an interviewer (role) you can see the timeline but also edit the episodes or events by long holding them.
-#### SplitView
-You can see both the questions and the timeline.
 
-### Interviewee's pages
-This user can only see the timeline - all functionnalities related to editing the timeline are disabled for him.
+#### Sidebar
+
+Navigate between different pages:
+- **Dashboard** - Overview (see Figma for design ideas)
+- **Questionnaire** - Questions only
+- **Calendar** - Timeline only
+- **Split View** - Questions and timeline combined
+
+Note: Views are implemented by toggling visibility of page sections.
+
+#### Questionnaire
+
+View and answer questions, access question history when disconnected, edit answers, export interview data, review gaps and overlaps, and manually add episodes or events. 
+
+#### Calendar
+
+Interviewers can view the timeline and edit episodes or events by long-pressing them.
+
+#### Split View
+
+View both questions and timeline side by side.
+
+### Interviewee's Pages
+
+Interviewees can only view the timeline. All timeline editing functionality is disabled for this role.
+
+## Resources & Documentation
+
+ ### Figma Designs
+
+- **[Final Design](https://www.figma.com/design/dMe4ZYdj6tKyLolA9hcaxL/LifeStories?m=auto&t=3o3vvwr3PZr7xfjH-1) ** - Production-ready UI and components
+- **[Brainstorming](https://www.figma.com/board/v9qDByOj3HOAcwidoQvg82/LifeStories---Final?t=3o3vvwr3PZr7xfjH-1)** - Initial concepts and ideas
+- **[Brainstorming & Process](https://www.figma.com/board/ZBvi9S5uDuBLEaXsL6mnD6/LifeStories?node-id=0-1&t=3o3vvwr3PZr7xfjH-1)** - Design iterations and process documentation
+
+- **[Database Schema (DBDiagram)](https://dbdiagram.io/d/LifeStories-updated-690a046a6735e111702ffddc)** - Data model and relationships
+- **[Tasks & Roadmap (Whimsical)](https://whimsical.com/tasks-34iLabHiqveUoGJ3t1k46R)** - Development tasks and timeline

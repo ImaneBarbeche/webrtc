@@ -1,67 +1,43 @@
 // episodeEdit.js
 
 /**
- * Ouvre une fenêtre d'édition pour un épisode (item) de la timeline.
- * @param {Object} item - L'item à éditer.
- * @param {Function} onSave - Callback à appeler avec l'item modifié.
+ * Opens an edit window for an episode (item) from the timeline.
+ * @param {Object} item - The item to edit.
+ * @param {Function} onSave - Callback to call with the modified item.
  */
 export function openEpisodeEditModal(item, onSave) {
-  // Créer l'overlay semi-transparent
+  // Create semi-transparent overlay
   const overlay = document.createElement("div");
   overlay.className = "episode-edit-overlay";
-  overlay.style.position = "fixed";
-  overlay.style.top = "0";
-  overlay.style.left = "0";
-  overlay.style.width = "100vw";
-  overlay.style.height = "100vh";
-  overlay.style.zIndex = "3000";
-  // overlay.style.background = "rgba(0,0,0,0.15)";
-  // overlay.style.transition = "background 0.2s";
 
-  // Drawer latéral
+  // Side drawer
   const drawer = document.createElement("div");
   drawer.className = "episode-edit-drawer default-card";
-  drawer.style.position = "fixed";
-  drawer.style.top = "0";
-  drawer.style.right = "0";
-  drawer.style.height = "97vh";
-  drawer.style.width = "400px";
-  drawer.style.maxWidth = "90vw";
-  // drawer.style.background = 'white';
-  // drawer.style.boxShadow = '-4px 0 24px rgba(0,0,0,0.12)';
-  // drawer.style.borderRadius = '16px 0 0 16px';
-  drawer.style.margin = "1rem";
-  drawer.style.display = "flex";
-  drawer.style.flexDirection = "column";
-  drawer.style.padding = "2em 2.5em";
-  drawer.style.transform = "translateX(100%)";
-  drawer.style.transition = "transform 0.3s cubic-bezier(.4,0,.2,1)";
   drawer.innerHTML = `
-    <h2 style="margin-bottom:1em;">Modifier l'épisode</h2>
-    <label style="display:block;margin-bottom:1em;">Contenu : <input type="text" id="edit-content" class="question-input" value="${
+    <h2>Edit episode</h2>
+    <label>Content: <input type="text" id="edit-content" class="question-input" value="${
       item.content || ""
     }" ></label>
-    <label style="display:block;margin-bottom:1em;">Début : <input type="date" id="edit-start" class="question-input" value="${
+    <label>Start: <input type="date" id="edit-start" class="question-input" value="${
       item.start ? new Date(item.start).toISOString().slice(0, 10) : ""
     }"></label>
-    <label style="display:block;margin-bottom:1.5em;">Fin : <input type="date" id="edit-end" class="question-input" value="${
+    <label>End: <input type="date" id="edit-end" class="question-input" value="${
       item.end ? new Date(item.end).toISOString().slice(0, 10) : ""
     }"></label>
-    <div style="display:flex;gap:1em;justify-content:flex-end;">
-      <button id="save-edit" class="primary-button">
-        Enregistrer</button>
-      <button id="cancel-edit" class="secondary-button">Annuler</button>
+    <div class="episode-edit-actions">
+      <button id="save-edit" class="primary-button">Save</button>
+      <button id="cancel-edit" class="secondary-button">Cancel</button>
     </div>
   `;
   overlay.appendChild(drawer);
   document.body.appendChild(overlay);
 
-  // Animation effet drawer
+  // Drawer animation effect
   setTimeout(() => {
-    drawer.style.transform = "translateX(0)";
+    drawer.classList.add("open");
   }, 10);
 
-  // Gestion des boutons
+  // Handle button clicks
   drawer.querySelector("#save-edit").onclick = () => {
     item.content = drawer.querySelector("#edit-content").value;
     item.start = new Date(drawer.querySelector("#edit-start").value);
