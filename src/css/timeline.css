@@ -708,12 +708,6 @@
   cursor: pointer;
 }
 
-/* Effet hover pour indiquer qu'on peut faire un appui long */
-.vis-label.vis-nested-group:hover {
-  background-color: rgba(0, 123, 255, 0.05);
-  transition: background-color 0.2s ease;
-}
-
 /* Animation pour l'appui long */
 .vis-label.vis-nested-group:active {
   background-color: rgba(0, 123, 255, 0.15);

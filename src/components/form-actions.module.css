@@ -17,7 +17,6 @@
     }
 
     &::backdrop {
-      /* backdrop-filter: blur(.2rem); */
       background-color: transparent;
       transition: all 0.3s ease;
     }
@@ -43,11 +42,6 @@
       input[type="text"] {
         background-color: transparent;
       }
-
-      /* select, input[type="date"] {
-                background-color: var(--primary-light);
-                border-radius: 2rem;
-            } */
 
       label:has(input[type="radio"]) {
         margin-block: 1rem;
@@ -95,8 +89,6 @@
       .radio-container-main {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        /* prevents content from moving and down */
-        /* grid-template-rows: 1fr 1fr; */
         gap: 1rem;
         margin-block: 1rem;
         min-width: 20rem;
@@ -104,18 +96,15 @@
         display: flex;
         max-width: 100%;
         overflow-x: auto;
-        /* justify-items: center; */
 
         .radio-label {
           --label-color: var(--primary-grey);
 
           background-color: var(--label-color);
-          /* opacity: 0.8; */
           border-radius: 2rem;
           display: flex;
           justify-content: center;
           align-items: center;
-          /* height: 100%; */
           padding-block: 0.5rem;
           margin: 0;
           cursor: pointer;
@@ -151,7 +140,6 @@
           span {
             background-color: transparent;
             box-shadow: none;
-            /* border: 2px solid red; */
           }
 
           input {
@@ -175,10 +163,6 @@
           color: inherit;
         }
       }
-      /* 
-            .secondary-button {
-                background-color: red;
-            } */
 
       .btn-container {
         display: flex;
@@ -200,7 +184,3 @@
     }
   }
 }
-
-/* dialog::backdrop {
-    backdrop-filter: blur(2rem);
-} */

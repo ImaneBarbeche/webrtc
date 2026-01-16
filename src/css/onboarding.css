@@ -9,8 +9,14 @@
 }
 
 .manual-input {
+  display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 1rem;
+  align-items: center;
+
+  button {
+    max-width: fit-content;
+  }
 }
 
 .manual-input textarea {
@@ -19,13 +25,14 @@
   border-radius: 8px;
   resize: vertical;
   min-height: 80px;
+  min-width: 15rem;
   font-family: inherit;
 }
 
 #connectionCode,
 #answerCode {
   width: 100%;
-  max-width: 500px;
+  max-width: 15rem;
   padding: 15px;
   border-radius: 8px;
   font-family: "Courier New", monospace;
@@ -455,6 +462,8 @@ header h1 {
   padding: 15px;
   border-radius: 10px;
   font-weight: 500;
+  max-width: fit-content;
+  margin-inline: auto;
 }
 
 .status-message.success {
@@ -562,37 +571,41 @@ header h1 {
   position: fixed;
   top: 10px;
   right: 10px;
-  padding: 8px 12px;
+  padding-block: 0.25rem;
+  padding-inline: 1rem;
   border-radius: 20px;
   font-size: 12px;
-  font-weight: bold;
+  /* font-weight: bold; */
   z-index: 1000;
   display: flex;
   align-items: center;
   gap: 6px;
+  background-color: var(--muted-beige);
+  box-shadow: 0 0.25rem 0.625rem var(--secondary-grey);
+  backdrop-filter: blur(2rem);
 }
 
-#webrtc-status.connected {
-  background-color: #28a745;
-  color: white;
-}
-
-#webrtc-status.disconnected {
-  background-color: #dc3545;
-  color: white;
-}
-
-#webrtc-status.standalone {
-  background-color: #6c757d;
-  color: white;
+#webrtc-status {
+  .role {
+    display: block;
+    font-size: smaller;
+  }
 }
 
 #webrtc-status .dot {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background-color: white;
+  background-color: #d3ddeb;
   animation: pulse 2s ease-in-out infinite;
+}
+
+#webrtc-status.disconnected .dot {
+  background-color: #d36a6a;
+}
+
+#webrtc-status.connected .dot {
+  background-color: #6cd36a;
 }
 
 @keyframes pulse {
