@@ -33,15 +33,6 @@ const handleDateChange = (setter) => (e) => {
 function AddEpisodeModal({ onClose }) {
   const contentInputRef = useRef(null);
 
-  useEffect(() => {
-    // if (contentInputRef.current) {
-    //     const timer = setTimeout(() => {
-    //         contentInputRef.current.focus();
-    //     }, 50);
-    //     return () => clearTimeout(timer);
-    // }
-  });
-
   const [trajectories, setTrajectories] = useState(getTrajectories());
   const [selectedTrajectoryId, setSelectedTrajectoryId] = useState(
     trajectories[0]?.id || ""
@@ -55,7 +46,6 @@ function AddEpisodeModal({ onClose }) {
   );
 
   const handleTrajectoryChange = (newId) => {
-    // const newId = parseInt(e.target.value);
     setSelectedTrajectoryId(newId);
     // Getting the attributes for the selected trajectory
     const newAttributes = getAttributes(newId);
@@ -122,16 +112,6 @@ function AddEpisodeModal({ onClose }) {
 
   return (
     <dialog id="episode_modal" className="default-card">
-      {/* {selectedTrajectoryId}
-        {selectedAttributeId} {selectedType} {contentText} */}
-      {/* <div className='title-row'>
-                <header>
-                    <h3>Ajouter un element</h3>
-                </header>
-                <button className='invisible-button' onClick={() => document.getElementById('episode_modal').close()}>
-                    <X />
-                </button>
-            </div> */}
       <div className="title-row">
         <button
           className={styles["close"]}

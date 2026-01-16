@@ -1,5 +1,7 @@
 import React from "react";
 
+// Shows the status during the onboarding
+// TODO: Can be removed in favor of the proper WebRTCStatus component
 export default function Status({ status }) {
   // ← Reçoit status en props
 
@@ -7,7 +9,6 @@ export default function Status({ status }) {
     offline: { text: "Hors ligne" },
     connecting: { text: "Connexion en cours..." },
     connected: { text: "Connecté" },
-    disconnected: { text: "Déconnecté" },
   };
 
   return (
